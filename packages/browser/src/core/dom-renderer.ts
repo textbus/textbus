@@ -136,7 +136,7 @@ export class DomRenderer implements NativeRenderer {
   }
 
   remove(node: NativeNode) {
-    node.parentNode.removeChild(node)
+    node.parentNode?.removeChild(node)
   }
 
   insertBefore(newNode: NativeNode, ref: NativeNode) {
@@ -157,6 +157,12 @@ export class DomRenderer implements NativeRenderer {
 
   setStyle(target: NativeNode, key: string, value: any) {
     target.style[key] = value ?? ''
+  }
+
+  syncTextContent(target: NativeNode, content: string) {
+    if (target.textContent !== content) {
+      target.textContent = content
+    }
   }
 
   removeStyle(target: NativeNode, key: string) {

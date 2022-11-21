@@ -1,8 +1,7 @@
 import { Injector, normalizeProvider, NullInjector, Provider, ReflectiveInjector, Scope } from '@tanbo/di'
 
-import { ComponentInstance, Formatter, Component } from './model/_api'
+import { ComponentInstance, Formatter, Component, NativeNode } from './model/_api'
 import {
-  NativeNode,
   History,
   RootComponentRef,
   Renderer,

@@ -253,6 +253,12 @@ export interface SlotRange {
   endIndex: number
 }
 
+/**
+ * 原生元素节点抽象类型
+ */
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type NativeNode = {} & any
+
 export interface EventTypes {
   onUnselect: () => void
   onSelected: () => void
@@ -280,6 +286,7 @@ export interface EventTypes {
   onSlotRemoved: (event: Event<ComponentInstance>) => void
 
   onGetRanges: (event: GetRangesEvent<ComponentInstance>) => void
+  onDirtyViewClean: (event: Event<ComponentInstance, NativeNode>) => void
 }
 
 class EventCache<T, K extends keyof T = keyof T> {
@@ -585,7 +592,7 @@ export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemo
 export function invokeListener(target: ComponentInstance, eventType: 'onBreak', event: Event<Slot, BreakEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContextMenu', event: ContextMenuEvent<ComponentInstance>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onPaste', event: Event<Slot, PasteEventData>): void
-// eslint-disable-next-line max-len
+export function invokeListener(target: ComponentInstance, eventType: 'onDirtyViewClean', event: Event<ComponentInstance, NativeNode>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onGetRanges', event: GetRangesEvent<ComponentInstance>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onSelected'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onUnselect'): void
@@ -757,3 +764,7 @@ export const onDestroy = makeEventHook('onDestroy')
  * 当组件为选区公共父组件时的勾子
  */
 export const onGetRanges = makeEventHook('onGetRanges')
+/**
+ * 当 diff 视图时，检测到有脏节点时调用的勾子
+ */
+export const onDirtyViewClean = makeEventHook('onDirtyViewClean')

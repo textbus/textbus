@@ -10,9 +10,13 @@ import {
   Slot,
   invokeListener,
   Ref,
-  SlotRenderFactory, FormatHostBindingRender, jsx
+  SlotRenderFactory,
+  FormatHostBindingRender,
+  jsx,
+  Event,
+  NativeNode
 } from '../model/_api'
-import { NativeNode, NativeRenderer, RootComponentRef } from './_injection-tokens'
+import { NativeRenderer, RootComponentRef } from './_injection-tokens'
 import { makeError } from '../_utils/make-error'
 import { Controller } from './controller'
 
@@ -132,8 +136,8 @@ class NativeElementMappingTable {
   private nativeVDomMapping = new WeakMap<NativeNode, VElement | VTextNode>()
   private vDomNativeMapping = new WeakMap<VElement | VTextNode, NativeNode>()
 
-  set(key: NativeNode, value: VElement | VTextNode): void
   set(key: VElement | VTextNode, value: NativeNode): void
+  set(key: NativeNode, value: VElement | VTextNode): void
   set(key: any, value: any) {
     if (this.get(key)) {
       this.delete(key)
@@ -150,8 +154,8 @@ class NativeElementMappingTable {
     }
   }
 
-  get(key: NativeNode): VElement | VTextNode;
   get(key: VElement | VTextNode): NativeNode;
+  get(key: NativeNode): VElement | VTextNode;
   get(key: any) {
     if (key instanceof VTextNode || key instanceof VElement) {
       return this.vDomNativeMapping.get(key)
@@ -252,7 +256,7 @@ export class Renderer {
       if (dirty || this.readonlyStateChanged) {
         if (this.oldVDom) {
           const oldNativeNode = this.nativeNodeCaches.get(this.oldVDom)
-          const newNativeNode = this.diffAndUpdate(root, this.oldVDom)
+          const newNativeNode = this.diffAndUpdate(root, this.oldVDom, component)
           if (oldNativeNode !== newNativeNode) {
             this.nativeRenderer.replace(newNativeNode, oldNativeNode)
           }
@@ -332,37 +336,56 @@ export class Renderer {
     this.subscription.unsubscribe()
   }
 
-  private sortNativeNode(parent: NativeNode, children: NativeNode[]) {
-    children.forEach((node, index) => {
+  private sortAndCleanNativeNode(parent: NativeNode, children: NativeNode[], component: ComponentInstance) {
+    let index = 0
+    while (true) {
+      const node = children[index]
+      if (!node) {
+        break
+      }
       const current = this.nativeRenderer.getChildByIndex(parent, index)
+      index++
       if (!current) {
         this.nativeRenderer.appendChild(parent, node)
-        return
+        continue
       }
       if (current !== node) {
         this.nativeRenderer.insertBefore(node, current)
       }
-    })
+    }
+    while (true) {
+      const current = this.nativeRenderer.getChildByIndex(parent, index)
+      if (!current) {
+        break
+      }
+      const event = new Event<ComponentInstance, NativeNode>(component, current)
+      invokeListener(component, 'onDirtyViewClean', event)
+      if (event.isPrevented) {
+        index++
+        continue
+      }
+      this.nativeRenderer.remove(current)
+    }
     return parent
   }
 
-  private diffAndUpdate(newVDom: VElement, oldVDom: VElement) {
+  private diffAndUpdate(newVDom: VElement, oldVDom: VElement, component: ComponentInstance) {
     const newNativeNode = this.diffNodeAndUpdate(newVDom, oldVDom)
 
-    const children = this.diffChildrenAndUpdate(newVDom, oldVDom)
+    const children = this.diffChildrenAndUpdate(newVDom, oldVDom, component)
 
-    return this.sortNativeNode(newNativeNode, children)
+    return this.sortAndCleanNativeNode(newNativeNode, children, component)
   }
 
-  private diffChildrenAndUpdate(newVDom: VElement, oldVDom: VElement) {
+  private diffChildrenAndUpdate(newVDom: VElement, oldVDom: VElement, component: ComponentInstance) {
     const newChildren = newVDom.children
     const oldChildren = oldVDom.children
 
-    const beginIdenticalNodes = this.diffIdenticalChildrenToEnd(newChildren, oldChildren)
-    const endIdenticalNodes = this.diffIdenticalChildrenToBegin(newChildren, oldChildren)
+    const beginIdenticalNodes = this.diffIdenticalChildrenToEnd(newChildren, oldChildren, component)
+    const endIdenticalNodes = this.diffIdenticalChildrenToBegin(newChildren, oldChildren, component)
 
-    const beginNodes = this.diffChildrenToEnd(newChildren, oldChildren)
-    const endNodes = this.diffChildrenToBegin(newChildren, oldChildren)
+    const beginNodes = this.diffChildrenToEnd(newChildren, oldChildren, component)
+    const endNodes = this.diffChildrenToBegin(newChildren, oldChildren, component)
 
 
     oldChildren.forEach(i => {
@@ -386,7 +409,10 @@ export class Renderer {
     ]
   }
 
-  private diffIdenticalChildrenToEnd(newChildren: Array<VElement | VTextNode>, oldChildren: Array<VElement | VTextNode>): NativeNode[] {
+  private diffIdenticalChildrenToEnd(
+    newChildren: Array<VElement | VTextNode>,
+    oldChildren: Array<VElement | VTextNode>,
+    component: ComponentInstance): NativeNode[] {
     const children: NativeNode[] = []
     while (newChildren.length && oldChildren.length) {
       const newFirstVNode = newChildren[0]
@@ -415,8 +441,8 @@ export class Renderer {
         } else {
           nativeNode = this.createElement(newFirstVNode)
         }
-        const cc = this.diffChildrenAndUpdate(newFirstVNode, oldFirstVNode)
-        children.push(this.sortNativeNode(nativeNode, cc))
+        const cc = this.diffChildrenAndUpdate(newFirstVNode, oldFirstVNode, component)
+        children.push(this.sortAndCleanNativeNode(nativeNode, cc, component))
       } else {
         break
       }
@@ -424,7 +450,10 @@ export class Renderer {
     return children
   }
 
-  private diffIdenticalChildrenToBegin(newChildren: Array<VElement | VTextNode>, oldChildren: Array<VElement | VTextNode>): NativeNode[] {
+  private diffIdenticalChildrenToBegin(
+    newChildren: Array<VElement | VTextNode>,
+    oldChildren: Array<VElement | VTextNode>,
+    component: ComponentInstance): NativeNode[] {
     const children: NativeNode[] = []
     while (newChildren.length && oldChildren.length) {
       const newLastVNode = newChildren[newChildren.length - 1]
@@ -453,8 +482,8 @@ export class Renderer {
         } else {
           nativeNode = this.createElement(newLastVNode)
         }
-        const cc = this.diffChildrenAndUpdate(newLastVNode, oldLastVNode)
-        children.push(this.sortNativeNode(nativeNode, cc))
+        const cc = this.diffChildrenAndUpdate(newLastVNode, oldLastVNode, component)
+        children.push(this.sortAndCleanNativeNode(nativeNode, cc, component))
       } else {
         break
       }
@@ -463,7 +492,10 @@ export class Renderer {
     return children.reverse()
   }
 
-  private diffChildrenToEnd(newChildren: Array<VElement | VTextNode>, oldChildren: Array<VElement | VTextNode>): NativeNode[] {
+  private diffChildrenToEnd(
+    newChildren: Array<VElement | VTextNode>,
+    oldChildren: Array<VElement | VTextNode>,
+    component: ComponentInstance): NativeNode[] {
     const children: NativeNode[] = []
     while (newChildren.length && oldChildren.length) {
       const newFirstVNode = newChildren[0]
@@ -476,7 +508,7 @@ export class Renderer {
           continue
         }
         if (oldFirstVNode instanceof VElement && newFirstVNode.tagName === oldFirstVNode.tagName) {
-          const nativeNode = this.diffAndUpdate(newFirstVNode, oldFirstVNode)
+          const nativeNode = this.diffAndUpdate(newFirstVNode, oldFirstVNode, component)
 
           children.push(nativeNode)
           newChildren.shift()
@@ -494,6 +526,7 @@ export class Renderer {
           const nativeNode = this.nativeNodeCaches.get(oldFirstVNode)
           this.nativeNodeCaches.set(newFirstVNode, nativeNode)
           children.push(nativeNode)
+          this.nativeRenderer.syncTextContent(nativeNode, newFirstVNode.textContent)
           newChildren.shift()
           oldChildren.shift()
         } else {
@@ -504,7 +537,10 @@ export class Renderer {
     return children
   }
 
-  private diffChildrenToBegin(newChildren: Array<VElement | VTextNode>, oldChildren: Array<VElement | VTextNode>): NativeNode[] {
+  private diffChildrenToBegin(
+    newChildren: Array<VElement | VTextNode>,
+    oldChildren: Array<VElement | VTextNode>,
+    component: ComponentInstance): NativeNode[] {
     const children: NativeNode[] = []
     while (newChildren.length && oldChildren.length) {
       const newLastVNode = newChildren[newChildren.length - 1]
@@ -517,7 +553,7 @@ export class Renderer {
           continue
         }
         if (oldLastVNode instanceof VElement && newLastVNode.tagName === oldLastVNode.tagName) {
-          const nativeNode = this.diffAndUpdate(newLastVNode, oldLastVNode)
+          const nativeNode = this.diffAndUpdate(newLastVNode, oldLastVNode, component)
 
           children.push(nativeNode)
           newChildren.pop()
@@ -535,6 +571,7 @@ export class Renderer {
           const nativeNode = this.nativeNodeCaches.get(oldLastVNode)
           this.nativeNodeCaches.set(newLastVNode, nativeNode)
           children.push(nativeNode)
+          this.nativeRenderer.syncTextContent(nativeNode, newLastVNode.textContent)
           newChildren.pop()
           oldChildren.pop()
         } else {
@@ -631,7 +668,7 @@ export class Renderer {
           }
           (oldVNode.parentNode as VElement).replaceChild(vNode, oldVNode)
           const oldNativeNode = this.nativeNodeCaches.get(oldVNode)
-          const newNativeNode = this.diffAndUpdate(vNode, oldVNode)
+          const newNativeNode = this.diffAndUpdate(vNode, oldVNode, component)
           this.nativeNodeCaches.set(newNativeNode, vNode)
           this.slotVNodeCaches.set(slot, vNode)
           if (oldNativeNode !== newNativeNode) {
@@ -699,7 +736,7 @@ export class Renderer {
       if (dirty) {
         (oldVNode.parentNode as VElement).replaceChild(vNode, oldVNode)
         const oldNativeNode = this.nativeNodeCaches.get(oldVNode)
-        const newNativeNode = this.diffAndUpdate(vNode, oldVNode)
+        const newNativeNode = this.diffAndUpdate(vNode, oldVNode, component)
         if (oldNativeNode !== newNativeNode) {
           this.nativeRenderer.replace(newNativeNode, oldNativeNode)
         }

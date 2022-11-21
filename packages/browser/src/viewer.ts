@@ -530,7 +530,8 @@ export class Viewer {
         wordBreak: 'break-all',
         boxSizing: 'border-box',
         minHeight,
-        flex: 1
+        flex: 1,
+        outline: 'none'
       },
       attrs: {
         'data-textbus-view': VIEW_DOCUMENT,
