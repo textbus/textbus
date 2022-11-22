@@ -113,10 +113,10 @@ export class Viewer {
       useValue: mask
     }, {
       provide: NativeRenderer,
-      useClass: DomRenderer
+      useExisting: DomRenderer
     }, {
       provide: NativeSelectionBridge,
-      useClass: SelectionBridge
+      useExisting: SelectionBridge
     }, {
       provide: Viewer,
       useValue: this

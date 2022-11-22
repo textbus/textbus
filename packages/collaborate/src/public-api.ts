@@ -12,7 +12,7 @@ export const collaborateModule: Module = {
     CollaborateCursor,
     {
       provide: History,
-      useClass: Collaborate
+      useExisting: Collaborate
     }
   ]
 }
