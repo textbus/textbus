@@ -510,7 +510,7 @@ export const tableComponent = defineComponent({
 
         tableCells = slotsToTable(slots.toArray(), tableInfo.columnCount)
       },
-      render(isOutputMode: boolean, slotRender: SlotRender): VElement {
+      render(slotRender: SlotRender): VElement {
         tableCells = slotsToTable(slots.toArray(), tableInfo.columnCount)
         return (
           <table class={'tb-table' +

@@ -1,5 +1,6 @@
 import { VElement, VTextNode } from './element'
 import { FormatValue } from './format'
+import { RenderMode } from './types'
 
 export interface FormatHostBindingRender {
   fallbackTagName: string
@@ -17,7 +18,7 @@ export abstract class Formatter<T extends FormatValue> {
   abstract render(
     children: Array<VElement | VTextNode>,
     formatValue: T,
-    isOutputMode: boolean): VElement | FormatHostBindingRender
+    renderMode: RenderMode): VElement | FormatHostBindingRender
 }
 
 export abstract class Attribute<T extends FormatValue> {
@@ -27,6 +28,6 @@ export abstract class Attribute<T extends FormatValue> {
   abstract render(
     node: VElement,
     formatValue: T,
-    isOutputMode: boolean
+    renderMode: RenderMode
   ): void
 }

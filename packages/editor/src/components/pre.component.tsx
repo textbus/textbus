@@ -652,7 +652,7 @@ export const preComponent = defineComponent({
     })
 
     return {
-      render(isOutputMode: boolean, slotRender: SlotRender): VElement {
+      render(slotRender: SlotRender): VElement {
         let lang = ''
         languageList.forEach(i => {
           if (i.value === data.state!.lang) {

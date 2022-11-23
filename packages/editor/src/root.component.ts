@@ -106,7 +106,7 @@ export const rootComponent = defineComponent({
     })
 
     return {
-      render(isOutputMode: boolean, slotRender: SlotRender): VElement {
+      render(slotRender: SlotRender): VElement {
         return slotRender(slots.get(0)!, (children) => {
           return new VElement('div', {
             'textbus-document': 'true',

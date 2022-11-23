@@ -2,7 +2,7 @@ import {
   ComponentInitData,
   ComponentInstance,
   ContentType,
-  defineComponent,
+  defineComponent, RenderMode,
   Slot,
   SlotRender,
   useContext,
@@ -65,7 +65,7 @@ export const timelineComponent = defineComponent({
       slots.push(createTimelineItem(injector))
     }
     return {
-      render(isOutput: boolean, slotRender: SlotRender): VElement {
+      render(slotRender: SlotRender, renderMode): VElement {
         return (
           <tb-timeline>
             {
@@ -78,7 +78,7 @@ export const timelineComponent = defineComponent({
                 return (
                   <div class={classes.join(' ')}>
                     <div class="tb-timeline-line"/>
-                    <div class="tb-timeline-icon" title={isOutput ? null : '点击切换颜色'} onClick={() => {
+                    <div class="tb-timeline-icon" title={renderMode === RenderMode.Editing ? null : '点击切换颜色'} onClick={() => {
                       if (!type) {
                         slot.updateState(draft => {
                           draft.type = timelineTypes[0] as TimelineType
@@ -90,7 +90,7 @@ export const timelineComponent = defineComponent({
                       }
                     }}/>
                     {
-                      !isOutput && <span class="tb-timeline-add" onClick={() => {
+                      renderMode === RenderMode.Editing && <span class="tb-timeline-add" onClick={() => {
                         const index = slots.indexOf(slot) + 1
                         slots.insertByIndex(createTimelineItem(injector, type), index)
                       }}/>

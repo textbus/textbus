@@ -98,7 +98,7 @@ export const todolistComponent = defineComponent({
     }
 
     return {
-      render(_, slotRender): VElement {
+      render(slotRender): VElement {
         return (
           <tb-todolist>
             {

@@ -2,12 +2,11 @@ import { Observable, Subject, Subscription } from '@tanbo/stream'
 import { Draft, Patch, produce } from 'immer'
 
 import { ComponentInstance, ComponentLiteral } from './component'
-import { Action, ApplyAction } from './operation'
 import { Content } from './content'
 import { Format, FormatLiteral, FormatRange, FormatValue, Formats, FormatTree, FormatItem } from './format'
 import { Attribute, Formatter } from './attribute'
 import { ChangeMarker } from './change-marker'
-import { StateChange } from './types'
+import { Action, ApplyAction, StateChange } from './types'
 
 export enum ContentType {
   Text = 1,

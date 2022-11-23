@@ -1,8 +1,8 @@
 import { Observable, Subject, Subscription } from '@tanbo/stream'
 
 import { Slot } from './slot'
-import { Action, Operation } from './operation'
 import { ComponentInstance } from './component'
+import { Action, Operation } from './types'
 
 /**
  * Textbus 管理组件内部插槽增删改查的类

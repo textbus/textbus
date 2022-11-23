@@ -2,19 +2,20 @@ import { Injectable, Prop } from '@tanbo/di'
 import { Observable, Subject, Subscription } from '@tanbo/stream'
 
 import {
-  VElement,
-  VTextNode,
+  ComponentInstance,
+  Event,
+  FormatHostBindingRender,
   FormatItem,
   FormatTree,
-  ComponentInstance,
-  Slot,
   invokeListener,
-  Ref,
-  Event,
+  jsx,
   NativeNode,
+  Ref,
+  RenderMode,
+  Slot,
   SlotRenderFactory,
-  FormatHostBindingRender,
-  jsx
+  VElement,
+  VTextNode
 } from '../model/_api'
 import { NativeRenderer, RootComponentRef } from './_injection-tokens'
 import { makeError } from '../_utils/make-error'
@@ -667,13 +668,13 @@ export class Renderer {
   private componentRender(component: ComponentInstance): VElement {
     this.renderedComponents.push(component)
     if (component.changeMarker.dirty || this.readonlyStateChanged) {
-      const node = component.extends.render(this.controller.readonly, (slot, factory) => {
+      const node = component.extends.render((slot, factory) => {
         return this.slotRender(component, slot, children => {
           const vNodes = this.extractVNodesBySlot(slot, children, [])
           this.slotVNodesCaches.set(slot, vNodes)
           return factory(children)
         })
-      })
+      }, this.controller.readonly ? RenderMode.Readonly : RenderMode.Editing)
       setEditable(node, false)
       this.componentVNode.set(component, node)
       component.changeMarker.rendered()
@@ -733,7 +734,7 @@ export class Renderer {
         throw rendererErrorFn(`component \`${component.name}\` slot rendering does not return a VElement.`)
       }
       for (const [attribute, value] of slot.getAttributes()) {
-        attribute.render(root, value, this.controller.readonly)
+        attribute.render(root, value, this.controller.readonly ? RenderMode.Readonly : RenderMode.Editing)
       }
       root.attrs.set(this.slotIdAttrKey, slot.id)
       setEditable(root, true)
@@ -803,7 +804,7 @@ export class Renderer {
     let host: VElement | null = null
     for (let i = formats.length - 1; i > -1; i--) {
       const item = formats[i]
-      const next = item.formatter.render(children, item.value, this.controller.readonly)
+      const next = item.formatter.render(children, item.value, this.controller.readonly ? RenderMode.Readonly : RenderMode.Editing)
       if (!next) {
         throw rendererErrorFn(`Formatter \`${item.formatter.name}\` must return an VElement!`)
       }

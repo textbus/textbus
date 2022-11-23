@@ -1,12 +1,16 @@
 import { Injectable } from '@tanbo/di'
 
 import {
-  VElement,
-  VTextNode,
+  ComponentInstance,
+  FormatHostBindingRender,
   FormatItem,
   FormatTree,
-  ComponentInstance,
-  Slot, SlotRenderFactory, FormatHostBindingRender, jsx,
+  jsx,
+  RenderMode,
+  Slot,
+  SlotRenderFactory,
+  VElement,
+  VTextNode,
 } from '../model/_api'
 import { RootComponentRef } from './_injection-tokens'
 // import { makeError } from '../_utils/make-error'
@@ -38,9 +42,9 @@ export class OutputRenderer {
 
   private componentRender(component: ComponentInstance): VElement {
     if (component.changeMarker.outputDirty) {
-      const node = component.extends.render(true, (slot, factory) => {
+      const node = component.extends.render((slot, factory) => {
         return this.slotRender(slot, factory)
-      })
+      }, RenderMode.Output)
       component.changeMarker.outputRendered()
       this.componentVNode.set(component, node)
       return node
@@ -80,7 +84,7 @@ export class OutputRenderer {
       }
       const root = slotRenderFactory(children)
       for (const [attribute, value] of slot.getAttributes()) {
-        attribute.render(root, value, true)
+        attribute.render(root, value, RenderMode.Output)
       }
       slot.changeMarker.outputRendered()
       this.slotVNodeCaches.set(slot, root)
@@ -130,7 +134,7 @@ export class OutputRenderer {
     let host: VElement | null = null
     for (let i = formats.length - 1; i > -1; i--) {
       const item = formats[i]
-      const next = item.formatter.render(children, item.value, true)
+      const next = item.formatter.render(children, item.value, RenderMode.Output)
       if (!(next instanceof VElement)) {
         hostBindings.push(next)
         continue

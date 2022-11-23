@@ -69,7 +69,7 @@ export const alertComponent = defineComponent({
     })
 
     return {
-      render(_, slotRender): VElement {
+      render(slotRender): VElement {
         const classes = ['tb-alert']
         if (state.fill) {
           classes.push('tb-alert-fill')

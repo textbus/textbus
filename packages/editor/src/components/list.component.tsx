@@ -84,7 +84,7 @@ export const listComponent = defineComponent({
 
     return {
       type: state,
-      render(isOutputMode: boolean, slotRender: SlotRender): VElement {
+      render(slotRender: SlotRender): VElement {
         const Tag = state
         return (
           <Tag>

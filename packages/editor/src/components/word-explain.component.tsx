@@ -4,7 +4,7 @@ import {
   ContentType,
   defineComponent, onContextMenu,
   onDestroy,
-  onSlotRemove,
+  onSlotRemove, RenderMode,
   Slot,
   SlotRender,
   useContext,
@@ -98,7 +98,7 @@ export const wordExplainComponent = defineComponent({
     })
 
     return {
-      render(isOutputMode: boolean, slotRenderFn: SlotRender): VElement {
+      render(slotRenderFn: SlotRender, renderMode): VElement {
         return (
           <tb-word-explain>
             <div class="tb-word-explain-title-group" style={{ width: state.width }}>
@@ -113,7 +113,7 @@ export const wordExplainComponent = defineComponent({
               return <div class="tb-word-explain-detail">{children}</div>
             })}
             {
-              !isOutputMode && <span class="tb-word-explain-close" onClick={() => {
+              renderMode === RenderMode.Editing && <span class="tb-word-explain-close" onClick={() => {
                 commander.removeComponent(self)
               }
               }/>

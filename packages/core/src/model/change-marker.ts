@@ -1,7 +1,7 @@
 import { Observable, Subject } from '@tanbo/stream'
 
-import { Operation } from './operation'
 import { ComponentInstance } from './component'
+import { Operation } from './types'
 
 /**
  * 用来标识组件或插槽的数据变化

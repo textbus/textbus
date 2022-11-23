@@ -3,7 +3,7 @@ import {
   ComponentInstance,
   ContentType,
   defineComponent,
-  onDestroy,
+  onDestroy, RenderMode,
   Slot,
   useContext,
   useSlots,
@@ -63,7 +63,7 @@ export const stepComponent = defineComponent({
       sub.unsubscribe()
     })
     return {
-      render(isOutputMode: boolean, slotRender): VElement {
+      render(slotRender, renderMode): VElement {
         const currentStep = state.step
         return (
           <tb-step step={state.step}>
@@ -99,7 +99,7 @@ export const stepComponent = defineComponent({
                       })
                     }
                     {
-                      !isOutputMode && <span class="tb-step-item-add" onClick={
+                      renderMode === RenderMode.Editing && <span class="tb-step-item-add" onClick={
                         () => {
                           slots.insertByIndex(createStepSlot(injector), index + 1)
                         }

@@ -41,7 +41,7 @@ export const blockquoteComponent = defineComponent({
       ]))
     }
     return {
-      render(isOutputMode: boolean, slotRender: SlotRender): VElement {
+      render(slotRender: SlotRender): VElement {
         return slotRender(slots.get(0)!, children => {
           return <div class="tb-blockquote">{children}</div>
         })

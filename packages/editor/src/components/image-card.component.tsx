@@ -117,7 +117,7 @@ export const imageCardComponent = defineComponent({
     }
 
     return {
-      render(_, slotRender): VElement {
+      render(slotRender): VElement {
         return (
           <tb-image-card data-src={state.src} data-height={state.height}>
             <div onClick={showForm}>

@@ -8,7 +8,7 @@ import { ContentType, Slot, SlotLiteral } from './slot'
 import { Formats } from './format'
 import { ChangeMarker } from './change-marker'
 import { Slots } from './slots'
-import { StateChange } from './types'
+import { RenderMode, StateChange } from './types'
 
 enablePatches()
 
@@ -43,7 +43,7 @@ export interface SlotRender {
 }
 
 export interface ComponentRender {
-  (isOutputMode: boolean, slotRender: SlotRender): VElement
+  (slotRender: SlotRender, renderMode: RenderMode): VElement
 }
 
 /**
