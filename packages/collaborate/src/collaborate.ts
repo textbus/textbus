@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@tanbo/di'
 import { delay, filter, map, Observable, Subject, Subscription } from '@tanbo/stream'
 import {
+  AbstractSelection,
   ChangeOrigin,
   ComponentInstance,
   ContentType,
@@ -133,6 +134,9 @@ export class Collaborate implements History {
   protected updateRemoteActions: Array<UpdateItem> = []
   protected noRecord = {}
 
+  protected historyItems: Array<CursorPosition | null> = []
+  protected index = 0
+
   constructor(@Inject(HISTORY_STACK_SIZE) protected stackSize: number,
               protected rootComponentRef: RootComponentRef,
               protected collaborateCursor: CollaborateCursor,
@@ -153,25 +157,46 @@ export class Collaborate implements History {
   listen() {
     const root = this.yDoc.getMap('RootComponent')
     const rootComponent = this.rootComponentRef.component!
-    this.manager = new UndoManager(root, {
+    const manager = new UndoManager(root, {
       trackedOrigins: new Set<any>([this.yDoc])
     })
-    const cursorKey = 'cursor-position'
-    this.manager.on('stack-item-added', event => {
-      event.stackItem.meta.set(cursorKey, this.getRelativeCursorLocation())
-      if (this.manager!.undoStack.length > this.stackSize) {
-        this.manager!.undoStack.shift()
+    this.manager = manager
+
+    manager.on('stack-item-added', event => {
+      if (event.type === 'undo') {
+        if (event.origin === manager) {
+          this.index++
+        } else {
+          this.historyItems.length = this.index
+          this.historyItems.push(this.getRelativeCursorLocation())
+          this.index++
+        }
+      } else {
+        this.index--
+      }
+      if (manager.undoStack.length > this.stackSize) {
+        this.historyItems.shift()
+        manager.undoStack.shift()
       }
       if (event.origin === this.yDoc) {
         this.pushEvent.next()
       }
       this.changeEvent.next()
     })
-    this.manager.on('stack-item-popped', event => {
-      const position = event.stackItem.meta.get(cursorKey) as CursorPosition
+    manager.on('stack-item-popped', () => {
+      const position: CursorPosition | null = this.historyItems[this.index - 1]
       if (position) {
-        this.restoreCursorLocation(position)
+        const selection = this.getAbstractSelection(position)
+        if (selection) {
+          this.selection.setBaseAndExtent(
+            selection.anchorSlot,
+            selection.anchorOffset,
+            selection.focusSlot,
+            selection.focusOffset)
+          return
+        }
       }
+      this.selection.unSelect()
     })
     this.subscriptions.push(
       this.selection.onChange.subscribe(() => {
@@ -245,11 +270,15 @@ export class Collaborate implements History {
   }
 
   clear() {
+    this.index = 0
+    this.historyItems = []
     this.manager?.clear()
     this.changeEvent.next()
   }
 
   destroy() {
+    this.index = 0
+    this.historyItems = []
     this.subscriptions.forEach(i => i.unsubscribe())
     this.collaborateCursor.destroy()
     this.manager?.destroy()
@@ -293,18 +322,22 @@ export class Collaborate implements History {
     this.syncSlots(slots, rootComponent)
   }
 
-  protected restoreCursorLocation(position: CursorPosition) {
+  protected getAbstractSelection(position: CursorPosition): AbstractSelection | null {
     const anchorPosition = createAbsolutePositionFromRelativePosition(position.anchor, this.yDoc)
     const focusPosition = createAbsolutePositionFromRelativePosition(position.focus, this.yDoc)
     if (anchorPosition && focusPosition) {
       const focusSlot = this.contentMap.get(focusPosition.type as YText)
       const anchorSlot = this.contentMap.get(anchorPosition.type as YText)
       if (focusSlot && anchorSlot) {
-        this.selection.setBaseAndExtent(anchorSlot, anchorPosition.index, focusSlot, focusPosition.index)
-        return
+        return {
+          anchorSlot,
+          anchorOffset: anchorPosition.index,
+          focusSlot,
+          focusOffset: focusPosition.index
+        }
       }
     }
-    this.selection.unSelect()
+    return null
   }
 
   protected getRelativeCursorLocation(): CursorPosition | null {
