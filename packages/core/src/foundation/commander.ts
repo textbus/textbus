@@ -204,6 +204,9 @@ function deltaToSlots<T>(selection: Selection,
     parentComponentState: parentComponent.state
   }
   let newSlot = rule.slotFactory(context)
+  delta.attributes.forEach((value, key) => {
+    newSlot.setAttribute(key, value)
+  })
   const newSlots = [newSlot]
 
   let index = 0
@@ -241,6 +244,9 @@ function deltaToSlots<T>(selection: Selection,
       newSlots.push(...slots)
     }
     newSlot = rule.slotFactory(context)
+    delta.attributes.forEach((value, key) => {
+      newSlot.setAttribute(key, value)
+    })
   }
   return newSlots
 }
@@ -909,9 +915,6 @@ export class Commander {
       offset: Selection.getInlineContentEndIndex(endSlot, endOffset)
     }
 
-    let slots: Slot<U>[] = []
-    let position: SelectionPosition | null = null
-
     const parentComponent = startScope.slot.parent!
     if (parentComponent.separable) {
       if (startScope.slot !== parentComponent.slots.last) {
@@ -944,6 +947,8 @@ export class Commander {
       }
     }
 
+    let slots: Slot<U>[] = []
+    let position: SelectionPosition | null = null
     while (true) {
       const endPaths = selection.getPathsBySlot(startScope.slot)
       if (!endPaths) {
