@@ -598,10 +598,9 @@ export class Commander {
    * @param newComponent 新插入的组件
    */
   replaceComponent(oldComponent: ComponentInstance, newComponent: ComponentInstance): boolean {
-    const b = this.insertBefore(newComponent, oldComponent)
+    const b = this.removeComponent(oldComponent)
     if (b) {
-      this.selection.setFocus(this.selection.focusSlot!, this.selection.focusOffset! + 1)
-      return this.delete(false)
+      return this.insert(newComponent)
     }
     return false
   }
