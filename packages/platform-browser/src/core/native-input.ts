@@ -1,5 +1,5 @@
 import { Injectable, Injector } from '@tanbo/di'
-import { filter, fromEvent, map, merge, Observable, Subject, Subscription } from '@tanbo/stream'
+import { distinctUntilChanged, filter, fromEvent, map, merge, Observable, Subject, Subscription } from '@tanbo/stream'
 import { Commander, ContentType, Controller, Keyboard, Scheduler, Selection, Slot } from '@textbus/core'
 
 import { Caret, CaretPosition, Input, Scroller } from './types'
@@ -9,12 +9,21 @@ import { Parser } from '../dom-support/parser'
 
 
 class NativeCaret implements Caret {
-  onPositionChange = new Subject<CaretPosition | null>()
+  onPositionChange: Observable<CaretPosition | null>
 
   set nativeRange(range: Range | null) {
     this._nativeRange = range
-    if (range && range.collapsed) {
-      this.onPositionChange.next(range.getBoundingClientRect())
+    if (range) {
+      const r = range.cloneRange()
+      r.collapse(true)
+      const rect = r.getBoundingClientRect()
+      this.positionChangeEvent.next({
+        left: rect.left,
+        top: rect.top,
+        height: rect.height
+      })
+    } else {
+      this.positionChangeEvent.next(null)
     }
   }
 
@@ -24,7 +33,9 @@ class NativeCaret implements Caret {
 
   get rect() {
     if (this.nativeRange) {
-      return this.nativeRange.getBoundingClientRect()
+      const range = this.nativeRange.cloneRange()
+      range.collapse(true)
+      return range.getBoundingClientRect()
     }
     return {
       left: 0,
@@ -38,7 +49,10 @@ class NativeCaret implements Caret {
   private _nativeRange: Range | null = null
   private subs: Subscription[] = []
 
+  private positionChangeEvent = new Subject<CaretPosition | null>()
+
   constructor(private scheduler: Scheduler) {
+    this.onPositionChange = this.positionChangeEvent.pipe(distinctUntilChanged())
   }
 
   refresh() {

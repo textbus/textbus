@@ -222,7 +222,7 @@ class ExperimentalCaret implements Caret {
     const startContainer = nativeRange.startContainer
 
     const node = (startContainer.nodeType === Node.ELEMENT_NODE ? startContainer : startContainer.parentNode) as HTMLElement
-    if (node?.nodeType !== Node.ELEMENT_NODE || !nativeRange.collapsed) {
+    if (node?.nodeType !== Node.ELEMENT_NODE) {
       this.positionChangeEvent.next(null)
       return
     }
