@@ -611,6 +611,7 @@ export class Selection {
 
   /**
    * 获取选区所选择的块的集合
+   * @param decompose 是否按块分解已选中的区域
    */
   getSelectedScopes(decompose = false): SlotRange[] {
     if (!this.isSelected) {
@@ -1446,7 +1447,7 @@ export class Selection {
     let i = 0
     const contents = slot.sliceContent(startIndex, endIndex)
     contents.forEach(c => {
-      if (typeof c !== 'string' && c.type === ContentType.BlockComponent) {
+      if (typeof c !== 'string' && c.type === ContentType.BlockComponent && c.slots.length !== 0) {
         newScope = null
         c.slots.toArray().forEach(s => {
           scopes.push(...this.decomposeSlotRange(s, 0, s.length))

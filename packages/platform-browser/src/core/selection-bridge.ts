@@ -196,6 +196,50 @@ export class SelectionBridge implements NativeSelectionBridge {
   getNextLinePositionByCurrent(position: SelectionPosition): SelectionPosition | null {
     return this.getLinePosition(position, true)
   }
+  // private getLinePosition(currentPosition: SelectionPosition, toNext: boolean): SelectionPosition | null {
+  //   clearTimeout(this.cacheCaretPositionTimer)
+  //   let p: SelectionPosition | null
+  //   if (this.oldCaretPosition) {
+  //     p = this.caretRangeFromPoint(currentPosition, this.oldCaretPosition.left, toNext)
+  //   } else {
+  //     this.oldCaretPosition = this.getRect(currentPosition)!
+  //     p = this.caretRangeFromPoint(currentPosition, this.oldCaretPosition.left, toNext)
+  //   }
+  //   this.cacheCaretPositionTimer = setTimeout(() => {
+  //     this.oldCaretPosition = null
+  //   }, 3000)
+  //   return p
+  // }
+  //
+  // private caretRangeFromPoint(currentPosition: SelectionPosition, x: number, toNext: boolean): SelectionPosition | null {
+  //   const rect = this.getRect(currentPosition)!
+  //   const fn = document.caretRangeFromPoint || function (x: number, y: number) {
+  //     const range = (document as any).caretPositionFromPoint(x, y)
+  //     return {
+  //       startContainer: range.offsetNode,
+  //       startOffset: range.offset
+  //     }
+  //   }
+  //
+  //   const current = fn.call(document, rect.left, rect.top)!
+  //
+  //   let startTop = toNext ? rect.top + rect.height : rect.top
+  //   const step = toNext ? 5 : -5
+  //   while (true) {
+  //     startTop += step
+  //     const newPosition = fn.call(document, x, startTop)
+  //     if (!newPosition) {
+  //       return toNext ?
+  //         this.selection.findLastPosition(this.rootComponentRef.component.slots.last, true) :
+  //         this.selection.findFirstPosition(this.rootComponentRef.component.slots.first, true)
+  //     }
+  //     if (newPosition.startContainer !== current.startContainer || newPosition.startOffset !== current.startOffset) {
+  //       return this.getCorrectedPosition(newPosition.startContainer, newPosition.startOffset, toNext)
+  //     }
+  //   }
+  //   return null
+  // }
+
 
   private getLinePosition(currentPosition: SelectionPosition, toNext: boolean): SelectionPosition | null {
     clearTimeout(this.cacheCaretPositionTimer)
@@ -242,7 +286,7 @@ export class SelectionBridge implements NativeSelectionBridge {
       focusOffset = position.offset
       const rect2 = this.getRect(position)!
       if (!isToPrevLine) {
-        if (rect2.left > minLeft || rect2.top < minTop) {
+        if (rect2.left > minLeft || rect2.top + rect2.height <= minTop) {
           isToPrevLine = true
         } else if (rect2.left === minLeft && rect2.top === minTop) {
           return position
@@ -283,10 +327,11 @@ export class SelectionBridge implements NativeSelectionBridge {
     let maxRight = startLeft
     let focusSlot = currentPosition.slot
     let focusOffset = currentPosition.offset
-    let minTop = this.getRect({
+    const rect = this.getRect({
       slot: focusSlot,
       offset: focusOffset
-    })!.top
+    })!
+    let minTop = rect.top
     let oldPosition!: SelectionPosition
     let oldLeft = 0
     while (true) {
@@ -296,7 +341,7 @@ export class SelectionBridge implements NativeSelectionBridge {
       focusOffset = position.offset
       const rect2 = this.getRect(position)!
       if (!isToNextLine) {
-        if (rect2.left < maxRight || rect2.top > minTop) {
+        if (rect2.left < maxRight || rect2.top >= minTop + rect.height) {
           isToNextLine = true
         } else if (rect2.left === maxRight && rect2.top === minTop) {
           return position
