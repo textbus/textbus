@@ -170,7 +170,7 @@ fromEvent(btns[1], 'click').subscribe(() => {
   textarea.value = JSON.stringify(json)
 })
 fromEvent(btns[2], 'click').subscribe(() => {
-  const contents = editor.getContent()
+  const contents = editor.getHTML()
   textarea.value = contents
 })
 fromEvent(btns[3], 'click').subscribe(() => {

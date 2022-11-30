@@ -245,7 +245,7 @@ export class Viewer extends Starter {
   /**
    * 获取 HTML 格式的内容
    */
-  getContent(): string {
+  getHTML(): string {
     this.guardReady()
 
     const outputRenderer = this.get(OutputRenderer)

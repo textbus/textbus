@@ -641,16 +641,20 @@ export class Commander {
    * @param text 要粘贴的文本
    */
   paste(pasteSlot: Slot, text: string) {
-    if (!this.selection.isSelected) {
+    if (pasteSlot.isEmpty) {
       return false
     }
-    if (!this.selection.isCollapsed) {
+    const selection = this.selection
+    if (!selection.isSelected) {
+      return false
+    }
+    if (!selection.isCollapsed) {
       this.delete()
     }
-    const component = this.selection.commonAncestorComponent!
-    const slot = this.selection.commonAncestorSlot!
+    const component = selection.commonAncestorComponent!
+    const slot = selection.commonAncestorSlot!
     const event = new Event(slot, {
-      index: this.selection.startOffset!,
+      index: selection.startOffset!,
       data: pasteSlot,
       text
     })
@@ -660,13 +664,13 @@ export class Commander {
       const afterDelta = new DeltaLite()
       while (delta.length) {
         const { insert, formats } = delta.shift()!
-        const commonAncestorSlot = this.selection.commonAncestorSlot!
+        const commonAncestorSlot = selection.commonAncestorSlot!
         if (canInsert(insert, commonAncestorSlot)) {
           this.insert(insert, formats)
           continue
         }
 
-        afterDelta.push(...commonAncestorSlot.cut(this.selection.startOffset!).toDelta())
+        afterDelta.push(...commonAncestorSlot.cut(selection.startOffset!).toDelta())
         const parentComponent = commonAncestorSlot.parent!
 
         if (commonAncestorSlot === parentComponent.slots.last) {
@@ -682,7 +686,7 @@ export class Commander {
               parentComponent.state,
             slots: nextSlots
           })!
-          delta.push({
+          afterDelta.push({
             insert: nextComponent,
             formats: []
           })
@@ -703,6 +707,13 @@ export class Commander {
         this.insert(insert, formats)
       }
       snapshot.restore()
+      const currentContent = selection.startSlot!.getContentAtIndex(selection.startOffset!)
+      if (currentContent &&
+        typeof currentContent !== 'string' &&
+        currentContent.type === ContentType.BlockComponent &&
+        currentContent.slots.length > 0) {
+        selection.toNext()
+      }
     }
     return !event.isPrevented
   }
