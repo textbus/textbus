@@ -18,6 +18,7 @@
     "noImplicitAny": false,
     "suppressImplicitAnyIndexErrors": true,
     "outDir": "bundles/",
+    "skipLibCheck": true,
     "downlevelIteration": true,
     "jsx": "react",
     "jsxFactory": "VElement.createElement"
