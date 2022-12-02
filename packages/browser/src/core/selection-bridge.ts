@@ -330,7 +330,8 @@ export class SelectionBridge implements NativeSelectionBridge {
     this.changeFromUser = true
     if (this.ignoreSelectionChange ||
       selection.rangeCount === 0 ||
-      !this.docContainer.contains(selection.anchorNode)) {
+      !this.docContainer.contains(selection.anchorNode) ||
+      this.rootComponentRef.component.slots.length === 0) {
       return
     }
     const nativeRange = selection.getRangeAt(0).cloneRange()
@@ -338,12 +339,24 @@ export class SelectionBridge implements NativeSelectionBridge {
     const isFocusStart = selection.focusNode === nativeRange.startContainer && selection.focusOffset === nativeRange.startOffset
     if (!this.docContainer.contains(selection.focusNode)) {
       if (isFocusEnd) {
-        const vEle = this.renderer.getVNodeBySlot(this.rootComponentRef.component.slots.first!)!
+        const vEle = this.renderer.getVNodeBySlot(this.rootComponentRef.component.slots.first!)
+        if (!vEle) {
+          return
+        }
         const nativeNode = this.renderer.getNativeNodeByVNode(vEle)
+        if (!nativeNode) {
+          return
+        }
         nativeRange.setEndAfter(nativeNode.lastChild!)
       } else {
-        const vEle = this.renderer.getVNodeBySlot(this.rootComponentRef.component.slots.last!)!
+        const vEle = this.renderer.getVNodeBySlot(this.rootComponentRef.component.slots.last!)
+        if (!vEle) {
+          return
+        }
         const nativeNode = this.renderer.getNativeNodeByVNode(vEle)
+        if (!nativeNode) {
+          return
+        }
         nativeRange.setStartBefore(nativeNode.firstChild!)
       }
     }
