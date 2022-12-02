@@ -52,6 +52,7 @@ const editor = createEditor({
     const collaborateCursor = starter.get(CollaborateCursor)
     const layout = starter.get(Layout)
     const input = starter.get(Input)
+    input.disabled = true
     //
     input.caret.correctScrollTop({
       onScroll: fromEvent(document, 'scroll'),

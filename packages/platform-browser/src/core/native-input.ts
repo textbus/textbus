@@ -132,6 +132,18 @@ export class NativeInput extends Input {
 
   onReady = Promise.resolve()
 
+  set disabled(b: boolean) {
+    this._disabled = b
+    if (b && !this.controller.readonly) {
+      this.documentView.contentEditable = b ? 'false' : 'true'
+    }
+  }
+
+  get disabled() {
+    return this._disabled
+  }
+
+  private _disabled = false
   private documentView: HTMLElement
   private nativeSelection = document.getSelection()!
 

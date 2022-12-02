@@ -67,6 +67,7 @@ export abstract class Input {
   abstract composition: boolean
   abstract onReady: Promise<void>
   abstract caret: Caret
+  abstract disabled: boolean
 
   abstract focus(nativeRange: Range, reFlash: boolean): void
 

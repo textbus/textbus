@@ -287,6 +287,19 @@ export class MagicInput extends Input {
   composition = false
   onReady: Promise<void>
   caret = new ExperimentalCaret(this.scheduler, this.injector.get(VIEW_MASK))
+
+  set disabled(b: boolean) {
+    this._disabled = b
+    if (b && this.textarea) {
+      this.textarea.disabled = b
+    }
+  }
+
+  get disabled() {
+    return this._disabled
+  }
+
+  private _disabled = false
   private container = this.createEditableFrame()
 
   private subscription = new Subscription()
@@ -334,7 +347,9 @@ export class MagicInput extends Input {
   }
 
   focus(range: Range, restart: boolean) {
-    this.caret.show(range, restart)
+    if (!this.disabled) {
+      this.caret.show(range, restart)
+    }
     if (this.controller.readonly) {
       return
     }
@@ -368,6 +383,7 @@ export class MagicInput extends Input {
     const doc = this.doc
     const contentBody = doc.body
     const textarea = doc.createElement('textarea')
+    textarea.disabled = this.disabled
     contentBody.appendChild(textarea)
     this.textarea = textarea
     this.subscription.add(
