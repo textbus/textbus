@@ -1137,8 +1137,8 @@ export class Selection {
       }
     }
 
-    // 循环向后找最后一个子 fragment，但有可能当前这个就是最后一个，这时循环
-    // 向上会找不到，那么就使用当前的 fragment
+    // 循环向后找最后一个子 slot，但有可能当前这个就是最后一个，这时循环
+    // 向上会找不到，那么就使用当前的 slot
     const cacheSlot = slot
 
     while (slot) {
@@ -1197,9 +1197,8 @@ export class Selection {
         offset: offset - prev.length
       }
     }
-    // 循环向前找第一个子 fragment，但有可能当前这个就是第一个，这时循环
-    // 向上会找不到，那么就使用当前的 fragment
-    const cacheSlot = slot
+    // 循环向前找第一个子 slot，但有可能当前这个就是第一个，这时循环向上会找不到，那么就使用当前的 slot
+    let cacheSlot = slot
 
     while (slot) {
       const parentComponent = slot.parent!
@@ -1231,6 +1230,7 @@ export class Selection {
         }
       }
       slot = parentSlot
+      cacheSlot = slot
     }
     return {
       slot: cacheSlot,
