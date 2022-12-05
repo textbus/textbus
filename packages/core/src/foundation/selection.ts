@@ -211,6 +211,9 @@ export class Selection {
   }
 
   set nativeSelectionDelegate(v: boolean) {
+    if (v === this._nativeSelectionDelegate) {
+      return
+    }
     this._nativeSelectionDelegate = v
     if (this.controller.readonly) {
       return
@@ -256,7 +259,7 @@ export class Selection {
   private _focusOffset: number | null = null
   private changeEvent = new Subject<AbstractSelection | null>()
 
-  private _nativeSelectionDelegate = true
+  private _nativeSelectionDelegate = false
 
   private subscriptions: Subscription[] = []
 
