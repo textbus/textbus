@@ -18,7 +18,10 @@
     "noImplicitAny": false,
     "suppressImplicitAnyIndexErrors": true,
     "outDir": "bundles/",
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "paths": {
+      "@textbus/core": ["../core/src/public-api.ts"]
+    }
   },
   "include": [
     "src"

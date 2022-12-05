@@ -15,7 +15,9 @@ import {
   invokeListener,
   Controller,
   Component,
-  Keyboard
+  Keyboard,
+  History,
+  Commander
 } from '@textbus/core'
 
 import { Parser, OutputTranslator, ComponentLoader } from './dom-support/_api'
@@ -28,7 +30,6 @@ import {
   DomRenderer,
   SelectionBridge, VIEW_MASK, VIEW_DOCUMENT, Caret
 } from './core/_api'
-import { DefaultShortcut } from './preset/_api'
 
 export interface OutputContents<T = any> {
   content: T
@@ -123,7 +124,7 @@ export class Viewer {
     }]
     this.injector = new Starter({
       ...options,
-      plugins: [() => new DefaultShortcut(), ...(options.plugins || [])],
+      plugins: options.plugins || [],
       providers: [
         ...(options.providers || []),
         ...staticProviders,
@@ -154,18 +155,8 @@ export class Viewer {
     const parser = starter.get(Parser)
     const translator = starter.get(Translator)
     const doc = starter.get(VIEW_DOCUMENT)
-    const keyboard = starter.get(Keyboard)
 
-    keyboard.addShortcut({
-      keymap: {
-        key: 's',
-        ctrlKey: true
-      },
-      action: () => {
-        this.saveEvent.next()
-      }
-    })
-
+    this.initDefaultShortcut()
     let component: ComponentInstance
     const content = this.options.content
     if (content) {
@@ -335,6 +326,154 @@ export class Viewer {
     if (!this.isReady) {
       throw editorError('please wait for the editor to initialize before getting the content!')
     }
+  }
+
+  private initDefaultShortcut() {
+    const injector = this.injector
+    const selection = injector.get(Selection)
+    const keyboard = injector.get(Keyboard)
+    const history = injector.get(History)
+    const commander = injector.get(Commander)
+    keyboard.addShortcut({
+      keymap: {
+        key: 's',
+        ctrlKey: true
+      },
+      action: () => {
+        this.saveEvent.next()
+      }
+    })
+    keyboard.addShortcut({
+      keymap: {
+        key: 'Enter'
+      },
+      action: () => {
+        commander.break()
+      }
+    })
+    keyboard.addShortcut({
+      keymap: {
+        key: 'Enter',
+        shiftKey: true
+      },
+      action: () => {
+        const startOffset = selection.startOffset!
+        const startSlot = selection.startSlot!
+        const isToEnd = startOffset === startSlot.length || startSlot.isEmpty
+        const content = isToEnd ? '\n\n' : '\n'
+        const isInserted = commander.insert(content)
+        if (isInserted && isToEnd) {
+          selection.setPosition(startSlot, startOffset + 1)
+        }
+      }
+    })
+    keyboard.addShortcut({
+      keymap: {
+        key: ['Delete', 'Backspace']
+      },
+      action: (key) => {
+        commander.delete(key === 'Backspace')
+      }
+    })
+    keyboard.addShortcut({
+      keymap: {
+        key: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
+      },
+      action: (key) => {
+        switch (key) {
+          case 'ArrowLeft':
+            selection.toPrevious()
+            break
+          case 'ArrowRight':
+            selection.toNext()
+            break
+          case 'ArrowUp':
+            selection.toPreviousLine()
+            break
+          case 'ArrowDown':
+            selection.toNextLine()
+            break
+        }
+      }
+    })
+    keyboard.addShortcut({
+      keymap: {
+        key: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'],
+        shiftKey: true
+      },
+      action: (key) => {
+        switch (key) {
+          case 'ArrowLeft':
+            selection.wrapToBefore()
+            break
+          case 'ArrowRight':
+            selection.wrapToAfter()
+            break
+          case 'ArrowUp':
+            selection.wrapToTop()
+            break
+          case 'ArrowDown':
+            selection.wrapToBottom()
+            break
+        }
+      }
+    })
+
+    keyboard.addShortcut({
+      keymap: {
+        key: 'Tab'
+      },
+      action: () => {
+        commander.insert('    ')
+      }
+    })
+
+    keyboard.addShortcut({
+      keymap: {
+        key: 'a',
+        ctrlKey: true
+      },
+      action: () => {
+        selection.selectAll()
+      }
+    })
+    keyboard.addShortcut({
+      keymap: {
+        key: 'c',
+        ctrlKey: true
+      },
+      action: () => {
+        commander.copy()
+      }
+    })
+    keyboard.addShortcut({
+      keymap: {
+        key: 'x',
+        ctrlKey: true
+      },
+      action: () => {
+        commander.cut()
+      }
+    })
+    keyboard.addShortcut({
+      keymap: {
+        key: 'z',
+        ctrlKey: true
+      },
+      action: () => {
+        history.back()
+      }
+    })
+    keyboard.addShortcut({
+      keymap: {
+        key: 'z',
+        ctrlKey: true,
+        shiftKey: true
+      },
+      action: () => {
+        history.forward()
+      }
+    })
   }
 
   private initDocStyleSheetsAndScripts(options: ViewOptions) {

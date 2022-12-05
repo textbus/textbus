@@ -54,7 +54,7 @@ export class Keyboard {
    * @param interceptor
    */
   addZenCodingInterceptor(interceptor: ZenCodingInterceptor) {
-    this.zenCodingInterceptors.unshift(interceptor)
+    this.zenCodingInterceptors.push(interceptor)
     return {
       remove: () => {
         const index = this.zenCodingInterceptors.indexOf(interceptor)
@@ -83,7 +83,9 @@ export class Keyboard {
       !keymapState.altKey &&
       commonAncestorSlot === this.selection.startSlot &&
       commonAncestorSlot === this.selection.endSlot) {
-      for (const interceptor of this.zenCodingInterceptors) {
+
+      for (let i = this.zenCodingInterceptors.length - 1; i > -1; i--) {
+        const interceptor = this.zenCodingInterceptors[i]
         const matchKey = interceptor.try(key)
         if (matchKey) {
           const activeSlotContents = commonAncestorSlot.sliceContent()
@@ -121,7 +123,7 @@ export class Keyboard {
    */
   addShortcut(shortcut: Shortcut) {
     const shortcutEx = this.createShortcutEx(shortcut)
-    this.shortcutList.unshift(shortcutEx)
+    this.shortcutList.push(shortcutEx)
     return {
       remove: () => {
         const index = this.shortcutList.indexOf(shortcutEx)
@@ -133,7 +135,8 @@ export class Keyboard {
   }
 
   private handleShortcut(keymap: KeymapState, shortcutList: ShortcutEx[]) {
-    for (const ex of shortcutList) {
+    for (let i = shortcutList.length - 1; i > -1; i--) {
+      const ex = shortcutList[i]
       const config = ex.config
       if (ex.test(keymap.key) &&
         !!config.keymap.altKey === keymap.altKey &&
