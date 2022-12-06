@@ -30,7 +30,7 @@
     "@tanbo/color-picker": "^1.0.3",
     "@tanbo/css-themes": "^0.0.1",
     "@tanbo/di": "^1.1.4",
-    "@tanbo/stream": "^1.1.8",
+    "@tanbo/stream": "^1.1.9",
     "@textbus/browser": "^2.5.11",
     "@textbus/collaborate": "^2.5.11",
     "@textbus/core": "^2.5.11",

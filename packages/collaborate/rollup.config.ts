@@ -15,6 +15,10 @@ export default {
   ],
   plugins: [
     commonjs(),
-    typescript()
+    typescript({
+      compilerOptions: {
+        paths: {}
+      }
+    })
   ]
 }
