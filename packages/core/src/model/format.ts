@@ -46,14 +46,15 @@ export class Format {
    * 将新样式合并到现有样式中
    * @param formatter
    * @param value
+   * @param background
    */
-  merge(formatter: BlockFormatter, value: FormatValue): this
-  merge(formatter: InlineFormatter, value: FormatRange): this
-  merge(formatter: Formatter, value: FormatValue | FormatRange): this {
+  merge(formatter: BlockFormatter, value: FormatValue, background?: boolean): this
+  merge(formatter: InlineFormatter, value: FormatRange, background?: boolean): this
+  merge(formatter: Formatter, value: FormatValue | FormatRange, background = false): this {
     if (formatter.type === FormatType.Block) {
       if (isVoid(value)) {
         this.map.delete(formatter)
-      } else {
+      } else if (!background || !this.map.has(formatter)) {
         this.map.set(formatter, [{
           startIndex: 0,
           endIndex: this.slot.length,
@@ -73,7 +74,7 @@ export class Format {
       return this
     }
 
-    const newRanges = this.normalizeFormatRange(ranges, value as FormatRange)
+    const newRanges = this.normalizeFormatRange(background, ranges, value as FormatRange)
     if (newRanges.length) {
       this.map.set(formatter, newRanges)
     } else {
@@ -143,7 +144,7 @@ export class Format {
     })
     Array.from(this.map.keys()).forEach(key => {
       const oldRanges = this.map.get(key)!
-      const newRanges = this.normalizeFormatRange(oldRanges)
+      const newRanges = this.normalizeFormatRange(false, oldRanges)
       if (newRanges.length) {
         this.map.set(key, newRanges)
       } else {
@@ -226,7 +227,7 @@ export class Format {
   discard(formatter: Formatter, startIndex: number, endIndex: number) {
     const oldRanges = this.map.get(formatter)
     if (oldRanges) {
-      this.normalizeFormatRange(oldRanges, {
+      this.normalizeFormatRange(false, oldRanges, {
         startIndex,
         endIndex,
         value: null as any
@@ -377,9 +378,9 @@ export class Format {
     return list
   }
 
-  private normalizeFormatRange(oldRanges: FormatRange[], newRange?: FormatRange) {
+  private normalizeFormatRange(background: boolean, oldRanges: FormatRange[], newRange?: FormatRange) {
     if (newRange) {
-      oldRanges = [...oldRanges, newRange]
+      oldRanges = background ? [newRange, ...oldRanges] : [...oldRanges, newRange]
     }
     const formatValues: Array<FormatValue> = this.tileRanges(oldRanges)
 

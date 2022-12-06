@@ -84,6 +84,8 @@ export class Slot<T = any> {
   protected contentChangeEvent = new Subject<Action[]>()
   protected stateChangeEvent = new Subject<StateChange<T>>()
 
+  protected applyFormatCoverChild = false
+
   constructor(schema: ContentType[], public state?: T) {
     this.schema = schema.sort()
     this.onContentChange = this.contentChangeEvent.asObservable()
@@ -263,7 +265,7 @@ export class Slot<T = any> {
     this.format.split(startIndex, length)
 
     this.content.insert(startIndex, content)
-    this.applyFormats(formats, startIndex, length)
+    this.applyFormats(formats, startIndex, length, false)
 
     if (isEmpty && this._index === 0) {
       const len = this.length - 1
@@ -359,7 +361,7 @@ export class Slot<T = any> {
       const offset = content.length
       if (typeof content === 'string' || content.type !== ContentType.BlockComponent) {
         const deletedFormat = this.format.extract(index, index + offset)
-        this.applyFormats(formats, index, offset)
+        this.applyFormats(formats, index, offset, this.applyFormatCoverChild)
         applyActions.push({
           type: 'retain',
           offset: index
@@ -380,8 +382,15 @@ export class Slot<T = any> {
         }, ...Slot.createActionByFormat(deletedFormat))
       } else {
         content.slots.toArray().forEach(slot => {
-          slot.retain(0)
-          slot.retain(slot.length, formats)
+          if (this.applyFormatCoverChild) {
+            slot.background(() => {
+              slot.retain(0)
+              slot.retain(slot.length, formats)
+            })
+          } else {
+            slot.retain(0)
+            slot.retain(slot.length, formats)
+          }
         })
       }
       index += offset
@@ -710,19 +719,29 @@ export class Slot<T = any> {
     }
   }
 
-  private applyFormats(formats: Formats, startIndex: number, offset: number) {
+  /**
+   * 当在回调函数中应用样式时，将把应用的样式作为子插槽的最低优化级合并
+   * @param fn
+   */
+  background(fn: () => void) {
+    this.applyFormatCoverChild = true
+    fn()
+    this.applyFormatCoverChild = false
+  }
+
+  private applyFormats(formats: Formats, startIndex: number, offset: number, background: boolean) {
     formats.forEach(keyValue => {
       const key = keyValue[0]
       const value = keyValue[1]
 
       if (key.type === FormatType.Block) {
-        this.format.merge(key, value)
+        this.format.merge(key, value, background)
       } else {
         this.format.merge(key, {
           startIndex,
           endIndex: startIndex + offset,
           value
-        })
+        }, background)
       }
     })
   }

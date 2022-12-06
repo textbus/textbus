@@ -80,12 +80,10 @@ export class Parser {
 
   parse(html: string, rootSlot: Slot) {
     const element = Parser.parseHTML(html)
-    const formatItems: FormatItem[] = this.readFormats(element, rootSlot, [])
-    this.applyFormats(rootSlot, formatItems)
-    return rootSlot
+    return this.readFormats(element, rootSlot)
   }
 
-  private readComponent(el: Node, slot: Slot, formatItems: FormatItem[]) {
+  private readComponent(el: Node, slot: Slot) {
     if (el.nodeType === Node.ELEMENT_NODE) {
       if ((el as HTMLElement).tagName === 'BR') {
         slot.insert('\n')
@@ -104,7 +102,7 @@ export class Parser {
           return
         }
       }
-      this.readFormats(el as HTMLElement, slot, formatItems)
+      this.readFormats(el as HTMLElement, slot)
     } else if (el.nodeType === Node.TEXT_NODE) {
       const textContent = el.textContent
       if (/^\s*[\r\n]+\s*$/.test(textContent as string)) {
@@ -114,7 +112,7 @@ export class Parser {
     }
   }
 
-  private readFormats(el: HTMLElement, slot: Slot, formatItems: FormatItem[]) {
+  private readFormats(el: HTMLElement, slot: Slot) {
     const formats = this.formatLoaders.filter(f => {
       return f.match(el)
     }).map(f => {
@@ -122,10 +120,10 @@ export class Parser {
     })
     const startIndex = slot.index
     Array.from(el.childNodes).forEach(child => {
-      this.readComponent(child, slot, formatItems)
+      this.readComponent(child, slot)
     })
     const endIndex = slot.index
-    formatItems.unshift(...formats.map<FormatItem>(i => {
+    this.applyFormats(slot, formats.map<FormatItem>(i => {
       return {
         formatter: i.formatter,
         value: i.value,
@@ -133,19 +131,21 @@ export class Parser {
         endIndex
       }
     }))
-    return formatItems
+    slot.retain(endIndex)
+    return slot
   }
 
   private readSlot<T extends Slot>(childSlot: T, childElement: HTMLElement): T {
-    const childFormatItems: FormatItem[] = this.readFormats(childElement, childSlot, [])
-    this.applyFormats(childSlot, childFormatItems)
+    this.readFormats(childElement, childSlot)
     return childSlot
   }
 
   private applyFormats(slot: Slot, formatItems: FormatItem[]) {
-    formatItems.forEach(i => {
-      slot.retain(i.startIndex)
-      slot.retain(i.endIndex - i.startIndex, i.formatter, i.value)
+    slot.background(() => {
+      formatItems.forEach(i => {
+        slot.retain(i.startIndex)
+        slot.retain(i.endIndex - i.startIndex, i.formatter, i.value)
+      })
     })
   }
 }
