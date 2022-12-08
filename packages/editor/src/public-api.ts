@@ -5,7 +5,7 @@ export * from './plugins/_api'
 export * from './toolbar/_api'
 export * from './uikit/_api'
 
-export * from './context-menu'
+export * from './plugins/context-menu'
 export * from './create-editor'
 export * from './dialog'
 export * from './editor'

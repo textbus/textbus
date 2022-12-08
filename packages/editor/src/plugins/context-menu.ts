@@ -1,4 +1,4 @@
-import { Inject, Injectable, Injector } from '@tanbo/di'
+import { Injector } from '@tanbo/di'
 import { fromEvent, Subscription } from '@tanbo/stream'
 import {
   Commander,
@@ -11,7 +11,8 @@ import {
   ContextMenuConfig,
   ContextMenuGroup,
   RootComponentRef,
-  triggerContextMenu
+  triggerContextMenu,
+  Plugin
 } from '@textbus/core'
 import {
   createElement,
@@ -19,12 +20,11 @@ import {
   VIEW_CONTAINER,
   Parser
 } from '@textbus/browser'
-import { I18n } from './i18n'
-import { Message } from './message'
-import { paragraphComponent } from './components/paragraph.component'
+import { I18n } from '../i18n'
+import { Message } from '../message'
+import { paragraphComponent } from '../components/paragraph.component'
 
-@Injectable()
-export class ContextMenu {
+export class ContextMenu implements Plugin {
   private eventFromSelf = false
   private subs: Subscription[] = []
 
@@ -34,16 +34,15 @@ export class ContextMenu {
   private menu!: HTMLElement
   private submenu!: HTMLElement
 
-  constructor(@Inject(VIEW_CONTAINER) private container: HTMLElement,
-              private injector: Injector,
-              private rootComponentRef: RootComponentRef,
-              private i18n: I18n,
-              private parser: Parser,
-              private message: Message,
-              private renderer: Renderer,
-              private commander: Commander,
-              private selection: Selection) {
-
+  setup(injector: Injector) {
+    const container = injector.get(VIEW_CONTAINER)
+    const i18n = injector.get(I18n)
+    const selection = injector.get(Selection)
+    const commander = injector.get(Commander)
+    const rootComponentRef = injector.get(RootComponentRef)
+    const message = injector.get(Message)
+    const parser = injector.get(Parser)
+    const renderer = injector.get(Renderer)
     this.subs.push(
       fromEvent(document, 'mousedown').subscribe(() => {
         this.hide()
@@ -60,17 +59,17 @@ export class ContextMenu {
             }
           }
         })
-        const menus = this.makeContextmenu(ev.target as HTMLElement)
+        const menus = ContextMenu.makeContextmenu(ev.target as HTMLElement, selection, renderer)
         const defaultMenus: ContextMenuConfig[] = [{
           iconClasses: ['textbus-icon-copy'],
-          label: this.i18n.get('editor.copy'),
-          disabled: this.selection.isCollapsed,
+          label: i18n.get('editor.copy'),
+          disabled: selection.isCollapsed,
           onClick: () => {
-            this.commander.copy()
+            commander.copy()
           }
         }, {
           iconClasses: ['textbus-icon-paste'],
-          label: this.i18n.get('editor.paste'),
+          label: i18n.get('editor.paste'),
           // disabled: true,
           onClick: () => {
             navigator.permissions.query({ name: 'clipboard-write' } as any).then((result) => {
@@ -83,7 +82,7 @@ export class ContextMenu {
                     }).then(text => {
                       const div = document.createElement('div')
                       div.innerHTML = text
-                      this.commander.paste(this.parser.parse(text, new Slot([
+                      commander.paste(parser.parse(text, new Slot([
                         ContentType.BlockComponent,
                         ContentType.Text,
                         ContentType.InlineComponent
@@ -92,22 +91,22 @@ export class ContextMenu {
                   })
                 })
               } else {
-                this.message.danger(this.i18n.get('editor.input.canNotAccessClipboard'))
+                message.danger(i18n.get('editor.input.canNotAccessClipboard'))
               }
             })
           }
         }, {
           iconClasses: ['textbus-icon-cut'],
-          label: this.i18n.get('editor.cut'),
-          disabled: this.selection.isCollapsed,
+          label: i18n.get('editor.cut'),
+          disabled: selection.isCollapsed,
           onClick: () => {
-            this.commander.cut()
+            commander.cut()
           }
         }, {
           iconClasses: ['textbus-icon-select'],
-          label: this.i18n.get('editor.selectAll'),
+          label: i18n.get('editor.selectAll'),
           onClick: () => {
-            this.selection.selectAll()
+            selection.selectAll()
           }
         }]
 
@@ -115,27 +114,27 @@ export class ContextMenu {
             ...menus,
             defaultMenus,
             [{
-              label: this.i18n.get('editor.insertParagraphBefore'),
+              label: i18n.get('editor.insertParagraphBefore'),
               iconClasses: ['textbus-icon-insert-paragraph-before'],
-              disabled: this.selection.commonAncestorComponent === this.rootComponentRef.component,
+              disabled: selection.commonAncestorComponent === rootComponentRef.component,
               onClick: () => {
-                const component = paragraphComponent.createInstance(this.injector)
-                const ref = this.selection.commonAncestorComponent
+                const component = paragraphComponent.createInstance(injector)
+                const ref = selection.commonAncestorComponent
                 if (ref) {
-                  this.commander.insertBefore(component, ref)
-                  this.selection.selectFirstPosition(component)
+                  commander.insertBefore(component, ref)
+                  selection.selectFirstPosition(component)
                 }
               }
             }, {
-              label: this.i18n.get('editor.insertParagraphAfter'),
+              label: i18n.get('editor.insertParagraphAfter'),
               iconClasses: ['textbus-icon-insert-paragraph-after'],
-              disabled: this.selection.commonAncestorComponent === this.rootComponentRef.component,
+              disabled: selection.commonAncestorComponent === rootComponentRef.component,
               onClick: () => {
-                const component = paragraphComponent.createInstance(this.injector)
-                const ref = this.selection.commonAncestorComponent
+                const component = paragraphComponent.createInstance(injector)
+                const ref = selection.commonAncestorComponent
                 if (ref) {
-                  this.commander.insertAfter(component, ref)
-                  this.selection.selectFirstPosition(component)
+                  commander.insertAfter(component, ref)
+                  selection.selectFirstPosition(component)
                 }
               }
             }]
@@ -155,14 +154,14 @@ export class ContextMenu {
     this.subs = []
   }
 
-  private makeContextmenu(source: HTMLElement) {
-    const startSlot = this.selection.startSlot
+  private static makeContextmenu(source: HTMLElement, selection: Selection, renderer: Renderer) {
+    const startSlot = selection.startSlot
     if (!startSlot) {
       return []
     }
     let component: ComponentInstance | null = null
     do {
-      const location = this.renderer.getLocationByNativeNode(source)
+      const location = renderer.getLocationByNativeNode(source)
       if (location) {
         const current = location.slot.getContentAtIndex(location.startIndex)
         if (location.endIndex - location.startIndex === 1 && typeof current === 'object') {
@@ -176,7 +175,7 @@ export class ContextMenu {
       }
     } while (source)
     if (!component) {
-      component = this.selection.commonAncestorComponent!
+      component = selection.commonAncestorComponent!
     }
     if (!component) {
       return []
@@ -256,12 +255,12 @@ export class ContextMenu {
         children: actions.map(item => {
           if (Array.isArray((item as ContextMenuGroup).submenu)) {
             return {
-              ...this.createMenuView(item, true),
+              ...ContextMenu.createMenuView(item, true),
               item
             }
           }
           return {
-            ...this.createMenuView(item),
+            ...ContextMenu.createMenuView(item),
             item
           }
         }).map(i => {
@@ -318,7 +317,7 @@ export class ContextMenu {
     return container
   }
 
-  private createMenuView(item: ContextMenuConfig, isHostNode = false) {
+  private static createMenuView(item: ContextMenuConfig, isHostNode = false) {
     const btn = createElement('button', {
       attrs: {
         type: 'button'

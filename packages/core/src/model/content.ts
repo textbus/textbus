@@ -21,14 +21,16 @@ export class Content {
         if (index > i && index < i + itemLength) {
           const segmenter = new Intl.Segmenter()
           const segments = segmenter.segment(item)
-          const points = [...segments]
           let offset = 0
-          for (const p of points) {
+          for (const p of segments) {
             const segmentLength = p.segment.length
             if (index > i + offset && index < i + offset + segmentLength) {
               return toEnd ? i + offset + segmentLength : i + offset
             }
             offset += segmentLength
+            if (i + offset > index) {
+              return index
+            }
           }
         }
       }

@@ -8,7 +8,6 @@ import { rootComponent, rootComponentLoader } from './root.component'
 import { Layout } from './layout'
 import { I18n } from './i18n'
 import { i18n_zh_CN } from './i18n/zh_CN'
-import { ContextMenu } from './context-menu'
 import { Dialog } from './dialog'
 import { Message } from './message'
 import { FileUploader, UploadConfig } from './file-uploader'
@@ -77,7 +76,6 @@ export class Editor extends Viewer {
           },
           deps: [Selection, Message, I18n]
         },
-          ContextMenu,
           Dialog,
           Message
         ]
@@ -113,7 +111,6 @@ export class Editor extends Viewer {
     }
     this.host.append(this.layout.container)
     return super.mount(this.layout.scroller).then(rootInjector => {
-      rootInjector.get(ContextMenu)
       if (this.destroyed) {
         return rootInjector
       }
@@ -145,7 +142,6 @@ export class Editor extends Viewer {
     }
     if (this.injector) {
       const types = [
-        ContextMenu,
         Dialog
       ]
 

@@ -87,7 +87,7 @@ import {
   strikeThroughTool, tableAddTool, tableRemoveTool, textAlignTool, textBackgroundTool, textIndentTool, ulTool,
   underlineTool, unlinkTool, ToolFactory, componentsTool, formatPainterTool
 } from './toolbar/_api'
-import { LinkJumpTipPlugin } from './plugins/_api'
+import { LinkJumpTipPlugin, ContextMenu } from './plugins/_api'
 
 export const defaultComponentLoaders: ComponentLoader[] = [
   imageCardComponentLoader,
@@ -210,7 +210,8 @@ export function createEditor(options: EditorOptions = {}) {
   return new Editor({
     plugins: [
       () => new Toolbar(defaultTools),
-      () => new LinkJumpTipPlugin()
+      () => new LinkJumpTipPlugin(),
+      () => new ContextMenu()
     ],
     ...defaultOptions,
     ...options
