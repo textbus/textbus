@@ -42,11 +42,17 @@ interface CaretStyle {
   fontSize: string
 }
 
+interface CompositionState {
+  slot: Slot
+  index: number
+  data: string
+}
 
 class ExperimentalCaret implements Caret {
   onPositionChange: Observable<CaretPosition | null>
   onStyleChange: Observable<CaretStyle>
   elementRef: HTMLElement
+  compositionState: CompositionState | null = null
 
   get rect() {
     return this.caret.getBoundingClientRect()
@@ -75,6 +81,12 @@ class ExperimentalCaret implements Caret {
   private oldRange: Range | null = null
 
   private isFixed = false
+
+  private compositionElement = createElement('span', {
+    styles: {
+      textDecoration: 'underline'
+    }
+  })
 
   constructor(
     private scheduler: Scheduler,
@@ -226,6 +238,14 @@ class ExperimentalCaret implements Caret {
       this.positionChangeEvent.next(null)
       return
     }
+    if (this.compositionState) {
+      const compositionElement = this.compositionElement
+      compositionElement.innerText = this.compositionState.data
+      nativeRange = nativeRange.cloneRange()
+      nativeRange.insertNode(compositionElement)
+      nativeRange.selectNodeContents(compositionElement)
+      nativeRange.collapse()
+    }
     const rect = getLayoutRectByRange(nativeRange)
     const { fontSize, lineHeight, color } = getComputedStyle(node)
 
@@ -299,6 +319,9 @@ export class MagicInput extends Input {
     return this._disabled
   }
 
+  private isSafari = isSafari()
+  private isMac = isMac()
+  private isWindows = isWindows()
   private _disabled = false
   private container = this.createEditableFrame()
 
@@ -309,10 +332,6 @@ export class MagicInput extends Input {
 
   private isFocus = false
   private nativeFocus = false
-
-  private isSafari = isSafari()
-  private isMac = isMac()
-  private isWindows = isWindows()
 
   private isSougouPinYin = false // 有 bug 版本搜狗拼音
 
@@ -522,6 +541,23 @@ export class MagicInput extends Input {
   }
 
   private handleInput(textarea: HTMLTextAreaElement) {
+    let startIndex = 0
+    this.subscription.add(
+      fromEvent<CompositionEvent>(textarea, 'compositionstart').subscribe(() => {
+        startIndex = this.selection.startOffset!
+      }),
+      fromEvent<CompositionEvent>(textarea, 'compositionupdate').subscribe(ev => {
+        this.caret.compositionState = {
+          slot: this.selection.startSlot!,
+          index: startIndex,
+          data: ev.data
+        }
+        this.caret.refresh(true)
+      }),
+      fromEvent<CompositionEvent>(textarea, 'compositionend').subscribe(() => {
+        this.caret.compositionState = null
+      })
+    )
     this.subscription.add(
       merge(
         fromEvent<InputEvent>(textarea, 'beforeinput').pipe(
@@ -567,7 +603,7 @@ export class MagicInput extends Input {
         display: 'block',
         height: '100%',
         position: 'relative',
-        top: this.isWindows ? '6px' : '0'
+        top: this.isWindows ? '3px' : '0'
       }
     }) as HTMLIFrameElement
   }

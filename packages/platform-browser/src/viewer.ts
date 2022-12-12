@@ -491,7 +491,7 @@ export class Viewer extends Starter {
     })
     const styleEl = document.createElement('style')
     docStyles.push(...(options.styleSheets || []))
-    editModeStyles.push(`#${this.id} *::selection{background-color: rgba(18, 150, 219, .2); color:inherit}`,
+    editModeStyles.push(`#${this.id} *::selection{background-color: rgba(18, 150, 219, .4); color:inherit}`,
       ...(options.editingStyleSheets || []))
 
     this.styleSheet = Viewer.cssMin(docStyles.join(''))
