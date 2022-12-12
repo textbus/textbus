@@ -624,6 +624,9 @@ export class Slot<T = any> {
     temporarySlot.toDelta().forEach(item => {
       slot.insert(item.insert, item.formats)
     })
+    if (this.isEmpty) {
+      this.cleanAttributes()
+    }
     return slot
   }
 

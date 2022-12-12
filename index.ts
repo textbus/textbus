@@ -32,7 +32,8 @@ const editor = createEditor({
   // autoHeight: true,
   zenCoding: true,
   // readonly: true,
-  // minHeight: '300px',
+  minHeight: '300px',
+  useContentEditable: true,
   theme: 'darkline',
   placeholder: '请输入内容……',
   // content: document.getElementById('template')?.innerHTML,
@@ -52,7 +53,7 @@ const editor = createEditor({
     const collaborateCursor = starter.get(CollaborateCursor)
     const layout = starter.get(Layout)
     const input = starter.get(Input)
-    input.disabled = true
+    // input.disabled = true
     //
     input.caret.correctScrollTop({
       onScroll: fromEvent(document, 'scroll'),

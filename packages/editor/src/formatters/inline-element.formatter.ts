@@ -17,10 +17,9 @@ export class InlineTagFormatLoader<T extends FormatValue> extends Matcher<T, For
 }
 
 export class InlineElementFormatter implements Formatter<boolean> {
-  columned = false
-
   constructor(public name: string,
-              public tagName: string) {
+              public tagName: string,
+              public columned: boolean) {
   }
 
   render(children: Array<VElement | VTextNode>) {
@@ -29,13 +28,13 @@ export class InlineElementFormatter implements Formatter<boolean> {
 }
 
 // 行内标签
-export const boldFormatter = new InlineElementFormatter('bold', 'strong')
-export const italicFormatter = new InlineElementFormatter('italic', 'em')
-export const strikeThroughFormatter = new InlineElementFormatter('strikeThrough', 'del')
-export const underlineFormatter = new InlineElementFormatter('underline', 'u')
-export const subscriptFormatter = new InlineElementFormatter('subscript', 'sub')
-export const superscriptFormatter = new InlineElementFormatter('superscript', 'sup')
-export const codeFormatter = new InlineElementFormatter('code', 'code')
+export const boldFormatter = new InlineElementFormatter('bold', 'strong', false)
+export const italicFormatter = new InlineElementFormatter('italic', 'em', false)
+export const strikeThroughFormatter = new InlineElementFormatter('strikeThrough', 'del', true)
+export const underlineFormatter = new InlineElementFormatter('underline', 'u', true)
+export const subscriptFormatter = new InlineElementFormatter('subscript', 'sub', false)
+export const superscriptFormatter = new InlineElementFormatter('superscript', 'sup', false)
+export const codeFormatter = new InlineElementFormatter('code', 'code', false)
 export const boldFormatLoader = new InlineTagFormatLoader(boldFormatter, {
   tags: ['strong', 'b'],
   styles: {
