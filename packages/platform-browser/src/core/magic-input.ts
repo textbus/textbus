@@ -58,6 +58,11 @@ class ExperimentalCaret implements Caret {
     return this.caret.getBoundingClientRect()
   }
 
+  compositionElement = createElement('span', {
+    styles: {
+      textDecoration: 'underline'
+    }
+  })
   private timer: any = null
   private caret: HTMLElement
   private oldPosition: CaretPosition | null = null
@@ -81,12 +86,6 @@ class ExperimentalCaret implements Caret {
   private oldRange: Range | null = null
 
   private isFixed = false
-
-  private compositionElement = createElement('span', {
-    styles: {
-      textDecoration: 'underline'
-    }
-  })
 
   constructor(
     private scheduler: Scheduler,
@@ -547,6 +546,10 @@ export class MagicInput extends Input {
         startIndex = this.selection.startOffset!
       }),
       fromEvent<CompositionEvent>(textarea, 'compositionupdate').subscribe(ev => {
+        if (ev.data === ' ') {
+          // 处理搜狗五笔不符合 composition 事件预期，会意外跳光标的问题
+          return
+        }
         this.caret.compositionState = {
           slot: this.selection.startSlot!,
           index: startIndex,
@@ -556,6 +559,7 @@ export class MagicInput extends Input {
       }),
       fromEvent<CompositionEvent>(textarea, 'compositionend').subscribe(() => {
         this.caret.compositionState = null
+        this.caret.compositionElement.parentNode?.removeChild(this.caret.compositionElement)
       })
     )
     this.subscription.add(
