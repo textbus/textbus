@@ -1,6 +1,6 @@
 {
   "name": "@textbus/editor",
-  "version": "3.0.0-alpha.50",
+  "version": "3.0.0-alpha.52",
   "description": "Textbus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
   "main": "./bundles/public-api.js",
   "module": "./bundles/public-api.js",
@@ -33,7 +33,7 @@
     "@tanbo/stream": "^1.1.9",
     "@textbus/collaborate": "^3.0.0-alpha.50",
     "@textbus/core": "^3.0.0-alpha.50",
-    "@textbus/platform-browser": "^3.0.0-alpha.50",
+    "@textbus/platform-browser": "^3.0.0-alpha.52",
     "katex": "^0.16.0",
     "prismjs": "^1.23.0"
   },
