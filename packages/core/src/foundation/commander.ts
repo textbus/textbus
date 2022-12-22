@@ -181,6 +181,14 @@ export interface TransformRule<ComponentState, SlotState> {
    * 创建组件状态的工厂函数
    */
   stateFactory?(): ComponentState
+
+  /**
+   * 当未被选中的组件转换且需要重新创建新组件时调用，如没有配置，或没有返回组件实例，则会按默认规则创建
+   * @param name
+   * @param slots
+   * @param state
+   */
+  existingComponentTransformer?(name: string, slots: Slot[], state: any): ComponentInstance | void
 }
 
 function deltaToSlots<T>(selection: Selection,
@@ -843,10 +851,20 @@ export class Commander {
         invokeListener(parentComponent, 'onSlotRemove', event)
         if (!event.isPrevented) {
           const deletedSlots = parentComponent.slots.cut(slotIndex + 1, slotIndex + count)
-          const afterComponent = this.translator.createComponentByData(parentComponent.name, {
-            state: typeof parentComponent.state === 'object' ? JSON.parse(JSON.stringify(parentComponent.state)) : parentComponent.state,
-            slots: deletedSlots
-          })
+          const newState = typeof parentComponent.state === 'object' ?
+            JSON.parse(JSON.stringify(parentComponent.state)) :
+            parentComponent.state
+
+          let afterComponent: ComponentInstance | null = null
+          if (typeof rule.existingComponentTransformer === 'function') {
+            afterComponent = rule.existingComponentTransformer(parentComponent.name, deletedSlots, newState) || null
+          }
+          if (!afterComponent) {
+            afterComponent = this.translator.createComponentByData(parentComponent.name, {
+              state: newState,
+              slots: deletedSlots
+            })
+          }
           this.insertAfter(afterComponent!, parentComponent)
         }
       }

@@ -391,7 +391,7 @@ export class Collaborate implements History {
               this.syncComponent(sharedComponent, component)
               slot.insert(component)
             }
-            if (this.selection.isSelected) {
+            if (this.selection.isSelected && tr.origin !== this.manager) {
               if (slot === this.selection.anchorSlot && this.selection.anchorOffset! > index) {
                 this.selection.setAnchor(slot, this.selection.anchorOffset! + length)
               }
@@ -401,9 +401,8 @@ export class Collaborate implements History {
             }
           } else if (action.delete) {
             const index = slot.index
-            slot.retain(slot.index)
             slot.delete(action.delete)
-            if (this.selection.isSelected) {
+            if (this.selection.isSelected && tr.origin !== this.manager) {
               if (slot === this.selection.anchorSlot && this.selection.anchorOffset! >= index) {
                 this.selection.setAnchor(slot, this.selection.startOffset! - action.delete)
               }
