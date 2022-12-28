@@ -1,2 +1,56 @@
 @import "./packages/editor/assets/icons/style.css";
 @import "./packages/editor/assets/index";
+
+.right {
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px;
+}
+
+.btn-list {
+  padding-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+
+  button {
+    margin: 3px;
+  }
+}
+
+.content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  textarea {
+    flex: 1;
+  }
+}
+
+.copy {
+  padding: 10px 0;
+}
+
+#avatar {
+  width: 100px;
+  span {
+    padding: 3px;
+    margin: 3px;
+    display: inline-block;
+  }
+}
+
+.container {
+  position: fixed;
+  padding: 20px;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+}
+
+#editor {
+  flex: 1;
+  height: 100%;
+}

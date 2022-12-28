@@ -56,6 +56,7 @@
   "devDependencies": {
     "@babel/core": "^7.16.5",
     "@babel/preset-env": "^7.16.5",
+    "@tanbo/json-parser": "^0.0.2",
     "@types/jest": "^27.0.3",
     "@types/node": "^18.11.11",
     "@types/prismjs": "^1.16.6",
