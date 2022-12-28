@@ -1,10 +1,8 @@
 import { createEditor, Editor, jumbotronComponent, listComponent, paragraphComponent } from '@textbus/editor'
 import { Commander, ComponentInstance, ContentType, RootComponentRef, Selection, Slot } from '@textbus/core'
-import { Injector } from '@tanbo/di'
 
 describe('Commander:transform 转换空白', () => {
   let editor: Editor
-  let injector: Injector
   let commander: Commander
   let selection: Selection
   beforeEach(async () => {
@@ -24,7 +22,7 @@ describe('Commander:transform 转换空白', () => {
    * [] => <p>[]</p>
    */
   test('转换为普通段落', () => {
-    const rootComponent = injector.get(RootComponentRef).component
+    const rootComponent = editor.get(RootComponentRef).component
     commander.transform({
       multipleSlot: false,
       target: paragraphComponent,
@@ -42,6 +40,7 @@ describe('Commander:transform 转换空白', () => {
       name: paragraphComponent.name,
       state: null,
       slots: [{
+        attributes: {},
         schema: [1, 2],
         state: null,
         content: ['\n'],
@@ -58,7 +57,7 @@ describe('Commander:transform 转换空白', () => {
    * [] => <ul><li>[]</li></li>
    */
   test('转换为普通列表', () => {
-    const rootComponent = injector.get(RootComponentRef).component
+    const rootComponent = editor.get(RootComponentRef).component
     commander.transform({
       multipleSlot: true,
       target: listComponent,
@@ -76,6 +75,7 @@ describe('Commander:transform 转换空白', () => {
       name: listComponent.name,
       state: 'ul',
       slots: [{
+        attributes: {},
         schema: [1, 2],
         state: null,
         content: ['\n'],
@@ -92,7 +92,6 @@ describe('Commander:transform 转换空白', () => {
 
 describe('Commander:transform 转换同级段落', () => {
   let editor: Editor
-  let injector: Injector
   let selection: Selection
   let commander: Commander
   beforeEach(async () => {
@@ -102,8 +101,8 @@ describe('Commander:transform 转换同级段落', () => {
     const container = document.createElement('div')
     await editor.mount(container)
 
-    selection = injector.get(Selection)
-    commander = injector.get(Commander)
+    selection = editor.get(Selection)
+    commander = editor.get(Commander)
     selection.usePaths({
       anchor: [0, 0, 0, 0],
       focus: [0, 1, 0, 0]
@@ -123,7 +122,7 @@ describe('Commander:transform 转换同级段落', () => {
    * <p>]</p>
    */
   test('转换为段落', () => {
-    const rootComponent = injector.get(RootComponentRef).component
+    const rootComponent = editor.get(RootComponentRef).component
     commander.transform({
       multipleSlot: false,
       target: paragraphComponent,
@@ -141,6 +140,7 @@ describe('Commander:transform 转换同级段落', () => {
       name: paragraphComponent.name,
       state: null,
       slots: [{
+        attributes: {},
         schema: [1, 2],
         state: null,
         content: ['\n'],
@@ -150,6 +150,7 @@ describe('Commander:transform 转换同级段落', () => {
       name: paragraphComponent.name,
       state: null,
       slots: [{
+        attributes: {},
         schema: [1, 2],
         state: null,
         content: ['\n'],
@@ -171,7 +172,7 @@ describe('Commander:transform 转换同级段落', () => {
    * </ul>
    */
   test('转换为普通列表', () => {
-    const rootComponent = injector.get(RootComponentRef).component
+    const rootComponent = editor.get(RootComponentRef).component
     selection.usePaths({
       anchor: [0, 0, 0, 0],
       focus: [0, 1, 0, 0]
@@ -197,11 +198,13 @@ describe('Commander:transform 转换同级段落', () => {
       name: listComponent.name,
       state: 'ul',
       slots: [{
+        attributes: {},
         schema: [1, 2],
         state: null,
         content: ['\n'],
         formats: {}
       }, {
+        attributes: {},
         schema: [1, 2],
         state: null,
         content: ['\n'],
@@ -217,7 +220,6 @@ describe('Commander:transform 转换同级段落', () => {
 
 describe('Commander:transform 转换复杂结构', () => {
   let editor: Editor
-  let injector: Injector
   let selection: Selection
   let commander: Commander
   beforeEach(async () => {
@@ -283,7 +285,7 @@ describe('Commander:transform 转换复杂结构', () => {
         return 'ul'
       }
     })
-    const rootComponent = injector.get(RootComponentRef).component
+    const rootComponent = editor.get(RootComponentRef).component
     const firstSlot = rootComponent.slots.get(0)!
     expect(firstSlot.length).toBe(3)
     expect((firstSlot.getContentAtIndex(0) as ComponentInstance).name).toBe(listComponent.name)
@@ -295,6 +297,7 @@ describe('Commander:transform 转换复杂结构', () => {
       focus: [0, 1, 1, 2]
     })
     expect(firstSlot.toJSON()).toEqual({
+      attributes: {},
       schema: [1, 2, 3],
       state: null,
       formats: {},
@@ -302,11 +305,13 @@ describe('Commander:transform 转换复杂结构', () => {
         name: listComponent.name,
         state: 'ul',
         slots: [{
+          attributes: {},
           schema: [1, 2],
           state: null,
           formats: {},
           content: ['aaa']
         }, {
+          attributes: {},
           schema: [1, 2],
           state: null,
           formats: {},
@@ -316,11 +321,13 @@ describe('Commander:transform 转换复杂结构', () => {
         name: listComponent.name,
         state: 'ul',
         slots: [{
+          attributes: {},
           schema: [1, 2],
           state: null,
           formats: {},
           content: ['ppp']
         }, {
+          attributes: {},
           schema: [1, 2],
           state: null,
           formats: {},
@@ -335,6 +342,7 @@ describe('Commander:transform 转换复杂结构', () => {
           backgroundSize: ''
         },
         slots: [{
+          attributes: {},
           schema: [1, 2, 3],
           state: null,
           formats: {},
@@ -342,6 +350,7 @@ describe('Commander:transform 转换复杂结构', () => {
             name: paragraphComponent.name,
             state: null,
             slots: [{
+              attributes: {},
               schema: [1, 2],
               state: null,
               formats: {},
@@ -351,6 +360,7 @@ describe('Commander:transform 转换复杂结构', () => {
             name: paragraphComponent.name,
             state: null,
             slots: [{
+              attributes: {},
               schema: [1, 2],
               state: null,
               formats: {},
@@ -406,7 +416,7 @@ describe('Commander:transform 转换复杂结构', () => {
         return 'ul'
       }
     })
-    const rootComponent = injector.get(RootComponentRef).component
+    const rootComponent = editor.get(RootComponentRef).component
     const firstSlot = rootComponent.slots.get(0)!
     expect(firstSlot.length).toBe(2)
     expect((firstSlot.getContentAtIndex(0) as ComponentInstance).name).toBe(listComponent.name)
@@ -417,12 +427,14 @@ describe('Commander:transform 转换复杂结构', () => {
     })
     expect(firstSlot.toJSON()).toEqual({
       schema: [1, 2, 3],
+      attributes: {},
       state: null,
       formats: {},
       content: [{
         name: listComponent.name,
         state: 'ul',
         slots: [{
+          attributes: {},
           schema: [1, 2],
           state: null,
           formats: {},
@@ -432,26 +444,31 @@ describe('Commander:transform 转换复杂结构', () => {
         name: listComponent.name,
         state: 'ul',
         slots: [{
+          attributes: {},
           schema: [1, 2],
           state: null,
           formats: {},
           content: ['aaa']
         }, {
+          attributes: {},
           schema: [1, 2],
           state: null,
           formats: {},
           content: ['ppp']
         }, {
+          attributes: {},
           schema: [1, 2],
           state: null,
           formats: {},
           content: ['test']
         }, {
+          attributes: {},
           schema: [1, 2],
           state: null,
           formats: {},
           content: ['test']
         }, {
+          attributes: {},
           schema: [1, 2],
           state: null,
           formats: {},
@@ -499,14 +516,15 @@ describe('Commander:transform 转换块和行内混合内容', () => {
     expect(editor.getJSON()).toEqual({
       'name': 'RootComponent', 'state': null, 'slots': [{
         'schema': [1, 2, 3],
+        attributes: {},
         'content': [{
           'name': 'ParagraphComponent',
           'state': null,
-          'slots': [{ 'schema': [1, 2], 'content': ['aaaaa'], 'formats': {}, 'state': null }]
+          'slots': [{ attributes: {}, 'schema': [1, 2], 'content': ['aaaaa'], 'formats': {}, 'state': null }]
         }, {
           'name': 'ParagraphComponent',
           'state': null,
-          'slots': [{ 'schema': [1, 2], 'content': ['bbbbb'], 'formats': {}, 'state': null }]
+          'slots': [{ attributes: {}, 'schema': [1, 2], 'content': ['bbbbb'], 'formats': {}, 'state': null }]
         }, {
           'name': 'JumbotronComponent',
           'state': {
@@ -518,14 +536,22 @@ describe('Commander:transform 转换块和行内混合内容', () => {
           },
           'slots': [{
             'schema': [1, 2, 3],
+            attributes: {},
             'content': [{
               'name': 'HeadingComponent',
               'state': 'h1',
-              'slots': [{ 'schema': [1, 2], 'content': ['Hello, world!'], 'formats': {}, 'state': null }]
+              'slots': [{
+                attributes: {},
+                'schema': [1, 2],
+                'content': ['Hello, world!'],
+                'formats': {},
+                'state': null
+              }]
             }, {
               'name': 'ParagraphComponent',
               'state': null,
               'slots': [{
+                attributes: {},
                 'schema': [1, 2],
                 'content': ['你好，我是 Textbus，一个给你带来全新体验的富文本开发框架。'],
                 'formats': {},
@@ -534,7 +560,14 @@ describe('Commander:transform 转换块和行内混合内容', () => {
             }, {
               'name': 'ListComponent',
               'state': 'ul',
-              'slots': [{ 'schema': [1, 2], 'content': ['现在我们开始吧！'], 'formats': {}, 'state': null }, {
+              'slots': [{
+                attributes: {},
+                'schema': [1, 2],
+                'content': ['现在我们开始吧！'],
+                'formats': {},
+                'state': null
+              }, {
+                attributes: {},
                 'schema': [1, 2],
                 'content': ['11111'],
                 'formats': {},
@@ -547,11 +580,11 @@ describe('Commander:transform 转换块和行内混合内容', () => {
         }, {
           'name': 'ParagraphComponent',
           'state': null,
-          'slots': [{ 'schema': [1, 2], 'content': ['ccccc'], 'formats': {}, 'state': null }]
+          'slots': [{ attributes: {}, 'schema': [1, 2], 'content': ['ccccc'], 'formats': {}, 'state': null }]
         }, {
           'name': 'ParagraphComponent',
           'state': null,
-          'slots': [{ 'schema': [1, 2], 'content': ['ddddd'], 'formats': {}, 'state': null }]
+          'slots': [{ attributes: {}, 'schema': [1, 2], 'content': ['ddddd'], 'formats': {}, 'state': null }]
         }],
         'formats': {},
         'state': null
