@@ -4,6 +4,7 @@ import { ComponentInstance, ComponentLiteral } from './component'
  * Textbus 内容管理类
  */
 export class Content {
+  private segmenter = new Intl.Segmenter()
   private data: Array<string | ComponentInstance> = []
 
   get length() {
@@ -19,19 +20,25 @@ export class Content {
       const itemLength = item.length
       if (typeof item === 'string') {
         if (index > i && index < i + itemLength) {
-          const segmenter = new Intl.Segmenter()
-          const segments = segmenter.segment(item)
-          let offset = 0
+          const offsetIndex = index - i
+          const startIndex = Math.max(0, offsetIndex - 15)
+          const endIndex = Math.min(startIndex + 30, item.length)
+
+          const fragment = item.slice(startIndex, endIndex)
+          const segments = this.segmenter.segment(fragment)
+
+          let offset = startIndex
           for (const p of segments) {
             const segmentLength = p.segment.length
             if (index > i + offset && index < i + offset + segmentLength) {
               return toEnd ? i + offset + segmentLength : i + offset
             }
             offset += segmentLength
-            if (i + offset > index) {
-              return index
+            if (i + offset >= index) {
+              break
             }
           }
+          return index
         }
       }
       i += itemLength
