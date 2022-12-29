@@ -1,4 +1,4 @@
-import { ComponentLiteral, Module, TextbusConfig } from '@textbus/core'
+import { ComponentLiteral, Module, Slot, TextbusConfig } from '@textbus/core'
 import { Observable } from '@tanbo/stream'
 
 import { FormatLoader, ComponentLoader, AttributeLoader } from '../dom-support/parser'
@@ -63,8 +63,15 @@ export interface Caret {
   correctScrollTop(scroller: Scroller): void
 }
 
+export interface CompositionState {
+  slot: Slot
+  index: number
+  data: string
+}
+
 export abstract class Input {
   abstract composition: boolean
+  abstract compositionState: CompositionState | null
   abstract onReady: Promise<void>
   abstract caret: Caret
   abstract disabled: boolean

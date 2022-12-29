@@ -220,6 +220,15 @@ export interface PasteEventData {
   text: string
 }
 
+export interface CompositionStartEventData {
+  index: number
+}
+
+export interface CompositionUpdateEventData {
+  index: number
+  data: string
+}
+
 export interface ContextMenuItem {
   iconClasses?: string[]
   label: string
@@ -287,6 +296,9 @@ export interface EventTypes {
 
   onGetRanges: (event: GetRangesEvent<ComponentInstance>) => void
   onDirtyViewClean: (event: Event<ComponentInstance, NativeNode>) => void
+  onCompositionStart: (event: Event<Slot, CompositionStartEventData>) => void
+  onCompositionUpdate: (event: Event<Slot, CompositionUpdateEventData>) => void
+  onCompositionEnd: (event: Event<Slot>) => void
 }
 
 class EventCache<T, K extends keyof T = keyof T> {
@@ -594,6 +606,13 @@ export function invokeListener(target: ComponentInstance, eventType: 'onContextM
 export function invokeListener(target: ComponentInstance, eventType: 'onPaste', event: Event<Slot, PasteEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onDirtyViewClean', event: Event<ComponentInstance, NativeNode>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onGetRanges', event: GetRangesEvent<ComponentInstance>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onGetRanges', event: GetRangesEvent<ComponentInstance>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onGetRanges', event: GetRangesEvent<ComponentInstance>): void
+// eslint-disable-next-line max-len
+export function invokeListener(target: ComponentInstance, eventType: 'onCompositionStart', event: Event<Slot, CompositionStartEventData>): void
+// eslint-disable-next-line max-len
+export function invokeListener(target: ComponentInstance, eventType: 'onCompositionUpdate', event: Event<Slot, CompositionUpdateEventData>): void
+export function invokeListener(target: ComponentInstance, eventType: 'onCompositionEnd', event: Event<Slot>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onSelected'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onUnselect'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onFocus'): void
@@ -768,3 +787,15 @@ export const onGetRanges = makeEventHook('onGetRanges')
  * 当 diff 视图时，检测到有脏节点时调用的勾子
  */
 export const onDirtyViewClean = makeEventHook('onDirtyViewClean')
+/**
+ * 当插槽组合输入前触发
+ */
+export const onCompositionStart = makeEventHook('onCompositionStart')
+/**
+ * 当插槽组合输入时触发
+ */
+export const onCompositionUpdate = makeEventHook('onCompositionUpdate')
+/**
+ * 当插槽组合输入结束触发
+ */
+export const onCompositionEnd = makeEventHook('onCompositionEnd')

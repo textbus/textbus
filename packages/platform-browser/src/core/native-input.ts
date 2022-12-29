@@ -1,8 +1,19 @@
 import { Injectable, Injector } from '@tanbo/di'
 import { distinctUntilChanged, filter, fromEvent, map, merge, Observable, Subject, Subscription } from '@tanbo/stream'
-import { Commander, ContentType, Controller, Keyboard, Scheduler, Selection, Slot } from '@textbus/core'
+import {
+  Commander,
+  CompositionStartEventData,
+  ContentType,
+  Controller,
+  Event,
+  invokeListener,
+  Keyboard,
+  Scheduler,
+  Selection,
+  Slot
+} from '@textbus/core'
 
-import { Caret, CaretPosition, Input, Scroller } from './types'
+import { Caret, CaretPosition, CompositionState, Input, Scroller } from './types'
 import { VIEW_DOCUMENT } from './injection-tokens'
 import { isSafari, isMac } from '../_utils/env'
 import { Parser } from '../dom-support/parser'
@@ -129,6 +140,7 @@ export class NativeInput extends Input {
   caret = new NativeCaret(this.scheduler)
 
   composition = false
+  compositionState: CompositionState | null = null
 
   onReady = Promise.resolve()
 
@@ -319,16 +331,39 @@ export class NativeInput extends Input {
   }
 
   private handleInput(input: HTMLElement) {
-
+    let startIndex = 0
+    let isCompositionEnd = false
     this.subscription.add(
       fromEvent(input, 'compositionstart').subscribe(() => {
         this.composition = true
+        this.compositionState = null
+        startIndex = this.selection.startOffset!
+        const startSlot = this.selection.startSlot!
+        const event = new Event<Slot, CompositionStartEventData>(startSlot, {
+          index: startIndex
+        })
+        invokeListener(startSlot.parent!, 'onCompositionStart', event)
+      }),
+      fromEvent<CompositionEvent>(input, 'compositionupdate').subscribe(ev => {
+        const startSlot = this.selection.startSlot!
+        this.compositionState = {
+          slot: startSlot,
+          index: startIndex,
+          data: ev.data
+        }
+        const event = new Event(startSlot, {
+          index: startIndex,
+          data: ev.data
+        })
+
+        invokeListener(startSlot.parent!, 'onCompositionUpdate', event)
       }),
       merge(
         fromEvent<InputEvent>(input, 'beforeinput').pipe(
           filter(ev => {
             ev.preventDefault()
             if (this.isSafari) {
+              isCompositionEnd = ev.inputType === 'insertFromComposition'
               return ev.inputType === 'insertText' || ev.inputType === 'insertFromComposition'
             }
             return !ev.isComposing && !!ev.data
@@ -339,6 +374,7 @@ export class NativeInput extends Input {
         ),
         this.isSafari ? new Observable<string>() : fromEvent<CompositionEvent>(input, 'compositionend').pipe(
           map(ev => {
+            isCompositionEnd = true
             ev.preventDefault()
             return ev.data
           }),
@@ -350,9 +386,18 @@ export class NativeInput extends Input {
         )
       ).subscribe(text => {
         this.composition = false
+        this.compositionState = null
         if (text) {
           this.commander.write(text)
         }
+        if (isCompositionEnd) {
+          const startSlot = this.selection.startSlot
+          if (startSlot) {
+            const event = new Event<Slot>(startSlot, null)
+            invokeListener(startSlot.parent!, 'onCompositionEnd', event)
+          }
+        }
+        isCompositionEnd = false
       })
     )
   }

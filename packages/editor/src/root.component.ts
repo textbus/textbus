@@ -16,7 +16,7 @@ import {
   onBreak,
   ComponentInstance,
   ComponentInitData,
-  useSelf, onViewInit
+  useSelf, onViewInit, onCompositionStart
 } from '@textbus/core'
 import { ComponentLoader, VIEW_DOCUMENT, EDITOR_OPTIONS, SlotParser } from '@textbus/platform-browser'
 
@@ -103,6 +103,10 @@ export const rootComponent = defineComponent({
 
     onDestroy(() => {
       subscription.unsubscribe()
+    })
+
+    onCompositionStart(() => {
+      rootNode.current?.setAttribute('data-placeholder', '')
     })
 
     return {

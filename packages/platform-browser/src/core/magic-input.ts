@@ -2,8 +2,11 @@ import { distinctUntilChanged, filter, fromEvent, map, merge, Observable, Subjec
 import { Injectable, Injector } from '@tanbo/di'
 import {
   Commander,
+  CompositionStartEventData,
   ContentType,
   Controller,
+  Event,
+  invokeListener,
   Keyboard,
   Scheduler,
   Selection,
@@ -12,9 +15,9 @@ import {
 
 import { createElement, getLayoutRectByRange } from '../_utils/uikit'
 import { Parser } from '../dom-support/parser'
-import { isMac, isSafari, isWindows } from '../_utils/env'
+import { isFirefox, isMac, isSafari, isWindows } from '../_utils/env'
 import { VIEW_MASK } from './injection-tokens'
-import { Caret, CaretPosition, Input, Scroller } from './types'
+import { Caret, CaretPosition, CompositionState, Input, Scroller } from './types'
 
 const iframeHTML = `
 <!DOCTYPE html>
@@ -40,12 +43,6 @@ interface CaretStyle {
   height: string
   lineHeight: string
   fontSize: string
-}
-
-interface CompositionState {
-  slot: Slot
-  index: number
-  data: string
 }
 
 class ExperimentalCaret implements Caret {
@@ -304,6 +301,7 @@ class ExperimentalCaret implements Caret {
 @Injectable()
 export class MagicInput extends Input {
   composition = false
+  compositionState: CompositionState | null = null
   onReady: Promise<void>
   caret = new ExperimentalCaret(this.scheduler, this.injector.get(VIEW_MASK))
 
@@ -319,6 +317,7 @@ export class MagicInput extends Input {
   }
 
   private isSafari = isSafari()
+  private isFirefox = isFirefox()
   private isMac = isMac()
   private isWindows = isWindows()
   private _disabled = false
@@ -476,7 +475,10 @@ export class MagicInput extends Input {
         this.doc.body.appendChild(div)
         div.focus()
         setTimeout(() => {
-          const html = div.innerHTML
+          let html = div.innerHTML
+          if (!html && text && this.isFirefox) {
+            html = text
+          }
           this.handlePaste(html, text)
 
           this.doc.body.removeChild(div)
@@ -543,31 +545,46 @@ export class MagicInput extends Input {
     let startIndex = 0
     this.subscription.add(
       fromEvent<CompositionEvent>(textarea, 'compositionstart').subscribe(() => {
+        this.composition = true
+        this.caret.compositionState = this.compositionState = null
         startIndex = this.selection.startOffset!
+        const startSlot = this.selection.startSlot!
+        const event = new Event<Slot, CompositionStartEventData>(startSlot, {
+          index: startIndex
+        })
+        invokeListener(startSlot.parent!, 'onCompositionStart', event)
       }),
       fromEvent<CompositionEvent>(textarea, 'compositionupdate').subscribe(ev => {
         if (ev.data === ' ') {
           // 处理搜狗五笔不符合 composition 事件预期，会意外跳光标的问题
           return
         }
-        this.caret.compositionState = {
-          slot: this.selection.startSlot!,
+        const startSlot = this.selection.startSlot!
+        this.caret.compositionState = this.compositionState = {
+          slot: startSlot,
           index: startIndex,
           data: ev.data
         }
         this.caret.refresh(true)
-      }),
-      fromEvent<CompositionEvent>(textarea, 'compositionend').subscribe(() => {
-        this.caret.compositionState = null
-        this.caret.compositionElement.parentNode?.removeChild(this.caret.compositionElement)
+        const event = new Event(startSlot, {
+          index: startIndex,
+          data: ev.data
+        })
+
+        invokeListener(startSlot.parent!, 'onCompositionUpdate', event)
       })
     )
+    let isCompositionEnd = false
     this.subscription.add(
       merge(
         fromEvent<InputEvent>(textarea, 'beforeinput').pipe(
           filter(ev => {
             ev.preventDefault()
+            if (this.isFirefox && ev.inputType === 'insertFromPaste') {
+              return false
+            }
             if (this.isSafari) {
+              isCompositionEnd = ev.inputType === 'insertFromComposition'
               return ev.inputType === 'insertText' || ev.inputType === 'insertFromComposition'
             }
             return !ev.isComposing && !!ev.data
@@ -578,6 +595,7 @@ export class MagicInput extends Input {
         ),
         this.isSafari ? new Observable<string>() : fromEvent<CompositionEvent>(textarea, 'compositionend').pipe(
           map(ev => {
+            isCompositionEnd = true
             ev.preventDefault()
             textarea.value = ''
             return ev.data
@@ -589,9 +607,20 @@ export class MagicInput extends Input {
           })
         )
       ).subscribe(text => {
+        this.composition = false
+        this.caret.compositionState = this.compositionState = null
+        this.caret.compositionElement.parentNode?.removeChild(this.caret.compositionElement)
         if (text) {
           this.commander.write(text)
         }
+        if (isCompositionEnd) {
+          const startSlot = this.selection.startSlot
+          if (startSlot) {
+            const event = new Event<Slot>(startSlot, null)
+            invokeListener(startSlot.parent!, 'onCompositionEnd', event)
+          }
+        }
+        isCompositionEnd = false
       })
     )
   }
