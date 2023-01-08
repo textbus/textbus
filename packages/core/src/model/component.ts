@@ -189,8 +189,9 @@ export interface ChangeController<T> {
   /**
    * 组件状态更新函数
    * @param fn
+   * @param record 是否记录此次状态变更
    */
-  update(fn: (draft: Draft<T>) => void): T
+  update(fn: (draft: Draft<T>) => void, record?: boolean): T
 }
 
 export class Ref<T> {

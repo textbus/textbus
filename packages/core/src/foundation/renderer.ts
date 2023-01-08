@@ -621,11 +621,9 @@ export class Renderer {
       listenerChanges.remove.forEach(i => {
         this.nativeRenderer.unListen(nativeNode, i[0], i[1])
       })
-      if (!this.controller.readonly) {
-        listenerChanges.add.forEach(i => {
-          this.nativeRenderer.listen(nativeNode, i[0], i[1])
-        })
-      }
+      listenerChanges.add.forEach(i => {
+        this.nativeRenderer.listen(nativeNode, i[0], i[1])
+      })
 
       this.renderedVNode.set(newVDom, true)
       this.nativeNodeCaches.set(newVDom, nativeNode)
@@ -891,11 +889,9 @@ export class Renderer {
     })
     vDom.classes.forEach(k => this.nativeRenderer.addClass(el, k))
 
-    if (!this.controller.readonly) {
-      Object.keys(vDom.listeners).forEach(type => {
-        this.nativeRenderer.listen(el, type, vDom.listeners[type])
-      })
-    }
+    Object.keys(vDom.listeners).forEach(type => {
+      this.nativeRenderer.listen(el, type, vDom.listeners[type])
+    })
     this.nativeNodeCaches.set(el, vDom)
     return el
   }

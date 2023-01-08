@@ -997,6 +997,12 @@ export class Commander {
       selection.setBaseAndExtent(slot, startIndex, slot, endIndex)
       if (slot.isEmpty) {
         startScope = selection.getPreviousPositionByPosition(slot, 0)
+        if (startScope.slot === slot && startScope.offset === startIndex) {
+          if (position) {
+            selection.setPosition(position.slot, position.offset)
+          }
+          break
+        }
         if (parentComponent.separable || parentComponent.slots.length === 1) {
           const delta = slot.toDelta()
           slots.unshift(...deltaToSlots(selection, slot, delta, rule, abstractSelection, 0))
@@ -1012,7 +1018,18 @@ export class Commander {
         }
       } else {
         startScope = selection.getPreviousPositionByPosition(slot, startIndex)
+        if (startScope.slot === slot && startScope.offset === startIndex) {
+          if (position) {
+            selection.setPosition(position.slot, position.offset)
+          }
+          break
+        }
         if (startIndex === endIndex) {
+          const componentInstances = slotsToComponents(this.injector, slots, rule)
+          slots = []
+          componentInstances.forEach(instance => {
+            this.insert(instance)
+          })
           continue
         }
         this.delete(deletedSlot => {

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@tanbo/di'
+import { Inject, Injectable, Optional } from '@tanbo/di'
 import { filter, map, Observable, Subject, Subscription } from '@tanbo/stream'
 import {
   AbstractSelection,
@@ -26,7 +26,8 @@ import {
   Transaction,
   UndoManager,
   createAbsolutePositionFromRelativePosition,
-  createRelativePositionFromTypeIndex
+  createRelativePositionFromTypeIndex,
+  Item
 } from 'yjs'
 
 const collaborateErrorFn = makeError('Collaborate')
@@ -89,6 +90,12 @@ interface UpdateItem {
   action(): void
 }
 
+export abstract class CustomUndoManagerConfig {
+  abstract captureTransaction?(arg0: Transaction): boolean
+
+  abstract deleteFilter?(arg0: Item): boolean
+}
+
 @Injectable()
 export class Collaborate implements History {
   onLocalChangesApplied: Observable<void>
@@ -137,7 +144,8 @@ export class Collaborate implements History {
               protected scheduler: Scheduler,
               protected registry: Registry,
               protected selection: Selection,
-              protected starter: Starter) {
+              protected starter: Starter,
+              @Optional() protected undoManagerConfig: CustomUndoManagerConfig) {
     this.onBack = this.backEvent.asObservable()
     this.onForward = this.forwardEvent.asObservable()
     this.onChange = this.changeEvent.asObservable()
@@ -148,8 +156,21 @@ export class Collaborate implements History {
   listen() {
     const root = this.yDoc.getMap('RootComponent')
     const rootComponent = this.rootComponentRef.component!
+    const undoManagerConfig = this.undoManagerConfig || {}
     const manager = new UndoManager(root, {
-      trackedOrigins: new Set<any>([this.yDoc])
+      trackedOrigins: new Set<any>([this.yDoc]),
+      captureTransaction(arg) {
+        if (undoManagerConfig.captureTransaction) {
+          return undoManagerConfig.captureTransaction(arg)
+        }
+        return true
+      },
+      deleteFilter(item: Item) {
+        if (undoManagerConfig.deleteFilter) {
+          return undoManagerConfig.deleteFilter(item)
+        }
+        return true
+      }
     })
     this.manager = manager
 

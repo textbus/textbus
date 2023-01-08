@@ -32,7 +32,7 @@ const editor = createEditor({
   // autoHeight: true,
   zenCoding: true,
   // readonly: true,
-  minHeight: '300px',
+  // minHeight: '600px',
   useContentEditable: true,
   theme: 'darkline',
   placeholder: '请输入内容……',
