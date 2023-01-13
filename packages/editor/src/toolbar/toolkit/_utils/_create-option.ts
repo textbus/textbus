@@ -16,6 +16,9 @@ export interface OptionConfig {
 
 export function createOption(config: OptionConfig) {
   return createElement('button', {
+    attrs: {
+      type: 'button'
+    },
     classes: ['textbus-toolbar-option', ...(config.disabled ? ['textbus-toolbar-option-disabled'] : [])],
     children: [
       config.iconClasses ? createElement('span', {
