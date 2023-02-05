@@ -11,7 +11,7 @@ API，且提供了更高的抽象层，使 Textbus 不仅易于上手，同时�
 ## 安装
 
 ```
-npm install @textbus/core @textbus/browser
+npm install @textbus/core @textbus/platform-browser
 ```
 
 ## 创建编辑器

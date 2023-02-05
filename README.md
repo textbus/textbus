@@ -4,7 +4,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/build-passing-green" alt="version:2.5.7">
-  <img src="https://img.shields.io/badge/npm-v2.5.7-red" alt="qq group:">
+  <img src="https://img.shields.io/badge/npm-v3.0.0-red" alt="qq group:">
   <img src="https://img.shields.io/badge/QQ Group-786923770-blue" alt="qq group:">
 </p>
 
@@ -41,12 +41,13 @@
 
 ### 模块
 
-|          模块          | 作用                                                                                    |
-|:--------------------:|:--------------------------------------------------------------------------------------|
-|    @textbus/core     | 核心模块，提供了组件、插槽、格式、属性的数据模型抽象和选区、格式变换、渲染、组件生命周期管理、编辑器控制、历史记录、快捷键管理、语法糖管理、输出转换等富文本核心能力的实现 |
-|   @textbus/browser   | 浏览器支持中间层，提供了基本的视图层，桥接了选区、光标、和 DOM 渲染能力                                                |
-| @textbus/collaborate | 协作支持模块，提供了基于 Yjs 的协作对接能力                                                              |
-|   @textbus/editor    | 官方实现的一个简易的编辑器，提供了基本的文档编辑能力                                                            |
+|            模块             | 作用                                                                                    |
+|:-------------------------:|:--------------------------------------------------------------------------------------|
+|       @textbus/core       | 核心模块，提供了组件、插槽、格式、属性的数据模型抽象和选区、格式变换、渲染、组件生命周期管理、编辑器控制、历史记录、快捷键管理、语法糖管理、输出转换等富文本核心能力的实现 |
+| @textbus/platform-browser | 浏览器支持中间层，提供了基本的视图层，桥接了选区、光标、和 DOM 渲染能力                                                |
+|   @textbus/collaborate    | 协作支持模块，提供了基于 Yjs 的协作对接能力                                                              |
+|      @textbus/editor      | 官方实现的一个简易的编辑器，提供了基本的文档编辑能力                                                            |
+|  @textbus/platform-node   | 适用于 node 后台运行的 Textbus 的实用工具集                                                         |
 
 
 ### 3.0 预览
@@ -127,12 +128,12 @@ editor.blur()
 
 ### 获取 HTML 内容
 ```ts
-const content = editor.getContents().content
+const html = editor.getHTML()
 ```
 
 ### 获取 JSON 内容
 ```ts
-const json = editor.getJSON().content
+const json = editor.getJSON()
 ```
 
 ### 替换内容
@@ -150,10 +151,10 @@ editor.replaceContent('')
 ```
 ## 本地开发
 
-Textbus 采用 lerna 作为多模块管理，全局安装 lerna。
+Textbus 采用 pnpm 作为多模块管理，全局安装 pnpm。
 
 ```
-npm install lerna -g
+npm install pnpm -g
 ```
 
 克隆 Textbus 仓库，并安装依赖。
@@ -161,7 +162,7 @@ npm install lerna -g
 ```
 git clone git@github.com:textbus/textbus.git
 cd textbus
-lerna bootstrap --hoist
+pnpm install
 ```
 
 启动开发环境。

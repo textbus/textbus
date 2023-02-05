@@ -77,6 +77,7 @@ class ExperimentalCaret implements Caret {
   private flashing = true
 
   private subs: Subscription[] = []
+  private subscription = new Subscription()
 
   private positionChangeEvent = new Subject<CaretPosition | null>()
   private styleChangeEvent = new Subject<CaretStyle>()
@@ -108,7 +109,7 @@ class ExperimentalCaret implements Caret {
       ]
     })
 
-    this.subs.push(
+    this.subscription.add(
       fromEvent(document, 'mousedown').subscribe(() => {
         this.flashing = false
       }),
@@ -163,6 +164,7 @@ class ExperimentalCaret implements Caret {
 
   destroy() {
     clearTimeout(this.timer)
+    this.subscription.unsubscribe()
     this.subs.forEach(i => i.unsubscribe())
   }
 
@@ -522,9 +524,11 @@ export class MagicInput extends Input {
         return !isWriting // || !this.textarea.value
       })).subscribe(ev => {
         let key = ev.key
-        const b = key === 'Process' && ev.code === 'Digit2'
+        const keys = ')!@#$%^Z&*('
+        const b = key === 'Process' && /Digit\d/.test(ev.code) && ev.shiftKey
         if (b) {
-          key = '@'
+          // 大小写锁定为大写 + 全角 + shift + 数字键，还存在问题
+          key = keys.charAt(+ev.code.substring(5))
           this.isSougouPinYin = true
           ev.preventDefault()
         }
