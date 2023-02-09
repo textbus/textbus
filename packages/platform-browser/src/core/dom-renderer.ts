@@ -121,7 +121,7 @@ export class DomRenderer implements NativeRenderer {
   }
 
   createTextNode(textContent: string): NativeNode {
-    return document.createTextNode(DomRenderer.replaceEmpty(textContent, '\u00a0'))
+    return document.createTextNode(DomRenderer.replaceEmpty(textContent))
   }
 
   createElement(name: string): NativeNode {
@@ -160,8 +160,9 @@ export class DomRenderer implements NativeRenderer {
   }
 
   syncTextContent(target: NativeNode, content: string) {
-    if (target.textContent !== content) {
-      target.textContent = content
+    const c = DomRenderer.replaceEmpty(content)
+    if (target.textContent !== c) {
+      target.textContent = c
     }
   }
 
@@ -208,11 +209,12 @@ export class DomRenderer implements NativeRenderer {
     document.execCommand('copy')
   }
 
-  static replaceEmpty(s: string, target: string) {
+  static replaceEmpty(s: string) {
+    const empty = '\u00a0'
     return s.replace(/\s\s+/g, str => {
       return ' ' + Array.from({
         length: str.length - 1
-      }).fill(target).join('')
-    }).replace(/^\s|\s$/g, target)
+      }).fill(empty).join('')
+    }).replace(/^\s|\s$/g, empty)
   }
 }
