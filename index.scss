@@ -33,6 +33,7 @@
 
 #avatar {
   width: 100px;
+
   span {
     padding: 3px;
     margin: 3px;
@@ -53,4 +54,13 @@
 #editor {
   flex: 1;
   height: 100%;
+}
+
+@media screen and (max-width: 1200px) {
+  .container {
+    display: block;
+  }
+  #editor {
+    height: auto;
+  }
 }

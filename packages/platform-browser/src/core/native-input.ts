@@ -1,5 +1,14 @@
 import { Injectable, Injector } from '@tanbo/di'
-import { distinctUntilChanged, filter, fromEvent, map, merge, Observable, Subject, Subscription } from '@tanbo/stream'
+import {
+  distinctUntilChanged,
+  filter,
+  fromEvent,
+  map,
+  merge,
+  Observable,
+  Subject,
+  Subscription,
+} from '@tanbo/stream'
 import {
   Commander,
   CompositionStartEventData,
@@ -7,7 +16,7 @@ import {
   Controller,
   Event,
   invokeListener,
-  Keyboard,
+  Keyboard, Renderer,
   Scheduler,
   Selection,
   Slot
@@ -172,6 +181,7 @@ export class NativeInput extends Input {
               private scheduler: Scheduler,
               private selection: Selection,
               private keyboard: Keyboard,
+              private renderer: Renderer,
               private commander: Commander,
               private controller: Controller) {
     super()
@@ -360,16 +370,40 @@ export class NativeInput extends Input {
       }),
       merge(
         fromEvent<InputEvent>(input, 'beforeinput').pipe(
-          filter(ev => {
-            ev.preventDefault()
-            if (this.isSafari) {
-              isCompositionEnd = ev.inputType === 'insertFromComposition'
-              return ev.inputType === 'insertText' || ev.inputType === 'insertFromComposition'
-            }
-            return !ev.isComposing && !!ev.data
-          }),
           map(ev => {
-            return ev.data as string
+            ev.preventDefault()
+            if (ev.inputType === 'insertCompositionText') {
+              return null
+            }
+            if (ev.inputType === 'insertReplacementText') {
+              const range = ev.getTargetRanges()[0]
+              const location = this.renderer.getLocationByNativeNode(range.startContainer)!
+              const startSlot = this.selection.startSlot!
+              this.selection.setBaseAndExtent(
+                startSlot,
+                location.startIndex + range.startOffset,
+                startSlot,
+                location.startIndex + range.endOffset)
+
+              this.commander.delete()
+              return ev.dataTransfer?.getData('text') || ev.data || null
+            }
+            isCompositionEnd = ev.inputType === 'insertFromComposition'
+            if (isCompositionEnd && this.composition) {
+              return null
+            }
+            if (this.isSafari) {
+              if (ev.inputType === 'insertText' || isCompositionEnd) {
+                return ev.data
+              }
+            }
+            if (!ev.isComposing && !!ev.data) {
+              return ev.data
+            }
+            return null
+          }),
+          filter(text => {
+            return text
           })
         ),
         this.isSafari ? new Observable<string>() : fromEvent<CompositionEvent>(input, 'compositionend').pipe(
