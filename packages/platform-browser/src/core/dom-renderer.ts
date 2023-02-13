@@ -103,13 +103,19 @@ export class DomRenderer implements NativeRenderer {
     xlinktype: 'xlink:type',
     'xlink:type': 'xlink:type'
   }
-  formElement: Record<string, string[]> = {
-    input: ['disabled', 'readonly', 'value'],
+  booleanProps: Record<string, string[]> = {
+    input: ['disabled', 'readonly'],
     select: ['disabled', 'readonly'],
-    option: ['disabled', 'selected', 'value'],
+    option: ['disabled', 'selected'],
     button: ['disabled'],
     video: ['controls', 'autoplay', 'loop', 'muted'],
     audio: ['controls', 'autoplay', 'loop', 'muted'],
+  }
+  valueProps: Record<string, string[]> = {
+    input: ['value'],
+    option: ['value'],
+    video: ['src'],
+    audio: ['src']
   }
 
   listen<T = any>(node: NativeNode, type: string, callback: (ev: T) => any) {
@@ -176,9 +182,14 @@ export class DomRenderer implements NativeRenderer {
       return
     }
     target.setAttribute(key, value)
-    const propNames = this.formElement[target.tagName.toLowerCase()]
-    if (propNames && propNames.includes(key)) {
+    const tag = target.tagName.toLowerCase()
+    const booleanTagNames = this.booleanProps[tag]
+    const valueTagNames = this.valueProps[tag]
+    if (booleanTagNames && booleanTagNames.includes(key)) {
       target[key] = Boolean(value)
+    }
+    if (valueTagNames && valueTagNames.includes(key)) {
+      target[key] = value
     }
   }
 
@@ -187,9 +198,14 @@ export class DomRenderer implements NativeRenderer {
       this.removeXlinkAttribute(target, this.possibleXlinkNames[key])
     }
     target.removeAttribute(key)
-    const propNames = this.formElement[target.tagName.toLowerCase()]
-    if (propNames && propNames.includes(key)) {
+    const tag = target.tagName.toLowerCase()
+    const booleanTagNames = this.booleanProps[tag]
+    const valueTagNames = this.valueProps[tag]
+    if (booleanTagNames && booleanTagNames.includes(key)) {
       target[key] = false
+    }
+    if (valueTagNames && valueTagNames.includes(key)) {
+      target[key] = ''
     }
   }
 
