@@ -24,7 +24,7 @@ import {
 
 import { Caret, CaretPosition, CompositionState, Input, Scroller } from './types'
 import { VIEW_DOCUMENT } from './injection-tokens'
-import { isSafari, isMac } from '../_utils/env'
+import { isSafari, isMac, isMobileBrowser } from '../_utils/env'
 import { Parser } from '../dom-support/parser'
 
 
@@ -173,6 +173,7 @@ export class NativeInput extends Input {
 
   private isSafari = isSafari()
   private isMac = isMac()
+  private isMobileBrowser = isMobileBrowser()
 
   private isSougouPinYin = false // 有 bug 版本搜狗拼音
 
@@ -390,7 +391,12 @@ export class NativeInput extends Input {
             }
             isCompositionEnd = ev.inputType === 'insertFromComposition'
             if (isCompositionEnd && this.composition) {
-              return null
+              if (this.isMobileBrowser) {
+                this.composition = false
+                this.compositionState = null
+              } else {
+                return null
+              }
             }
             if (this.isSafari) {
               if (ev.inputType === 'insertText' || isCompositionEnd) {
@@ -406,7 +412,10 @@ export class NativeInput extends Input {
             return text
           })
         ),
-        this.isSafari ? new Observable<string>() : fromEvent<CompositionEvent>(input, 'compositionend').pipe(
+        (!this.isMobileBrowser && this.isSafari) ? new Observable<string>() : fromEvent<CompositionEvent>(input, 'compositionend').pipe(
+          filter(() => {
+            return this.composition
+          }),
           map(ev => {
             isCompositionEnd = true
             ev.preventDefault()

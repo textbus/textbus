@@ -70,7 +70,13 @@ export interface CompositionState {
 }
 
 export abstract class Input {
+  /**
+   * @experimental
+   */
   abstract composition: boolean
+  /**
+   * @experimental
+   */
   abstract compositionState: CompositionState | null
   abstract onReady: Promise<void>
   abstract caret: Caret

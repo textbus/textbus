@@ -233,7 +233,7 @@ export class Viewer extends Starter {
   /**
    * 获取编辑器所有资源
    */
-  getResources() {
+  getResources(): Resources {
     return {
       styleSheets: this.options?.styleSheets || [],
       styleSheet: this.styleSheet,
