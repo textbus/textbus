@@ -8,6 +8,7 @@ import {
   onBreak,
   onContextMenu,
   onPaste,
+  RenderMode,
   Selection,
   Slot,
   SlotRender,
@@ -38,6 +39,7 @@ import 'prismjs/components/prism-jsx'
 import 'prismjs/components/prism-tsx'
 import { paragraphComponent } from './paragraph.component'
 import { I18n } from '../i18n'
+import { useComponentToolbar, useSelector } from './templates/_api'
 
 export const codeStyles = {
   keyword: 'keyword',
@@ -519,9 +521,31 @@ export const preComponent = defineComponent({
       ev.preventDefault()
     })
 
+    function emphasize() {
+      const { startSlot, endSlot } = selection
+      let startIndex = slots.indexOf(startSlot!)
+      const endIndex = slots.indexOf(endSlot!) + 1
+      for (; startIndex < endIndex; startIndex++) {
+        slots.get(startIndex)?.updateState(draft => {
+          draft.emphasize = true
+        })
+      }
+    }
+
+    function cancelEmphasize() {
+      const { startSlot, endSlot } = selection
+      let startIndex = slots.indexOf(startSlot!)
+      const endIndex = slots.indexOf(endSlot!) + 1
+      for (; startIndex < endIndex; startIndex++) {
+        slots.get(startIndex)?.updateState(draft => {
+          draft.emphasize = false
+        })
+      }
+    }
+
     onContextMenu(event => {
       event.useMenus([{
-        iconClasses: ['textbus-icon-terminal'],
+        iconClasses: ['textbus-icon-source-code'],
         label: i18n.get('components.preComponent.contextMenuLabel'),
         submenu: languageList.map(i => {
           return {
@@ -557,29 +581,11 @@ export const preComponent = defineComponent({
       }, {
         label: i18n.get('components.preComponent.emphasize'),
         disabled: !selection.isSelected,
-        onClick() {
-          const { startSlot, endSlot } = selection
-          let startIndex = slots.indexOf(startSlot!)
-          const endIndex = slots.indexOf(endSlot!) + 1
-          for (; startIndex < endIndex; startIndex++) {
-            slots.get(startIndex)?.updateState(draft => {
-              draft.emphasize = true
-            })
-          }
-        }
+        onClick: emphasize
       }, {
         label: i18n.get('components.preComponent.cancelEmphasize'),
         disabled: !selection.isSelected,
-        onClick() {
-          const { startSlot, endSlot } = selection
-          let startIndex = slots.indexOf(startSlot!)
-          const endIndex = slots.indexOf(endSlot!) + 1
-          for (; startIndex < endIndex; startIndex++) {
-            slots.get(startIndex)?.updateState(draft => {
-              draft.emphasize = false
-            })
-          }
-        }
+        onClick: cancelEmphasize
       }])
     })
 
@@ -651,8 +657,40 @@ export const preComponent = defineComponent({
       ev.preventDefault()
     })
 
+    const ComponentToolbar = useComponentToolbar()
+    const LanguageSelector = useSelector({
+      items: languageList.map(item => {
+        if (item.label) {
+          return item
+        }
+        return {
+          ...item,
+          label: i18n.get('components.preComponent.defaultLang')
+        }
+      }),
+      defaultValue: data.state?.lang
+    }, current => {
+      stateController.update(draft => {
+        draft.lang = current.value
+      })
+    })
+    const ThemeSelector = useSelector({
+      items: [{
+        label: 'Light',
+        value: 'light'
+      }, {
+        label: 'Dark',
+        value: 'dark'
+      }],
+      defaultValue: data.state?.theme
+    }, current => {
+      stateController.update(draft => {
+        draft.theme = current.value
+      })
+    })
+
     return {
-      render(slotRender: SlotRender): VElement {
+      render(slotRender: SlotRender, renderMode: RenderMode): VElement {
         let lang = ''
         languageList.forEach(i => {
           if (i.value === data.state!.lang) {
@@ -662,20 +700,35 @@ export const preComponent = defineComponent({
         const blockHighlight = slots.toArray().some(i => i.state?.emphasize === true)
         return (
           <pre class="tb-pre" lang={lang} theme={data.state!.theme || null}>
-            <div class="tb-code-line-number-bg" style={{
-              width: Math.max(String(slots.length).length, 2.5) + 'em'
-            }}/>
-            <div class={'tb-code-content' + (blockHighlight ? ' tb-color-content-highlight' : '')}>
-              {
-                slots.toArray().map(item => {
-                  return slotRender(item, children => {
-                    return <div
-                      class={(item.state?.emphasize ? 'tb-code-line-emphasize ' : '') + 'tb-code-line'}>{children}</div>
+            {
+              renderMode === RenderMode.Editing ?
+              <ComponentToolbar>
+                <LanguageSelector/>
+                <ThemeSelector/>
+                <button type="button" class="textbus-toolbar-button" onClick={emphasize}>
+                  {i18n.get('components.preComponent.emphasize')}
+                </button>
+                <button type="button" class="textbus-toolbar-button" onClick={cancelEmphasize}>
+                  {i18n.get('components.preComponent.cancelEmphasize')}
+                </button>
+              </ComponentToolbar> : null
+            }
+            <div class="tb-pre-content">
+              <div class="tb-code-line-number-bg " style={{
+                width: Math.max(String(slots.length).length, 2.5) + 'em'
+              }}/>
+              <div class={'tb-code-content' + (blockHighlight ? ' tb-color-content-highlight' : '')}>
+                {
+                  slots.toArray().map(item => {
+                    return slotRender(item, children => {
+                      return <div
+                        class={(item.state?.emphasize ? 'tb-code-line-emphasize ' : '') + 'tb-code-line'}>{children}</div>
+                    })
                   })
-                })
-              }
+                }
+              </div>
+              <span class="tb-pre-lang">{lang}</span>
             </div>
-            <span class="tb-pre-lang">{lang}</span>
           </pre>
         )
       }

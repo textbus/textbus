@@ -37,7 +37,7 @@ function initEditor() {
     useContentEditable: true,
     theme: 'darkline',
     placeholder: '请输入内容……',
-    // content: document.getElementById('template')?.innerHTML,
+    content: document.getElementById('template')?.innerHTML,
     // imports: [
     //   collaborateModule
     // ],

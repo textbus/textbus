@@ -18,15 +18,19 @@ code {
 }
 
 .tb-pre {
-  line-height: 1.418em;
-  display: flex;
+  position: relative
+}
+
+.tb-pre-content {
   border-radius: 5px;
   border: 1px solid #efefef;
+  line-height: 1.418em;
+  display: flex;
+  position: relative;
   word-break: break-all;
   word-wrap: break-word;
   white-space: pre-wrap;
   overflow: hidden;
-  position: relative
 }
 
 code, kbd, pre, samp {
