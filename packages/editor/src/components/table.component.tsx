@@ -1,6 +1,7 @@
 import { Injectable, Injector } from '@tanbo/di'
-import { ComponentLoader, SlotParser, CollaborateSelectionAwarenessDelegate } from '@textbus/platform-browser'
+import { CollaborateSelectionAwarenessDelegate, ComponentLoader, SlotParser } from '@textbus/platform-browser'
 import {
+  AbstractSelection,
   Commander,
   ComponentInitData,
   ComponentInstance,
@@ -8,28 +9,33 @@ import {
   defineComponent,
   onContextMenu,
   onSlotRemove,
+  Renderer,
+  RenderMode,
   Selection,
   Slot,
-  AbstractSelection,
   SlotRender,
   useContext,
   useSelf,
   useSlots,
   useState,
-  Renderer,
   VElement
 } from '@textbus/core'
 
 import { I18n } from '../i18n'
 import {
-  autoComplete, createCell, findFocusCell, selectCells,
+  autoComplete,
+  createCell,
+  findFocusCell,
+  selectCells,
   serialize,
   slotsToTable,
   TableCellPosition,
   TableCellSlot,
-  TableConfig, TableSlotState,
+  TableConfig,
+  TableSlotState,
   useTableMultipleRange
 } from './hooks/table-multiple-range'
+import { useComponentToolbar } from './templates/component-toolbar'
 
 export {
   createCell
@@ -195,6 +201,8 @@ export const tableComponent = defineComponent({
         }
       }])
     })
+
+    const ComponentToolbar = useComponentToolbar()
 
     const instance = {
       mergeCells() {
@@ -510,9 +518,9 @@ export const tableComponent = defineComponent({
 
         tableCells = slotsToTable(slots.toArray(), tableInfo.columnCount)
       },
-      render(slotRender: SlotRender): VElement {
+      render(slotRender: SlotRender, renderMode: RenderMode): VElement {
         tableCells = slotsToTable(slots.toArray(), tableInfo.columnCount)
-        return (
+        const table = (
           <table class={'tb-table' +
             (data.state!.useTextbusStyle ? ' tb-table-textbus' : '') +
             (hasMultipleCell ? ' td-table-multiple-select' : '')}>
@@ -535,6 +543,76 @@ export const tableComponent = defineComponent({
             </tbody>
           </table>
         )
+        return (
+          <div data-component={tableComponent.name}>
+            {
+              renderMode === RenderMode.Editing ?
+                <ComponentToolbar>
+                  <button type="button" title={i18n.get('components.tableComponent.addColumnToLeft')} class="textbus-toolbar-button"
+                          onClick={() => {
+                            instance.addColumnToLeft()
+                          }}>
+                    <span class="textbus-icon-table-add-column-left"/>
+                  </button>
+                  <button type="button" title={i18n.get('components.tableComponent.addColumnToRight')} class="textbus-toolbar-button"
+                          onClick={() => {
+                            instance.addColumnToRight()
+                          }}>
+                    <span class="textbus-icon-table-add-column-right"/>
+                  </button>
+                  <button type="button" title={i18n.get('components.tableComponent.insertRowBefore')} class="textbus-toolbar-button"
+                          onClick={() => {
+                            instance.addRowToTop()
+                          }}>
+                    <span class="textbus-icon-table-add-row-top"/>
+                  </button>
+                  <button type="button" title={i18n.get('components.tableComponent.insertRowAfter')} class="textbus-toolbar-button"
+                          onClick={() => {
+                            instance.addRowToBottom()
+                          }}>
+                    <span class="textbus-icon-table-add-row-bottom"/>
+                  </button>
+                  <span class="textbus-toolbar-split-line"/>
+                  <button type="button" title={i18n.get('components.tableComponent.deleteColumns')} class="textbus-toolbar-button"
+                          onClick={() => {
+                            instance.deleteColumns()
+                          }}>
+                    <span class="textbus-icon-table-delete-column-left"/>
+                  </button>
+                  <button type="button" title={i18n.get('components.tableComponent.deleteRows')} class="textbus-toolbar-button"
+                          onClick={() => {
+                            instance.deleteRows()
+                          }}>
+                    <span class="textbus-icon-table-delete-row-top"/>
+                  </button>
+                  <span class="textbus-toolbar-split-line"/>
+                  <button type="button" title={i18n.get('components.tableComponent.mergeCells')} class="textbus-toolbar-button"
+                          onClick={() => {
+                            instance.mergeCells()
+                          }}>
+                    <span class="textbus-icon-table-split-columns"/>
+                  </button>
+                  <button type="button" title={i18n.get('components.tableComponent.splitCells')} class="textbus-toolbar-button"
+                          onClick={() => {
+                            instance.splitCells()
+                          }}>
+                    <span class="textbus-icon-table"/>
+                  </button>
+                  <span class="textbus-toolbar-split-line"/>
+                  <button type="button" title={i18n.get('components.tableComponent.contextMenuRemoveTable')} class="textbus-toolbar-button"
+                          onClick={() => {
+                            commander.removeComponent(self)
+                          }}>
+                    <span class="textbus-icon-table-remove"/>
+                  </button>
+                </ComponentToolbar> : null
+
+            }
+            {
+              table
+            }
+          </div>
+        )
       }
     }
     return instance
@@ -543,9 +621,12 @@ export const tableComponent = defineComponent({
 
 export const tableComponentLoader: ComponentLoader = {
   match(element: HTMLElement): boolean {
-    return element.tagName === 'TABLE'
+    return element.tagName === 'TABLE' || element.tagName === 'DIV' && element.dataset.component === tableComponent.name
   },
   read(element: HTMLTableElement, injector: Injector, slotParser: SlotParser): ComponentInstance {
+    if (element.tagName === 'DIV') {
+      element = element.children[0] as HTMLTableElement
+    }
     const { tHead, tBodies, tFoot } = element
     const headers: Slot[][] = []
     const bodies: Slot[][] = []

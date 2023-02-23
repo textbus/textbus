@@ -93,6 +93,15 @@
   overflow: hidden;
 }
 
+.textbus-toolbar-split-line {
+  display: inline-block;
+  margin-left: 6px;
+  margin-right: 6px;
+  height: 14px;
+  width: 1px;
+  background-color: rgba(0, 0, 0, .2);
+}
+
 .textbus-toolbar-dropdown-menu {
   position: absolute;
   left: 0;
@@ -357,6 +366,7 @@
 
   &:hover {
     z-index: 4;
+
     .textbus-toolbar-submenu {
       height: auto;
       overflow: auto;
