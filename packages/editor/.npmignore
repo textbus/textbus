@@ -8,6 +8,7 @@ test/
 .eslintrc.js
 .editorconfig
 babel.config.js
+types.d.ts
 index.ts
 index.html
 webpack-build.config.js

@@ -21,9 +21,11 @@
     "skipLibCheck": true,
     "downlevelIteration": true,
     "jsx": "react",
-    "jsxFactory": "VElement.createElement"
+    "jsxFactory": "VElement.createElement",
+    "paths": {
+      "@textbus/platform-browser": ["../platform-browser/src/public-api.ts"],
+      "@textbus/core": ["../core/src/public-api.ts"]
+    }
   },
-  "include": [
-    "src/"
-  ]
+  "include": ["src"]
 }

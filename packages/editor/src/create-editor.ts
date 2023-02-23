@@ -88,6 +88,8 @@ import {
   underlineTool, unlinkTool, ToolFactory, componentsTool, formatPainterTool
 } from './toolbar/_api'
 import { LinkJumpTipPlugin, ContextMenu } from './plugins/_api'
+import editionStyles from './components/scss-editing/_index.scss'
+import docStyles from './components/scss/_index.scss'
 
 export const defaultComponentLoaders: ComponentLoader[] = [
   imageCardComponentLoader,
@@ -186,9 +188,9 @@ export const defaultOptions: EditorOptions = {
      [textbus-document=true] a {color: inherit;}
      [textbus-document=true] a {text-decoration: underline; color: #449fdb; cursor: text;}
      [textbus-document=true] {line-height: 1.5}`,
-    require('!to-string-loader!css-loader!sass-loader!./components/scss-editing/_index.scss')
+    editionStyles
   ],
-  styleSheets: [require('!to-string-loader!css-loader!sass-loader!./components/scss/_index.scss')],
+  styleSheets: [docStyles],
   components: defaultComponents,
   formatters: defaultFormatters,
   componentLoaders: defaultComponentLoaders,

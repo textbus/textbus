@@ -43,19 +43,41 @@ module.exports = {
       }]
     }, {
       test: /\.s?css$/,
+      exclude: [path.resolve(__dirname, './packages/editor/src/components')],
       use: ['style-loader', 'css-loader', {
         loader: 'postcss-loader',
         options: {
           postcssOptions: {
             plugins: [
               [
-                "postcss-preset-env",
+                'postcss-preset-env',
                 {
                   // Options
                 },
               ],
               [
-                "autoprefixer"
+                'autoprefixer'
+              ]
+            ],
+          }
+        }
+      }, 'sass-loader'],
+    }, {
+      test: /\.s?css$/,
+      include: [path.resolve(__dirname, './packages/editor/src/components')],
+      use: ['to-string-loader', 'css-loader', {
+        loader: 'postcss-loader',
+        options: {
+          postcssOptions: {
+            plugins: [
+              [
+                'postcss-preset-env',
+                {
+                  // Options
+                },
+              ],
+              [
+                'autoprefixer'
               ]
             ],
           }

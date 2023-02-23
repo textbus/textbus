@@ -197,9 +197,10 @@ core.destroy()
 
 ## Textbus 其它模块
 
-+ [browser 模块](https://www.npmjs.com/package/@textbus/browser) —— PC 端富文本编辑器中间层
++ [browser 模块](https://www.npmjs.com/package/@textbus/platform-browser) —— PC 端富文本编辑器中间层
 + [editor 模块](https://www.npmjs.com/package/@textbus/editor) —— PC 端富文本编辑器
 + [collaborate 模块](https://www.npmjs.com/package/@textbus/collaborate) —— 协作编辑支持模块
++ [node 模块](https://www.npmjs.com/package/@textbus/platform-node) —— node 后台支持工具包
 
 ### 官方文档
 
