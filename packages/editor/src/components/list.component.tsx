@@ -113,9 +113,6 @@ export const listComponentLoader: ComponentLoader = {
   match(element: HTMLElement): boolean {
     return element.tagName === 'OL' || element.tagName === 'UL'
   },
-  resources: {
-    styles: ['.tb-list-item {margin-top: 0.5em; margin-bottom: 0.5em}']
-  },
   read(element: HTMLElement, injector: Injector, slotParser: SlotParser): ComponentInstance {
     const slots: Slot[] = []
 

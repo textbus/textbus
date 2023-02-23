@@ -50,6 +50,8 @@
   },
   "gitHead": "cd75d4ae54f0976cbb87c654ab322b5d66f572e5",
   "devDependencies": {
-    "rimraf": "^3.0.2"
+    "rimraf": "^3.0.2",
+    "sass-loader": "^12.4.0",
+    "to-string-loader": "^1.2.0"
   }
 }

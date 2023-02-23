@@ -138,35 +138,6 @@ export const imageCardComponent = defineComponent({
 })
 
 export const imageCardComponentLoader: ComponentLoader = {
-  resources: {
-    styles: [
-      `
-tb-image-card {
-  display: block;
-  margin-top: 10px;
-  margin-bottom: 20px;
-  box-shadow: 1px 2px 3px rgba(0, 0, 0, .1);
-  border-radius: 3px;
-  overflow: hidden;
-}
-tb-image-card > div > img {
-  width: 100%;
-  display: block;
-  min-height: 40px;
-}
-tb-image-card > p {
-  margin: 0;
-  text-align: center;
-  font-size: 15px;
-  color: #aaa;
-  height: 24px;
-  line-height: 24px;
-  padding: 6px 20px;
-  box-sizing: content-box;
-}
-`
-    ]
-  },
   match(element: HTMLElement): boolean {
     return element.nodeName.toLowerCase() === 'tb-image-card'
   },

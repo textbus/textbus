@@ -1,0 +1,30 @@
+.tb-timeline-icon:hover {
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
+.tb-timeline-add {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 0;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.tb-timeline-add:before {
+  content: "+";
+}
+
+.tb-timeline-add:hover {
+  transform: scale(1.2);
+}
+
+.tb-timeline-item:hover .tb-timeline-add {
+  display: block;
+}
+
+.tb-timeline-content {
+  overflow: hidden;
+}

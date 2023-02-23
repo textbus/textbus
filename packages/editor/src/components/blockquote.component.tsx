@@ -53,7 +53,7 @@ export const blockquoteComponent = defineComponent({
 export const blockquoteComponentLoader: ComponentLoader = {
   resources: {
     // eslint-disable-next-line max-len
-    styles: ['.tb-blockquote {padding: 10px 15px; border-left: 10px solid #dddee1; background-color: #f8f8f9; margin: 1em 0; border-radius: 4px;} .tb-blockquote>*:first-child{margin-top:0}blockquote>*:last-child{margin-bottom:0}']
+    styles: ['']
   },
   match(element: HTMLElement): boolean {
     return element.tagName === 'BLOCKQUOTE'

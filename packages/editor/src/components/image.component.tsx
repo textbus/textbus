@@ -294,9 +294,6 @@ export const imageComponent = defineComponent({
 })
 
 export const imageComponentLoader: ComponentLoader = {
-  resources: {
-    styles: ['.tb-img{max-width: 100%}']
-  },
   match(element: HTMLElement): boolean {
     return element.tagName === 'IMG'
   },

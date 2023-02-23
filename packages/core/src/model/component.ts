@@ -607,8 +607,6 @@ export function invokeListener(target: ComponentInstance, eventType: 'onContextM
 export function invokeListener(target: ComponentInstance, eventType: 'onPaste', event: Event<Slot, PasteEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onDirtyViewClean', event: Event<ComponentInstance, NativeNode>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onGetRanges', event: GetRangesEvent<ComponentInstance>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onGetRanges', event: GetRangesEvent<ComponentInstance>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onGetRanges', event: GetRangesEvent<ComponentInstance>): void
 // eslint-disable-next-line max-len
 export function invokeListener(target: ComponentInstance, eventType: 'onCompositionStart', event: Event<Slot, CompositionStartEventData>): void
 // eslint-disable-next-line max-len

@@ -185,8 +185,10 @@ export const defaultOptions: EditorOptions = {
     `[textbus-document=true] [style*=color]:not([style*=background-color])
      [textbus-document=true] a {color: inherit;}
      [textbus-document=true] a {text-decoration: underline; color: #449fdb; cursor: text;}
-     [textbus-document=true] {line-height: 1.5}`
+     [textbus-document=true] {line-height: 1.5}`,
+    require('!to-string-loader!css-loader!sass-loader!./components/scss-editing/_index.scss')
   ],
+  styleSheets: [require('!to-string-loader!css-loader!sass-loader!./components/scss/_index.scss')],
   components: defaultComponents,
   formatters: defaultFormatters,
   componentLoaders: defaultComponentLoaders,

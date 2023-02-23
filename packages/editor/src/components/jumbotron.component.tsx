@@ -147,26 +147,6 @@ export const jumbotronComponent = defineComponent({
 })
 
 export const jumbotronComponentLoader: ComponentLoader = {
-  resources: {
-    styles: [
-      `
-tb-jumbotron {
-  display: block;
-  min-height: 200px;
-  margin-bottom: 1em;
-  background-color: #eee;
-  padding: 20px;
-  position: relative;
-  border-radius: 4px;
-  overflow: hidden;
-}
-`
-    ],
-    editModeStyles: [
-      // eslint-disable-next-line max-len
-      '.tb-jumbotron-setting { display:none; border-radius: 4px; font-size: 14px;position: absolute; right: 10px; top: 10px; background: #fff; box-shadow: 1px 2px 3px rgba(0,0,0,.1); color: #333; border: 0; outline: none; cursor: pointer;}.tb-jumbotron-setting:hover{color: #1296db} tb-jumbotron:hover .tb-jumbotron-setting{display:block} '
-    ]
-  },
   match(element: HTMLElement): boolean {
     return element.nodeName.toLowerCase() === 'tb-jumbotron'
   },

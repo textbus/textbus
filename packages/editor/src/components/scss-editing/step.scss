@@ -1,0 +1,23 @@
+.tb-step-item-add {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: none;
+  cursor: pointer;
+}
+
+.tb-step-item-add:hover {
+  transform: scale(1.2);
+}
+
+.tb-step-item-add:after {
+  content: "+"
+}
+
+.tb-step-item:hover .tb-step-item-add {
+  display: block;
+}
+
+.tb-step-item-icon {
+  cursor: pointer;
+}

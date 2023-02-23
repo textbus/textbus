@@ -1,0 +1,25 @@
+tb-word-explain {
+  position: relative;
+}
+
+tb-word-explain:hover .tb-word-explain-close {
+  display: block;
+}
+
+.tb-word-explain-close {
+  display: none;
+  position: absolute;
+  right: 10px;
+  top: 0;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.tb-word-explain-close:hover {
+  transform: scale(1.2);
+}
+
+.tb-word-explain-close:before {
+  content: "\u00d7";
+}

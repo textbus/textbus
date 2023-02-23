@@ -11,7 +11,7 @@ export function preToolConfigFactory(injector: Injector): SelectToolConfig {
   const commander = injector.get(Commander)
   const selection = injector.get(Selection)
   return {
-    iconClasses: ['textbus-icon-terminal'],
+    iconClasses: ['textbus-icon-source-code'],
     tooltip: i18n.get('plugins.toolbar.preTool.tooltip'),
     mini: true,
     options: [{

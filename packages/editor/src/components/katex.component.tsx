@@ -120,11 +120,6 @@ export const katexComponent = defineComponent({
 })
 
 export const katexComponentLoader: ComponentLoader = {
-  resources: {
-    styles: [
-      'tb-katex, .katex-display, .katex, .katex-html{display: inline-block} tb-katex{margin-left: 0.5em; margin-right: 0.5em}'
-    ]
-  },
   match(element: HTMLElement): boolean {
     return element.tagName.toLowerCase() === 'tb-katex'
   },

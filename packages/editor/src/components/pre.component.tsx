@@ -684,49 +684,6 @@ export const preComponent = defineComponent({
 })
 
 export const preComponentLoader: ComponentLoader = {
-  resources: {
-    styles: [
-      /* eslint-disable */
-      `
-    code, .tb-pre {background-color: #fefefe;}
-   .tb-pre code {padding: 0; border: none; background: none; border-radius: 0; vertical-align: inherit;}
-   code {padding: 1px 5px; border-radius: 3px; vertical-align: middle; border: 1px solid rgba(0, 0, 0, .08);}
-   .tb-pre {line-height: 1.418em; display: flex; border-radius: 5px; border: 1px solid #efefef; word-break: break-all; word-wrap: break-word; white-space: pre-wrap; overflow: hidden; position: relative}
-   code, kbd, pre, samp {font-family: Microsoft YaHei Mono, Menlo, Monaco, Consolas, Courier New, monospace;}
-   .tb-code-line-number-bg { background-color: #f9f9f9; border-right: 1px solid #eee; width: 3em; }
-   .tb-code-content { flex: 1; padding: 15px 0 15px 0; counter-reset: codeNum; }
-   .tb-color-content-highlight { background-color: #eee }
-   .tb-color-content-highlight .tb-code-line { opacity: 0.56; }
-   .tb-code-line { position: relative; display: block; padding: 0 15px 0 0.5em}
-   .tb-code-line::before { counter-increment: codeNum; content: counter(codeNum); position: absolute; left: -5.3em; top: 0; width: 4em; text-align: right; padding: 0 0.8em 0 0.5em; overflow: hidden; white-space: nowrap; color: #aeaeae;}
-   .tb-color-content-highlight .tb-code-line-emphasize { opacity: 1; background-color: #fefefe}
-   .tb-pre-lang { position: absolute; right: 0; top: 0; opacity: 0.5; pointer-events: none; font-size: 13px; padding: 4px 10px;}
-  .tb-hl-keyword { font-weight: bold; }
-  .tb-hl-string { color: rgb(221, 17, 68) }
-  .tb-hl-function { color: rgb(0, 134, 179); }
-  .tb-hl-number { color: #388138 }
-  .tb-hl-tag { color: rgb(0, 0, 128) }
-  .tb-hl-comment { color: rgb(153, 153, 136); font-style: italic; }
-  .tb-hl-boolean { color: #388138; font-weight: bold }
-  .tb-hl-builtin { color: rgb(0, 134, 179); }
-  .tb-hl-regex { color: #f60; }
-  .tb-hl-attr-name { color: rgb(0, 134, 179); }
-  .tb-hl-attr-value { color: rgb(221, 17, 68) }
-  .tb-hl-class-name { color: rgb(0, 134, 179); font-weight: bold }
-  .tb-hl-selector { color: rgb(0, 134, 179); font-weight: bold }
-  .tb-pre[theme=dark] {color: #a9aeb2; background-color: #1c2838; border-color: #353535 }
-  .tb-pre[theme=dark] .tb-color-content-highlight { background-color: #263140;}
-  .tb-pre[theme=dark] .tb-color-content-highlight .tb-code-line-emphasize { opacity: 1; background-color: #1c2838}
-  .tb-pre[theme=dark] .tb-hl-keyword {color: rgb(0, 134, 179);}
-  .tb-pre[theme=dark] .tb-hl-tag {color: rgb(0, 134, 179);}
-  .tb-pre[theme=dark] .tb-hl-comment {color: #4c5156;}
-  .tb-pre[theme=dark] .tb-hl-string {color: #ce5a70;}
-  .tb-pre[theme=dark] .tb-hl-attr-value {color: #ce5a70;}
-  .tb-pre[theme=dark] .tb-hl-regex {color: #af741d;}
-  .tb-pre[theme=dark] .tb-hl-selector {color: #ce5a70; font-weight: normal}
-  .tb-pre[theme=dark] .tb-code-line::before { color: #536171}
-  .tb-pre[theme=dark] .tb-code-line-number-bg {background-color: #2d3a48; border-right-color: #292929; }`]
-  },
   match(element: HTMLElement): boolean {
     return element.tagName === 'PRE'
   },
