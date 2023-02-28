@@ -26,7 +26,7 @@ import { Caret, CaretPosition, CompositionState, Input, Scroller } from './types
 import { VIEW_DOCUMENT } from './injection-tokens'
 import { isSafari, isMac, isMobileBrowser } from '../_utils/env'
 import { Parser } from '../dom-support/parser'
-
+import { getLayoutRectByRange } from '../_utils/uikit'
 
 class NativeCaret implements Caret {
   onPositionChange: Observable<CaretPosition | null>
@@ -36,7 +36,7 @@ class NativeCaret implements Caret {
     if (range) {
       const r = range.cloneRange()
       r.collapse(true)
-      const rect = r.getBoundingClientRect()
+      const rect = getLayoutRectByRange(r)
       this.positionChangeEvent.next({
         left: rect.left,
         top: rect.top,
@@ -55,7 +55,7 @@ class NativeCaret implements Caret {
     if (this.nativeRange) {
       const range = this.nativeRange.cloneRange()
       range.collapse(true)
-      return range.getBoundingClientRect()
+      return getLayoutRectByRange(range)
     }
     return {
       left: 0,
