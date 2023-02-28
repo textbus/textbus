@@ -155,9 +155,11 @@ export class NativeInput extends Input {
 
   set disabled(b: boolean) {
     this._disabled = b
-    if (b && !this.controller.readonly) {
-      this.documentView.contentEditable = b ? 'false' : 'true'
+    if (this.controller.readonly) {
+      this.documentView.contentEditable = 'false'
+      return
     }
+    this.documentView.contentEditable = b ? 'false' : 'true'
   }
 
   get disabled() {
