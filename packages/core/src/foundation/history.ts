@@ -171,71 +171,74 @@ export class LocalHistory extends History {
 
   private record() {
     let beforePaths = this.selection.getPaths()
-    this.scheduler.onDocChanged.pipe(map(i => {
-      const operations: Operation[] = []
-      for (const item of i) {
-        if (item.from !== ChangeOrigin.Local) {
-          continue
-        }
-        const operation = item.operation
-        const apply = operation.apply.filter(i => {
-          return i.type !== 'apply' || i.record
-        })
-        const unApply = operation.unApply.filter(i => {
-          return i.type !== 'apply' || i.record
-        })
-        if (apply.length && unApply.length) {
-
-          operations.push({
-            path: operation.path,
-            apply,
-            unApply
+    this.subscription = this.scheduler.onLocalChangeBefore.subscribe(() => {
+      beforePaths = this.selection.getPaths()
+    }).add(this.scheduler.onDocChanged.pipe(map(i => {
+        const operations: Operation[] = []
+        for (const item of i) {
+          if (item.from !== ChangeOrigin.Local) {
+            continue
+          }
+          const operation = item.operation
+          const apply = operation.apply.filter(i => {
+            return i.type !== 'apply' || i.record
           })
-        }
-      }
-      return operations
-    })).subscribe((operations) => {
-      if (!operations.length) {
-        return
-      }
-      this.historySequence.length = this.index
-      this.index++
-      const afterPaths = this.selection.getPaths()
-      this.historySequence.push({
-        operations: operations.map(i => {
-          return {
-            path: [...i.path],
-            apply: i.apply.map(j => {
-              if (j.type === 'insert' || j.type === 'insertSlot') {
-                return {
-                  ...j,
-                  ref: null
-                } as any
-              }
-              return j
-            }),
-            unApply: i.unApply.map(j => {
-              if (j.type === 'insert' || j.type === 'insertSlot') {
-                return {
-                  ...j,
-                  ref: null
-                } as any
-              }
-              return j
+          const unApply = operation.unApply.filter(i => {
+            return i.type !== 'apply' || i.record
+          })
+          if (apply.length && unApply.length) {
+
+            operations.push({
+              path: operation.path,
+              apply,
+              unApply
             })
           }
-        }),
-        beforePaths,
-        afterPaths
+        }
+        return operations
+      })).subscribe((operations) => {
+        if (!operations.length) {
+          return
+        }
+        this.historySequence.length = this.index
+        this.index++
+        const afterPaths = this.selection.getPaths()
+        this.historySequence.push({
+          operations: operations.map(i => {
+            return {
+              path: [...i.path],
+              apply: i.apply.map(j => {
+                if (j.type === 'insert' || j.type === 'insertSlot') {
+                  return {
+                    ...j,
+                    ref: null
+                  } as any
+                }
+                return j
+              }),
+              unApply: i.unApply.map(j => {
+                if (j.type === 'insert' || j.type === 'insertSlot') {
+                  return {
+                    ...j,
+                    ref: null
+                  } as any
+                }
+                return j
+              })
+            }
+          }),
+          beforePaths,
+          afterPaths
+        })
+        if (this.historySequence.length > this.stackSize) {
+          this.historySequence.shift()
+          this.index--
+        }
+        beforePaths = afterPaths
+        this.pushEvent.next()
+        this.changeEvent.next()
       })
-      if (this.historySequence.length > this.stackSize) {
-        this.historySequence.shift()
-        this.index--
-      }
-      beforePaths = afterPaths
-      this.pushEvent.next()
-      this.changeEvent.next()
-    })
+    )
   }
 
   private apply(historyItem: HistoryItem, back: boolean) {

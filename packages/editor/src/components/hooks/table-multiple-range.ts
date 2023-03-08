@@ -1,10 +1,12 @@
 import { debounceTime, merge, Subscription } from '@tanbo/stream'
-import { createElement, VIEW_CONTAINER, Rect } from '@textbus/platform-browser'
+import { createElement, Rect, VIEW_CONTAINER } from '@textbus/platform-browser'
 import {
-  ChangeController, ComponentInstance, GetRangesEvent,
+  ChangeController,
+  ComponentInstance,
   ContentType,
-  onGetRanges,
+  GetRangesEvent,
   onDestroy,
+  onGetRanges,
   Renderer,
   Selection,
   Slot,
@@ -62,6 +64,7 @@ export interface TableCellRect {
 export function createCell(colspan = 1, rowspan = 1) {
   return new Slot([
     ContentType.InlineComponent,
+    ContentType.BlockComponent,
     ContentType.Text
   ], {
     rowspan,

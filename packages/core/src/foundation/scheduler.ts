@@ -1,5 +1,5 @@
 import { Injectable } from '@tanbo/di'
-import { map, microTask, Observable, Subject, Subscription } from '@tanbo/stream'
+import { map, microTask, Observable, Subject, Subscription, take } from '@tanbo/stream'
 
 import { ComponentInstance, invokeListener, Operation } from '../model/_api'
 import { RootComponentRef } from './_injection-tokens'
@@ -49,6 +49,11 @@ export class Scheduler {
    */
   onDocChanged: Observable<ChangeItem[]>
 
+  /** 当文档在本地发生第一次变更 */
+  onDocFirstChangeFromLocal: Observable<void>
+
+  onLocalChangeBefore: Observable<void>
+
   private _lastChangesHasLocalUpdate = true
   private _lastChangesHasRemoteUpdate = false
   private changeFromRemote = false
@@ -57,6 +62,7 @@ export class Scheduler {
 
   private docChangedEvent = new Subject<ChangeItem[]>()
   private docChangeEvent = new Subject<void>()
+  private localChangeBeforeEvent = new Subject<void>()
   private subs: Subscription[] = []
 
   constructor(private rootComponentRef: RootComponentRef,
@@ -64,6 +70,8 @@ export class Scheduler {
               private renderer: Renderer) {
     this.onDocChanged = this.docChangedEvent.asObservable()
     this.onDocChange = this.docChangeEvent.asObservable()
+    this.onLocalChangeBefore = this.localChangeBeforeEvent.asObservable()
+    this.onDocFirstChangeFromLocal = this.onLocalChangeBefore.pipe(take(1))
   }
 
   /**
@@ -100,13 +108,19 @@ export class Scheduler {
       }),
       changeMarker.onChange.pipe(
         map(op => {
+          const from = this.changeFromRemote ? ChangeOrigin.Remote :
+            this.changeFromHistory ? ChangeOrigin.History : ChangeOrigin.Local
+
           if (isRendered) {
             isRendered = false
+            if (from === ChangeOrigin.Local) {
+              this.localChangeBeforeEvent.next()
+            }
             this.docChangeEvent.next()
           }
+
           return {
-            from: this.changeFromRemote ? ChangeOrigin.Remote :
-              this.changeFromHistory ? ChangeOrigin.History : ChangeOrigin.Local,
+            from,
             operation: op
           }
         }),

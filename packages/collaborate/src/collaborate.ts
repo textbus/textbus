@@ -96,6 +96,11 @@ export abstract class CustomUndoManagerConfig {
   abstract deleteFilter?(arg0: Item): boolean
 }
 
+interface CollaborateHistorySelectionPosition {
+  before: CursorPosition | null
+  after: CursorPosition | null
+}
+
 @Injectable()
 export class Collaborate implements History {
   onLocalChangesApplied: Observable<void>
@@ -135,7 +140,7 @@ export class Collaborate implements History {
   protected updateRemoteActions: Array<UpdateItem> = []
   protected noRecord = {}
 
-  protected historyItems: Array<CursorPosition | null> = []
+  protected historyItems: Array<CollaborateHistorySelectionPosition> = []
   protected index = 0
 
   constructor(@Inject(HISTORY_STACK_SIZE) protected stackSize: number,
@@ -174,13 +179,23 @@ export class Collaborate implements History {
     })
     this.manager = manager
 
+    let beforePosition: CursorPosition | null = null
+    this.subscriptions.push(
+      this.scheduler.onLocalChangeBefore.subscribe(() => {
+        beforePosition = this.getRelativeCursorLocation()
+      })
+    )
+
     manager.on('stack-item-added', event => {
       if (event.type === 'undo') {
         if (event.origin === manager) {
           this.index++
         } else {
           this.historyItems.length = this.index
-          this.historyItems.push(this.getRelativeCursorLocation())
+          this.historyItems.push({
+            before: beforePosition,
+            after: this.getRelativeCursorLocation()
+          })
           this.index++
         }
       } else {
@@ -195,10 +210,12 @@ export class Collaborate implements History {
       }
       this.changeEvent.next()
     })
-    manager.on('stack-item-popped', () => {
-      const position: CursorPosition | null = this.historyItems[this.index - 1]
-      if (position) {
-        const selection = this.getAbstractSelection(position)
+    manager.on('stack-item-popped', (ev) => {
+      const index = ev.type === 'undo' ? this.index : this.index - 1
+      const position = this.historyItems[index] || null
+      const p = ev.type === 'undo' ? position?.before : position?.after
+      if (p) {
+        const selection = this.getAbstractSelection(p)
         if (selection) {
           this.selection.setBaseAndExtent(
             selection.anchorSlot,
@@ -278,8 +295,9 @@ export class Collaborate implements History {
   }
 
   clear() {
-    this.index = 0
-    this.historyItems = []
+    const last = this.historyItems.pop()
+    this.historyItems = last ? [last] : []
+    this.index = last ? 1 : 0
     this.manager?.clear()
     this.changeEvent.next()
   }

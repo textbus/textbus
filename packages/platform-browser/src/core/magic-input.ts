@@ -333,7 +333,7 @@ export class MagicInput extends Input {
   private isFocus = false
   private nativeFocus = false
 
-  private isSougouPinYin = false // 有 bug 版本搜狗拼音
+  private ignoreComposition = false // 有 bug 版本搜狗拼音
 
   constructor(private parser: Parser,
               private keyboard: Keyboard,
@@ -523,13 +523,13 @@ export class MagicInput extends Input {
         }
         return !isWriting // || !this.textarea.value
       })).subscribe(ev => {
+        this.ignoreComposition = false
         let key = ev.key
         const keys = ')!@#$%^Z&*('
         const b = key === 'Process' && /Digit\d/.test(ev.code) && ev.shiftKey
         if (b) {
           // 大小写锁定为大写 + 全角 + shift + 数字键，还存在问题
           key = keys.charAt(+ev.code.substring(5))
-          this.isSougouPinYin = true
           ev.preventDefault()
         }
         const is = this.keyboard.execShortcut({
@@ -539,6 +539,7 @@ export class MagicInput extends Input {
           ctrlKey: this.isMac ? ev.metaKey : ev.ctrlKey
         })
         if (is) {
+          this.ignoreComposition = true
           ev.preventDefault()
         }
       })
@@ -548,7 +549,12 @@ export class MagicInput extends Input {
   private handleInput(textarea: HTMLTextAreaElement) {
     let startIndex = 0
     this.subscription.add(
-      fromEvent<CompositionEvent>(textarea, 'compositionstart').subscribe(() => {
+      fromEvent<CompositionEvent>(textarea, 'compositionstart').pipe(filter(() => {
+        return !this.ignoreComposition
+      })).subscribe(() => {
+        if (!this.selection.isCollapsed) {
+          this.commander.delete()
+        }
         this.composition = true
         this.caret.compositionState = this.compositionState = null
         startIndex = this.selection.startOffset!
@@ -558,7 +564,11 @@ export class MagicInput extends Input {
         })
         invokeListener(startSlot.parent!, 'onCompositionStart', event)
       }),
-      fromEvent<CompositionEvent>(textarea, 'compositionupdate').subscribe(ev => {
+      fromEvent<CompositionEvent>(textarea, 'compositionupdate').pipe(filter(() => {
+        return !this.ignoreComposition
+      })).pipe(distinctUntilChanged((prev, next) => {
+        return prev.data !== next.data
+      })).subscribe(ev => {
         if (ev.data === ' ') {
           // 处理搜狗五笔不符合 composition 事件预期，会意外跳光标的问题
           return
@@ -597,19 +607,17 @@ export class MagicInput extends Input {
             return ev.data as string
           })
         ),
-        this.isSafari ? new Observable<string>() : fromEvent<CompositionEvent>(textarea, 'compositionend').pipe(
-          map(ev => {
-            isCompositionEnd = true
-            ev.preventDefault()
-            textarea.value = ''
-            return ev.data
-          }),
-          filter(() => {
-            const b = this.isSougouPinYin
-            this.isSougouPinYin = false
-            return !b
-          })
-        )
+        this.isSafari ? new Observable<string>() : fromEvent<CompositionEvent>(textarea, 'compositionend')
+          .pipe(filter(() => {
+            return !this.ignoreComposition
+          })).pipe(
+            map(ev => {
+              isCompositionEnd = true
+              ev.preventDefault()
+              textarea.value = ''
+              return ev.data
+            })
+          )
       ).subscribe(text => {
         this.composition = false
         this.caret.compositionState = this.compositionState = null

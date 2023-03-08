@@ -177,7 +177,7 @@ export class NativeInput extends Input {
   private isMac = isMac()
   private isMobileBrowser = isMobileBrowser()
 
-  private isSougouPinYin = false // 有 bug 版本搜狗拼音
+  private ignoreComposition = false // 有 bug 版本搜狗拼音
 
   constructor(private injector: Injector,
               private parser: Parser,
@@ -323,11 +323,12 @@ export class NativeInput extends Input {
         }
         return !isWriting // || !this.textarea.value
       })).subscribe(ev => {
+        this.ignoreComposition = false
         let key = ev.key
-        const b = key === 'Process' && ev.code === 'Digit2'
+        const keys = ')!@#$%^Z&*('
+        const b = key === 'Process' && /Digit\d/.test(ev.code) && ev.shiftKey
         if (b) {
-          key = '@'
-          this.isSougouPinYin = true
+          key = keys.charAt(+ev.code.substring(5))
           ev.preventDefault()
         }
         const is = this.keyboard.execShortcut({
@@ -337,6 +338,7 @@ export class NativeInput extends Input {
           ctrlKey: this.isMac ? ev.metaKey : ev.ctrlKey
         })
         if (is) {
+          this.ignoreComposition = true
           ev.preventDefault()
         }
       })
@@ -347,7 +349,9 @@ export class NativeInput extends Input {
     let startIndex = 0
     let isCompositionEnd = false
     this.subscription.add(
-      fromEvent(input, 'compositionstart').subscribe(() => {
+      fromEvent(input, 'compositionstart').pipe(filter(() => {
+        return !this.ignoreComposition
+      })).subscribe(() => {
         this.composition = true
         this.compositionState = null
         startIndex = this.selection.startOffset!
@@ -357,7 +361,9 @@ export class NativeInput extends Input {
         })
         invokeListener(startSlot.parent!, 'onCompositionStart', event)
       }),
-      fromEvent<CompositionEvent>(input, 'compositionupdate').subscribe(ev => {
+      fromEvent<CompositionEvent>(input, 'compositionupdate').pipe(filter(() => {
+        return !this.ignoreComposition
+      })).subscribe(ev => {
         const startSlot = this.selection.startSlot!
         this.compositionState = {
           slot: startSlot,
@@ -414,21 +420,25 @@ export class NativeInput extends Input {
             return text
           })
         ),
-        (!this.isMobileBrowser && this.isSafari) ? new Observable<string>() : fromEvent<CompositionEvent>(input, 'compositionend').pipe(
-          filter(() => {
-            return this.composition
-          }),
-          map(ev => {
-            isCompositionEnd = true
-            ev.preventDefault()
-            return ev.data
-          }),
-          filter(() => {
-            const b = this.isSougouPinYin
-            this.isSougouPinYin = false
-            return !b
-          })
-        )
+        (!this.isMobileBrowser && this.isSafari) ?
+          new Observable<string>() :
+          fromEvent<CompositionEvent>(input, 'compositionend').pipe(filter(() => {
+            return !this.ignoreComposition
+          })).pipe(
+            filter(() => {
+              return this.composition
+            }),
+            map(ev => {
+              isCompositionEnd = true
+              ev.preventDefault()
+              return ev.data
+            }),
+            filter(() => {
+              const b = this.ignoreComposition
+              this.ignoreComposition = false
+              return !b
+            })
+          )
       ).subscribe(text => {
         this.composition = false
         this.compositionState = null
