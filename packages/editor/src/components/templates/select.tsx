@@ -45,7 +45,7 @@ export function useSelector(config: SelectConfig, callback: (current: SelectOpti
               isOpen = !isOpen
               self.changeMarker.forceMarkDirtied()
             }}>
-              <span class="textbus-toolbar-select-label">{current?.label}</span>
+              <span class="textbus-toolbar-select-label">{current?.label || ' '}</span>
               <span class="textbus-dropdown-caret"></span>
             </button>
           </span>

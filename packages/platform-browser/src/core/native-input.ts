@@ -12,6 +12,7 @@ import {
 import {
   Commander,
   CompositionStartEventData,
+  CompositionUpdateEventData,
   ContentType,
   Controller,
   Event,
@@ -346,6 +347,113 @@ export class NativeInput extends Input {
   }
 
   private handleInput(input: HTMLElement) {
+    if (this.isMobileBrowser) {
+      this.handleMobileInput(input)
+    } else {
+      this.handlePCInput(input)
+    }
+  }
+
+  private handleMobileInput(input: HTMLElement) {
+    let isCompositionStart = true
+    let startIndex: number
+    const compositionStart = () => {
+      this.composition = true
+      this.compositionState = null
+      startIndex = this.selection.startOffset!
+      const startSlot = this.selection.startSlot!
+      const event = new Event<Slot, CompositionStartEventData>(startSlot, {
+        index: startIndex
+      })
+      invokeListener(startSlot.parent!, 'onCompositionStart', event)
+    }
+    const compositionUpdate = (data: string) => {
+      const startSlot = this.selection.startSlot!
+      this.compositionState = {
+        slot: startSlot,
+        index: startIndex,
+        data
+      }
+      const event = new Event<Slot, CompositionUpdateEventData>(startSlot, {
+        index: startIndex,
+        data
+      })
+
+      invokeListener(startSlot.parent!, 'onCompositionUpdate', event)
+    }
+    const compositionEnd = (data: string) => {
+      this.composition = false
+
+      if (data) {
+        this.commander.write(data)
+      }
+      const startSlot = this.selection.startSlot
+      if (startSlot) {
+        const event = new Event<Slot>(startSlot, null)
+        invokeListener(startSlot.parent!, 'onCompositionEnd', event)
+      }
+    }
+    this.subscription.add(
+      fromEvent(input, 'compositionstart').subscribe(() => {
+        compositionStart()
+      }),
+      fromEvent<CompositionEvent>(input, 'compositionupdate').subscribe(ev => {
+        compositionUpdate(ev.data)
+      }),
+      fromEvent<CompositionEvent>(input, 'compositionend').subscribe(ev => {
+        compositionEnd(ev.data)
+      }),
+      fromEvent<InputEvent>(input, 'beforeinput').subscribe(ev => {
+        switch (ev.inputType) {
+          case 'insertText':
+            if (ev.data) {
+              this.commander.write(ev.data)
+              ev.preventDefault()
+            }
+            break
+          case 'insertCompositionText':
+            if (isCompositionStart) {
+              isCompositionStart = false
+              compositionStart()
+            } else {
+              compositionUpdate(ev.data || '')
+            }
+            break
+          case 'deleteCompositionText':
+            this.composition = false
+            break
+          case 'deleteContentBackward':
+          case 'insertReplacementText': {
+            this.composition = false
+            const range = ev.getTargetRanges()[0]
+            const location = this.renderer.getLocationByNativeNode(range.startContainer)!
+            const startSlot = this.selection.startSlot!
+            this.selection.setBaseAndExtent(
+              startSlot,
+              location.startIndex + range.startOffset,
+              startSlot,
+              location.startIndex + range.endOffset)
+
+            this.commander.delete()
+            if (ev.inputType === 'insertReplacementText') {
+              const text = ev.dataTransfer?.getData('text') || ev.data || null
+              if (text) {
+                this.commander.write(text)
+              }
+            }
+            break
+          }
+
+          case 'insertFromComposition': {
+            compositionEnd(ev.data || '')
+            break
+          }
+        }
+      })
+    )
+  }
+
+  private handlePCInput(input: HTMLElement) {
     let startIndex = 0
     let isCompositionEnd = false
     this.subscription.add(
@@ -399,12 +507,7 @@ export class NativeInput extends Input {
             }
             isCompositionEnd = ev.inputType === 'insertFromComposition'
             if (isCompositionEnd && this.composition) {
-              if (this.isMobileBrowser) {
-                this.composition = false
-                this.compositionState = null
-              } else {
-                return null
-              }
+              return null
             }
             if (this.isSafari) {
               if (ev.inputType === 'insertText' || isCompositionEnd) {
@@ -420,8 +523,7 @@ export class NativeInput extends Input {
             return text
           })
         ),
-        (!this.isMobileBrowser && this.isSafari) ?
-          new Observable<string>() :
+        this.isSafari ? new Observable<string>() :
           fromEvent<CompositionEvent>(input, 'compositionend').pipe(filter(() => {
             return !this.ignoreComposition
           })).pipe(

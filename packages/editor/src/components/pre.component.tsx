@@ -383,7 +383,7 @@ export const preComponent = defineComponent({
 
     const stateController = useState({
       lang: data.state!.lang,
-      theme: data.state!.theme
+      theme: data.state?.theme || 'Light'
     })
     const injector = useContext()
 
@@ -682,7 +682,7 @@ export const preComponent = defineComponent({
         label: 'Dark',
         value: 'dark'
       }],
-      defaultValue: data.state?.theme
+      defaultValue: data.state?.theme || 'light'
     }, current => {
       stateController.update(draft => {
         draft.theme = current.value

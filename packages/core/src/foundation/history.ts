@@ -7,6 +7,7 @@ import { Selection, SelectionPaths } from './selection'
 import { Registry } from './registry'
 import { HISTORY_STACK_SIZE, RootComponentRef } from './_injection-tokens'
 import { ChangeOrigin, Scheduler } from './scheduler'
+import { makeError } from '../_utils/make-error'
 
 export interface HistoryItem {
   beforePaths: SelectionPaths
@@ -50,6 +51,8 @@ function objToFormats(formatsObj: Record<string, any>, registry: Registry): Form
   })
   return formats
 }
+
+const historyErrorFn = makeError('History')
 
 /**
  * Textbus 历史记录管理类
@@ -294,13 +297,15 @@ export class LocalHistory extends History {
             if (formatsObj) {
               formats = objToFormats(formatsObj, this.registry)
             }
-            const content = typeof action.content === 'string' ?
-              action.content :
-              this.registry.createComponent(action.content as ComponentLiteral)!
-            if (formats) {
-              slot.insert(content, formats)
+            if (typeof action.content === 'string') {
+              formats ? slot.insert(action.content, formats) : slot.insert(action.content)
             } else {
-              slot.insert(content)
+              const instance = this.registry.createComponent(action.content as ComponentLiteral)
+              if (!instance) {
+                // eslint-disable-next-line max-len
+                throw historyErrorFn(`component \`${action.content.name}\` not registered, please add \`${action.content.name}\` component to the components configuration item.`)
+              }
+              formats ? slot.insert(instance, formats) : slot.insert(instance)
             }
           }
         })

@@ -118,33 +118,29 @@ export class VElement {
               attrs: VElementOptions | null = null,
               children: Array<VElement | VTextNode> = []) {
     attrs = attrs || {}
-    const className = (attrs.class || '').trim()
-    this.classes = new Set<string>(className ? className.split(/\s+/g) : [])
 
-    Reflect.deleteProperty(attrs, 'class')
-
-    const style = attrs.style || ''
-    const styles = new Map<string, string | number>()
-    if (typeof style === 'string') {
-      style.split(';').map(s => s.split(':')).forEach(v => {
-        if (!v[0] || !v[1]) {
-          return
-        }
-        styles.set(v[0].trim(), v[1].trim())
-      })
-    } else if (typeof style === 'object') {
-      Object.keys(style).forEach(key => {
-        styles.set(key, style[key])
-      })
-    }
-
-    this.styles = styles
-
-    Reflect.deleteProperty(attrs, 'style')
-    Reflect.deleteProperty(attrs, 'slot')
+    this.styles = new Map<string, string | number>()
     this.listeners = {}
+    this.classes = new Set<string>()
     Object.keys(attrs).forEach(key => {
-      if (/^on[A-Z]/.test(key)) {
+      if (key === 'class') {
+        const className = (attrs!.class || '').trim();
+        (this as any).classes = new Set<string>(className ? className.split(/\s+/g) : [])
+      } else if (key === 'style') {
+        const style = attrs!.style || ''
+        if (typeof style === 'string') {
+          style.split(';').map(s => s.split(':')).forEach(v => {
+            if (!v[0] || !v[1]) {
+              return
+            }
+            this.styles.set(v[0].trim(), v[1].trim())
+          })
+        } else if (typeof style === 'object') {
+          Object.keys(style).forEach(key => {
+            this.styles.set(key, style[key])
+          })
+        }
+      } else if (/^on[A-Z]/.test(key)) {
         const listener = attrs![key]
         if (typeof listener === 'function') {
           this.listeners[key.replace(/^on/, '').toLowerCase()] = listener
@@ -153,7 +149,6 @@ export class VElement {
         this.attrs.set(key, attrs![key])
       }
     })
-
     this.appendChild(...children)
   }
 

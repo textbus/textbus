@@ -80,7 +80,7 @@ export const rootComponent = defineComponent({
             selection.setPosition(p.slots.get(0)!, 0)
           }
         } else if (ev.target === rootNode.current) {
-          let parentComponent = selection.focusSlot!.parent
+          let parentComponent = selection.focusSlot?.parent
           while (parentComponent && parentComponent.parentComponent !== self) {
             parentComponent = parentComponent.parentComponent
           }

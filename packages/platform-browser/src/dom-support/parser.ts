@@ -33,7 +33,7 @@ export interface ComponentLoader {
   match(element: HTMLElement): boolean
 
   /** 读取组件内容的方法 */
-  read(element: HTMLElement, context: Injector, slotParser: SlotParser): ComponentInstance | Slot
+  read(element: HTMLElement, injector: Injector, slotParser: SlotParser): ComponentInstance | Slot
 }
 
 export interface FormatLoaderReadResult<T extends FormatValue> {
