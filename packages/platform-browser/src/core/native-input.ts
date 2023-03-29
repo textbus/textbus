@@ -443,11 +443,11 @@ export class NativeInput extends Input {
             }
             break
           }
-
-          case 'insertFromComposition': {
-            compositionEnd(ev.data || '')
-            break
-          }
+          //
+          // case 'insertFromComposition': {
+          //   compositionEnd(ev.data || '')
+          //   break
+          // }
         }
       })
     )

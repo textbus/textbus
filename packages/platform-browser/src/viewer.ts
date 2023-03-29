@@ -266,6 +266,15 @@ export class Viewer extends Starter {
   }
 
   /**
+   * 清空内容
+   */
+  clear() {
+    this.replaceContent('')
+    const history = this.get(History)
+    history.clear()
+  }
+
+  /**
    * 销毁编辑器
    */
   override destroy() {
