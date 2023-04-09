@@ -133,49 +133,56 @@ function getNodeChanges(newVDom: VElement, oldVDom: VElement) {
   }
 }
 
-class NativeElementMappingTable {
-  private nativeVDomMapping = new WeakMap<NativeNode, VElement | VTextNode>()
-  private vDomNativeMapping = new WeakMap<VElement | VTextNode, NativeNode>()
+function createBidirectionalMapping<A extends object, B extends object>(isA: (v: A | B) => boolean) {
+  const a2b = new WeakMap<A, B>()
+  const b2a = new WeakMap<B, A>()
 
-  set(key: VElement | VTextNode, value: NativeNode): void
-  set(key: NativeNode, value: VElement | VTextNode): void
-  set(key: any, value: any) {
-    if (this.get(key)) {
-      this.delete(key)
+  function set(key: A, value: B): void
+  function set(key: B, value: A): void
+  function set(key: any, value: any) {
+    if (get(key)) {
+      remove(key)
     }
-    if (this.get(value)) {
-      this.delete(value)
+    if (get(value)) {
+      remove(value)
     }
-    if (key instanceof VElement || key instanceof VTextNode) {
-      this.vDomNativeMapping.set(key, value)
-      this.nativeVDomMapping.set(value, key)
+    if (isA(key)) {
+      a2b.set(key, value)
+      b2a.set(value, key)
     } else {
-      this.vDomNativeMapping.set(value, key)
-      this.nativeVDomMapping.set(key, value)
+      a2b.set(value, key)
+      b2a.set(key, value)
     }
   }
 
-  get(key: VElement | VTextNode): NativeNode;
-  get(key: NativeNode): VElement | VTextNode;
-  get(key: any) {
-    if (key instanceof VTextNode || key instanceof VElement) {
-      return this.vDomNativeMapping.get(key)
+  function get(key: A): B
+  function get(key: B): A
+  function get(key: any) {
+    if (isA(key)) {
+      return a2b.get(key)
     }
-    return this.nativeVDomMapping.get(key)
+    return b2a.get(key)
   }
 
-  delete(key: NativeNode | VElement | VTextNode) {
-    if (key instanceof VTextNode || key instanceof VElement) {
-      const v = this.vDomNativeMapping.get(key)!
-      this.vDomNativeMapping.delete(key)
-      this.nativeVDomMapping.delete(v)
+  function remove(key: A | B) {
+    if (isA(key)) {
+      const v = a2b.get(key as A)!
+      a2b.delete(key as A)
+      b2a.delete(v)
     } else {
-      const v = this.nativeVDomMapping.get(key)!
-      this.nativeVDomMapping.delete(key)
-      this.vDomNativeMapping.delete(v)
+      const v = b2a.get(key as B)!
+      b2a.delete(key as B)
+      a2b.delete(v)
     }
+  }
+
+  return {
+    set,
+    get,
+    remove
   }
 }
+
 
 /**
  * 虚拟 DOM 节点在数据内的范围
@@ -206,7 +213,6 @@ export class Renderer {
   @Prop()
   nativeRenderer!: NativeRenderer
 
-  private componentVNode = new WeakMap<ComponentInstance, VElement>()
   private slotRootVNodeCaches = new WeakMap<Slot, VElement>()
   private vNodeLocation = new WeakMap<VElement | VTextNode, VNodeLocation>()
   private renderedVNode = new WeakMap<VElement | VTextNode, true>()
@@ -214,7 +220,12 @@ export class Renderer {
 
   private slotRenderFactory = new WeakMap<Slot, SlotRenderFactory>()
 
-  private nativeNodeCaches = new NativeElementMappingTable()
+  private componentVNode = createBidirectionalMapping<ComponentInstance, VElement>(v => {
+    return v instanceof VElement
+  })
+  private nativeNodeCaches = createBidirectionalMapping<VElement | VTextNode, NativeNode>(v => {
+    return v instanceof VElement || v instanceof VTextNode
+  })
 
   private viewUpdatedEvent = new Subject<void>()
   private viewUpdateBeforeEvent = new Subject<void>()
@@ -451,6 +462,7 @@ export class Renderer {
         } else {
           nativeNode = this.createElement(newFirstVNode)
         }
+        component = this.componentVNode.get(newFirstVNode) || component
         const cc = this.diffChildrenAndUpdate(newFirstVNode, oldFirstVNode, component)
         children.push(this.sortAndCleanNativeNode(nativeNode, cc, component))
       } else {
@@ -492,6 +504,7 @@ export class Renderer {
         } else {
           nativeNode = this.createElement(newLastVNode)
         }
+        component = this.componentVNode.get(newLastVNode) || component
         const cc = this.diffChildrenAndUpdate(newLastVNode, oldLastVNode, component)
         children.push(this.sortAndCleanNativeNode(nativeNode, cc, component))
       } else {
@@ -518,6 +531,7 @@ export class Renderer {
           continue
         }
         if (oldFirstVNode instanceof VElement && newFirstVNode.tagName === oldFirstVNode.tagName) {
+          component = this.componentVNode.get(newFirstVNode) || component
           const nativeNode = this.diffAndUpdate(newFirstVNode, oldFirstVNode, component)
 
           children.push(nativeNode)
@@ -563,6 +577,7 @@ export class Renderer {
           continue
         }
         if (oldLastVNode instanceof VElement && newLastVNode.tagName === oldLastVNode.tagName) {
+          component = this.componentVNode.get(newLastVNode) || component
           const nativeNode = this.diffAndUpdate(newLastVNode, oldLastVNode, component)
 
           children.push(nativeNode)

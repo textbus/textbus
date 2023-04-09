@@ -564,11 +564,7 @@ export class Slot<T = any> {
    * @param endIndex
    */
   cut(startIndex = 0, endIndex = this.length): Slot {
-    const slot = this.cutTo(new Slot(this.schema, this.state), startIndex, endIndex)
-    this.attributes.forEach((value, key) => {
-      slot.setAttribute(key, value)
-    })
-    return slot
+    return this.cutTo(new Slot([...this.schema], this.state), startIndex, endIndex)
   }
 
   /**
@@ -588,7 +584,7 @@ export class Slot<T = any> {
     if (startIndex > endIndex) {
       return slot
     }
-    if (slot.getAttributes().length === 0) {
+    if (slot.isEmpty) {
       this.attributes.forEach((value, key) => {
         slot.setAttribute(key, value)
       })
@@ -624,9 +620,9 @@ export class Slot<T = any> {
     temporarySlot.toDelta().forEach(item => {
       slot.insert(item.insert, item.formats)
     })
-    if (this.isEmpty) {
-      this.cleanAttributes()
-    }
+    // if (this.isEmpty) {
+    //   this.cleanAttributes()
+    // }
     return slot
   }
 

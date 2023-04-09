@@ -1,15 +1,7 @@
 import { Injectable, Prop } from '@tanbo/di'
 import { distinctUntilChanged, map, Observable, share, Subject, Subscription } from '@tanbo/stream'
 
-import {
-  ComponentInstance,
-  ContentType,
-  invokeListener,
-  Slot,
-  Event,
-  SlotRange,
-  GetRangesEvent
-} from '../model/_api'
+import { ComponentInstance, ContentType, Event, GetRangesEvent, invokeListener, Slot, SlotRange } from '../model/_api'
 import { RootComponentRef } from './_injection-tokens'
 import { Controller } from './controller'
 
@@ -1174,17 +1166,25 @@ export class Selection {
         }
       }
       const componentIndex = parentSlot.indexOf(parentComponent)
-      if (componentIndex < parentSlot.length - 1) {
-        const nextContent = parentSlot.getContentAtIndex(componentIndex + 1)
-        if (typeof nextContent !== 'string') {
-          const nextFirstSlot = nextContent.slots.first
-          if (nextFirstSlot) {
-            return this.findFirstPosition(nextFirstSlot)
+      if (componentIndex < parentSlot.length) {
+        if (parentComponent.type !== ContentType.BlockComponent) {
+          return {
+            slot: parentSlot,
+            offset: componentIndex + 1
           }
         }
-        return {
-          slot: parentSlot,
-          offset: componentIndex + 1
+        const nextContent = parentSlot.getContentAtIndex(componentIndex + 1)
+        if (nextContent) {
+          if (typeof nextContent !== 'string') {
+            const nextFirstSlot = nextContent.slots.first
+            if (nextFirstSlot) {
+              return this.findFirstPosition(nextFirstSlot)
+            }
+          }
+          return {
+            slot: parentSlot,
+            offset: componentIndex + 1
+          }
         }
       }
       slot = parentSlot
