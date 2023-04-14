@@ -299,6 +299,37 @@ export class Renderer {
   }
 
   /**
+   * 根据虚拟 DOM 节点，获取当前所属的组件
+   * @param vNode
+   */
+  getComponentByVNode(vNode: VElement): ComponentInstance | null {
+    let n: VElement | null = vNode
+    while (n) {
+      const instance = this.componentVNode.get(vNode)
+      if (instance) {
+        return instance
+      }
+      n = n.parentNode
+    }
+    return null
+  }
+
+  /**
+   * 根据原生节点，获取当前所属的组件
+   * @param nativeNode
+   */
+  getComponentByNativeNode(nativeNode: NativeNode): ComponentInstance | null {
+    let vNode = this.getVNodeByNativeNode(nativeNode)
+    if (vNode instanceof VTextNode) {
+      vNode = vNode.parentNode as VElement
+    }
+    if (vNode instanceof VElement) {
+      return this.getComponentByVNode(vNode)
+    }
+    return null
+  }
+
+  /**
    * 获取插槽 对应的虚拟 DOM 节点
    * @param slot
    */
