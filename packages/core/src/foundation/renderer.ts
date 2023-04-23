@@ -4,11 +4,7 @@ import { Observable, Subject, Subscription } from '@tanbo/stream'
 import {
   ComponentInstance,
   Event,
-  FormatHostBindingRender,
-  FormatItem,
-  FormatTree,
   invokeListener,
-  jsx,
   NativeNode,
   Ref,
   RenderMode,
@@ -20,6 +16,7 @@ import {
 import { NativeRenderer, RootComponentRef } from './_injection-tokens'
 import { makeError } from '../_utils/make-error'
 import { Controller } from './controller'
+import { PureRenderer, VNodeLocation } from './pure-renderer'
 
 const rendererErrorFn = makeError('Renderer')
 
@@ -181,16 +178,6 @@ function createBidirectionalMapping<A extends object, B extends object>(isA: (v:
     get,
     remove
   }
-}
-
-
-/**
- * 虚拟 DOM 节点在数据内的范围
- */
-export interface VNodeLocation {
-  startIndex: number
-  endIndex: number
-  slot: Slot
 }
 
 /**
@@ -764,13 +751,25 @@ export class Renderer {
     if (slot.changeMarker.dirty || this.readonlyStateChanged) {
       this.slotRenderFactory.set(slot, slotRenderFactory)
       const formatTree = slot.createFormatTree()
-
+      const renderMode = this.controller.readonly ? RenderMode.Readonly : RenderMode.Editing
+      const componentRender = (component) => {
+        return this.componentRender(component)
+      }
+      const setLocation = (vNode, location) => {
+        this.vNodeLocation.set(vNode, location)
+      }
       let children = formatTree.children ?
-        this.createVDomByFormatTree(slot, formatTree.children) :
-        this.createVDomByContent(slot, formatTree.startIndex, formatTree.endIndex)
-
+        PureRenderer.createVDomByFormatTree(slot, formatTree.children, renderMode, componentRender, setLocation) :
+        PureRenderer.createVDomByContent(
+          slot,
+          formatTree.startIndex,
+          formatTree.endIndex,
+          renderMode,
+          componentRender,
+          setLocation
+        )
       if (formatTree.formats) {
-        children = [this.createVDomByOverlapFormats(formatTree.formats, children, slot)]
+        children = [PureRenderer.createVDomByOverlapFormats(formatTree.formats, children, slot, renderMode, setLocation)]
       }
       const root = slotRenderFactory(children)
 
@@ -778,7 +777,7 @@ export class Renderer {
         throw rendererErrorFn(`component \`${component.name}\` slot rendering does not return a VElement.`)
       }
       for (const [attribute, value] of slot.getAttributes()) {
-        attribute.render(root, value, this.controller.readonly ? RenderMode.Readonly : RenderMode.Editing)
+        attribute.render(root, value, renderMode)
       }
       root.attrs.set(this.slotIdAttrKey, slot.id)
       setEditable(root, true)
@@ -817,102 +816,6 @@ export class Renderer {
     })
     slot.changeMarker.rendered()
     return this.slotRootVNodeCaches.get(slot)!
-  }
-
-  private createVDomByFormatTree(slot: Slot, formats: FormatTree<any>[]) {
-    const nodes: Array<VElement | VTextNode> = []
-    for (const child of formats) {
-      if (child.formats?.length) {
-        const children = child.children ?
-          this.createVDomByFormatTree(slot, child.children) :
-          this.createVDomByContent(slot, child.startIndex, child.endIndex)
-
-        const nextChildren = this.createVDomByOverlapFormats(
-          child.formats,
-          children,
-          slot
-        )
-        nodes.push(nextChildren)
-      } else {
-        nodes.push(...this.createVDomByContent(slot, child.startIndex, child.endIndex))
-      }
-    }
-    return nodes
-  }
-
-  private createVDomByOverlapFormats(
-    formats: (FormatItem<any>)[],
-    children: Array<VElement | VTextNode>,
-    slot: Slot): VElement {
-    const hostBindings: Array<{ render: FormatHostBindingRender, item: FormatItem<any> }> = []
-    let host: VElement | null = null
-    for (let i = formats.length - 1; i > -1; i--) {
-      const item = formats[i]
-      const next = item.formatter.render(children, item.value, this.controller.readonly ? RenderMode.Readonly : RenderMode.Editing)
-      if (!next) {
-        throw rendererErrorFn(`Formatter \`${item.formatter.name}\` must return an VElement!`)
-      }
-      if (!(next instanceof VElement)) {
-        hostBindings.push({
-          item,
-          render: next
-        })
-        continue
-      }
-      host = next
-      this.vNodeLocation.set(next, {
-        slot,
-        startIndex: item.startIndex,
-        endIndex: item.endIndex
-      })
-      children = [next]
-    }
-    for (const binding of hostBindings) {
-      const { render, item } = binding
-      if (!host) {
-        host = jsx(render.fallbackTagName)
-        host.appendChild(...children)
-        this.vNodeLocation.set(host, {
-          slot,
-          startIndex: item.startIndex,
-          endIndex: item.endIndex
-        })
-      }
-      render.attach(host)
-    }
-    return host!
-  }
-
-  private createVDomByContent(slot: Slot, startIndex: number, endIndex: number): Array<VTextNode | VElement> {
-    const elements: Array<string | ComponentInstance> = slot.sliceContent(startIndex, endIndex).map(i => {
-      if (typeof i === 'string') {
-        return i.match(/\n|[^\n]+/g)!
-      }
-      return i
-    }).flat()
-    return elements.map(item => {
-      let vNode!: VElement | VTextNode
-      let length: number
-      if (typeof item === 'string') {
-        if (item === '\n') {
-          vNode = new VElement('br')
-          length = 1
-        } else {
-          vNode = new VTextNode(item)
-          length = item.length
-        }
-      } else {
-        length = 1
-        vNode = this.componentRender(item)
-      }
-      this.vNodeLocation.set(vNode, {
-        slot,
-        startIndex,
-        endIndex: startIndex + length
-      })
-      startIndex += length
-      return vNode
-    })
   }
 
   private createElement(vDom: VElement) {

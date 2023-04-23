@@ -1,21 +1,8 @@
 import { Injectable } from '@tanbo/di'
 
-import {
-  ComponentInstance,
-  FormatHostBindingRender,
-  FormatItem,
-  FormatTree,
-  jsx,
-  RenderMode,
-  Slot,
-  SlotRenderFactory,
-  VElement,
-  VTextNode,
-} from '../model/_api'
+import { ComponentInstance, RenderMode, Slot, SlotRenderFactory, VElement } from '../model/_api'
 import { RootComponentRef } from './_injection-tokens'
-// import { makeError } from '../_utils/make-error'
-
-// const outputRendererErrorFn = makeError('OutputRenderer')
+import { PureRenderer } from './pure-renderer'
 
 /**
  * Textbus 输出渲染器
@@ -70,17 +57,19 @@ export class OutputRenderer {
     return this.componentVNode.get(component)!
   }
 
-  private slotRender(slot: Slot, slotRenderFactory: SlotRenderFactory): VElement {
+  slotRender(slot: Slot, slotRenderFactory: SlotRenderFactory): VElement {
     if (slot.changeMarker.outputDirty) {
       this.slotRenderFactory.set(slot, slotRenderFactory)
       const formatTree = slot.createFormatTree()
-
+      const componentRender = (component) => {
+        return this.componentRender(component)
+      }
       let children = formatTree.children ?
-        this.createVDomByFormatTree(slot, formatTree.children) :
-        this.createVDomByContent(slot, formatTree.startIndex, formatTree.endIndex)
+        PureRenderer.createVDomByFormatTree(slot, formatTree.children, RenderMode.Output, componentRender) :
+        PureRenderer.createVDomByContent(slot, formatTree.startIndex, formatTree.endIndex, RenderMode.Output, componentRender)
 
       if (formatTree.formats) {
-        children = [this.createVDomByOverlapFormats(formatTree.formats, children)]
+        children = [PureRenderer.createVDomByOverlapFormats(formatTree.formats, children, slot, RenderMode.Output)]
       }
       const root = slotRenderFactory(children)
       for (const [attribute, value] of slot.getAttributes()) {
@@ -105,77 +94,5 @@ export class OutputRenderer {
     })
     slot.changeMarker.outputRendered()
     return this.slotVNodeCaches.get(slot)!
-  }
-
-  private createVDomByFormatTree(slot: Slot, formats: FormatTree<any>[]) {
-    const nodes: Array<VElement | VTextNode> = []
-    for (const child of formats) {
-      if (child.formats?.length) {
-        const children = child.children ?
-          this.createVDomByFormatTree(slot, child.children) :
-          this.createVDomByContent(slot, child.startIndex, child.endIndex)
-
-        const nextChildren = this.createVDomByOverlapFormats(
-          child.formats,
-          children
-        )
-        nodes.push(nextChildren)
-      } else {
-        nodes.push(...this.createVDomByContent(slot, child.startIndex, child.endIndex))
-      }
-    }
-    return nodes
-  }
-
-  private createVDomByOverlapFormats(
-    formats: (FormatItem<any>)[],
-    children: Array<VElement | VTextNode>): VElement {
-    const hostBindings: Array<FormatHostBindingRender> = []
-    let host: VElement | null = null
-    for (let i = formats.length - 1; i > -1; i--) {
-      const item = formats[i]
-      const next = item.formatter.render(children, item.value, RenderMode.Output)
-      if (!(next instanceof VElement)) {
-        hostBindings.push(next)
-        continue
-      }
-      host = next
-      children = [next]
-    }
-    for (const binding of hostBindings) {
-      if (!host) {
-        host = jsx(binding.fallbackTagName)
-        host.appendChild(...children)
-      }
-      binding.attach(host)
-    }
-    return host!
-  }
-
-  private createVDomByContent(slot: Slot, startIndex: number, endIndex: number): Array<VTextNode | VElement> {
-    const elements: Array<string | ComponentInstance> = slot.sliceContent(startIndex, endIndex).map(i => {
-      if (typeof i === 'string') {
-        return i.match(/\n|[^\n]+/g)!
-      }
-      return i
-    }).flat()
-    return elements.map(item => {
-      let vNode!: VElement | VTextNode
-      let length: number
-      if (typeof item === 'string') {
-        if (item === '\n') {
-          vNode = new VElement('br')
-          length = 1
-        } else {
-          vNode = new VTextNode(item)
-          length = item.length
-        }
-      } else {
-        length = 1
-        vNode = this.componentRender(item)
-      }
-      startIndex += length
-      return vNode
-    })
   }
 }

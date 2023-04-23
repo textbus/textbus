@@ -406,7 +406,7 @@ export class Commander {
         content,
         formats
       })
-      invokeListener(slot.parent!, 'onContentInserted', event)
+      invokeListener(slot.parent!, 'onContentInserted', insertedEvent)
       if (!insertedEvent.isPrevented) {
         selection.setBaseAndExtent(slot, slot.index, slot, slot.index)
       }

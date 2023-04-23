@@ -1,6 +1,6 @@
 {
   "name": "@textbus/editor",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "Textbus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
   "main": "./bundles/index.js",
   "module": "./bundles/index.esm.js",
@@ -31,8 +31,8 @@
     "@tanbo/css-themes": "^0.0.1",
     "@tanbo/di": "^1.1.4",
     "@tanbo/stream": "^1.1.9",
-    "@textbus/core": "^3.2.0",
-    "@textbus/platform-browser": "^3.2.0",
+    "@textbus/core": "^3.3.0",
+    "@textbus/platform-browser": "^3.3.0",
     "classnames": "^2.3.2",
     "katex": "^0.16.0",
     "prismjs": "^1.23.0"
@@ -48,7 +48,7 @@
   "bugs": {
     "url": "https://github.com/textbus/textbus.git/issues"
   },
-  "gitHead": "cd75d4ae54f0976cbb87c654ab322b5d66f572e5",
+  "gitHead": "cf4fd289b73bc777124a32fe42bb58eba05a34f1",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^23.0.2",
     "@rollup/plugin-typescript": "^9.0.2",

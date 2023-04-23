@@ -21,7 +21,8 @@ import {
   HISTORY_STACK_SIZE,
   READONLY,
   Registry,
-  ATTRIBUTE_LIST
+  ATTRIBUTE_LIST,
+  PureRenderer
 } from './foundation/_api'
 import { makeError } from './_utils/make-error'
 
@@ -210,6 +211,7 @@ export class Starter extends ReflectiveInjector {
       Commander,
       Keyboard,
       OutputRenderer,
+      PureRenderer,
       Query,
       Renderer,
       Selection,

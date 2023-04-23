@@ -347,9 +347,8 @@ export class SelectionBridge implements NativeSelectionBridge {
         })
       )
     }
-
     this.subs.push(
-      fromEvent(document, 'selectionchange').subscribe(() => {
+      fromEvent(document, 'selectionchange').pipe().subscribe(() => {
         this.syncSelection(connector)
       })
     )
@@ -426,7 +425,12 @@ export class SelectionBridge implements NativeSelectionBridge {
           nativeRange.setEnd(end.node, end.offset)
         }
         connector.setSelection(abstractSelection)
-        if (selection.isCollapsed) {
+        if (selection.isCollapsed && (
+          rawRange.startContainer !== start.node ||
+          rawRange.startOffset !== start.offset ||
+          rawRange.endContainer !== end.node ||
+          rawRange.endOffset !== end.offset
+        )) {
           rawRange.setStart(start.node, start.offset)
           rawRange.setEnd(end.node, end.offset)
         }

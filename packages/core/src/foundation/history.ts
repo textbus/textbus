@@ -323,12 +323,12 @@ export class LocalHistory extends History {
           if (action.type === 'insertSlot') {
             const slot = this.registry.createSlot(action.slot)
             component.slots.insert(slot)
+            return
           }
           if (action.type === 'apply') {
             component.updateState(draft => {
               return applyPatches(draft, action.patches)
             })
-            return
           }
         })
       }
