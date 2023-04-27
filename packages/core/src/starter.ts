@@ -51,13 +51,13 @@ export interface Module {
   /** 组件列表 */
   components?: Component[]
   /** 格式列表 */
-  formatters?: Formatter<any>[]
+  formatters?: (Formatter<any> | ((injector: Injector) => Formatter<any>))[]
   /** 属性列表 */
-  attributes?: Attribute<any>[]
+  attributes?: (Attribute<any> | ((injector: Injector) => Attribute<any>))[]
   /** 跨平台及基础扩展实现的提供者 */
   providers?: Provider[]
   /** 插件集合 */
-  plugins?: Array<() => Plugin>
+  plugins?: Array<Plugin | (() => Plugin)>
 
   /**
    * 初始化之前的设置，返回一个函数，当 Textbus 销毁时调用
@@ -94,7 +94,7 @@ export class Starter extends ReflectiveInjector {
   constructor(public config: TextbusConfig) {
     super(new NullInjector(), [], Starter.diScope)
     const { plugins, providers } = this.mergeModules(config)
-    this.plugins = plugins.map(i => i())
+    this.plugins = plugins
     this.staticProviders = providers
     this.normalizedProviders = this.staticProviders.map(i => normalizeProvider(i))
   }
@@ -161,19 +161,16 @@ export class Starter extends ReflectiveInjector {
     const components = [
       ...(config.components || [])
     ]
-    const attributes = [
-      ...(config.attributes || [])
-    ]
-    const formatters = [
-      ...(config.formatters || [])
-    ]
+    const attributes = this.bindContext(config.attributes)
+    const formatters = this.bindContext(config.formatters)
     const plugins = [
       ...(config.plugins || [])
     ]
     config.imports?.forEach(module => {
       customProviders.push(...(module.providers || []))
       components.push(...(module.components || []))
-      formatters.push(...(module.formatters || []))
+      attributes.push(...this.bindContext(module.attributes))
+      formatters.push(...this.bindContext(module.formatters))
       plugins.push(...(module.plugins || []))
     })
     const providers: Provider[] = [
@@ -239,7 +236,23 @@ export class Starter extends ReflectiveInjector {
     ]
     return {
       providers,
-      plugins
+      plugins: plugins.map(i => {
+        if (typeof i === 'function') {
+          return i()
+        }
+        return i
+      })
     }
+  }
+
+  private bindContext<T extends (Attribute<any> | Formatter<any>)>(
+    list: Array<T | ((injector: Injector) => T)> = []
+  ): T[] {
+    return list.map(item => {
+      if (typeof item === 'function') {
+        return item(this)
+      }
+      return item
+    })
   }
 }

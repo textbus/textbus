@@ -43,7 +43,9 @@ export class Keyboard {
               private selection: Selection) {
     components.forEach(component => {
       const config = component.zenCoding
-      if (config) {
+      if (Array.isArray(config)) {
+        config.forEach(i => this.zenCodingInterceptors.push(this.createZenCodingEx(component, i)))
+      } else if (config) {
         this.zenCodingInterceptors.push(this.createZenCodingEx(component, config))
       }
     })

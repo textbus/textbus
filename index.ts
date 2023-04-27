@@ -231,6 +231,9 @@ async function create() {
 
   const editor =  initEditor()
 
+  const root = editor.get(RootComponentRef).component
+  root.toString()
+
   // editor.onChange.subscribe(() => {
   //   console.log(editor.getHTML())
   // })

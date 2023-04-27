@@ -149,7 +149,8 @@ export interface ComponentOptions<Extends extends ComponentExtends, State, SlotS
   separable?: boolean
 
   /** 输入语法糖支持 */
-  zenCoding?: ZenCodingGrammarInterceptor<ComponentInitData<State, SlotState>>
+  zenCoding?: ZenCodingGrammarInterceptor<ComponentInitData<State, SlotState>> |
+    ZenCodingGrammarInterceptor<ComponentInitData<State, SlotState>>[]
 
   /**
    * 组件初始化实现
@@ -169,7 +170,7 @@ export interface Component<Instance extends ComponentInstance = ComponentInstanc
   /** 组件是否可拆分 */
   separable: boolean
 
-  zenCoding?: ZenCodingGrammarInterceptor<State>
+  zenCoding?: ZenCodingGrammarInterceptor<State> | ZenCodingGrammarInterceptor<State>[]
 
   /**
    * 组件创建实例的方法
