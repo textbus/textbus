@@ -336,7 +336,7 @@ export class LocalHistory extends History {
           }
           if (action.type === 'apply') {
             component.updateState(draft => {
-              return applyPatches(draft, action.patches)
+              return applyPatches(draft as any, action.patches)
             })
           }
         })

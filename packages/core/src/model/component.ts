@@ -99,57 +99,145 @@ export interface ZenCodingGrammarInterceptor<Data = any> {
 /**
  * 组件实例对象
  */
-export interface ComponentInstance<Extends extends ComponentExtends = ComponentExtends, State = any, SlotState = unknown> {
+export class ComponentInstance<Extends extends ComponentExtends = ComponentExtends, State = unknown, SlotState = unknown> {
   /**
    * 组件所在的插槽
    * @readonly
    * @internal
    */
-  parent: Slot | null
+  parent: Slot | null = null
   /**
    * 父组件
    * @readonly
    * @internal
    */
-  parentComponent: ComponentInstance | null
+  parentComponent: ComponentInstance | null = null
   /** 组件变化标识器 */
-  changeMarker: ChangeMarker
-  /** 组件是否可拆分 */
-  separable: boolean
-  /** 组件名 */
-  name: string
+  changeMarker = new ChangeMarker()
   /** 组件长度，固定为 1 */
-  length: 1
-  /** 组件类型 */
-  type: ContentType
+  length = 1
   /** 组件的子插槽集合 */
   slots: Slots<SlotState>
-  /** 组件内部实现的方法 */
-  extends: Extends
   /** 组件动态上下文菜单注册表 */
-  shortcutList: Shortcut[]
+  shortcutList: Shortcut[] = []
   /** 当状态变更时触发 */
   onStateChange: Observable<StateChange<State>>
-
+  /** 组件内部实现的方法 */
+  extends!: Extends
+  /** 组件名 */
+  name: string
+  /** 组件类型 */
+  type: ContentType
+  /** 组件是否可拆分 */
+  separable: boolean
   /** 组件状态 */
-  get state(): State
+  state: State
+
+  protected stateChangeEvent = new Subject<StateChange<State>>()
+
+  /**
+   * @param injector 当前容器上下文
+   * @param options 组件配置项
+   * @param initData 初始数据
+   */
+  constructor(injector: Injector,
+              private options: ComponentOptions<Extends, State, SlotState>,
+              initData?: ComponentInitData<State, SlotState>) {
+    this.onStateChange = this.stateChangeEvent.asObservable()
+    this.name = options.name
+    this.type = options.type
+    this.separable = !!options.separable
+    this.state = initData?.state as any || null
+
+    const changeController: ChangeController<State> = {
+      update: (fn, record = true) => {
+        return this.updateState(fn, record)
+      },
+      onChange: this.onStateChange.pipe(map(i => i.newState))
+    }
+    const context: ComponentContext<State> = {
+      contextInjector: injector,
+      changeController,
+      componentInstance: this,
+      eventCache: new EventCache<EventTypes>(),
+    }
+    contextStack.push(context)
+    this.extends = options.setup(initData)
+    onDestroy(() => {
+      eventCacheMap.delete(this)
+      subscriptions.forEach(i => i.unsubscribe())
+    })
+    eventCacheMap.set(this, context.eventCache)
+    contextStack.pop()
+    this.slots = context.slots || new Slots<SlotState>(this)
+    if (Reflect.has(context, 'initState')) {
+      this.state = context.initState as State
+    }
+
+    const subscriptions: Subscription[] = [
+      this.slots.onChange.subscribe(ops => {
+        this.changeMarker.markAsDirtied(ops)
+      })
+    ]
+  }
 
   /**
    * 更新组件状态的方法
    * @param fn
    * @param record
    */
-  updateState(fn: (draft: Draft<State>) => void, record?: boolean): State
+  updateState(fn: (draft: Draft<State>) => void, record?: boolean): State {
+    let changes!: Patch[]
+    let inverseChanges!: Patch[]
+    const oldState = this.state
+    const newState = produce(oldState, fn, (p, ip) => {
+      changes = p
+      inverseChanges = ip
+    }) as State
+    if (changes.length === 0 && inverseChanges.length === 0) {
+      return oldState!
+    }
+    this.state = newState
+    this.changeMarker.markAsDirtied({
+      path: [],
+      apply: [{
+        type: 'apply',
+        patches: changes!,
+        value: newState,
+        record: !!record
+      }],
+      unApply: [{
+        type: 'apply',
+        patches: inverseChanges!,
+        value: oldState,
+        record: !!record
+      }]
+    })
+    this.stateChangeEvent.next({
+      oldState: oldState!,
+      newState,
+      record: !!record
+    })
+    return newState
+  }
 
   /**
    * 组件转为 JSON 数据的方法
    */
-  toJSON(): ComponentLiteral<State>
+  toJSON(): ComponentLiteral<State> {
+    return {
+      name: this.name,
+      state: this.state ?? null as unknown as State,
+      slots: this.slots.toJSON()
+    }
+  }
 
   /**
    * 将组件转换为 string
    */
-  toString(): string
+  toString(): string {
+    return this.slots.toString()
+  }
 }
 
 /**
@@ -177,22 +265,36 @@ export interface ComponentOptions<Extends extends ComponentExtends, State, SlotS
 /**
  * Textbus 组件
  */
-export interface Component<Instance extends ComponentInstance = ComponentInstance, State extends ComponentInitData = ComponentInitData> {
+export class Component<
+  Extends extends ComponentExtends = ComponentExtends,
+  State = unknown,
+  SlotState = unknown> {
+
   /** 组件名 */
   name: string
   /** 实例数据类型 */
   instanceType: ContentType
   /** 组件是否可拆分 */
   separable: boolean
+  /** 快捷语法拦截器 */
+  zenCoding: ZenCodingGrammarInterceptor<ComponentInitData<State, SlotState>> |
+    ZenCodingGrammarInterceptor<ComponentInitData<State, SlotState>>[]
 
-  zenCoding?: ZenCodingGrammarInterceptor<State> | ZenCodingGrammarInterceptor<State>[]
+  constructor(private options: ComponentOptions<Extends, State, SlotState>) {
+    this.name = options.name
+    this.instanceType = options.type
+    this.separable = !!options.separable
+    this.zenCoding = options.zenCoding || []
+  }
 
   /**
    * 组件创建实例的方法
-   * @param context
+   * @param injector
    * @param data
    */
-  createInstance(context: Injector, data?: State): Instance
+  createInstance(injector: Injector, data?: ComponentInitData<State, SlotState>): ComponentInstance<Extends, State, SlotState> {
+    return new ComponentInstance<Extends, State, SlotState>(injector, this.options, data)
+  }
 }
 
 /**
@@ -386,7 +488,7 @@ interface ComponentContext<T> {
   changeController: ChangeController<T>
   contextInjector: Injector
   componentInstance: ComponentInstance
-  dynamicShortcut: Shortcut[]
+  // dynamicShortcut: Shortcut[]
   eventCache: EventCache<EventTypes>
 }
 
@@ -404,15 +506,15 @@ function getCurrentContext() {
 /**
  * 提取组件的实例类型
  */
-export type ExtractComponentInstanceType<T> = T extends Component<infer S> ? S : never
+export type ExtractComponentInstanceType<T> = T extends Component<infer S, infer U, infer K> ? ComponentInstance<S, U, K> : never
 /**
  * 提取组件扩展类型
  */
-export type ExtractComponentInstanceExtendsType<T> = T extends Component<ComponentInstance<infer S>> ? S : never
+export type ExtractComponentInstanceExtendsType<T> = T extends Component<infer S> ? S : never
 /**
  * 提取组件状态类型
  */
-export type ExtractComponentStateType<T> = T extends Component<ComponentInstance<any, infer S>> ? S : never
+export type ExtractComponentStateType<T> = T extends Component<any, infer S> ? S : never
 
 /**
  * Textbus 扩展组件方法
@@ -420,116 +522,8 @@ export type ExtractComponentStateType<T> = T extends Component<ComponentInstance
  */
 export function defineComponent<Extends extends ComponentExtends, State = any, SlotState = any>(
   options: ComponentOptions<Extends, State, SlotState>
-): Component<ComponentInstance<Extends, State, SlotState>, ComponentInitData<State, SlotState>> {
-  const component: Component<ComponentInstance<Extends, State, SlotState>, ComponentInitData<State, SlotState>> = {
-    name: options.name,
-    separable: !!options.separable,
-    instanceType: options.type,
-    zenCoding: options.zenCoding,
-    createInstance(contextInjector: Injector, initData?: ComponentInitData<State, SlotState>) {
-      const marker = new ChangeMarker()
-      const stateChangeSubject = new Subject<StateChange<State>>()
-
-      const onStateChange = stateChangeSubject.asObservable()
-
-      const changeController: ChangeController<State> = {
-        update(fn, record = true) {
-          return componentInstance.updateState(fn, record)
-        },
-        onChange: onStateChange.pipe(map(i => i.newState))
-      }
-
-      const componentInstance: ComponentInstance<Extends, State, SlotState> = {
-        name: component.name,
-        type: component.instanceType,
-        separable: component.separable,
-        changeMarker: marker,
-        parent: null,
-        get parentComponent() {
-          return componentInstance.parent?.parent || null
-        },
-        get state() {
-          return state!
-        },
-        length: 1,
-        onStateChange,
-        slots: null as any,
-        extends: null as any,
-        shortcutList: null as any,
-        updateState(fn, record = true) {
-          let changes!: Patch[]
-          let inverseChanges!: Patch[]
-          const oldState = state
-          const newState = produce(oldState, fn, (p, ip) => {
-            changes = p
-            inverseChanges = ip
-          }) as State
-          if (changes.length === 0 && inverseChanges.length === 0) {
-            return oldState!
-          }
-          state = newState
-          marker.markAsDirtied({
-            path: [],
-            apply: [{
-              type: 'apply',
-              patches: changes!,
-              value: newState,
-              record
-            }],
-            unApply: [{
-              type: 'apply',
-              patches: inverseChanges!,
-              value: oldState,
-              record
-            }]
-          })
-          stateChangeSubject.next({
-            oldState: oldState!,
-            newState,
-            record
-          })
-          return newState
-        },
-        toJSON() {
-          return {
-            name: component.name,
-            state: state ?? null as unknown as State,
-            slots: componentInstance.slots.toJSON()
-          }
-        },
-        toString() {
-          return componentInstance.slots.toString()
-        }
-      }
-      const context: ComponentContext<State> = {
-        contextInjector,
-        changeController,
-        componentInstance: componentInstance,
-        dynamicShortcut: [],
-        eventCache: new EventCache<EventTypes>(),
-      }
-      contextStack.push(context)
-      componentInstance.extends = options.setup(initData)
-      onDestroy(() => {
-        eventCacheMap.delete(componentInstance)
-        subscriptions.forEach(i => i.unsubscribe())
-      })
-      eventCacheMap.set(componentInstance, context.eventCache)
-      contextStack.pop()
-      componentInstance.slots = context.slots || new Slots(componentInstance)
-      componentInstance.shortcutList = context.dynamicShortcut
-      let state = Reflect.has(context, 'initState') ? context.initState : initData?.state
-
-      const subscriptions: Subscription[] = [
-        componentInstance.slots.onChange.subscribe(ops => {
-          marker.markAsDirtied(ops)
-        })
-      ]
-
-      return componentInstance
-    }
-  }
-  return component
+) {
+  return new Component<Extends, State, SlotState>(options)
 }
 
 /**
@@ -590,7 +584,7 @@ export function useRef<T>(initValue: T | null = null) {
  */
 export function useDynamicShortcut(config: Shortcut) {
   const context = getCurrentContext()
-  context.dynamicShortcut.push(config)
+  context.componentInstance.shortcutList.push(config)
 }
 
 /**
