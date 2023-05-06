@@ -1592,7 +1592,7 @@ export class Selection {
       const end = childSlots.indexOf(endSlot!)
       startSlotRefIndex = childSlots.indexOf(startSlot)
       if (startParentComponent !== commonAncestorComponent && end === -1) {
-        start.push(...childSlots.slice(startSlotRefIndex + 1, childSlots.length).map(slot => {
+        start.push(...childSlots.slice(startSlotRefIndex! + 1, childSlots.length).map(slot => {
           return {
             startIndex: 0,
             endIndex: slot.length,
