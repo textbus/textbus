@@ -145,7 +145,7 @@ export class Query {
    * @param filter 查询结构过滤函数，过滤不需要的数据
    */
   queryComponent<Extends extends ComponentExtends, T, U>(
-    component: Component<ComponentInstance<Extends, T, U>>,
+    component: Component<Extends, T, U>,
     filter?: (instance: ComponentInstance<Extends, T, U>) => boolean): QueryState<ComponentInstance<Extends, T, U>> {
     if (!this.selection.isSelected) {
       return {
@@ -181,7 +181,7 @@ export class Query {
    * @param component 要查询的组件
    */
   queryWrappedComponent<Extends extends ComponentExtends, T, U>(
-    component: Component<ComponentInstance<Extends, T, U>>
+    component: Component<Extends, T, U>
   ): QueryState<ComponentInstance<Extends, T, U>> {
     const selection = this.selection
     if (!selection.isSelected || selection.isCollapsed) {
