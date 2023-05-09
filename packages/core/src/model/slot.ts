@@ -75,7 +75,10 @@ export class Slot<T = any> {
     return this.isEmpty ? 0 : this._index
   }
 
-  /** 插槽的 id，用于优化 diff 算法 */
+  /**
+   * @internal
+   * 插槽的 id，用于优化 diff 算法
+   */
   readonly id = Math.random()
 
   protected _index = 0

@@ -706,6 +706,9 @@ export class Renderer {
           return factory(children)
         })
       }, this.controller.readonly ? RenderMode.Readonly : RenderMode.Editing)
+      if (!(node instanceof VElement)) {
+        throw rendererErrorFn(`component \`${component.name}\` rendering does not return a VElement.`)
+      }
       setEditable(node, false)
       this.componentVNode.set(component, node)
       component.changeMarker.rendered()
@@ -721,6 +724,9 @@ export class Renderer {
         const oldVNode = this.slotRootVNodeCaches.get(slot)!
         const factory = this.slotRenderFactory.get(slot)!
         const vNode = this.slotRender(component, slot, factory)
+        if (!(vNode instanceof VElement)) {
+          throw rendererErrorFn(`component \`${component.name}\` slot rendering does not return a VElement.`)
+        }
         if (dirty) {
           if (oldComponentVNode === oldVNode) {
             this.componentVNode.set(component, vNode)

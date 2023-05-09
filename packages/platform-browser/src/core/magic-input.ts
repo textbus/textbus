@@ -259,7 +259,7 @@ class ExperimentalCaret implements Caret {
       height = parseFloat(fontSize) * parseFloat(lineHeight)
     }
 
-    const boxHeight = Math.floor(Math.max(height, rect.height))
+    const boxHeight = Math.max(Math.floor(Math.max(height, rect.height)), 12)
     // const boxHeight = Math.floor(height)
 
     let rectTop = rect.top

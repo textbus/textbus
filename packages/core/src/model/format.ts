@@ -49,18 +49,6 @@ export class Format {
    * @param background
    */
   merge<T extends FormatValue>(formatter: Formatter<T>, value: FormatRange<T>, background = false): this {
-    // if (formatter.type === FormatType.Block) {
-    //   if (isVoid(value)) {
-    //     this.map.delete(formatter)
-    //   } else if (!background || !this.map.has(formatter)) {
-    //     this.map.set(formatter, [{
-    //       startIndex: 0,
-    //       endIndex: this.slot.length,
-    //       value: value as FormatValue
-    //     }])
-    //   }
-    //   return this
-    // }
     let ranges = this.map.get(formatter)
     if (!ranges) {
       const v = value.value
@@ -109,12 +97,6 @@ export class Format {
   split(index: number, distance: number) {
     const expandedValues = Array.from<string>({ length: distance })
     Array.from(this.map).forEach(([key, formatRanges]) => {
-      // if (key.type === FormatType.Block) {
-      //   formatRanges.forEach(i => {
-      //     i.endIndex += distance
-      //   })
-      //   return
-      // }
       const values = this.tileRanges(formatRanges)
       values.splice(index, 0, ...expandedValues)
       const newRanges = Format.toRanges(values)
