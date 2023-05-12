@@ -24,24 +24,39 @@ export interface StateComponentInitData<State, SlotState> {
   state: State
 }
 
+/**
+ * 组件初始化数据
+ */
 export type ComponentInitData<State = unknown, SlotState = unknown> =
   SlotsComponentInitData<State, SlotState>
   | StateComponentInitData<State, SlotState>
 
+/**
+ * 组件 JSON 字面量接口
+ */
 export interface ComponentLiteral<State = any> {
   name: string
   slots: SlotLiteral<any, any>[]
   state: State
 }
 
+/**
+ * 插槽渲染的工厂函数
+ */
 export interface SlotRenderFactory {
   (children: Array<VElement | VTextNode>): VElement
 }
 
+/**
+ * 渲染插槽函数的定义
+ */
 export interface SlotRender {
   (slot: Slot, factory: SlotRenderFactory): VElement
 }
 
+/**
+ * 渲染组件函数的定义
+ */
 export interface ComponentRender {
   (slotRender: SlotRender, renderMode: RenderMode): VElement
 }
@@ -200,37 +215,71 @@ export class Ref<T> {
   }
 }
 
+/**
+ * 插入内容事件对象
+ */
 export interface InsertEventData {
+  /** 插槽插入的位置 */
   index: number
+  /** 当前插入的内容 */
   content: string | ComponentInstance,
+  /** 当前插入的附加的格式 */
   formats: Formats
 }
 
+/**
+ * 换行事件对象
+ */
 export interface BreakEventData {
+  /** 换行事件插槽的第几位触发的换行操作 */
   index: number
 }
 
+/**
+ * 删除数据事件对象
+ */
 export interface DeleteEventData {
+  /** 删除数据的位置 */
   index: number
+  /** 删除数据的长度 */
   count: number
+  /** 是否是向结束位置删除 */
   toEnd: boolean
 }
 
+/**
+ * 粘贴事件对象
+ */
 export interface PasteEventData {
+  /** 标识粘贴发生在插槽的第几位 */
   index: number
+  /** 粘贴的内容 */
   data: Slot
+  /** 粘贴内容的纯文本 */
   text: string
 }
 
+/**
+ * 组合输入开始事件对象
+ */
 export interface CompositionStartEventData {
+  /** 标识在插槽的第几位触发 */
   index: number
 }
 
+/**
+ * 组合输入更新事件对象
+ */
 export interface CompositionUpdateEventData {
+  /** 标识在插槽的第几位触发 */
   index: number
+  /** 组件数据输入的数据 */
   data: string
 }
 
+/**
+ * 上下文本菜单配置项
+ */
 export interface ContextMenuItem {
   iconClasses?: string[]
   label: string
@@ -239,6 +288,9 @@ export interface ContextMenuItem {
   onClick(): void
 }
 
+/**
+ * 自定义上下文本菜单配置项
+ */
 export interface ContextMenuCustomItem<T = unknown> {
   type: string
   value?: T
@@ -249,6 +301,9 @@ export interface ContextMenuCustomItem<T = unknown> {
   onComplete(value: T): void
 }
 
+/**
+ * 上下文多级菜单配置项
+ */
 export interface ContextMenuGroup {
   iconClasses?: string[]
   label: string

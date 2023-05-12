@@ -2,15 +2,24 @@ import { ComponentInstance, ComponentLiteral } from './component'
 
 /**
  * Textbus 内容管理类
+ * Content 属于 Slot 的私有属性，在实际场景中，开发者不需在关注此类，也不需要访问或操作此类
  */
 export class Content {
   private segmenter = new Intl.Segmenter()
   private data: Array<string | ComponentInstance> = []
 
+  /**
+   * 内容的长度
+   */
   get length() {
     return this.data.reduce((p, n) => p + n.length, 0)
   }
 
+  /**
+   * 修复 index，由于 emoji 长度不固定，当 index 在 emoji 中时，操作数据会产生意外的数据
+   * @param index 当前的 index
+   * @param toEnd 当需要变更 index 时，是向后还是向前移动
+   */
   correctIndex(index: number, toEnd: boolean) {
     if (index === 0 || index === this.length) {
       return index
@@ -49,6 +58,11 @@ export class Content {
     return index
   }
 
+  /**
+   * 在指定下标位置插入内容
+   * @param index
+   * @param content
+   */
   insert(index: number, content: string | ComponentInstance) {
     if (index >= this.length) {
       this.append(content)
@@ -85,6 +99,10 @@ export class Content {
     }
   }
 
+  /**
+   * 把内容添加到最后
+   * @param content
+   */
   append(content: ComponentInstance | string) {
     const lastChildIndex = this.data.length - 1
     const lastChild = this.data[lastChildIndex]

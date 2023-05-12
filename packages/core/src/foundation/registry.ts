@@ -11,6 +11,11 @@ import {
 } from '../model/_api'
 import { ATTRIBUTE_LIST, COMPONENT_LIST, FORMATTER_LIST } from './_injection-tokens'
 
+/**
+ * 注册表
+ * 用于缓存一个 Textbus 实例内可用的 Component、Formatter、Attribute。
+ * Registry 也可以根据数据创建组件或插槽的实例
+ */
 @Injectable()
 export class Registry {
   private componentMap = new Map<string, Component>()

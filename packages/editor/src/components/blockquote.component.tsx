@@ -51,12 +51,8 @@ export const blockquoteComponent = defineComponent({
 })
 
 export const blockquoteComponentLoader: ComponentLoader = {
-  resources: {
-    // eslint-disable-next-line max-len
-    styles: ['']
-  },
   match(element: HTMLElement): boolean {
-    return element.tagName === 'BLOCKQUOTE'
+    return element.tagName === 'BLOCKQUOTE' || element.tagName === 'DIV' && element.className === 'tb-blockquote'
   },
   read(element: HTMLElement, injector: Injector, slotParser: SlotParser): ComponentInstance {
     const slot = slotParser(new Slot([

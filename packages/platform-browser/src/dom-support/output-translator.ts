@@ -2,7 +2,7 @@ import { VElement, VTextNode } from '@textbus/core'
 import { Injectable } from '@tanbo/di'
 
 /**
- * HTML 输出转换器
+ * HTML 输出转换器，用于将虚拟 DOM 转换为 HTML 字符串
  */
 @Injectable()
 export class OutputTranslator {
@@ -41,6 +41,10 @@ export class OutputTranslator {
 
   private singleTagTest = new RegExp(`^(${OutputTranslator.singleTags.join('|')})$`, 'i')
 
+  /**
+   * 将虚拟 DOM 转换为 HTML 字符串的方法
+   * @param vDom 虚拟 DOM 节点
+   */
   transform(vDom: VElement): string {
     return vDom.children.map(child => {
       return this.vDomToHTMLString(child)

@@ -30,15 +30,47 @@ export interface ComponentRenderFn {
   (component: ComponentInstance, renderMode: RenderMode): VElement
 }
 
+/**
+ * 无副作用的渲染器，用于把组件或插槽渲染为虚拟 DOM
+ */
 @Injectable()
 export class PureRenderer {
+  /**
+   * 组件渲染方法
+   * @param component 要渲染的组件
+   * @param renderMode 渲染模式
+   * @example
+   * ```ts
+   * const vDom = pureRenderer.componentRender(componentInstance, RenderMode.Output)
+   * ```
+   */
   componentRender(component: ComponentInstance, renderMode: RenderMode): VElement {
     return component.extends.render((slot, factory) => {
-      return this.slotRender(slot, factory, renderMode)
+      return this.slotRender(slot, renderMode, factory)
     }, renderMode)
   }
 
-  slotRender(slot: Slot, slotRenderFactory: SlotRenderFactory, renderMode: RenderMode): VElement {
+  /**
+   * 插槽渲染方法
+   * @param slot 要渲染的插槽
+   * @param renderMode 渲染模式
+   * @param slotRenderFactory 渲染插槽的工厂函数
+   * @example
+   * ```tsx
+   * const slot = new Slot([
+   *   ContentType.Text
+   * ])
+   *
+   * slot.insert('hello world!')
+   *
+   * const vDom = pureRenderer.slotRender(slot, RenderMode.Output, children => {
+   *   return (
+   *     <div>{children}</div>
+   *   )
+   * })
+   * ```
+   */
+  slotRender(slot: Slot, renderMode: RenderMode, slotRenderFactory: SlotRenderFactory): VElement {
     const formatTree = slot.createFormatTree()
     const componentRender = (component, renderMode) => {
       return this.componentRender(component, renderMode)

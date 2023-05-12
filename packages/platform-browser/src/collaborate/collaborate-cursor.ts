@@ -6,6 +6,9 @@ import { VIEW_CONTAINER } from '../core/injection-tokens'
 import { SelectionBridge } from '../core/selection-bridge'
 import { createElement, getLayoutRectByRange, Rect } from '../_utils/uikit'
 
+/**
+ * 远程用户及光标位置信息
+ */
 export interface RemoteSelection {
   id: string
   color: string
@@ -25,10 +28,16 @@ export interface RemoteSelectionCursor {
   userTip: HTMLElement
 }
 
+/**
+ * 远程光标绘制范围计算代理类，可用于定制特定场景下的远程选区绘制，如表格有选区，不会遵守常见的文档流形式
+ */
 export abstract class CollaborateSelectionAwarenessDelegate {
   abstract getRects(abstractSelection: AbstractSelection, nativeRange: Range): false | Rect[]
 }
 
+/**
+ * 协作光标绘制类
+ */
 @Injectable()
 export class CollaborateCursor {
   private host = createElement('div', {
@@ -108,6 +117,9 @@ export class CollaborateCursor {
     }))
   }
 
+  /**
+   * 刷新协作光标，由于 Textbus 只会绘制可视区域的光标，当可视区域发生变化时，需要重新绘制
+   */
   refresh() {
     this.draw(this.currentSelection)
   }
@@ -116,6 +128,10 @@ export class CollaborateCursor {
     this.subscription.unsubscribe()
   }
 
+  /**
+   * 根据远程用户光标位置，绘制协作光标
+   * @param paths
+   */
   draw(paths: RemoteSelection[]) {
     this.currentSelection = paths
     const containerRect = this.container.getBoundingClientRect()

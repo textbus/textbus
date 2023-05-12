@@ -25,7 +25,7 @@ export enum QueryStateType {
 }
 
 /**
- * Textbus 状态查询结果，当状态为禁用时，`value` 为 null
+ * Textbus 状态查询结果，当状态为 Normal，`value` 为 null
  */
 export interface QueryState<V, S = QueryStateType, K = S extends QueryStateType.Enabled ? V : null> {
   state: S

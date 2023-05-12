@@ -15,6 +15,9 @@ export enum ChangeOrigin {
   Remote
 }
 
+/**
+ * 标记一次变更属于本地、远程或者是历史记录
+ */
 export interface ChangeItem {
   from: ChangeOrigin
   operation: Operation
@@ -49,9 +52,10 @@ export class Scheduler {
    */
   onDocChanged: Observable<ChangeItem[]>
 
-  /** 当文档在本地发生第一次变更 */
+  /** 当文档在本地发生第一次变更触发 */
   onDocFirstChangeFromLocal: Observable<void>
 
+  /** 当文档在本地发生变更之前触发 */
   onLocalChangeBefore: Observable<void>
 
   private _lastChangesHasLocalUpdate = true

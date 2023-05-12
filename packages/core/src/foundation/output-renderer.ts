@@ -57,7 +57,7 @@ export class OutputRenderer {
     return this.componentVNode.get(component)!
   }
 
-  slotRender(slot: Slot, slotRenderFactory: SlotRenderFactory): VElement {
+  private slotRender(slot: Slot, slotRenderFactory: SlotRenderFactory): VElement {
     if (slot.changeMarker.outputDirty) {
       this.slotRenderFactory.set(slot, slotRenderFactory)
       const formatTree = slot.createFormatTree()

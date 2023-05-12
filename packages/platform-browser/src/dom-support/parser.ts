@@ -11,6 +11,9 @@ import {
 import { ViewOptions } from '../core/types'
 import { EDITOR_OPTIONS } from '../core/injection-tokens'
 
+/**
+ * 组件可附加携带的信息，如一些样式表、脚本、或编辑时模式时的样式
+ */
 export interface ComponentResources {
   links?: Array<{ [key: string]: string }>
   styles?: string[]
@@ -18,7 +21,18 @@ export interface ComponentResources {
   editModeStyles?: string[]
 }
 
+/**
+ * 插槽解析器
+ */
 export interface SlotParser {
+  /**
+   * 将指定 DOM 节点解析为插槽数据
+   * @param childSlot 储存数据的插槽
+   * @param slotRootElement 插槽的根节点
+   * @param slotContentHostElement 插槽的内容节点
+   *
+   * 注意：当不传入内容节点时，Textbus 会把根节点当成内容节点
+   */
   <T extends Slot>(childSlot: T, slotRootElement: HTMLElement, slotContentHostElement?: HTMLElement): T
 }
 
@@ -41,9 +55,20 @@ export interface FormatLoaderReadResult<T extends FormatValue> {
   value: T
 }
 
+/**
+ * 格式加载器
+ */
 export interface FormatLoader<T extends FormatValue> {
+  /**
+   * 匹配一个 DOM 节点是否是某个格式节点
+   * @param element
+   */
   match(element: HTMLElement): boolean
 
+  /**
+   * 读取匹配到的节点，并返回读取后的信息
+   * @param element
+   */
   read(element: HTMLElement): FormatLoaderReadResult<T>
 }
 
@@ -52,12 +77,26 @@ export interface AttributeLoaderReadResult<T extends FormatValue> {
   value: T
 }
 
+/**
+ * 属性加载器
+ */
 export interface AttributeLoader<T extends FormatValue> {
+  /**
+   * 匹配一个 DOM 节点是否是某个属性节点
+   * @param element
+   */
   match(element: HTMLElement): boolean
 
+  /**
+   * 读取匹配到的节点，并返回读取后的信息
+   * @param element
+   */
   read(element: HTMLElement): AttributeLoaderReadResult<T>
 }
 
+/**
+ * 用于解析 HTML，并把 HTML 内容转换为 Textbus 可以支持的组件或插槽数据
+ */
 @Injectable()
 export class Parser {
   static parseHTML(html: string) {
@@ -88,6 +127,11 @@ export class Parser {
     this.attributeLoaders = attributeLoaders
   }
 
+  /**
+   * 使用指定的组件加载器解析一段 HTML 字符串
+   * @param html
+   * @param rootComponentLoader
+   */
   parseDoc(html: string, rootComponentLoader: ComponentLoader) {
     const element = Parser.parseHTML(html)
     return rootComponentLoader.read(
@@ -99,6 +143,11 @@ export class Parser {
     )
   }
 
+  /**
+   * 将一段 HTML 解析到指定插槽
+   * @param html
+   * @param rootSlot
+   */
   parse(html: string, rootSlot: Slot) {
     const element = Parser.parseHTML(html)
     return this.readFormats(element, rootSlot)

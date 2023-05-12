@@ -4,6 +4,9 @@ import { Commander } from './commander'
 import { Selection } from './selection'
 import { COMPONENT_LIST, ZEN_CODING_DETECT } from './_injection-tokens'
 
+/**
+ * 快捷键配置
+ */
 export interface KeymapState {
   ctrlKey: boolean
   altKey: boolean

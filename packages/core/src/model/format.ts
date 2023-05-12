@@ -1,27 +1,42 @@
 import { Formatter } from './attribute'
 import { Slot } from './slot'
 
+/**
+ * 格式或属性的值，必须为可被 JSON 序列化的字面量
+ */
 export type FormatValue = string | number | boolean | null | Record<string, string | number | boolean>
 
+/**
+ * 一组格式
+ */
 export type Formats = [formatter: Formatter<any>, value: FormatValue][]
 
+/**
+ * 标识格式的范围
+ */
 export interface FormatRange<T extends FormatValue> {
   startIndex: number
   endIndex: number
   value: T
 }
 
+/**
+ * 格式的字面量
+ */
 export interface FormatLiteral<T extends FormatValue> {
   [key: string]: FormatRange<T>[]
 }
 
-export interface FormatItem<T extends FormatValue> {
+/**
+ * 格式的详情
+ */
+export interface FormatItem<T extends FormatValue> extends FormatRange<T>{
   formatter: Formatter<T>
-  value: T
-  startIndex: number
-  endIndex: number
 }
 
+/**
+ * 格式树
+ */
 export interface FormatTree<T extends FormatValue> {
   startIndex: number
   endIndex: number
@@ -35,6 +50,7 @@ function isVoid(data: any) {
 
 /**
  * Textbus 格式管理类
+ * Format 类为 Slot 的私有属性，在实际场景中，开发者不需在关注此类，也不需要访问或操作此类
  */
 export class Format {
   private map = new Map<Formatter<any>, FormatRange<any>[]>()

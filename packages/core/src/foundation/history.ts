@@ -9,12 +9,21 @@ import { HISTORY_STACK_SIZE, RootComponentRef } from './_injection-tokens'
 import { ChangeOrigin, Scheduler } from './scheduler'
 import { makeError } from '../_utils/make-error'
 
+/**
+ * 每一次变更所产生的记录
+ */
 export interface HistoryItem {
+  /** 变更之前的光标位置 */
   beforePaths: SelectionPaths
+  /** 变更之后的光标位置 */
   afterPaths: SelectionPaths
+  /** 变更操作记录集合 */
   operations: Operation[]
 }
 
+/**
+ * 历史记录抽象类，实现以下接口即可完成 Textbus 历史记录
+ */
 export abstract class History {
   abstract onChange: Observable<void>
   abstract onBack: Observable<void>
