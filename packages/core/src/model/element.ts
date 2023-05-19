@@ -108,9 +108,9 @@ export class VElement {
   [parentNode]: VElement | null = null
   readonly attrs = new Map<string, any>()
   readonly styles = new Map<string, string | number>()
-  readonly classes: Set<string>
+  readonly classes = new Set<string>()
 
-  readonly listeners: VElementListeners
+  readonly listeners: VElementListeners = {}
 
   private _children: Array<VElement | VTextNode> = []
 
@@ -118,10 +118,6 @@ export class VElement {
               attrs: VElementOptions | null = null,
               children: Array<VElement | VTextNode> = []) {
     attrs = attrs || {}
-
-    this.styles = new Map<string, string | number>()
-    this.listeners = {}
-    this.classes = new Set<string>()
     Object.keys(attrs).forEach(key => {
       if (key === 'class') {
         const className = (attrs!.class || '').trim();
