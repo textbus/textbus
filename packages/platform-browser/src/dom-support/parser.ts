@@ -193,9 +193,11 @@ export class Parser {
       return f.read(el)
     })
     const startIndex = slot.index
-    Array.from(el.childNodes).forEach(child => {
-      this.readComponent(child, slot)
-    })
+    let startNode = el.firstChild
+    while (startNode) {
+      this.readComponent(startNode, slot)
+      startNode = startNode.nextSibling
+    }
     const endIndex = slot.index
     this.applyFormats(slot, formats.map<FormatItem<any>>(i => {
       return {
