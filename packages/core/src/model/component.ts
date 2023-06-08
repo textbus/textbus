@@ -335,6 +335,7 @@ export interface EventTypes {
   onViewChecked: () => void
   onViewInit: () => void
   onDestroy: () => void
+  onParentSlotUpdated: () => void
   onSelectionFromFront: (event: Event<ComponentInstance>) => void
   onSelectionFromEnd: (event: Event<ComponentInstance>) => void
   onBreak: (event: Event<Slot, BreakEventData>) => void
@@ -419,8 +420,8 @@ export type ExtractComponentStateType<T> = T extends Component<ComponentInstance
  */
 export function defineComponent<Extends extends ComponentExtends, State = any, SlotState = any>(
   options: ComponentOptions<Extends, State, SlotState>
-): Component<ComponentInstance<Extends, State>, ComponentInitData<State, SlotState>> {
-  const component: Component<ComponentInstance<Extends, State>, ComponentInitData<State, SlotState>> = {
+): Component<ComponentInstance<Extends, State, SlotState>, ComponentInitData<State, SlotState>> {
+  const component: Component<ComponentInstance<Extends, State, SlotState>, ComponentInitData<State, SlotState>> = {
     name: options.name,
     separable: !!options.separable,
     instanceType: options.type,
@@ -438,7 +439,7 @@ export function defineComponent<Extends extends ComponentExtends, State = any, S
         onChange: onStateChange.pipe(map(i => i.newState))
       }
 
-      const componentInstance: ComponentInstance<Extends, State> = {
+      const componentInstance: ComponentInstance<Extends, State, SlotState> = {
         name: component.name,
         type: component.instanceType,
         separable: component.separable,
@@ -676,6 +677,7 @@ export function invokeListener(target: ComponentInstance, eventType: 'onFocusIn'
 export function invokeListener(target: ComponentInstance, eventType: 'onFocusOut'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onDestroy'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onViewChecked'): void
+export function invokeListener(target: ComponentInstance, eventType: 'onParentSlotUpdated'): void
 export function invokeListener<K extends keyof EventTypes,
   D = EventTypes[K] extends (args: infer U) => any ?
     U extends Event<any> ? U : never
@@ -854,3 +856,7 @@ export const onCompositionUpdate = makeEventHook('onCompositionUpdate')
  * 当插槽组合输入结束触发
  */
 export const onCompositionEnd = makeEventHook('onCompositionEnd')
+/**
+ * 当组件的父插槽数据发生更新后触发
+ */
+export const onParentSlotUpdated = makeEventHook('onParentSlotUpdated')

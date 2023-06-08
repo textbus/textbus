@@ -144,9 +144,9 @@ export class Query {
    * @param component 要查询的组件
    * @param filter 查询结构过滤函数，过滤不需要的数据
    */
-  queryComponent<Extends extends ComponentExtends, T>(
-    component: Component<ComponentInstance<Extends, T>>,
-    filter?: (instance: ComponentInstance<Extends, T>) => boolean): QueryState<ComponentInstance<Extends, T>> {
+  queryComponent<Extends extends ComponentExtends, T, U>(
+    component: Component<ComponentInstance<Extends, T, U>>,
+    filter?: (instance: ComponentInstance<Extends, T, U>) => boolean): QueryState<ComponentInstance<Extends, T, U>> {
     if (!this.selection.isSelected) {
       return {
         state: QueryStateType.Normal,
@@ -159,10 +159,10 @@ export class Query {
 
       while (parent) {
         if (parent.name === component.name) {
-          if (!filter || filter(parent as ComponentInstance<Extends>)) {
+          if (!filter || filter(parent as ComponentInstance<Extends, T, U>)) {
             return {
               state: QueryStateType.Enabled,
-              value: parent as ComponentInstance<Extends>
+              value: parent as ComponentInstance<Extends, T, U>
             }
           }
         }
@@ -180,9 +180,9 @@ export class Query {
    * 查询当前选区是否包含在组件内
    * @param component 要查询的组件
    */
-  queryWrappedComponent<Extends extends ComponentExtends, T>(
-    component: Component<ComponentInstance<Extends, T>>
-  ): QueryState<ComponentInstance<Extends, T>> {
+  queryWrappedComponent<Extends extends ComponentExtends, T, U>(
+    component: Component<ComponentInstance<Extends, T, U>>
+  ): QueryState<ComponentInstance<Extends, T, U>> {
     const selection = this.selection
     if (!selection.isSelected || selection.isCollapsed) {
       return {
@@ -191,7 +191,7 @@ export class Query {
       }
     }
     const ranges = selection.getRanges()
-    const instances: ComponentInstance<Extends, T>[] = []
+    const instances: ComponentInstance<Extends, T, U>[] = []
     for (const range of ranges) {
       const { startSlot, endSlot, startOffset, endOffset } = range
       if (startSlot !== endSlot ||
@@ -203,7 +203,7 @@ export class Query {
       }
       const instance = startSlot.getContentAtIndex(startOffset)
       if (typeof instance !== 'string' && instance.name === component.name) {
-        instances.push(instance as ComponentInstance<Extends, T>)
+        instances.push(instance as ComponentInstance<Extends, T, U>)
       } else {
         return {
           state: QueryStateType.Normal,

@@ -225,6 +225,8 @@ export class Renderer {
 
   private renderedComponents: ComponentInstance[] = []
 
+  private firstRending = true
+
   constructor(private controller: Controller,
               private rootComponentRef: RootComponentRef) {
     this.onViewUpdated = this.viewUpdatedEvent.asObservable()
@@ -264,6 +266,7 @@ export class Renderer {
       }
       this.oldVDom = root
     }
+    this.firstRending = false
 
     Promise.resolve().then(() => {
       let index = this.renderedComponents.length - 1
@@ -759,7 +762,11 @@ export class Renderer {
       const formatTree = slot.createFormatTree()
       const renderMode = this.controller.readonly ? RenderMode.Readonly : RenderMode.Editing
       const componentRender = (component) => {
-        return this.componentRender(component)
+        const componentVNode = this.componentRender(component)
+        if (!this.firstRending) {
+          invokeListener(component, 'onParentSlotUpdated')
+        }
+        return componentVNode
       }
       const setLocation = (vNode, location) => {
         this.vNodeLocation.set(vNode, location)

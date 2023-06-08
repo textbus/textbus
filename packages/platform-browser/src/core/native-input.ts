@@ -422,7 +422,25 @@ export class NativeInput extends Input {
           case 'deleteCompositionText':
             this.composition = false
             break
-          case 'deleteContentBackward':
+          case 'deleteContentBackward': {
+            this.composition = false
+            const range = ev.getTargetRanges()[0]
+            if (!range) {
+              break
+            }
+            const location = this.renderer.getLocationByNativeNode(range.startContainer)!
+            const startSlot = this.selection.startSlot
+            if (startSlot) {
+              this.selection.setBaseAndExtent(
+                startSlot,
+                location.startIndex + range.startOffset,
+                startSlot,
+                location.startIndex + range.endOffset)
+
+              this.commander.delete()
+            }
+            break
+          }
           case 'insertReplacementText': {
             this.composition = false
             const range = ev.getTargetRanges()[0]
@@ -435,11 +453,9 @@ export class NativeInput extends Input {
               location.startIndex + range.endOffset)
 
             this.commander.delete()
-            if (ev.inputType === 'insertReplacementText') {
-              const text = ev.dataTransfer?.getData('text') || ev.data || null
-              if (text) {
-                this.commander.write(text)
-              }
+            const text = ev.dataTransfer?.getData('text') || ev.data || null
+            if (text) {
+              this.commander.write(text)
             }
             break
           }
