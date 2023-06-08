@@ -38,7 +38,7 @@ function initEditor() {
     zenCoding: true,
     // readonly: true,
     // minHeight: '600px',
-    useContentEditable: true,
+    // useContentEditable: true,
     theme: 'darkline',
     placeholder: '请输入内容……',
     // content: document.getElementById('template')?.innerHTML,

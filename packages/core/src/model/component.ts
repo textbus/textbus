@@ -545,9 +545,9 @@ export function useContext(token: any = Injector, noFoundValue?: any, flags?: an
 /**
  * 组件 setup 方法内获取组件实例的勾子
  */
-export function useSelf<Methods extends ComponentExtends = ComponentExtends, State = any>(): ComponentInstance<Methods, State> {
+export function useSelf<T extends ComponentInstance>(): T {
   const context = getCurrentContext()
-  return context.componentInstance as ComponentInstance<Methods, State>
+  return context.componentInstance as T
 }
 
 /**

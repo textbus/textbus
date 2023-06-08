@@ -326,7 +326,7 @@ export class Slot<T = any> {
     this.content.insert(startIndex, content)
     this.applyFormats(formats, startIndex, length, false)
 
-    if (isEmpty && this._index === 0) {
+    if (isEmpty) {
       const len = this.length - 1
       this.content.cut(len)
       this.format.shrink(len, 1)
