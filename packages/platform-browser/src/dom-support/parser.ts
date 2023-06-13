@@ -15,7 +15,7 @@ import { EDITOR_OPTIONS } from '../core/injection-tokens'
  * 组件可附加携带的信息，如一些样式表、脚本、或编辑时模式时的样式
  */
 export interface ComponentResources {
-  links?: Array<{ [key: string]: string }>
+  links?: Array<{[key: string]: string}>
   styles?: string[]
   scripts?: string[]
   editModeStyles?: string[]
@@ -32,8 +32,7 @@ export interface SlotParser {
    * @param slotContentHostElement 插槽的内容节点
    *
    * 注意：当不传入内容节点时，Textbus 会把根节点当成内容节点
-   */
-  <T extends Slot>(childSlot: T, slotRootElement: HTMLElement, slotContentHostElement?: HTMLElement): T
+   */<T extends Slot>(childSlot: T, slotRootElement: HTMLElement, slotContentHostElement?: HTMLElement): T
 }
 
 /**
@@ -179,7 +178,7 @@ export class Parser {
       this.readFormats(el as HTMLElement, slot)
     } else if (el.nodeType === Node.TEXT_NODE) {
       const textContent = el.textContent
-      if (/^\s*[\r\n]+\s*$/.test(textContent as string)) {
+      if (/^\s*[\r\n\u200b]+\s*$/.test(textContent as string)) {
         return
       }
       slot.insert(textContent as string)

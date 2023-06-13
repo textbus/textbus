@@ -60,7 +60,12 @@ export interface Module {
   plugins?: Array<Plugin | (() => Plugin)>
 
   /**
-   * 初始化之前的设置，返回一个函数，当 Textbus 销毁时调用
+   * 当模块注册时调用
+   */
+  beforeEach?(starter: Starter): void
+
+  /**
+   * 初始化时的设置，返回一个函数，当 Textbus 销毁时调用
    * @param starter
    */
   setup?(starter: Starter): Promise<(() => void) | void> | (() => void) | void
@@ -97,6 +102,11 @@ export class Starter extends ReflectiveInjector {
     this.plugins = plugins
     this.staticProviders = providers
     this.normalizedProviders = this.staticProviders.map(i => normalizeProvider(i))
+    config.imports?.forEach(module => {
+      if (typeof module.beforeEach === 'function') {
+        module.beforeEach(this)
+      }
+    })
   }
 
   /**
