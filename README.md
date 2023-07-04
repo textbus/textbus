@@ -5,7 +5,6 @@
 <p align="center">
   <img src="https://img.shields.io/badge/build-passing-green" alt="version:2.5.7">
   <img src="https://img.shields.io/badge/npm-v3.0.0-red" alt="qq group:">
-  <img src="https://img.shields.io/badge/QQ Group-786923770-blue" alt="qq group:">
 </p>
 
 
@@ -164,12 +163,6 @@ pnpm install
 ```
 npm start
 ```
-
-## 联系我们
-
-如果在官网还不能找到你想了解的问题，你可以加入 Textbus 的官方 QQ 群：786923770。你也可以直接扫码加入：
-
-![](./_source/qq-group.jpg)
 
 ## 赞助
 
