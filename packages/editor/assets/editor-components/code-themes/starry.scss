@@ -1,0 +1,81 @@
+.tb-pre[theme=starry] .tb-hl-keyword {
+  color: #71b155;
+  font-weight: bold;
+}
+
+.tb-pre[theme=starry] .tb-hl-string {
+  color: #dd7600;
+}
+
+.tb-pre[theme=starry] .tb-hl-function {
+  color: #2e89c1;
+}
+
+.tb-pre[theme=starry] .tb-hl-number {
+  color: #388138
+}
+
+.tb-pre[theme=starry] .tb-hl-tag {
+  color: #2e89c1 //#79c0d7;
+}
+
+.tb-pre[theme=starry] .tb-hl-comment {
+  color: #5c6d6e;
+  font-style: italic;
+}
+
+.tb-pre[theme=starry] .tb-hl-boolean {
+  color: #388138;
+  font-weight: bold
+}
+
+.tb-pre[theme=starry] .tb-hl-builtin {
+  color: #2e89c1;
+}
+
+.tb-pre[theme=starry] .tb-hl-regex {
+  color: #f60;
+}
+
+.tb-pre[theme=starry] .tb-hl-attr-name {
+  color: #71b155;
+}
+
+.tb-pre[theme=starry] .tb-hl-attr-value {
+  color: #dd7600
+}
+
+.tb-pre[theme=starry] .tb-hl-class-name {
+  color: #2e89c1;
+  font-weight: bold
+}
+
+.tb-pre[theme=starry] .tb-hl-selector {
+  color: #2e89c1;
+  font-weight: bold
+}
+
+
+.tb-pre[theme=starry] .tb-pre-content {
+  color: #a9aeb2;
+  background-color: #182324;
+  border: none
+}
+
+.tb-pre[theme=starry] .tb-color-content-highlight {
+  background: rgba(0, 0, 0, .2);
+}
+
+.tb-pre[theme=starry] .tb-color-content-highlight .tb-code-line-emphasize {
+  opacity: 1;
+  background-color: #182324
+}
+
+.tb-pre[theme=starry] .tb-code-line::before {
+  color: #536171
+}
+
+.tb-pre[theme=starry] .tb-code-line-number-bg {
+  background: none;
+  border: none;
+}

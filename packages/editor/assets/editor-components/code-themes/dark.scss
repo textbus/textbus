@@ -1,0 +1,54 @@
+
+.tb-pre[theme=dark] .tb-hl-keyword {
+  color: rgb(0, 134, 179);
+}
+
+.tb-pre[theme=dark] .tb-hl-tag {
+  color: rgb(0, 134, 179);
+}
+
+.tb-pre[theme=dark] .tb-hl-comment {
+  color: #4c5156;
+}
+
+.tb-pre[theme=dark] .tb-hl-string {
+  color: #ce5a70;
+}
+
+.tb-pre[theme=dark] .tb-hl-attr-value {
+  color: #ce5a70;
+}
+
+.tb-pre[theme=dark] .tb-hl-regex {
+  color: #af741d;
+}
+
+.tb-pre[theme=dark] .tb-hl-selector {
+  color: #ce5a70;
+  font-weight: normal
+}
+
+.tb-pre[theme=dark] .tb-pre-content {
+  color: #a9aeb2;
+  background-color: #1c2838;
+  border-color: #353535
+}
+
+.tb-pre[theme=dark] .tb-color-content-highlight {
+  background-color: #263140;
+}
+
+.tb-pre[theme=dark] .tb-color-content-highlight .tb-code-line-emphasize {
+  opacity: 1;
+  background-color: #1c2838
+}
+
+.tb-pre[theme=dark] .tb-code-line::before {
+  color: #536171
+}
+
+.tb-pre[theme=dark] .tb-code-line-number-bg {
+  background-color: #2d3a48;
+  border-right-color: #292929;
+}
+

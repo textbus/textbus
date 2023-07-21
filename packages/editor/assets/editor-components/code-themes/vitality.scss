@@ -1,0 +1,61 @@
+.tb-pre[theme=vitality] .tb-hl-function {
+  color: #5e5eb9;
+}
+
+.tb-pre[theme=vitality] .tb-pre-content {
+  //color: #a9aeb2;
+  background-color: #fafafa;
+  border: none;
+}
+
+.tb-pre[theme=vitality] .tb-color-content-highlight {
+  background: none;
+}
+
+.tb-pre[theme=vitality] .tb-color-content-highlight .tb-code-line-emphasize {
+  opacity: 1;
+  background-color: #fdfdfd
+}
+
+.tb-pre[theme=vitality] .tb-hl-keyword {
+  color: #659311;
+}
+
+.tb-pre[theme=vitality] .tb-hl-tag {
+  color: #5e5eb9;
+  font-weight: bold;
+}
+
+.tb-pre[theme=vitality] .tb-hl-comment {
+  //color: #4c5156;
+}
+
+.tb-pre[theme=vitality] .tb-hl-string {
+  color: #f80;
+}
+
+.tb-pre[theme=vitality] .tb-hl-attr-name {
+  color: #659311;
+}
+
+.tb-pre[theme=vitality] .tb-hl-attr-value {
+  color: #f80;
+}
+
+.tb-pre[theme=vitality] .tb-hl-regex {
+  color: #af741d;
+}
+
+.tb-pre[theme=vitality] .tb-hl-selector {
+  color: #5e5eb9;
+  font-weight: normal
+}
+
+.tb-pre[theme=vitality] .tb-code-line::before {
+  color: rgba(0, 0, 0, .3)
+}
+
+.tb-pre[theme=vitality] .tb-code-line-number-bg {
+  background: none;
+  border: none;
+}
