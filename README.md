@@ -3,8 +3,9 @@
 🚀 Textbus 是一个组件化、跨平台、数据驱动的富文本框架，并坚定的支持在线**多人协作**。你可以在 Textbus 中轻松创建出类似钉钉文档、石墨文档、飞书文档等完全自定义的编辑器。
 
 <p align="center">
-  <img src="https://img.shields.io/badge/build-passing-green" alt="version:2.5.7">
-  <img src="https://img.shields.io/badge/npm-v3.0.0-red" alt="qq group:">
+  <img src="https://img.shields.io/badge/build-passing-green">
+  <img src="https://img.shields.io/npm/v/%40textbus%2Fcore">
+  <img src="https://img.shields.io/npm/dm/%40viewfly/core">
 </p>
 
 
