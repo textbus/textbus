@@ -404,7 +404,8 @@ export const i18n_en_US: I18NConfig = {
       contextMenuLabel: 'switch language',
       changeTheme: 'change theme',
       emphasize: 'emphasize',
-      cancelEmphasize: 'cancel emphasize'
+      cancelEmphasize: 'cancel emphasize',
+      lineNumber: 'line number'
     },
     alertComponent: {
       creator: {

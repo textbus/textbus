@@ -440,8 +440,12 @@ export class Commander {
     let endOffset = selection.endOffset!
     let startSlot = selection.startSlot!
     let startOffset = selection.startOffset!
+    let isDeleteRanges = true
     if (selection.isCollapsed) {
       if (deleteBefore) {
+        if (startOffset === 0) {
+          isDeleteRanges = false
+        }
         const prevPosition = selection.getPreviousPosition()!
         startSlot = prevPosition.slot
         startOffset = prevPosition.offset
@@ -464,7 +468,7 @@ export class Commander {
     const scopes = selection.getScopes(startSlot, startOffset, endSlot, endOffset, true)
     let endCutIndex = endOffset
 
-    while (scopes.length) {
+    while (isDeleteRanges && scopes.length) {
       const lastScope = scopes.pop()!
       const { slot, startIndex } = lastScope
       const endIndex = lastScope.endIndex

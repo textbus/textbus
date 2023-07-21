@@ -269,10 +269,7 @@ export class Renderer {
     this.firstRending = false
 
     Promise.resolve().then(() => {
-      let index = this.renderedComponents.length - 1
-      while (index > -1) {
-        const item = this.renderedComponents[index]
-        index--
+      for (const item of this.renderedComponents) {
         invokeListener(item, 'onViewChecked')
       }
       this.renderedComponents = []
@@ -700,7 +697,6 @@ export class Renderer {
   }
 
   private componentRender(component: ComponentInstance): VElement {
-    this.renderedComponents.push(component)
     if (component.changeMarker.dirty || this.readonlyStateChanged) {
       const node = component.extends.render((slot, factory) => {
         return this.slotRender(component, slot, children => {
@@ -715,6 +711,7 @@ export class Renderer {
       setEditable(node, false)
       this.componentVNode.set(component, node)
       component.changeMarker.rendered()
+      this.renderedComponents.push(component)
       return node
     }
     if (component.changeMarker.changed) {
@@ -747,6 +744,7 @@ export class Renderer {
       })
       component.changeMarker.rendered()
     }
+    this.renderedComponents.push(component)
     return this.componentVNode.get(component)!
   }
 

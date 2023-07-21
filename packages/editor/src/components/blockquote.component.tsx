@@ -43,7 +43,7 @@ export const blockquoteComponent = defineComponent({
     return {
       render(slotRender: SlotRender): VElement {
         return slotRender(slots.get(0)!, children => {
-          return <div class="tb-blockquote">{children}</div>
+          return <blockquote class="tb-blockquote">{children}</blockquote>
         })
       }
     }

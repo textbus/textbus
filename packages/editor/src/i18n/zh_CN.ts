@@ -403,7 +403,8 @@ export const i18n_zh_CN: I18NConfig = {
       contextMenuLabel: '切换代码块语言',
       changeTheme: '切换代码块主题',
       emphasize: '强调',
-      cancelEmphasize: '取消强调'
+      cancelEmphasize: '取消强调',
+      lineNumber: '行号'
     },
     alertComponent: {
       creator: {

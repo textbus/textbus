@@ -117,6 +117,7 @@ export const languageList: Array<{ label: string, value: string }> = [{
 export interface PreComponentState {
   lang: string
   theme?: string
+  lineNumber?: boolean
 }
 
 export class CodeStyleFormatter implements Formatter<string> {
@@ -378,13 +379,15 @@ export const preComponent = defineComponent({
       theme: ''
     }
   }) {
-    let languageGrammar = getLanguageGrammar(data.state!.lang)
-    let [blockCommentStartString, blockCommentEndString] = getLanguageBlockCommentStart(data.state!.lang)
-
-    const stateController = useState({
+    let state = {
       lang: data.state!.lang,
-      theme: data.state?.theme || 'Light'
-    })
+      theme: data.state?.theme || 'Light',
+      lineNumber: data.state?.lineNumber !== false
+    }
+    let languageGrammar = getLanguageGrammar(state.lang)
+    let [blockCommentStartString, blockCommentEndString] = getLanguageBlockCommentStart(state.lang)
+
+    const stateController = useState(state)
     const injector = useContext()
 
     const i18n = injector.get(I18n)
@@ -392,8 +395,7 @@ export const preComponent = defineComponent({
     const selection = injector.get(Selection)
 
     stateController.onChange.subscribe(newState => {
-      data.state!.lang = newState.lang
-      data.state!.theme = newState.theme
+      state = newState
       languageGrammar = getLanguageGrammar(newState.lang);
 
       [blockCommentStartString, blockCommentEndString] = getLanguageBlockCommentStart(newState.lang)
@@ -551,8 +553,8 @@ export const preComponent = defineComponent({
           return {
             label: i.label || i18n.get('components.preComponent.defaultLang'),
             onClick() {
-              if (i.value !== data.state!.lang) {
-                data.state!.lang = i.value
+              if (i.value !== state.lang) {
+                state.lang = i.value
                 stateController.update(draft => {
                   draft.lang = i.value
                 })
@@ -571,10 +573,24 @@ export const preComponent = defineComponent({
             })
           }
         }, {
+          label: 'Vitality',
+          onClick() {
+            stateController.update(draft => {
+              draft.theme = 'vitality'
+            })
+          }
+        }, {
           label: 'Dark',
           onClick() {
             stateController.update(draft => {
               draft.theme = 'dark'
+            })
+          }
+        }, {
+          label: 'Starry',
+          onClick() {
+            stateController.update(draft => {
+              draft.theme = 'starry'
             })
           }
         }]
@@ -679,8 +695,14 @@ export const preComponent = defineComponent({
         label: 'Light',
         value: 'light'
       }, {
+        label: 'Vitality',
+        value: 'vitality'
+      }, {
         label: 'Dark',
         value: 'dark'
+      }, {
+        label: 'Starry',
+        value: 'starry'
       }],
       defaultValue: data.state?.theme || 'light'
     }, current => {
@@ -693,16 +715,24 @@ export const preComponent = defineComponent({
       render(slotRender: SlotRender, renderMode: RenderMode): VElement {
         let lang = ''
         languageList.forEach(i => {
-          if (i.value === data.state!.lang) {
+          if (i.value === state.lang) {
             lang = i.label
           }
         })
         const blockHighlight = slots.toArray().some(i => i.state?.emphasize === true)
         return (
-          <pre class="tb-pre" lang={lang} theme={data.state!.theme || null}>
+          <pre class={'tb-pre' + (state.lineNumber ? '' : ' tb-pre-hide-line-number')}
+               lang={lang} theme={state!.theme || null} line-number={state.lineNumber}>
             {
               renderMode === RenderMode.Editing ?
               <ComponentToolbar>
+                <label>{i18n.get('components.preComponent.lineNumber')}:
+                  <input type="checkbox" checked={state.lineNumber} onChange={(ev) => {
+                    stateController.update(draft => {
+                      draft.lineNumber = ev.target.checked
+                    })
+                  }}/>
+                </label>
                 <LanguageSelector/>
                 <ThemeSelector/>
                 <button type="button" class="textbus-toolbar-button" onClick={emphasize}>
@@ -767,7 +797,8 @@ export const preComponentLoader: ComponentLoader = {
     return preComponent.createInstance(injector, {
       state: {
         lang: el.getAttribute('lang') || '',
-        theme: el.getAttribute('theme') || ''
+        theme: el.getAttribute('theme') || '',
+        lineNumber: !el.classList.contains('tb-pre-hide-line-number')
       },
       slots
     })

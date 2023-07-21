@@ -88,8 +88,8 @@ import {
   underlineTool, unlinkTool, ToolFactory, componentsTool, formatPainterTool
 } from './toolbar/_api'
 import { LinkJumpTipPlugin, ContextMenu } from './plugins/_api'
-import editionStyles from './components/scss-editing/_index.scss'
-import docStyles from './components/scss/_index.scss'
+import editionStyles from '../assets/editor-editing/_index.scss'
+import docStyles from '../assets/editor-components/_index.scss'
 
 export const defaultComponentLoaders: ComponentLoader[] = [
   imageCardComponentLoader,
@@ -101,8 +101,8 @@ export const defaultComponentLoaders: ComponentLoader[] = [
   alertComponentLoader,
   jumbotronComponentLoader,
   audioComponentLoader,
-  blockComponentLoader,
   blockquoteComponentLoader,
+  blockComponentLoader,
   headingComponentLoader,
   imageComponentLoader,
   listComponentLoader,

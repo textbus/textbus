@@ -115,9 +115,7 @@ export const rootComponent = defineComponent({
           return new VElement('div', {
             'textbus-document': 'true',
             'ref': rootNode,
-            style: {
-              padding: '8px 8px 30px'
-            },
+            'class': 'tb-root',
             'data-placeholder': slots.get(0)?.isEmpty ? options.placeholder || '' : ''
           }, children)
         })

@@ -112,7 +112,7 @@
     "reflect-metadata": "^0.1.13",
     "y-webrtc": "^10.0.4",
     "y-websocket": "^1.4.3",
-    "yjs": "^13.5.39"
+    "yjs": "^13.6.7"
   },
   "repository": {
     "type": "git",
