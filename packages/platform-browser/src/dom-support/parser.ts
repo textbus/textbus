@@ -46,7 +46,7 @@ export interface ComponentLoader {
   match(element: HTMLElement): boolean
 
   /** 读取组件内容的方法 */
-  read(element: HTMLElement, injector: Injector, slotParser: SlotParser): ComponentInstance | Slot
+  read(element: HTMLElement, injector: Injector, slotParser: SlotParser): ComponentInstance | Slot | void
 }
 
 export interface FormatLoaderReadResult<T extends FormatValue> {
@@ -167,6 +167,9 @@ export class Parser {
               return this.readSlot(childSlot, slotRootElement, slotContentHostElement)
             }
           )
+          if (!result) {
+            return
+          }
           if (result instanceof Slot) {
             result.toDelta().forEach(i => slot.insert(i.insert, i.formats))
             return
@@ -177,12 +180,16 @@ export class Parser {
       }
       this.readFormats(el as HTMLElement, slot)
     } else if (el.nodeType === Node.TEXT_NODE) {
-      const textContent = el.textContent
-      if (/^\s*[\r\n\u200b]+\s*$/.test(textContent as string)) {
-        return
-      }
-      slot.insert(textContent as string)
+      this.readText(slot, el)
     }
+  }
+
+  private readText(slot: Slot, el: Node) {
+    const textContent = el.textContent
+    if (/^\s*[\r\n\u200b]+\s*$/.test(textContent as string)) {
+      return
+    }
+    slot.insert(textContent as string)
   }
 
   private readFormats(el: HTMLElement, slot: Slot) {
@@ -211,13 +218,19 @@ export class Parser {
   }
 
   private readSlot<T extends Slot>(childSlot: T, slotRootElement: HTMLElement, slotContentElement: HTMLElement): T {
-    this.attributeLoaders.filter(a => {
-      return a.match(slotRootElement)
-    }).forEach(a => {
-      const r = a.read(slotRootElement)
-      childSlot.setAttribute(r.attribute, r.value)
-    })
-    this.readFormats(slotContentElement, childSlot)
+    if (slotRootElement.nodeType === Node.ELEMENT_NODE) {
+      this.attributeLoaders.filter(a => {
+        return a.match(slotRootElement)
+      }).forEach(a => {
+        const r = a.read(slotRootElement)
+        childSlot.setAttribute(r.attribute, r.value)
+      })
+    }
+    if (slotContentElement.nodeType === Node.ELEMENT_NODE) {
+      this.readFormats(slotContentElement, childSlot)
+    } else {
+      this.readText(childSlot, slotContentElement)
+    }
     return childSlot
   }
 
