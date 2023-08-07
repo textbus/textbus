@@ -257,6 +257,8 @@ export class Selection {
 
   private customRanges: SlotRange[] | null = null
 
+  private changeFromUpdateCustomRanges = false
+
   constructor(private root: RootComponentRef,
               private controller: Controller) {
     let prevFocusComponent: ComponentInstance | null
@@ -314,7 +316,9 @@ export class Selection {
               ranges = rgs
             }))
         }
-        this.customRanges = ranges
+        if (!this.changeFromUpdateCustomRanges) {
+          this.customRanges = ranges
+        }
       }),
       this.onChange.pipe(
         map<any, ComponentInstance | null>(() => {
@@ -398,6 +402,17 @@ export class Selection {
   destroy() {
     this.subscriptions.forEach(i => i.unsubscribe())
     this.subscriptions = []
+  }
+
+  /**
+   * 设置自定义选中的区间
+   * @param ranges
+   */
+  setSelectedRanges(ranges: SlotRange[]) {
+    this.changeFromUpdateCustomRanges = true
+    this.customRanges = ranges
+    this.broadcastChanged()
+    this.changeFromUpdateCustomRanges = false
   }
 
   /**
