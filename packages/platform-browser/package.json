@@ -25,9 +25,9 @@
     "typescript editor"
   ],
   "dependencies": {
-    "@tanbo/di": "^1.1.5",
     "@tanbo/stream": "^1.2.0",
     "@textbus/core": "^3.7.1",
+    "@viewfly/core": "^0.1.0",
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
