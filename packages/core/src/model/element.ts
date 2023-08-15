@@ -1,65 +1,21 @@
-import { makeError } from '../_utils/make-error'
-
-const vElementErrorFn = makeError('VElement')
-const parentNode = Symbol('parentNode')
+import { Slot } from './slot'
+import { ComponentInstance } from './component'
 
 /**
  * Textbus 虚拟 DOM 文本节点
  */
 export class VTextNode {
-  get parentNode() {
-    return this[parentNode]
-  }
-
-  [parentNode]: VElement | null = null
-
   constructor(public textContent = '') {
   }
-}
-
-export type VElementJSXChildNode = VElement | VFragment | VTextNode | string | number | boolean | null | undefined
-
-export interface VElementOptions {
-  [key: string]: any
-}
-
-export interface VElementProps extends VElementOptions {
-  children?: Array<VElementJSXChildNode>
-}
-
-
-export interface VElementRenderFn {
-  (props: VElementProps | null): VElement;
 }
 
 export interface VElementListeners {
   [listenKey: string]: <T extends Event>(ev: T) => any;
 }
 
-export function Fragment(fragment: { children: VElementJSXChildNode[] }) {
-  return new VFragment(fragment.children)
-}
+export type VChildNode = VElement | VTextNode | ComponentInstance | string | number | boolean | null | undefined
 
-export function jsx(tagName: string | VElementRenderFn,
-                    props: VElementProps = {}) {
-  const children = props.children
-  Reflect.deleteProperty(props, 'children')
-  if (children) {
-    return VElement.createElement(tagName, props, children)
-  }
-  return VElement.createElement(tagName, props)
-}
-
-export function jsxs(tagName: string | VElementRenderFn, props: VElementProps = {}) {
-  return jsx(tagName, props)
-}
-
-export class VFragment {
-  constructor(public children: VElementJSXChildNode[]) {
-  }
-}
-
-function append(children: Array<VElement | VTextNode>, node: VElementJSXChildNode) {
+function append(children: VChildNode[], node: VChildNode) {
   if (node instanceof VElement) {
     children.push(node)
   } else if (node instanceof VTextNode) {
@@ -68,8 +24,8 @@ function append(children: Array<VElement | VTextNode>, node: VElementJSXChildNod
     }
   } else if (typeof node === 'string' && node.length > 0) {
     children.push(new VTextNode(node))
-  } else if (node instanceof VFragment) {
-    for (const item of node.children.flat()) {
+  } else if (Array.isArray(node)) {
+    for (const item of node.flat()) {
       append(children, item)
     }
   } else if (node !== false && node !== true && node !== null && typeof node !== 'undefined') {
@@ -78,46 +34,33 @@ function append(children: Array<VElement | VTextNode>, node: VElementJSXChildNod
 }
 
 /**
+ * 虚拟 DOM 节点在数据内的范围
+ */
+export interface NodeLocation {
+  startIndex: number
+  endIndex: number
+  slot: Slot
+}
+
+/**
  * Textbus 虚拟 DOM 元素节点
  */
 export class VElement {
-  static createElement(tagName: string | VElementRenderFn,
-                       attrs: VElementOptions | null = null,
-                       ...childNodes: VElementJSXChildNode[] | VElementJSXChildNode[][]) {
-    const children: Array<VElement | VTextNode> = []
-    childNodes.flat(2).forEach(i => {
-      append(children, i)
-    })
-    if (typeof tagName === 'function') {
-      return tagName({
-        ...attrs,
-        children
-      })
-    }
-    return new VElement(tagName, attrs, children)
-  }
+  children: Array<VElement | VTextNode | ComponentInstance> = []
+  location: NodeLocation | null = null
 
-  get parentNode() {
-    return this[parentNode]
-  }
-
-  get children() {
-    return [...this._children]
-  }
-
-  [parentNode]: VElement | null = null
   readonly attrs = new Map<string, any>()
   readonly styles = new Map<string, string | number>()
   readonly classes = new Set<string>()
-
   readonly listeners: VElementListeners = {}
 
-  private _children: Array<VElement | VTextNode> = []
 
   constructor(public tagName: string,
-              attrs: VElementOptions | null = null,
-              children: Array<VElement | VTextNode> = []) {
-    attrs = attrs || {}
+              attrs?: Record<string, any>,
+              children?: VChildNode[]) {
+    if (!attrs) {
+      return
+    }
     Object.keys(attrs).forEach(key => {
       if (key === 'class') {
         const className = (attrs!.class || '').trim();
@@ -145,40 +88,18 @@ export class VElement {
         this.attrs.set(key, attrs![key])
       }
     })
-    this.appendChild(...children)
+    if (children) {
+      children.flat(2).forEach(i => {
+        append(this.children, i)
+      })
+    }
   }
 
   /**
    * 在最后位置添加一个子节点。
    * @param newNodes
    */
-  appendChild(...newNodes: Array<VElement | VTextNode>) {
-    newNodes.forEach(node => {
-      node.parentNode?.removeChild(node)
-      node[parentNode] = this
-      this._children.push(node)
-    })
-  }
-
-  removeChild(node: VTextNode | VElement) {
-    const index = this._children.indexOf(node)
-    if (index > -1) {
-      this._children.splice(index, 1)
-      node[parentNode] = null
-      return
-    }
-    throw vElementErrorFn('node to be deleted is not a child of the current node.')
-  }
-
-  replaceChild(newNode: VElement | VTextNode, oldNode: VElement | VTextNode) {
-    const index = this._children.indexOf(oldNode)
-    if (index > -1) {
-      newNode.parentNode?.removeChild(newNode)
-      this._children.splice(index, 1, newNode)
-      oldNode[parentNode] = null
-      newNode[parentNode] = this
-      return
-    }
-    throw vElementErrorFn('node to be replaced is not a child of the current node.')
+  appendChild(...newNodes: Array<VElement | VTextNode | ComponentInstance>) {
+    this.children.push(...newNodes)
   }
 }

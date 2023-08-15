@@ -1,4 +1,4 @@
-import { Inject, Injectable, Injector } from '@tanbo/di'
+import { Inject, Injectable, Injector } from '@viewfly/core'
 import {
   Attribute,
   Component,
@@ -23,9 +23,9 @@ export class Registry {
   private attributeMap = new Map<string, Attribute<any>>()
 
   constructor(public contextInjector: Injector,
-              @Inject(COMPONENT_LIST) private components: Component[],
-              @Inject(ATTRIBUTE_LIST) private attributes: Attribute<any>[],
-              @Inject(FORMATTER_LIST) private formatters: Formatter<any>[]) {
+              @Inject(COMPONENT_LIST) components: Component[],
+              @Inject(ATTRIBUTE_LIST) attributes: Attribute<any>[],
+              @Inject(FORMATTER_LIST) formatters: Formatter<any>[]) {
     components.reverse().forEach(f => {
       this.componentMap.set(f.name, f)
     })

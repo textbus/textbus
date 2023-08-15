@@ -1,9 +1,8 @@
-import { Injectable } from '@tanbo/di'
+import { Injectable } from '@viewfly/core'
 import { map, microTask, Observable, Subject, Subscription, take } from '@tanbo/stream'
 
 import { ComponentInstance, invokeListener, Operation } from '../model/_api'
-import { RootComponentRef } from './_injection-tokens'
-import { Renderer } from './renderer'
+import { ViewAdapter, RootComponentRef } from './_injection-tokens'
 import { Selection } from './selection'
 
 /**
@@ -70,8 +69,8 @@ export class Scheduler {
   private subs: Subscription[] = []
 
   constructor(private rootComponentRef: RootComponentRef,
-              private selection: Selection,
-              private renderer: Renderer) {
+              private nativeRenderer: ViewAdapter,
+              private selection: Selection) {
     this.onDocChanged = this.docChangedEvent.asObservable()
     this.onDocChange = this.docChangeEvent.asObservable()
     this.onLocalChangeBefore = this.localChangeBeforeEvent.asObservable()
@@ -104,12 +103,9 @@ export class Scheduler {
   run() {
     const rootComponent = this.rootComponentRef.component
     const changeMarker = rootComponent.changeMarker
-    this.renderer.render()
+    // this.renderer.render()
     let isRendered = true
     this.subs.push(
-      changeMarker.onForceChange.pipe(microTask()).subscribe(() => {
-        this.renderer.render()
-      }),
       changeMarker.onChange.pipe(
         map(op => {
           const from = this.changeFromRemote ? ChangeOrigin.Remote :
@@ -131,7 +127,6 @@ export class Scheduler {
         microTask()
       ).subscribe(ops => {
         isRendered = true
-        this.renderer.render()
         this._lastChangesHasRemoteUpdate = false
         this._lastChangesHasLocalUpdate = false
         ops.forEach(i => {
@@ -141,13 +136,13 @@ export class Scheduler {
             this._lastChangesHasLocalUpdate = true
           }
         })
-        this.selection.restore(this._lastChangesHasLocalUpdate)
         this.docChangedEvent.next(ops)
       }),
       changeMarker.onChildComponentRemoved.subscribe(instance => {
         this.instanceList.add(instance)
       }),
-      this.renderer.onViewUpdated.subscribe(() => {
+      this.nativeRenderer.onViewUpdated.subscribe(() => {
+        this.selection.restore(this._lastChangesHasLocalUpdate)
         this.instanceList.forEach(instance => {
           let comp = instance
           while (comp) {

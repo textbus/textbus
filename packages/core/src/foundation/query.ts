@@ -1,9 +1,8 @@
-import { Injectable } from '@tanbo/di'
+import { Injectable } from '@viewfly/core'
 
 import { Selection } from './selection'
 import {
   ComponentInstance,
-  ComponentExtends,
   Formatter,
   FormatValue,
   Slot,
@@ -144,7 +143,7 @@ export class Query {
    * @param component 要查询的组件
    * @param filter 查询结构过滤函数，过滤不需要的数据
    */
-  queryComponent<Extends extends ComponentExtends, T, U>(
+  queryComponent<Extends, T, U>(
     component: Component<Extends, T, U>,
     filter?: (instance: ComponentInstance<Extends, T, U>) => boolean): QueryState<ComponentInstance<Extends, T, U>> {
     if (!this.selection.isSelected) {
@@ -180,7 +179,7 @@ export class Query {
    * 查询当前选区是否包含在组件内
    * @param component 要查询的组件
    */
-  queryWrappedComponent<Extends extends ComponentExtends, T, U>(
+  queryWrappedComponent<Extends, T, U>(
     component: Component<Extends, T, U>
   ): QueryState<ComponentInstance<Extends, T, U>> {
     const selection = this.selection

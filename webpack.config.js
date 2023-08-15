@@ -7,7 +7,7 @@ module.exports = {
   mode: 'development',
   devtool: 'cheap-module-source-map',
   entry: {
-    index: path.resolve(__dirname, 'index.ts')
+    index: path.resolve(__dirname, 'index.tsx')
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
