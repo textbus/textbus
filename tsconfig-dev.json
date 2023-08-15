@@ -23,7 +23,7 @@
       "@textbus/collaborate": ["./packages/collaborate/src/public-api.ts"]
     },
     "jsx": "react-jsx",
-    "jsxImportSource": "@textbus/core"
+    "jsxImportSource": "@viewfly/core"
   },
   "exclude": ["packages", "_docs", "helper", "test"]
 }

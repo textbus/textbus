@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@tanbo/di'
+import { Inject, Injectable } from '@viewfly/core'
 import { distinctUntilChanged, Observable, Subject } from '@tanbo/stream'
 import { READONLY } from './_injection-tokens'
 

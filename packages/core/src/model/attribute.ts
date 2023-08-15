@@ -1,6 +1,6 @@
 import { VElement, VTextNode } from './element'
 import { FormatValue } from './format'
-import { RenderMode } from './types'
+import { ComponentInstance } from './component'
 
 /**
  * 格式渲染可回退的渲染模式
@@ -69,12 +69,10 @@ export abstract class Formatter<T extends FormatValue> {
    * 格式渲染的方法
    * @param children 子节点集合
    * @param formatValue 当前格式要渲染的值
-   * @param renderMode 当前渲染模式
    */
   abstract render(
-    children: Array<VElement | VTextNode>,
-    formatValue: T,
-    renderMode: RenderMode): VElement | FormatHostBindingRender
+    children: Array<VElement | VTextNode | ComponentInstance>,
+    formatValue: T): VElement | FormatHostBindingRender
 }
 
 /**
@@ -94,11 +92,9 @@ export abstract class Attribute<T extends FormatValue> {
    * 渲染属性的方法
    * @param node 不附加属性的节点
    * @param formatValue 要附加属性的值
-   * @param renderMode 当前渲染模式
    */
   abstract render(
     node: VElement,
     formatValue: T,
-    renderMode: RenderMode
   ): void
 }

@@ -227,13 +227,6 @@ export class Slots<T = any> {
       sub.add(i.changeMarker.onChildComponentRemoved.subscribe(instance => {
         this.host.changeMarker.recordComponentRemoved(instance)
       }))
-      sub.add(i.changeMarker.onForceChange.subscribe(() => {
-        if (i.changeMarker.dirty) {
-          this.host.changeMarker.forceMarkDirtied()
-        } else {
-          this.host.changeMarker.forceMarkChanged()
-        }
-      }))
       this.changeListeners.set(i, sub)
     })
 

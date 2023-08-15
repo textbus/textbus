@@ -1,4 +1,4 @@
-import { Injectable, Prop } from '@tanbo/di'
+import { Injectable, Prop } from '@viewfly/core'
 import { distinctUntilChanged, map, Observable, share, Subject, Subscription } from '@tanbo/stream'
 
 import { ComponentInstance, ContentType, Event, GetRangesEvent, invokeListener, Slot, SlotRange } from '../model/_api'

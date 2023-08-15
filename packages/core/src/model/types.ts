@@ -64,8 +64,3 @@ export interface StateChange<T> {
   record: boolean
 }
 
-export enum RenderMode {
-  Output = 'Output',
-  Readonly = 'Readonly',
-  Editing = 'Editing'
-}

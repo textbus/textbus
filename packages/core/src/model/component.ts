@@ -1,14 +1,13 @@
 import { Draft, produce, Patch, enablePatches } from 'immer'
 import { map, Observable, Subject, Subscription } from '@tanbo/stream'
-import { AbstractType, Type, InjectionToken, InjectFlags, Injector } from '@tanbo/di'
+import { AbstractType, Type, InjectionToken, InjectFlags, Injector } from '@viewfly/core'
 
 import { makeError } from '../_utils/make-error'
-import { VElement, VTextNode } from './element'
 import { ContentType, Slot, SlotLiteral } from './slot'
 import { Formats } from './format'
 import { ChangeMarker } from './change-marker'
 import { Slots } from './slots'
-import { RenderMode, StateChange } from './types'
+import { StateChange } from './types'
 
 enablePatches()
 
@@ -40,33 +39,6 @@ export interface ComponentLiteral<State = any> {
   state: State
 }
 
-/**
- * 插槽渲染的工厂函数
- */
-export interface SlotRenderFactory {
-  (children: Array<VElement | VTextNode>): VElement
-}
-
-/**
- * 渲染插槽函数的定义
- */
-export interface SlotRender {
-  (slot: Slot, factory: SlotRenderFactory): VElement
-}
-
-/**
- * 渲染组件函数的定义
- */
-export interface ComponentRender {
-  (slotRender: SlotRender, renderMode: RenderMode): VElement
-}
-
-/**
- * 组件 setup 函数返回值必须要实现的接口
- */
-export interface ComponentExtends {
-  render: ComponentRender
-}
 
 export interface Key {
   match: RegExp | ((key: string) => boolean)
@@ -99,7 +71,7 @@ export interface ZenCodingGrammarInterceptor<Data = any> {
 /**
  * 组件实例对象
  */
-export class ComponentInstance<Extends extends ComponentExtends = ComponentExtends, State = unknown, SlotState = unknown> {
+export class ComponentInstance<State = unknown, SlotState = unknown, Extends = unknown> {
   /**
    * 组件所在的插槽
    * @readonly
@@ -141,7 +113,7 @@ export class ComponentInstance<Extends extends ComponentExtends = ComponentExten
    * @param initData 初始数据
    */
   constructor(injector: Injector,
-              private options: ComponentOptions<Extends, State, SlotState>,
+              private options: ComponentOptions<State, SlotState, Extends>,
               initData?: ComponentInitData<State, SlotState>) {
     this.onStateChange = this.stateChangeEvent.asObservable()
     this.name = options.name
@@ -243,7 +215,7 @@ export class ComponentInstance<Extends extends ComponentExtends = ComponentExten
 /**
  * Textbus 扩展组件接口
  */
-export interface ComponentOptions<Extends extends ComponentExtends, State, SlotState> {
+export interface ComponentOptions<State, SlotState, Extends> {
   /** 组件名 */
   name: string
   /** 组件类型 */
@@ -266,9 +238,9 @@ export interface ComponentOptions<Extends extends ComponentExtends, State, SlotS
  * Textbus 组件
  */
 export class Component<
-  Extends extends ComponentExtends = ComponentExtends,
   State = unknown,
-  SlotState = unknown> {
+  SlotState = unknown,
+  Extends = unknown> {
 
   /** 组件名 */
   name: string
@@ -280,7 +252,7 @@ export class Component<
   zenCoding: ZenCodingGrammarInterceptor<ComponentInitData<State, SlotState>> |
     ZenCodingGrammarInterceptor<ComponentInitData<State, SlotState>>[]
 
-  constructor(private options: ComponentOptions<Extends, State, SlotState>) {
+  constructor(private options: ComponentOptions<State, SlotState, Extends>) {
     this.name = options.name
     this.instanceType = options.type
     this.separable = !!options.separable
@@ -292,8 +264,8 @@ export class Component<
    * @param injector
    * @param data
    */
-  createInstance(injector: Injector, data?: ComponentInitData<State, SlotState>): ComponentInstance<Extends, State, SlotState> {
-    return new ComponentInstance<Extends, State, SlotState>(injector, this.options, data)
+  createInstance(injector: Injector, data?: ComponentInitData<State, SlotState>): ComponentInstance<State, SlotState, Extends> {
+    return new ComponentInstance<State, SlotState, Extends>(injector, this.options, data)
   }
 }
 
@@ -310,11 +282,6 @@ export interface ChangeController<T> {
    * @param record 是否记录此次状态变更
    */
   update(fn: (draft: Draft<T>) => void, record?: boolean): T
-}
-
-export class Ref<T> {
-  constructor(public current: T | null = null) {
-  }
 }
 
 /**
@@ -421,12 +388,6 @@ export interface SlotRange {
   endIndex: number
 }
 
-/**
- * 原生元素节点抽象类型
- */
-// eslint-disable-next-line @typescript-eslint/ban-types
-export type NativeNode = {} & any
-
 export interface EventTypes {
   onUnselect: () => void
   onSelected: () => void
@@ -434,8 +395,6 @@ export interface EventTypes {
   onBlur: () => void
   onFocusIn: () => void
   onFocusOut: () => void
-  onViewChecked: () => void
-  onViewInit: () => void
   onDestroy: () => void
   onParentSlotUpdated: () => void
   onSelectionFromFront: (event: Event<ComponentInstance>) => void
@@ -455,7 +414,6 @@ export interface EventTypes {
   onSlotRemoved: (event: Event<ComponentInstance>) => void
 
   onGetRanges: (event: GetRangesEvent<ComponentInstance>) => void
-  onDirtyViewClean: (event: Event<ComponentInstance, NativeNode>) => void
   onCompositionStart: (event: Event<Slot, CompositionStartEventData>) => void
   onCompositionUpdate: (event: Event<Slot, CompositionUpdateEventData>) => void
   onCompositionEnd: (event: Event<Slot>) => void
@@ -520,10 +478,10 @@ export type ExtractComponentStateType<T> = T extends Component<any, infer S> ? S
  * Textbus 扩展组件方法
  * @param options
  */
-export function defineComponent<Extends extends ComponentExtends, State = any, SlotState = any>(
-  options: ComponentOptions<Extends, State, SlotState>
+export function defineComponent<State = any, SlotState = any, Extends = any>(
+  options: ComponentOptions<State, SlotState, Extends>
 ) {
-  return new Component<Extends, State, SlotState>(options)
+  return new Component<State, SlotState, Extends>(options)
 }
 
 /**
@@ -569,13 +527,6 @@ export function useState<T>(initState: T) {
   }
   context.initState = initState
   return context.changeController as ChangeController<T>
-}
-
-/**
- * 组件单元素引用勾子
- */
-export function useRef<T>(initValue: T | null = null) {
-  return new Ref<T>(initValue)
 }
 
 /**
@@ -656,7 +607,6 @@ export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemo
 export function invokeListener(target: ComponentInstance, eventType: 'onBreak', event: Event<Slot, BreakEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContextMenu', event: ContextMenuEvent<ComponentInstance>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onPaste', event: Event<Slot, PasteEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onDirtyViewClean', event: Event<ComponentInstance, NativeNode>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onGetRanges', event: GetRangesEvent<ComponentInstance>): void
 // eslint-disable-next-line max-len
 export function invokeListener(target: ComponentInstance, eventType: 'onCompositionStart', event: Event<Slot, CompositionStartEventData>): void
@@ -670,7 +620,6 @@ export function invokeListener(target: ComponentInstance, eventType: 'onBlur'): 
 export function invokeListener(target: ComponentInstance, eventType: 'onFocusIn'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onFocusOut'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onDestroy'): void
-export function invokeListener(target: ComponentInstance, eventType: 'onViewChecked'): void
 export function invokeListener(target: ComponentInstance, eventType: 'onParentSlotUpdated'): void
 export function invokeListener<K extends keyof EventTypes,
   D = EventTypes[K] extends (args: infer U) => any ?
@@ -685,13 +634,6 @@ export function invokeListener<K extends keyof EventTypes,
     callbacks.forEach(fn => {
       return (fn as any)(event)
     })
-    if (eventType === 'onViewChecked') {
-      const viewInitCallbacks = cache.get('onViewInit')
-      cache.clean('onViewInit')
-      viewInitCallbacks.forEach(fn => {
-        (fn as any)(event)
-      })
-    }
     if (eventType === 'onDestroy') {
       eventCacheMap.delete(target)
     }
@@ -782,16 +724,6 @@ export const onPaste = makeEventHook('onPaste')
 export const onContextMenu = makeEventHook('onContextMenu')
 
 /**
- * 组件视图更新后的勾子
- */
-export const onViewChecked = makeEventHook('onViewChecked')
-
-/**
- * 组件第一次渲染后的勾子
- */
-export const onViewInit = makeEventHook('onViewInit')
-
-/**
  * 组件子插槽删除时的勾子
  */
 export const onSlotRemove = makeEventHook('onSlotRemove')
@@ -834,10 +766,6 @@ export const onDestroy = makeEventHook('onDestroy')
  * 当组件为选区公共父组件时的勾子
  */
 export const onGetRanges = makeEventHook('onGetRanges')
-/**
- * 当 diff 视图时，检测到有脏节点时调用的勾子
- */
-export const onDirtyViewClean = makeEventHook('onDirtyViewClean')
 /**
  * 当插槽组合输入前触发
  */
