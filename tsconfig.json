@@ -21,8 +21,8 @@
       "@textbus/editor": ["./packages/editor/src/public-api.ts"],
       "@textbus/collaborate": ["./packages/collaborate/src/public-api.ts"]
     },
-    "jsx": "react",
-    "jsxFactory": "VElement.createElement"
+    "jsx": "react-jsx",
+    "jsxImportSource": "@viewfly/core"
   },
   "exclude": ["packages", "_docs", "helper"]
 }

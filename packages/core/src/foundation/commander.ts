@@ -1,4 +1,4 @@
-import { Injectable, Injector } from '@tanbo/di'
+import { Injectable, Injector } from '@viewfly/core'
 
 import { AbstractSelection, Range, Selection, SelectionPosition } from './selection'
 import {
@@ -18,7 +18,7 @@ import {
   Slot,
   SlotRange
 } from '../model/_api'
-import { NativeRenderer, RootComponentRef } from './_injection-tokens'
+import { ViewAdapter, RootComponentRef } from './_injection-tokens'
 import { Registry } from './registry'
 
 function getInsertPosition(
@@ -295,6 +295,7 @@ function getBlockRangeToBegin(selection: Selection, slot: Slot, offset: number):
 export class Commander {
 
   constructor(protected selection: Selection,
+              protected platform: ViewAdapter,
               protected injector: Injector,
               protected registry: Registry,
               protected rootComponentRef: RootComponentRef) {
@@ -629,7 +630,7 @@ export class Commander {
    * 复制当前选区内容
    */
   copy() {
-    this.injector.get(NativeRenderer).copy()
+    this.platform.copy()
   }
 
   /**

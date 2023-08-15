@@ -1,11 +1,11 @@
-import { Inject, Injectable } from '@tanbo/di'
+import { Inject, Injectable } from '@viewfly/core'
 import { map, Observable, Subject, Subscription } from '@tanbo/stream'
 import { applyPatches } from 'immer'
 
 import { ComponentLiteral, Formats, Operation } from '../model/_api'
 import { Selection, SelectionPaths } from './selection'
 import { Registry } from './registry'
-import { HISTORY_STACK_SIZE, RootComponentRef } from './_injection-tokens'
+import { HISTORY_STACK_SIZE } from './_injection-tokens'
 import { ChangeOrigin, Scheduler } from './scheduler'
 import { makeError } from '../_utils/make-error'
 
@@ -111,7 +111,6 @@ export class LocalHistory extends History {
   private forceChangeSubscription: Subscription | null = null
 
   constructor(@Inject(HISTORY_STACK_SIZE) private stackSize: number,
-              private root: RootComponentRef,
               private scheduler: Scheduler,
               private selection: Selection,
               private registry: Registry) {
