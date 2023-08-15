@@ -25,8 +25,8 @@
     "typescript editor"
   ],
   "dependencies": {
-    "@tanbo/di": "^1.1.8",
-    "@tanbo/stream": "^1.2.5",
+    "@tanbo/stream": "^1.2.0",
+    "@viewfly/core": "^0.1.0",
     "immer": "^9.0.12"
   },
   "devDependencies": {

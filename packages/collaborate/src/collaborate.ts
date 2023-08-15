@@ -4,7 +4,6 @@ import {
   AbstractSelection,
   ChangeOrigin,
   ComponentInstance,
-  Controller,
   Registry,
   Formats,
   History,
@@ -14,8 +13,7 @@ import {
   Scheduler,
   Selection,
   SelectionPaths,
-  Slot,
-  Starter
+  Slot
 } from '@textbus/core'
 import {
   Array as YArray,
@@ -145,11 +143,9 @@ export class Collaborate implements History {
 
   constructor(@Inject(HISTORY_STACK_SIZE) protected stackSize: number,
               protected rootComponentRef: RootComponentRef,
-              protected controller: Controller,
               protected scheduler: Scheduler,
               protected registry: Registry,
               protected selection: Selection,
-              protected starter: Starter,
               @Optional() protected undoManagerConfig: CustomUndoManagerConfig) {
     this.onBack = this.backEvent.asObservable()
     this.onForward = this.forwardEvent.asObservable()
@@ -643,7 +639,7 @@ export class Collaborate implements History {
   }
 
   protected runLocalUpdate(fn: () => void, record = true) {
-    if (this.updateFromRemote || this.controller.readonly) {
+    if (this.updateFromRemote) {
       return
     }
     this.updateRemoteActions.push({

@@ -62,6 +62,8 @@
     "@types/prismjs": "^1.16.6",
     "@typescript-eslint/eslint-plugin": "^5.8.0",
     "@typescript-eslint/parser": "^5.8.0",
+    "@viewfly/core": "^0.1.0",
+    "@viewfly/platform-browser": "^0.1.0",
     "add-assets-webpack-plugin": "^1.0.0",
     "autoprefixer": "^10.4.0",
     "babel-jest": "^27.4.5",
