@@ -4,9 +4,20 @@ import { Draft, Patch, produce } from 'immer'
 import { ComponentInstance, ComponentLiteral } from './component'
 import { Content } from './content'
 import { Format, FormatLiteral, FormatRange, FormatValue, Formats, FormatTree, FormatItem } from './format'
-import { Attribute, Formatter } from './attribute'
+import { Attribute, FormatHostBindingRender, Formatter } from './attribute'
 import { ChangeMarker } from './change-marker'
 import { Action, ApplyAction, StateChange } from './types'
+import { VElement, VTextNode } from './element'
+import { makeError } from '../_utils/make-error'
+
+const slotError = makeError('Slot')
+
+/**
+ * 插槽渲染的工厂函数
+ */
+export interface SlotRenderFactory {
+  (children: Array<VElement | VTextNode | ComponentInstance>): VElement
+}
 
 export enum ContentType {
   Text = 1,
@@ -308,9 +319,6 @@ export class Slot<T = any> {
       sub.add(content.changeMarker.onChildComponentRemoved.subscribe(instance => {
         this.changeMarker.recordComponentRemoved(instance)
       }))
-      sub.add(content.changeMarker.onForceChange.subscribe(() => {
-        this.changeMarker.forceMarkChanged()
-      }))
       this.componentChangeListeners.set(content, sub)
     }
     let formats: Formats = []
@@ -416,12 +424,6 @@ export class Slot<T = any> {
       opt[next[0].name] = null
       return opt
     }, {})
-    if (endIndex - startIndex === 1) {
-      const content = this.getContentAtIndex(startIndex)
-      if (typeof content !== 'string' && content.type === ContentType.InlineComponent) {
-        content.changeMarker.forceMarkDirtied()
-      }
-    }
     this.content.slice(startIndex, endIndex).forEach(content => {
       const offset = content.length
       if (typeof content === 'string' || content.type !== ContentType.BlockComponent) {
@@ -655,27 +657,6 @@ export class Slot<T = any> {
   }
 
   /**
-   * 根据插槽的格式数据，生成格式树
-   */
-  createFormatTree(): FormatTree<FormatValue> {
-    return this.format.toTree(0, this.length)
-    // if (this.attributes.size) {
-    //   if (!tree.formats) {
-    //     tree.formats = []
-    //   }
-    //   this.getAttributes().forEach(item => {
-    //     tree.formats!.push({
-    //       formatter: item[0],
-    //       value: item[1],
-    //       startIndex: 0,
-    //       endIndex: this.length
-    //     })
-    //   })
-    // }
-    // return tree
-  }
-
-  /**
    * 获取传入格式在插槽指定内范围的集合
    * @param formatter 指定的格式
    * @param startIndex
@@ -841,6 +822,125 @@ export class Slot<T = any> {
         endIndex: startIndex + offset,
         value
       }, background)
+    })
+  }
+
+  /**
+   * 根据插槽的格式数据，生成格式树
+   */
+  toTree(slotRenderFactory: SlotRenderFactory): VElement {
+    const formatTree = this.format.toTree(0, this.length)
+    let children = formatTree.children ?
+      this.createVDomByFormatTree(this, formatTree.children) :
+      this.createVDomByContent(this, formatTree.startIndex, formatTree.endIndex)
+
+    if (formatTree.formats) {
+      children = [this.createVDomByOverlapFormats(formatTree.formats, children)]
+    }
+    const root = slotRenderFactory(children)
+    for (const [attribute, value] of this.getAttributes()) {
+      attribute.render(root, value)
+    }
+    return root
+  }
+
+  private createVDomByFormatTree(
+    slot: Slot,
+    formats: FormatTree<any>[]) {
+    const nodes: Array<VElement | VTextNode | ComponentInstance> = []
+    for (const child of formats) {
+      if (child.formats?.length) {
+        const children = child.children ?
+          this.createVDomByFormatTree(slot, child.children) :
+          this.createVDomByContent(slot, child.startIndex, child.endIndex)
+
+        const nextChildren = this.createVDomByOverlapFormats(
+          child.formats,
+          children,
+        )
+        nodes.push(nextChildren)
+      } else {
+        nodes.push(...this.createVDomByContent(
+          slot,
+          child.startIndex,
+          child.endIndex,
+        ))
+      }
+    }
+    return nodes
+  }
+
+  private createVDomByOverlapFormats(
+    formats: (FormatItem<any>)[],
+    children: Array<VElement | VTextNode | ComponentInstance>
+  ): VElement {
+    const hostBindings: Array<{render: FormatHostBindingRender, item: FormatItem<any>}> = []
+    let host: VElement | null = null
+    for (let i = formats.length - 1; i > -1; i--) {
+      const item = formats[i]
+      const next = item.formatter.render(children, item.value)
+      if (!next) {
+        throw slotError(`Formatter \`${item.formatter.name}\` must return an VElement!`)
+      }
+      if (!(next instanceof VElement)) {
+        hostBindings.push({
+          item,
+          render: next
+        })
+        continue
+      }
+      host = next
+      children = [next]
+    }
+    for (const binding of hostBindings) {
+      const { render, item } = binding
+      if (!host) {
+        host = new VElement(render.fallbackTagName)
+        host.location = {
+          slot: this,
+          startIndex: item.startIndex,
+          endIndex: item.endIndex
+        }
+        host.appendChild(...children)
+      }
+      render.attach(host)
+    }
+    return host!
+  }
+
+  private createVDomByContent(
+    slot: Slot,
+    startIndex: number,
+    endIndex: number
+  ): Array<VTextNode | VElement | ComponentInstance> {
+    const elements: Array<string | ComponentInstance> = slot.sliceContent(startIndex, endIndex).map(i => {
+      if (typeof i === 'string') {
+        return i.match(/\n|[^\n]+/g)!
+      }
+      return i
+    }).flat()
+    return elements.map(item => {
+      let vNode!: VElement | VTextNode | ComponentInstance
+      let length: number
+      if (typeof item === 'string') {
+        if (item === '\n') {
+          vNode = new VElement('br')
+          vNode.location = {
+            slot: this,
+            startIndex,
+            endIndex: startIndex + 1
+          }
+          length = 1
+        } else {
+          vNode = new VTextNode(item)
+          length = item.length
+        }
+      } else {
+        length = 1
+        vNode = item
+      }
+      startIndex += length
+      return vNode
     })
   }
 

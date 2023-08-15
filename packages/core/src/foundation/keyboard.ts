@@ -1,4 +1,4 @@
-import { Inject, Injectable, Injector } from '@tanbo/di'
+import { Inject, Injectable, Injector } from '@viewfly/core'
 import { Component, Shortcut, ZenCodingGrammarInterceptor } from '../model/_api'
 import { Commander } from './commander'
 import { Selection } from './selection'
