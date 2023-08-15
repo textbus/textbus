@@ -92,7 +92,7 @@ export class CollaborateCursor {
   private currentSelection: RemoteSelection[] = []
   private container: HTMLElement
 
-  constructor(private injector: Injector,
+  constructor(injector: Injector,
               private nativeSelection: SelectionBridge,
               private scheduler: Scheduler,
               private selection: Selection,

@@ -18,9 +18,9 @@
     "paths": {
       "@textbus/platform-browser": ["./packages/platform-browser/src/public-api.ts"],
       "@textbus/core": ["./packages/core/src/public-api.ts"],
-      "@textbus/core/*": ["./packages/core/src/*"],
       "@textbus/editor": ["./packages/editor/src/public-api.ts"],
-      "@textbus/collaborate": ["./packages/collaborate/src/public-api.ts"]
+      "@textbus/collaborate": ["./packages/collaborate/src/public-api.ts"],
+      "@textbus/adapter-viewfly": ["./packages/adapter-viewfly/src/public-api.ts"]
     },
     "jsx": "react-jsx",
     "jsxImportSource": "@viewfly/core"

@@ -186,7 +186,7 @@ export class NativeInput extends Input {
               private scheduler: Scheduler,
               private selection: Selection,
               private keyboard: Keyboard,
-              private domAdapter: DomAdapter,
+              private domAdapter: DomAdapter<any, any>,
               private commander: Commander,
               private controller: Controller) {
     super()
