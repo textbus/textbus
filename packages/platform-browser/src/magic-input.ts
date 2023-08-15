@@ -617,7 +617,19 @@ export class MagicInput extends Input {
       ).subscribe(text => {
         this.composition = false
         this.caret.compositionState = this.compositionState = null
-        this.caret.compositionElement.parentNode?.removeChild(this.caret.compositionElement)
+        const compositionElement = this.caret.compositionElement
+        let nextSibling = compositionElement.nextSibling
+        while (nextSibling) {
+          if (!nextSibling.textContent) {
+            const next = nextSibling.nextSibling
+            nextSibling.remove()
+            nextSibling = next
+            continue
+          }
+          nextSibling.remove()
+          break
+        }
+        compositionElement.remove()
         if (text) {
           this.commander.write(text)
         }
