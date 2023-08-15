@@ -16,10 +16,10 @@ module.exports = {
     extensions: ['.ts', '.tsx', '.js'],
     alias: {
       '@textbus/core$': path.resolve(__dirname, './packages/core/src/public-api.ts'),
-      '@textbus/core/jsx-runtime': path.resolve(__dirname, './packages/core/jsx-runtime'),
-      '@textbus/platform-browser': path.resolve(__dirname, './packages/platform-browser/src/public-api.ts'),
+      '@textbus/platform-browser$': path.resolve(__dirname, './packages/platform-browser/src/public-api.ts'),
       '@textbus/editor$': path.resolve(__dirname, './packages/editor/src/public-api.ts'),
       '@textbus/collaborate$': path.resolve(__dirname, './packages/collaborate/src/public-api.ts'),
+      '@textbus/adapter-viewfly': path.resolve(__dirname, './packages/adapter-viewfly/src/public-api.ts'),
     }
   },
   devServer: {

@@ -15,7 +15,7 @@ import { NativeInput } from './native-input'
  * Textbus PC 端配置接口
  */
 export interface ViewOptions {
-  adapter: DomAdapter
+  adapter: DomAdapter<any, any>
   /** 自动获取焦点 */
   autoFocus?: boolean
   /** 编辑区最小高度 */
@@ -38,8 +38,11 @@ export class BrowserModule implements Module {
   private workbench!: HTMLElement
 
   constructor(public host: HTMLElement, public config: ViewOptions) {
-    const id = 'textbus-' + Number((Math.random() + '').substring(2)).toString(16)
-    const { doc, mask, wrapper } = BrowserModule.createLayout(id, config.minHeight)
+    const { mask, wrapper } = BrowserModule.createLayout()
+    wrapper.prepend(config.adapter.host)
+    if (config.minHeight) {
+      config.adapter.host.style.minHeight = config.minHeight
+    }
     this.providers = [{
       provide: EDITOR_OPTIONS,
       useValue: config
@@ -48,7 +51,7 @@ export class BrowserModule implements Module {
       useValue: wrapper
     }, {
       provide: VIEW_DOCUMENT,
-      useValue: doc
+      useValue: config.adapter.host
     }, {
       provide: VIEW_MASK,
       useValue: mask
@@ -81,23 +84,7 @@ export class BrowserModule implements Module {
     this.workbench.remove()
   }
 
-  private static createLayout(id: string, minHeight = '100%') {
-    const doc = createElement('div', {
-      styles: {
-        cursor: 'text',
-        wordBreak: 'break-all',
-        boxSizing: 'border-box',
-        minHeight,
-        flex: 1,
-        outline: 'none'
-      },
-      attrs: {
-        'data-textbus-view': VIEW_DOCUMENT,
-      },
-      props: {
-        id
-      }
-    })
+  private static createLayout() {
     const mask = createElement('div', {
       attrs: {
         'data-textbus-view': VIEW_MASK,
@@ -123,11 +110,10 @@ export class BrowserModule implements Module {
         position: 'relative',
         flexDirection: 'column'
       },
-      children: [doc, mask]
+      children: [mask]
     })
     return {
       wrapper,
-      doc,
       mask
     }
   }

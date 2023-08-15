@@ -841,6 +841,11 @@ export class Slot<T = any> {
     for (const [attribute, value] of this.getAttributes()) {
       attribute.render(root, value)
     }
+    root.location = {
+      slot: this,
+      startIndex: 0,
+      endIndex: this.length
+    }
     return root
   }
 
@@ -889,6 +894,11 @@ export class Slot<T = any> {
         })
         continue
       }
+      next.location = {
+        slot: this,
+        startIndex: item.startIndex,
+        endIndex: item.endIndex
+      }
       host = next
       children = [next]
     }
@@ -934,6 +944,11 @@ export class Slot<T = any> {
         } else {
           vNode = new VTextNode(item)
           length = item.length
+          vNode.location = {
+            slot,
+            startIndex,
+            endIndex: startIndex + length
+          }
         }
       } else {
         length = 1
