@@ -5,6 +5,8 @@ import { ComponentInstance } from './component'
  * Textbus 虚拟 DOM 文本节点
  */
 export class VTextNode {
+  location: NodeLocation | null = null
+
   constructor(public textContent = '') {
   }
 }
@@ -16,7 +18,7 @@ export interface VElementListeners {
 export type VChildNode = VElement | VTextNode | ComponentInstance | string | number | boolean | null | undefined
 
 function append(children: VChildNode[], node: VChildNode) {
-  if (node instanceof VElement) {
+  if (node instanceof VElement || node instanceof ComponentInstance) {
     children.push(node)
   } else if (node instanceof VTextNode) {
     if (node.textContent) {
@@ -42,6 +44,12 @@ export interface NodeLocation {
   slot: Slot
 }
 
+export function createVNode(tagName: string,
+                            attrs?: Record<string, any> | null,
+                            children?: VChildNode[]) {
+  return new VElement(tagName, attrs, children)
+}
+
 /**
  * Textbus 虚拟 DOM 元素节点
  */
@@ -56,38 +64,38 @@ export class VElement {
 
 
   constructor(public tagName: string,
-              attrs?: Record<string, any>,
+              attrs?: Record<string, any> | null,
               children?: VChildNode[]) {
-    if (!attrs) {
-      return
+    if (attrs) {
+      Object.keys(attrs).forEach(key => {
+        if (key === 'class') {
+          const className = (attrs!.class || '').trim();
+          (this as any).classes = new Set<string>(className ? className.split(/\s+/g) : [])
+        } else if (key === 'style') {
+          const style = attrs!.style || ''
+          if (typeof style === 'string') {
+            style.split(';').map(s => s.split(':')).forEach(v => {
+              if (!v[0] || !v[1]) {
+                return
+              }
+              this.styles.set(v[0].trim(), v[1].trim())
+            })
+          } else if (typeof style === 'object') {
+            Object.keys(style).forEach(key => {
+              this.styles.set(key, style[key])
+            })
+          }
+          // } else if (/^on[A-Z]/.test(key)) {
+          //   const listener = attrs![key]
+          //   if (typeof listener === 'function') {
+          //     this.listeners[key.replace(/^on/, '').toLowerCase()] = listener
+          //   }
+        } else {
+          this.attrs.set(key, attrs![key])
+        }
+      })
     }
-    Object.keys(attrs).forEach(key => {
-      if (key === 'class') {
-        const className = (attrs!.class || '').trim();
-        (this as any).classes = new Set<string>(className ? className.split(/\s+/g) : [])
-      } else if (key === 'style') {
-        const style = attrs!.style || ''
-        if (typeof style === 'string') {
-          style.split(';').map(s => s.split(':')).forEach(v => {
-            if (!v[0] || !v[1]) {
-              return
-            }
-            this.styles.set(v[0].trim(), v[1].trim())
-          })
-        } else if (typeof style === 'object') {
-          Object.keys(style).forEach(key => {
-            this.styles.set(key, style[key])
-          })
-        }
-      } else if (/^on[A-Z]/.test(key)) {
-        const listener = attrs![key]
-        if (typeof listener === 'function') {
-          this.listeners[key.replace(/^on/, '').toLowerCase()] = listener
-        }
-      } else {
-        this.attrs.set(key, attrs![key])
-      }
-    })
+
     if (children) {
       children.flat(2).forEach(i => {
         append(this.children, i)

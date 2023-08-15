@@ -72,6 +72,7 @@ export interface ZenCodingGrammarInterceptor<Data = any> {
  * 组件实例对象
  */
 export class ComponentInstance<State = unknown, SlotState = unknown, Extends = unknown> {
+  id = Math.random()
   /**
    * 组件所在的插槽
    * @readonly
@@ -492,7 +493,7 @@ export type ExtractComponentStateType<T> = T extends Component<any, infer S> ? S
  * Textbus 扩展组件方法
  * @param options
  */
-export function defineComponent<State = any, SlotState = any, Extends = any>(
+export function defineComponent<State = unknown, SlotState = unknown, Extends = void>(
   options: ComponentOptions<State, SlotState, Extends>
 ) {
   return new Component<State, SlotState, Extends>(options)

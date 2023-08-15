@@ -45,7 +45,7 @@ export class SelectionBridge implements NativeSelectionBridge {
               private selection: Selection,
               private rootComponentRef: RootComponentRef,
               private input: Input,
-              private domAdapter: DomAdapter) {
+              private domAdapter: DomAdapter<any, any>) {
     this.docContainer = injector.get(VIEW_DOCUMENT)
     this.onSelectionChange = this.selectionChangeEvent.asObservable().pipe(filter(() => {
       return !controller.readonly
@@ -461,7 +461,7 @@ export class SelectionBridge implements NativeSelectionBridge {
 
     if (prev) {
       if (typeof prev !== 'string') {
-        const nativeNode = this.domAdapter.getNativeNodeByComponent(prev)
+        const nativeNode = this.domAdapter.getNativeNodeByComponent(prev)!
         return {
           node: nativeNode.parentNode!,
           offset: Array.from(nativeNode.parentNode!.childNodes).indexOf(nativeNode) + 1
@@ -488,7 +488,7 @@ export class SelectionBridge implements NativeSelectionBridge {
     }
     const current = slot.getContentAtIndex(offset)
     if (current && typeof current !== 'string') {
-      const nativeNode = this.domAdapter.getNativeNodeByComponent(current)
+      const nativeNode = this.domAdapter.getNativeNodeByComponent(current)!
       return {
         node: nativeNode.parentNode!,
         offset: Array.from(nativeNode.parentNode!.childNodes).indexOf(nativeNode)
