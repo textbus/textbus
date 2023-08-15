@@ -1,7 +1,7 @@
 import { InjectionToken } from '@viewfly/core'
 import { Observable } from '@tanbo/stream'
 
-import { ComponentInstance, Formatter, Component, Attribute } from '../model/_api'
+import { ComponentInstance, Formatter, Component, Attribute, Slot, VElement, VTextNode } from '../model/_api'
 
 /**
  * 根节点及原生根元素节点引用类
@@ -10,9 +10,11 @@ export abstract class RootComponentRef {
   abstract component: ComponentInstance
 }
 
-export abstract class ViewAdapter {
+export abstract class ViewAdapter<ViewElement = any> {
   abstract onViewUpdated: Observable<void>
   abstract copy(): void
+  abstract render(rootComponent: ComponentInstance): (void | (() => void))
+  abstract slotRender(slot: Slot, slotHostRender: (children: Array<VElement | VTextNode | ComponentInstance>) => VElement): ViewElement
 }
 
 /**

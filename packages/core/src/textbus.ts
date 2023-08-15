@@ -20,6 +20,7 @@ import {
   READONLY,
   Registry,
   ATTRIBUTE_LIST,
+  ViewAdapter,
 } from './foundation/_api'
 import { makeError } from './_utils/make-error'
 
@@ -161,9 +162,9 @@ export class Textbus extends ReflectiveInjector {
    * 启动一个 Textbus 实例，并将根组件渲染到原生节点
    * @param rootComponent 根组件
    */
-  async bind(rootComponent: ComponentInstance): Promise<this> {
+  async render(rootComponent: ComponentInstance): Promise<this> {
     if (this.isDestroyed) {
-      return this
+      throw textbusError('Textbus instance is destroyed!')
     }
     const rootComponentRef = this.get(RootComponentRef)
     rootComponentRef.component = rootComponent
@@ -188,12 +189,16 @@ export class Textbus extends ReflectiveInjector {
 
     const scheduler = this.get(Scheduler)
     const history = this.get(History)
+    const adapter = this.get(ViewAdapter)
 
     this.initDefaultShortcut()
 
     history.listen()
     scheduler.run()
-
+    const destroyView = adapter.render(rootComponent)
+    if (typeof destroyView === 'function') {
+      this.beforeDestroyCallbacks.push(destroyView)
+    }
     this.plugins.forEach(i => i.setup(this))
     return this
   }
@@ -327,6 +332,11 @@ export class Textbus extends ReflectiveInjector {
         provide: NativeSelectionBridge,
         useFactory() {
           throw textbusError('You must implement the `NativeSelectionBridge` interface to start Textbus!')
+        }
+      }, {
+        provide: ViewAdapter,
+        useFactory() {
+          throw textbusError('You must implement the `ViewAdapter` interface to start Textbus!')
         }
       }
     ]

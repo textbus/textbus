@@ -69,7 +69,7 @@ export class Scheduler {
   private subs: Subscription[] = []
 
   constructor(private rootComponentRef: RootComponentRef,
-              private nativeRenderer: ViewAdapter,
+              private viewAdapter: ViewAdapter,
               private selection: Selection) {
     this.onDocChanged = this.docChangedEvent.asObservable()
     this.onDocChange = this.docChangeEvent.asObservable()
@@ -103,7 +103,6 @@ export class Scheduler {
   run() {
     const rootComponent = this.rootComponentRef.component
     const changeMarker = rootComponent.changeMarker
-    // this.renderer.render()
     let isRendered = true
     this.subs.push(
       changeMarker.onChange.pipe(
@@ -141,7 +140,7 @@ export class Scheduler {
       changeMarker.onChildComponentRemoved.subscribe(instance => {
         this.instanceList.add(instance)
       }),
-      this.nativeRenderer.onViewUpdated.subscribe(() => {
+      this.viewAdapter.onViewUpdated.pipe(microTask()).subscribe(() => {
         this.selection.restore(this._lastChangesHasLocalUpdate)
         this.instanceList.forEach(instance => {
           let comp = instance
