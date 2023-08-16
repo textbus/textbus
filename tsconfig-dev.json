@@ -20,10 +20,10 @@
       "@textbus/core": ["./packages/core/src/public-api.ts"],
       "@textbus/editor": ["./packages/editor/src/public-api.ts"],
       "@textbus/collaborate": ["./packages/collaborate/src/public-api.ts"],
-      "@textbus/adapter-viewfly": ["./packages/adapter-viewfly/src/public-api.ts"]
+      "@textbus/adapter-viewfly": ["./packages/adapter-viewfly/src/public-api.ts"],
+      "@textbus/adapter-react": ["./packages/adapter-react/src/public-api.ts"]
     },
-    "jsx": "react-jsx",
-    "jsxImportSource": "@viewfly/core"
+    "jsx": "react-jsx"
   },
   "exclude": ["packages", "_docs", "helper", "test"]
 }
