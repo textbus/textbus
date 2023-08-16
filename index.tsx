@@ -18,22 +18,22 @@ import {
   VElement,
   VTextNode,
 } from '@textbus/core'
-import { createApp } from '@viewfly/platform-browser'
-import { Adapter, ViewComponentProps } from '@textbus/adapter-viewfly'
+import { createRoot } from 'react-dom/client'
+import { Adapter, ViewComponentProps } from '@textbus/adapter-react'
 
 const adapter = new Adapter({
   RootComponent: App,
   ParagraphComponent: Paragraph
 }, (host, root) => {
-  const app = createApp(root, {
-    context: textbus
-  }).mount(host)
+  const app = createRoot(host)
+  app.render(root)
   return () => {
-    app.destroy()
+    app.unmount()
   }
 })
 const browserModule = new BrowserModule(document.getElementById('editor')!, {
   adapter,
+  // useContentEditable: true
 })
 
 const textbus = new Textbus({
@@ -108,23 +108,23 @@ const rootModel = rootComponent.createInstance(textbus)
 textbus.render(rootModel)
 
 function App(props: ViewComponentProps<typeof rootComponent>) {
-  return () => {
-    const slot = props.component.slots.first
-    return adapter.slotRender(slot, children => {
+  const slot = props.component.slots.first
+  return (
+    adapter.slotRender(slot, children => {
       return createVNode('div', {
         'textbus-document': 'true',
         ref: props.rootRef
       }, children)
     })
-  }
+  )
 }
 
 function Paragraph(props: ViewComponentProps<typeof paragraphComponent>) {
-  return () => {
-    const slot = props.component.slots.first
-    return adapter.slotRender(slot, children => {
-      return createVNode('p', {ref: props.rootRef}, children)
+  const slot = props.component.slots.first
+  return (
+    adapter.slotRender(slot, children => {
+      return createVNode('p', { ref: props.rootRef }, children)
     })
-  }
+  )
 }
 
