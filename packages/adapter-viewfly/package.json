@@ -27,6 +27,7 @@
   "dependencies": {
     "@tanbo/stream": "^1.2.0",
     "@textbus/core": "^3.5.0",
+    "@textbus/platform-browser": "^3.5.0",
     "@viewfly/core": "^0.1.1"
   },
   "devDependencies": {
