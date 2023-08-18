@@ -107,7 +107,7 @@ export class Adapter extends DomAdapter<JSXComponent, JSXInternal.Element> {
         }, {})),
       }
       if (vNode.classes.size) {
-        props.className = Array.from(vNode.classes).join(' ')
+        props.class = Array.from(vNode.classes).join(' ')
       }
       if (vNode.styles) {
         props.style = Array.from(vNode.styles).reduce((a, b) => {
