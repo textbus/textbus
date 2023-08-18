@@ -23,10 +23,15 @@ export interface ViewflyAdapterComponents {
   [key: string]: JSXInternal.ComponentSetup<ViewComponentProps>
 }
 
+/**
+ * Textbus 桥接 [Viewfly](https://viewfly.org) 渲染能力适配器，用于在 Viewfly 项目中渲染 Textbus 数据
+ */
 export class Adapter extends DomAdapter<JSXComponent, JSXInternal.Element> {
   onViewUpdated = new Subject<void>()
 
   private components: ViewflyAdapterComponents = {}
+
+  private componentRefs = new WeakMap<ComponentInstance, Ref<HTMLElement>>()
 
   constructor(components: ViewflyAdapterComponents,
               mount: (host: HTMLElement, root: JSXComponent) => (void | (() => void))) {
@@ -59,14 +64,20 @@ export class Adapter extends DomAdapter<JSXComponent, JSXInternal.Element> {
   componentRender(component: ComponentInstance): JSXInternal.JSXNode {
     const comp = this.components[component.name] || this.components['*']
     if (comp) {
-      return jsx(comp, {
-        component,
-        rootRef: useRef<HTMLElement>(rootNode => {
+      component.changeMarker.rendered()
+      let ref = this.componentRefs.get(component)
+      if (!ref) {
+        ref = useRef<HTMLElement>(rootNode => {
           this.componentRootElementCaches.set(component, rootNode)
           return () => {
-            this.componentRootElementCaches.delete(component)
+            this.componentRootElementCaches.remove(component)
           }
         })
+        this.componentRefs.set(component, ref)
+      }
+      return jsx(comp, {
+        component,
+        rootRef: ref
       }, component.id)
     }
     throw adapterError(`cannot found view component \`${component.name}\`!`)
@@ -94,12 +105,18 @@ export class Adapter extends DomAdapter<JSXComponent, JSXInternal.Element> {
           a[b[0]] = b[1]
           return a
         }, {})),
-        children,
-        class: Array.from(vNode.classes).join(' '),
-        style: Array.from(vNode.styles).reduce((a, b) => {
+      }
+      if (vNode.classes.size) {
+        props.className = Array.from(vNode.classes).join(' ')
+      }
+      if (vNode.styles) {
+        props.style = Array.from(vNode.styles).reduce((a, b) => {
           a[b[0]] = b[1]
           return a
         }, {})
+      }
+      if (children.length) {
+        props.children = children
       }
       return jsx(vNode.tagName, props)
     }
