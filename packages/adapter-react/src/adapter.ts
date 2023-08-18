@@ -36,6 +36,9 @@ export interface ReactAdapterComponents {
   [key: string]: (props: ViewComponentProps) => JSX.Element
 }
 
+/**
+ * Textbus 桥接 React 渲染能力适配器，用于在 React 项目中渲染 Textbus 数据
+ */
 export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
   onViewUpdated = new Subject<void>()
 
@@ -68,7 +71,7 @@ export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
             if (rootNode) {
               this.componentRootElementCaches.set(component, rootNode)
             } else {
-              this.componentRootElementCaches.delete(component)
+              this.componentRootElementCaches.remove(component)
             }
           }
         })
@@ -103,7 +106,6 @@ export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
           children.push(replaceEmpty(child.textContent))
         } else {
           children.push(this.componentRender(child))
-          child.changeMarker.rendered()
         }
       }
       const props: any = {

@@ -11,9 +11,9 @@ import { createElement } from './_utils/uikit'
 import { VIEW_DOCUMENT } from './injection-tokens'
 
 /**
- * Textbus PC 端浏览器渲染能力实现
+ * Textbus PC 端浏览器渲染能力桥接器抽象类，提供了 DOM 元素查询能力，具体渲染能力由各前端框架实现相应桥接
  */
-export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter<ViewElement> {
+export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter {
   host = createElement('div', {
     styles: {
       cursor: 'text',
@@ -30,8 +30,10 @@ export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter
     }
   })
 
-  protected componentRootElementCaches = new WeakMap<ComponentInstance, HTMLElement>()
-  protected slotRootNativeElementCaches = createBidirectionalMapping<Slot, Node>(a => {
+  protected componentRootElementCaches = createBidirectionalMapping<ComponentInstance, HTMLElement>(a => {
+    return a instanceof ComponentInstance
+  })
+  protected slotRootNativeElementCaches = createBidirectionalMapping<Slot, HTMLElement>(a => {
     return a instanceof Slot
   })
   protected slotRootVElementCaches = new WeakMap<Slot, VElement>()
@@ -47,16 +49,42 @@ export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter
 
   abstract componentRender(component: ComponentInstance): ViewComponent
 
+  abstract slotRender(slot: Slot, slotHostRender: (children: Array<VElement | VTextNode | ComponentInstance>) => VElement): ViewElement
+
   override copy() {
     document.execCommand('copy')
   }
 
+  /**
+   * 根据组件获取组件的根 DOM 节点
+   * @param component
+   */
   getNativeNodeByComponent(component: ComponentInstance): HTMLElement | null {
     return this.componentRootElementCaches.get(component) || null
   }
 
+  /**
+   * 根据 DOM 节点，获对对应的组件根节点，如传入的 DOM 节点不为组件的根节点，则返回 null
+   * @param node
+   */
+  getComponentByNativeNode(node: HTMLElement): ComponentInstance | null {
+    return this.componentRootElementCaches.get(node) || null
+  }
+
+  /**
+   * 根据插槽获取插槽的根 DOM 节点
+   * @param slot
+   */
   getNativeNodeBySlot(slot: Slot): HTMLElement | null {
-    return this.slotRootNativeElementCaches.get(slot) as HTMLElement || null
+    return this.slotRootNativeElementCaches.get(slot) || null
+  }
+
+  /**
+   * 根据 DOM 节点，获对对应的插槽根节点，如传入的 DOM 节点不为插槽的根节点，则返回 null
+   * @param node
+   */
+  getSlotByNativeNode(node: HTMLElement): Slot | null {
+    return this.slotRootNativeElementCaches.get(node) || null
   }
 
   /**
@@ -96,13 +124,13 @@ export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter
    */
   getLocationByNativeNode(node: Node): NodeLocation | null {
     let slotRootNode = node
-    while (!this.slotRootNativeElementCaches.get(slotRootNode)) {
+    while (!this.slotRootNativeElementCaches.get(slotRootNode as HTMLElement)) {
       slotRootNode = slotRootNode.parentNode as Node
       if (!slotRootNode) {
         return null
       }
     }
-    const slot = this.slotRootNativeElementCaches.get(slotRootNode)
+    const slot = this.slotRootNativeElementCaches.get(slotRootNode as HTMLElement)
     const rootVNode = this.slotRootVElementCaches.get(slot)!
 
     const getLocation = (target: Node, tree: HTMLElement, vNodeTree: VElement) => {
