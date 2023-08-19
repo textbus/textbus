@@ -21,7 +21,8 @@
       "@textbus/editor": ["./packages/editor/src/public-api.ts"],
       "@textbus/collaborate": ["./packages/collaborate/src/public-api.ts"],
       "@textbus/adapter-viewfly": ["./packages/adapter-viewfly/src/public-api.ts"],
-      "@textbus/adapter-react": ["./packages/adapter-react/src/public-api.ts"]
+      "@textbus/adapter-react": ["./packages/adapter-react/src/public-api.ts"],
+      "@textbus/adapter-vue": ["./packages/adapter-vue/src/public-api.ts"]
     },
     "jsx": "react-jsx"
   },
