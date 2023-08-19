@@ -18,15 +18,46 @@ import {
   VElement,
   VTextNode,
 } from '@textbus/core'
-import { createRoot } from 'react-dom/client'
-import { Adapter, ViewComponentProps } from '@textbus/adapter-react'
+import { createApp, defineComponent as defineVue } from 'vue'
+import { Adapter, ViewComponentProps } from '@textbus/adapter-vue'
+
+const App = defineVue({
+  props: ['component', 'rootRef'],
+  setup(props: ViewComponentProps) {
+    return () => {
+      const slot = props.component.slots.first
+      return (
+        adapter.slotRender(slot, children => {
+          return createVNode('div', {
+            'textbus-document': 'true',
+            ref: props.rootRef
+          }, children)
+        })
+      )
+    }
+  }
+})
+
+const Paragraph = defineVue({
+  props: ['component', 'rootRef'],
+  setup(props: ViewComponentProps) {
+    return () => {
+      const slot = props.component.slots.first
+      return (
+        adapter.slotRender(slot, children => {
+          return createVNode('p', { ref: props.rootRef }, children)
+        })
+      )
+    }
+  }
+})
 
 const adapter = new Adapter({
   RootComponent: App,
   ParagraphComponent: Paragraph
 }, (host, root) => {
-  const app = createRoot(host)
-  app.render(root)
+  const app = createApp(root)
+  app.mount(host)
   return () => {
     app.unmount()
   }
@@ -61,7 +92,7 @@ const rootComponent = defineComponent({
       ContentType.Text,
       ContentType.BlockComponent
     ])
-    for (let i = 0; i < 50000; i++) {
+    for (let i = 0; i < 500; i++) {
       const p = paragraphComponent.createInstance(useContext())
       p.slots.first.insert(Math.random().toString(16), fontSizeFormatter, '23px')
       slot.insert(p)
@@ -106,25 +137,4 @@ const paragraphComponent = defineComponent({
 const rootModel = rootComponent.createInstance(textbus)
 
 textbus.render(rootModel)
-
-function App(props: ViewComponentProps<typeof rootComponent>) {
-  const slot = props.component.slots.first
-  return (
-    adapter.slotRender(slot, children => {
-      return createVNode('div', {
-        'textbus-document': 'true',
-        ref: props.rootRef
-      }, children)
-    })
-  )
-}
-
-function Paragraph(props: ViewComponentProps<typeof paragraphComponent>) {
-  const slot = props.component.slots.first
-  return (
-    adapter.slotRender(slot, children => {
-      return createVNode('p', { ref: props.rootRef }, children)
-    })
-  )
-}
 
