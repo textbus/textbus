@@ -21,6 +21,7 @@ module.exports = {
       '@textbus/collaborate$': path.resolve(__dirname, './packages/collaborate/src/public-api.ts'),
       '@textbus/adapter-viewfly': path.resolve(__dirname, './packages/adapter-viewfly/src/public-api.ts'),
       '@textbus/adapter-react': path.resolve(__dirname, './packages/adapter-react/src/public-api.ts'),
+      '@textbus/adapter-vue': path.resolve(__dirname, './packages/adapter-vue/src/public-api.ts'),
     }
   },
   devServer: {
