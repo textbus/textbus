@@ -47,12 +47,14 @@ export const videoComponent = defineComponent({
 
     return {
       render(): VElement {
-        return (
-          <video src={state.src} ref={ref} autoPlay={state.autoplay} controls={state.controls} style={{
-            width: state.width,
-            height: state.height
-          }}/>
-        )
+        const vNode = <video src={state.src} ref={ref} controls={state.controls} style={{
+          width: state.width,
+          height: state.height
+        }}/>
+        if (state.autoplay) {
+          vNode.attrs.set('autoPlay', 'autoplay')
+        }
+        return vNode
       },
       mergeProps(props: Partial<VideoState>) {
         state = controller.update(draft => {
