@@ -1,4 +1,4 @@
-import { Inject, Injectable, Optional } from '@tanbo/di'
+import { Inject, Injectable, Optional } from '@viewfly/core'
 import { filter, map, Observable, Subject, Subscription } from '@tanbo/stream'
 import {
   AbstractSelection,
