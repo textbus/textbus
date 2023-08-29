@@ -119,19 +119,21 @@ export class Viewer extends Starter {
     }, {
       provide: Viewer,
       useFactory: () => this
-    }]
+    },
+      DomRenderer,
+      Parser,
+      SelectionBridge,
+      OutputTranslator,
+      CollaborateCursor
+    ]
+    options.imports = options.imports || []
+    options.imports.push({
+      providers: staticProviders
+    })
     super({
       ...options,
       plugins: options.plugins || [],
-      providers: [
-        ...(options.providers || []),
-        ...staticProviders,
-        DomRenderer,
-        Parser,
-        SelectionBridge,
-        OutputTranslator,
-        CollaborateCursor
-      ],
+      providers: options.providers,
       setup: options.setup
     })
     this.id = id
