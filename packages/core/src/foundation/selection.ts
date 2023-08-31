@@ -884,9 +884,11 @@ export class Selection {
    * 选择整个文档
    */
   selectAll() {
-    const slot = this.root.component.slots.get(0)!
-    this.setBaseAndExtent(slot, 0, slot, slot.length)
-    this.restore()
+    const { first, last } = this.root.component.slots
+    if (first && last) {
+      this.setBaseAndExtent(first, 0, last, last.length)
+      this.restore()
+    }
   }
 
   /**
