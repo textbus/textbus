@@ -114,13 +114,19 @@ export class ComponentInstance<State = unknown, SlotState = unknown, Extends = u
    * @param initData 初始数据
    */
   constructor(injector: Injector,
-              private options: ComponentOptions<State, SlotState, Extends>,
+              options: ComponentOptions<State, SlotState, Extends>,
               initData?: ComponentInitData<State, SlotState>) {
     this.onStateChange = this.stateChangeEvent.asObservable()
     this.name = options.name
     this.type = options.type
     this.separable = !!options.separable
+
+    if (typeof options.validate === 'function') {
+      initData = options.validate(initData)
+    }
+
     this.state = initData?.state as any || null
+    this.slots = new Slots<SlotState>(this, initData?.slots || [])
 
     const changeController: ChangeController<State> = {
       update: (fn, record = true) => {
@@ -135,17 +141,15 @@ export class ComponentInstance<State = unknown, SlotState = unknown, Extends = u
       eventCache: new EventCache<EventTypes>(),
     }
     contextStack.push(context)
-    this.extends = options.setup(initData)
+    if (typeof options.setup === 'function') {
+      this.extends = options.setup()
+    }
     onDestroy(() => {
       eventCacheMap.delete(this)
       subscriptions.forEach(i => i.unsubscribe())
     })
     eventCacheMap.set(this, context.eventCache)
     contextStack.pop()
-    this.slots = context.slots || new Slots<SlotState>(this)
-    if (Reflect.has(context, 'initState')) {
-      this.state = context.initState as State
-    }
 
     const subscriptions: Subscription[] = [
       this.slots.onChange.subscribe(ops => {
@@ -229,10 +233,15 @@ export interface ComponentOptions<State, SlotState, Extends> {
     ZenCodingGrammarInterceptor<ComponentInitData<State, SlotState>>[]
 
   /**
-   * 组件初始化实现
+   * 组件初始数据校验
    * @param initData
    */
-  setup(initData?: ComponentInitData<State, SlotState>): Extends
+  validate?(initData?: ComponentInitData<State, SlotState>): ComponentInitData<State, SlotState>
+
+  /**
+   * 组件初始化实现
+   */
+  setup?(): Extends
 }
 
 /**
@@ -442,8 +451,6 @@ class EventCache<T, K extends keyof T = keyof T> {
 }
 
 interface ComponentContext<T> {
-  slots?: Slots
-  initState?: T
   changeController: ChangeController<T>
   contextInjector: Injector
   componentInstance: ComponentInstance
@@ -501,33 +508,6 @@ export function useContext(token: any = Injector, noFoundValue?: any, flags?: an
 export function useSelf<T extends ComponentInstance>(): T {
   const context = getCurrentContext()
   return context.componentInstance as T
-}
-
-/**
- * 组件使用子插槽的方法
- * @param slots 子插槽数组
- */
-export function useSlots<T>(slots: Slot<T>[]): Slots<T> {
-  const context = getCurrentContext()
-  if (Reflect.has(context, 'slots')) {
-    throw componentErrorFn('only one unique slots is allowed for a component!')
-  }
-  const s = new Slots(context.componentInstance, slots)
-  context.slots = s
-  return s
-}
-
-/**
- * 组件注册状态管理器的勾子
- * @param initState
- */
-export function useState<T>(initState: T) {
-  const context = getCurrentContext()
-  if (Reflect.has(context, 'initState')) {
-    throw componentErrorFn('only one unique state is allowed for a component!')
-  }
-  context.initState = initState
-  return context.changeController as ChangeController<T>
 }
 
 /**
