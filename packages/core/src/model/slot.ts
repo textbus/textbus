@@ -828,18 +828,18 @@ export class Slot<T = any> {
   /**
    * 根据插槽的格式数据，生成格式树
    */
-  toTree(slotRenderFactory: SlotRenderFactory): VElement {
+  toTree(slotRenderFactory: SlotRenderFactory, renderEnv?: any): VElement {
     const formatTree = this.format.toTree(0, this.length)
     let children = formatTree.children ?
-      this.createVDomByFormatTree(this, formatTree.children) :
+      this.createVDomByFormatTree(this, formatTree.children, renderEnv) :
       this.createVDomByContent(this, formatTree.startIndex, formatTree.endIndex)
 
     if (formatTree.formats) {
-      children = [this.createVDomByOverlapFormats(formatTree.formats, children)]
+      children = [this.createVDomByOverlapFormats(formatTree.formats, children, renderEnv)]
     }
     const root = slotRenderFactory(children)
     for (const [attribute, value] of this.getAttributes()) {
-      attribute.render(root, value)
+      attribute.render(root, value, renderEnv)
     }
     root.location = {
       slot: this,
@@ -851,17 +851,19 @@ export class Slot<T = any> {
 
   private createVDomByFormatTree(
     slot: Slot,
-    formats: FormatTree<any>[]) {
+    formats: FormatTree<any>[],
+    renderEnv: any) {
     const nodes: Array<VElement | VTextNode | ComponentInstance> = []
     for (const child of formats) {
       if (child.formats?.length) {
         const children = child.children ?
-          this.createVDomByFormatTree(slot, child.children) :
+          this.createVDomByFormatTree(slot, child.children, renderEnv) :
           this.createVDomByContent(slot, child.startIndex, child.endIndex)
 
         const nextChildren = this.createVDomByOverlapFormats(
           child.formats,
           children,
+          renderEnv
         )
         nodes.push(nextChildren)
       } else {
@@ -877,13 +879,14 @@ export class Slot<T = any> {
 
   private createVDomByOverlapFormats(
     formats: (FormatItem<any>)[],
-    children: Array<VElement | VTextNode | ComponentInstance>
+    children: Array<VElement | VTextNode | ComponentInstance>,
+    renderEnv: any
   ): VElement {
     const hostBindings: Array<{render: FormatHostBindingRender, item: FormatItem<any>}> = []
     let host: VElement | null = null
     for (let i = formats.length - 1; i > -1; i--) {
       const item = formats[i]
-      const next = item.formatter.render(children, item.value)
+      const next = item.formatter.render(children, item.value, renderEnv)
       if (!next) {
         throw slotError(`Formatter \`${item.formatter.name}\` must return an VElement!`)
       }
