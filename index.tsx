@@ -14,50 +14,18 @@ import {
   Textbus,
   useContext,
   useSelf,
-  useSlots,
   VElement,
   VTextNode,
 } from '@textbus/core'
-import { createApp, defineComponent as defineVue } from 'vue'
-import { Adapter, ViewComponentProps } from '@textbus/adapter-vue'
-
-const App = defineVue({
-  props: ['component', 'rootRef'],
-  setup(props: ViewComponentProps) {
-    return () => {
-      const slot = props.component.slots.first
-      return (
-        adapter.slotRender(slot, children => {
-          return createVNode('div', {
-            'textbus-document': 'true',
-            ref: props.rootRef
-          }, children)
-        })
-      )
-    }
-  }
-})
-
-const Paragraph = defineVue({
-  props: ['component', 'rootRef'],
-  setup(props: ViewComponentProps) {
-    return () => {
-      const slot = props.component.slots.first
-      return (
-        adapter.slotRender(slot, children => {
-          return createVNode('p', { ref: props.rootRef }, children)
-        })
-      )
-    }
-  }
-})
+import { createRoot } from 'react-dom/client'
+import { Adapter, ViewComponentProps } from '@textbus/adapter-react'
 
 const adapter = new Adapter({
   RootComponent: App,
   ParagraphComponent: Paragraph
 }, (host, root) => {
-  const app = createApp(root)
-  app.mount(host)
+  const app = createRoot(host)
+  app.render(root)
   return () => {
     app.unmount()
   }
@@ -87,30 +55,37 @@ const fontSizeFormatter: Formatter<string> = {
 const rootComponent = defineComponent({
   name: 'RootComponent',
   type: ContentType.BlockComponent,
+  validate() {
+    return {
+      slots: [
+        new Slot([
+          ContentType.Text,
+          ContentType.BlockComponent
+        ])
+      ]
+    }
+  },
   setup() {
-    const slot = new Slot([
-      ContentType.Text,
-      ContentType.BlockComponent
-    ])
-    for (let i = 0; i < 500; i++) {
+    const slot = useSelf().slots.get(0)!
+    for (let i = 0; i < 50; i++) {
       const p = paragraphComponent.createInstance(useContext())
       p.slots.first.insert(Math.random().toString(16), fontSizeFormatter, '23px')
       slot.insert(p)
     }
-    useSlots([
-      slot
-    ])
   }
 })
 
 const paragraphComponent = defineComponent({
   name: 'ParagraphComponent',
   type: ContentType.BlockComponent,
-  setup(initData) {
-    const slots = initData?.slots || [new Slot([
-      ContentType.Text
-    ])]
-    useSlots(slots)
+  validate(initData) {
+    return {
+      slots: initData?.slots || [new Slot([
+        ContentType.Text
+      ])]
+    }
+  },
+  setup() {
     const context = useContext()
     const commander = useContext(Commander)
     const selection = useContext(Selection)
@@ -137,4 +112,30 @@ const paragraphComponent = defineComponent({
 const rootModel = rootComponent.createInstance(textbus)
 
 textbus.render(rootModel)
+
+function App(props: ViewComponentProps<typeof rootComponent>) {
+  const slot = props.component.slots.first
+
+  return (
+    <div className="xxxx">
+      {
+        adapter.slotRender(slot, children => {
+          return createVNode('div', {
+            'textbus-document': 'true',
+            ref: props.rootRef
+          }, children)
+        })
+      }
+    </div>
+  )
+}
+
+function Paragraph(props: ViewComponentProps<typeof paragraphComponent>) {
+  const slot = props.component.slots.first
+  return (
+    adapter.slotRender(slot, children => {
+      return createVNode('p', { ref: props.rootRef }, children)
+    })
+  )
+}
 

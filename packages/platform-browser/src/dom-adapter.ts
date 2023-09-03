@@ -49,7 +49,9 @@ export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter
 
   abstract componentRender(component: ComponentInstance): ViewComponent
 
-  abstract slotRender(slot: Slot, slotHostRender: (children: Array<VElement | VTextNode | ComponentInstance>) => VElement): ViewElement
+  abstract slotRender(slot: Slot,
+                      slotHostRender: (children: Array<VElement | VTextNode | ComponentInstance>) => VElement,
+                      renderEnv: any): ViewElement
 
   override copy() {
     document.execCommand('copy')

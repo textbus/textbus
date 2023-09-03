@@ -69,10 +69,12 @@ export abstract class Formatter<T extends FormatValue> {
    * 格式渲染的方法
    * @param children 子节点集合
    * @param formatValue 当前格式要渲染的值
+   * @param renderEnv 渲染环境变量，你可以根据条件渲染不同的结果，renderEnv 的值由 slot.toTree 方法的第二个参数决定
    */
   abstract render(
     children: Array<VElement | VTextNode | ComponentInstance>,
-    formatValue: T): VElement | FormatHostBindingRender
+    formatValue: T,
+    renderEnv: any): VElement | FormatHostBindingRender
 }
 
 /**
@@ -92,9 +94,11 @@ export abstract class Attribute<T extends FormatValue> {
    * 渲染属性的方法
    * @param node 不附加属性的节点
    * @param formatValue 要附加属性的值
+   * @param renderEnv 渲染环境变量，你可以根据条件渲染不同的结果，renderEnv 的值由 slot.toTree 方法的第二个参数决定
    */
   abstract render(
     node: VElement,
     formatValue: T,
+    renderEnv: any
   ): void
 }

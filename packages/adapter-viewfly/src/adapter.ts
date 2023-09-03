@@ -83,8 +83,10 @@ export class Adapter extends DomAdapter<JSXComponent, JSXInternal.Element> {
     throw adapterError(`cannot found view component \`${component.name}\`!`)
   }
 
-  slotRender(slot: Slot, slotHostRender: (children: Array<VElement | VTextNode | ComponentInstance>) => VElement): JSXInternal.Element {
-    const vElement = slot.toTree(slotHostRender)
+  slotRender(slot: Slot,
+             slotHostRender: (children: Array<VElement | VTextNode | ComponentInstance>) => VElement,
+             renderEnv: any): JSXInternal.Element {
+    const vElement = slot.toTree(slotHostRender, renderEnv)
     this.slotRootVElementCaches.set(slot, vElement)
 
     const vNodeToJSX = (vNode: VElement) => {
