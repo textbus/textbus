@@ -290,7 +290,7 @@ export class NativeInput extends Input {
     )
   }
 
-  private handlePaste(dom: HTMLElement | string, text: string) {
+  private handlePaste(dom: HTMLElement | string | HTMLElement, text: string) {
     const slot = this.parser.parse(dom, new Slot([
       ContentType.BlockComponent,
       ContentType.InlineComponent,
