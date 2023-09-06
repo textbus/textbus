@@ -121,7 +121,7 @@ export class Textbus extends ReflectiveInjector {
     this.controller.readonly = b
   }
 
-  isFocus() {
+  get isFocus() {
     return this._isFocus
   }
 
