@@ -477,20 +477,16 @@ export class MagicInput extends Input {
         this.doc.body.appendChild(div)
         div.focus()
         setTimeout(() => {
-          let html = div.innerHTML
-          if (!html && text && this.isFirefox) {
-            html = text
-          }
-          this.handlePaste(html, text)
-
           this.doc.body.removeChild(div)
+          div.style.cssText = ''
+          this.handlePaste(div, text)
         })
       })
     )
   }
 
-  private handlePaste(html: string, text: string) {
-    const slot = this.parser.parse(html, new Slot([
+  private handlePaste(dom: HTMLElement | string, text: string) {
+    const slot = this.parser.parse(dom, new Slot([
       ContentType.BlockComponent,
       ContentType.InlineComponent,
       ContentType.Text
