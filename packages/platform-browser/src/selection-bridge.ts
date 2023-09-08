@@ -1,5 +1,5 @@
 import { filter, fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
-import { Inject, Injectable, Injector } from '@viewfly/core'
+import { Inject, Injectable } from '@viewfly/core'
 import {
   NativeSelectionBridge,
   NativeSelectionConnector,
@@ -8,7 +8,7 @@ import {
   AbstractSelection,
   RootComponentRef,
   Controller,
-  Selection
+  Selection, Textbus
 } from '@textbus/core'
 
 import { EDITOR_OPTIONS, VIEW_DOCUMENT } from './injection-tokens'
@@ -40,13 +40,13 @@ export class SelectionBridge implements NativeSelectionBridge {
   private oldCaretPosition!: Rect | null
 
   constructor(@Inject(EDITOR_OPTIONS) private config: ViewOptions,
-              injector: Injector,
+              textbus: Textbus,
               controller: Controller,
               private selection: Selection,
               private rootComponentRef: RootComponentRef,
               private input: Input,
               private domAdapter: DomAdapter<any, any>) {
-    this.docContainer = injector.get(VIEW_DOCUMENT)
+    this.docContainer = textbus.get(VIEW_DOCUMENT)
     this.onSelectionChange = this.selectionChangeEvent.asObservable().pipe(filter(() => {
       return !controller.readonly
     }))
