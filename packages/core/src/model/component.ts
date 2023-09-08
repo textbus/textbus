@@ -511,7 +511,7 @@ export function defineComponent<State = unknown, SlotState = unknown, Extends = 
  */
 export function useContext(): Injector
 export function useContext<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): T
-export function useContext(token: any = Injector, noFoundValue?: any, flags?: any): Injector {
+export function useContext(token: any = Injector, noFoundValue?: any, flags?: any) {
   const context = getCurrentContext()
   return context.contextInjector.get(token, noFoundValue, flags)
 }
