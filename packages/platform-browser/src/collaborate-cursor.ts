@@ -1,5 +1,5 @@
-import { Injectable, Injector, Optional } from '@viewfly/core'
-import { Selection, SelectionPaths, AbstractSelection, Scheduler } from '@textbus/core'
+import { Injectable, Optional } from '@viewfly/core'
+import { Selection, SelectionPaths, AbstractSelection, Scheduler, Textbus } from '@textbus/core'
 import { fromEvent, Subject, Subscription } from '@tanbo/stream'
 
 import { VIEW_CONTAINER } from './injection-tokens'
@@ -92,12 +92,12 @@ export class CollaborateCursor {
   private currentSelection: RemoteSelection[] = []
   private container: HTMLElement
 
-  constructor(injector: Injector,
+  constructor(textbus: Textbus,
               private nativeSelection: SelectionBridge,
               private scheduler: Scheduler,
               private selection: Selection,
               @Optional() private awarenessDelegate?: CollaborateSelectionAwarenessDelegate) {
-    this.container = injector.get(VIEW_CONTAINER)
+    this.container = textbus.get(VIEW_CONTAINER)
     this.canvasContainer.append(this.canvas)
     this.host.append(this.canvasContainer, this.tooltips)
     this.container.prepend(this.host)
