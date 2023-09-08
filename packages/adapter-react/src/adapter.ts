@@ -93,7 +93,7 @@ export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
 
   slotRender(slot: Slot,
              slotHostRender: (children: Array<VElement | VTextNode | ComponentInstance>) => VElement,
-             renderEnv: any): JSX.Element {
+             renderEnv?: any): JSX.Element {
     const vElement = slot.toTree(slotHostRender, renderEnv)
     this.slotRootVElementCaches.set(slot, vElement)
 
