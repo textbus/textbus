@@ -88,7 +88,7 @@ export class Adapter extends DomAdapter<VNode, VNode> {
 
   slotRender(slot: Slot,
              slotHostRender: (children: Array<VElement | VTextNode | ComponentInstance>) => VElement,
-             renderEnv: any): VNode {
+             renderEnv?: any): VNode {
     const vElement = slot.toTree(slotHostRender, renderEnv)
     this.slotRootVElementCaches.set(slot, vElement)
 
