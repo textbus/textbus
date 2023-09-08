@@ -1,5 +1,5 @@
 import { distinctUntilChanged, filter, fromEvent, map, merge, Observable, Subject, Subscription } from '@tanbo/stream'
-import { Injectable, Injector } from '@viewfly/core'
+import { Injectable } from '@viewfly/core'
 import {
   Commander,
   CompositionStartEventData,
@@ -10,7 +10,7 @@ import {
   Keyboard,
   Scheduler,
   Selection,
-  Slot
+  Slot, Textbus
 } from '@textbus/core'
 
 import { createElement, getLayoutRectByRange } from './_utils/uikit'
@@ -305,7 +305,7 @@ export class MagicInput extends Input {
   composition = false
   compositionState: CompositionState | null = null
   onReady: Promise<void>
-  caret = new ExperimentalCaret(this.scheduler, this.injector.get(VIEW_MASK))
+  caret = new ExperimentalCaret(this.scheduler, this.textbus.get(VIEW_MASK))
 
   set disabled(b: boolean) {
     this._disabled = b
@@ -341,7 +341,7 @@ export class MagicInput extends Input {
               private selection: Selection,
               private controller: Controller,
               private scheduler: Scheduler,
-              private injector: Injector) {
+              private textbus: Textbus) {
     super()
     this.onReady = new Promise<void>(resolve => {
       this.subscription.add(

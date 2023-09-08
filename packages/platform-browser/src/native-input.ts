@@ -1,4 +1,4 @@
-import { Injectable, Injector } from '@viewfly/core'
+import { Injectable } from '@viewfly/core'
 import {
   distinctUntilChanged,
   filter,
@@ -20,7 +20,7 @@ import {
   Keyboard,
   Scheduler,
   Selection,
-  Slot
+  Slot, Textbus
 } from '@textbus/core'
 
 import { Caret, CaretPosition, CompositionState, Input, Scroller } from './types'
@@ -181,7 +181,7 @@ export class NativeInput extends Input {
 
   private ignoreComposition = false // 有 bug 版本搜狗拼音
 
-  constructor(injector: Injector,
+  constructor(textbus: Textbus,
               private parser: Parser,
               private scheduler: Scheduler,
               private selection: Selection,
@@ -190,7 +190,7 @@ export class NativeInput extends Input {
               private commander: Commander,
               private controller: Controller) {
     super()
-    this.documentView = injector.get(VIEW_DOCUMENT)
+    this.documentView = textbus.get(VIEW_DOCUMENT)
     if (!controller.readonly) {
       this.documentView.contentEditable = 'true'
     }
