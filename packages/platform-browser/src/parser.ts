@@ -1,11 +1,12 @@
-import { Inject, Injectable, Injector } from '@viewfly/core'
+import { Inject, Injectable } from '@viewfly/core'
 import {
   Attribute,
   ComponentInstance,
   FormatItem,
   Formatter,
   FormatValue,
-  Slot
+  Slot,
+  Textbus
 } from '@textbus/core'
 
 import { EDITOR_OPTIONS } from './injection-tokens'
@@ -33,7 +34,7 @@ export interface ComponentLoader {
   match(element: HTMLElement): boolean
 
   /** 读取组件内容的方法 */
-  read(element: HTMLElement, injector: Injector, slotParser: SlotParser): ComponentInstance | Slot | void
+  read(element: HTMLElement, textbus: Textbus, slotParser: SlotParser): ComponentInstance | Slot | void
 }
 
 export interface FormatLoaderReadResult<T extends FormatValue> {
@@ -94,7 +95,7 @@ export class Parser {
   attributeLoaders: AttributeLoader<any>[]
 
   constructor(@Inject(EDITOR_OPTIONS) private options: ViewOptions,
-              private injector: Injector) {
+              private textbus: Textbus) {
     const componentLoaders = [
       ...(options.componentLoaders || [])
     ]
@@ -122,7 +123,7 @@ export class Parser {
     const element = typeof html === 'string' ? Parser.parseHTML(html) : html
     return rootComponentLoader.read(
       element,
-      this.injector,
+      this.textbus,
       (childSlot, slotRootElement, slotContentHostElement = slotRootElement) => {
         return this.readSlot(childSlot, slotRootElement, slotContentHostElement)
       }
@@ -149,7 +150,7 @@ export class Parser {
         if (t.match(el as HTMLElement)) {
           const result = t.read(
             el as HTMLElement,
-            this.injector,
+            this.textbus,
             (childSlot, slotRootElement, slotContentHostElement = slotRootElement) => {
               return this.readSlot(childSlot, slotRootElement, slotContentHostElement)
             }
