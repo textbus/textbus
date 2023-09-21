@@ -20,7 +20,7 @@ import {
   READONLY,
   Registry,
   ATTRIBUTE_LIST,
-  ViewAdapter,
+  ViewAdapter, FocusManager,
 } from './foundation/_api'
 import { makeError } from './_utils/make-error'
 
@@ -195,6 +195,25 @@ export class Textbus extends ReflectiveInjector {
 
     history.listen()
     scheduler.run()
+
+    const subscription = scheduler.onDocChanged.subscribe(() => {
+      this.changeEvent.next()
+    })
+    this.beforeDestroyCallbacks.push(() => {
+      subscription.unsubscribe()
+    })
+    const focusManager = this.get(FocusManager, null)
+
+    if (focusManager) {
+      subscription.add(
+        focusManager.onFocus.subscribe(() => {
+          this.focusEvent.next()
+        }),
+        focusManager.onBlur.subscribe(() => {
+          this.blurEvent.next()
+        })
+      )
+    }
     const destroyView = adapter.render(rootComponent)
     if (typeof destroyView === 'function') {
       this.beforeDestroyCallbacks.push(destroyView)

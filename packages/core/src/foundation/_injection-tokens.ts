@@ -50,3 +50,8 @@ export const HISTORY_STACK_SIZE = new InjectionToken<number>('HISTORY_STACK_SIZE
  * 是否只读
  */
 export const READONLY = new InjectionToken<boolean>('READONLY')
+
+export abstract class FocusManager {
+  abstract onFocus: Observable<void>
+  abstract onBlur: Observable<any>
+}
