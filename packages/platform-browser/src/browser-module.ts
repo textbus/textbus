@@ -1,5 +1,6 @@
-import { ComponentLiteral, Module, NativeSelectionBridge, ViewAdapter } from '@textbus/core'
+import { ComponentLiteral, FocusManager, Module, NativeSelectionBridge, ViewAdapter } from '@textbus/core'
 import { Provider } from '@viewfly/core'
+import { distinctUntilChanged, map, Subject } from '@tanbo/stream'
 
 import { AttributeLoader, ComponentLoader, FormatLoader, Parser } from './parser'
 import { EDITOR_OPTIONS, VIEW_CONTAINER, VIEW_DOCUMENT, VIEW_MASK } from './injection-tokens'
@@ -70,6 +71,27 @@ export class BrowserModule implements Module {
     }, {
       provide: DomAdapter,
       useValue: config.adapter
+    }, {
+      provide: FocusManager,
+      useFactory: (input: Input): FocusManager => {
+        const focusEvent = new Subject<void>()
+        const blurEvent = new Subject<void>()
+        input.caret.onPositionChange.pipe(
+          map(p => !!p),
+          distinctUntilChanged()
+        ).subscribe(b => {
+          if (b) {
+            focusEvent.next()
+          } else {
+            blurEvent.next()
+          }
+        })
+        return {
+          onFocus: focusEvent,
+          onBlur: blurEvent
+        }
+      },
+      deps: [Input]
     },
       Parser,
       SelectionBridge,
