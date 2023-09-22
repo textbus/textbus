@@ -37,7 +37,7 @@ export interface ComponentLoader {
   read(element: HTMLElement, textbus: Textbus, slotParser: SlotParser): ComponentInstance | Slot | void
 }
 
-export interface FormatLoaderReadResult<T extends FormatValue> {
+export interface FormatLoaderReadResult<T = FormatValue> {
   formatter: Formatter<T>
   value: T
 }
@@ -45,7 +45,7 @@ export interface FormatLoaderReadResult<T extends FormatValue> {
 /**
  * 格式加载器
  */
-export interface FormatLoader<T extends FormatValue> {
+export interface FormatLoader<T = FormatValue> {
   /**
    * 匹配一个 DOM 节点是否是某个格式节点
    * @param element
@@ -59,7 +59,7 @@ export interface FormatLoader<T extends FormatValue> {
   read(element: HTMLElement): FormatLoaderReadResult<T>
 }
 
-export interface AttributeLoaderReadResult<T extends FormatValue> {
+export interface AttributeLoaderReadResult<T = FormatValue> {
   attribute: Attribute<T>
   value: T
 }
@@ -67,7 +67,7 @@ export interface AttributeLoaderReadResult<T extends FormatValue> {
 /**
  * 属性加载器
  */
-export interface AttributeLoader<T extends FormatValue> {
+export interface AttributeLoader<T = FormatValue> {
   /**
    * 匹配一个 DOM 节点是否是某个属性节点
    * @param element
