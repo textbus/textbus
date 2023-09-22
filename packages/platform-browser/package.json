@@ -27,7 +27,7 @@
   "dependencies": {
     "@tanbo/stream": "^1.2.0",
     "@textbus/core": "^4.0.0-alpha.7",
-    "@viewfly/core": "^0.2.4",
+    "@viewfly/core": "^0.3.0",
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
