@@ -53,7 +53,7 @@ export interface FormatHostBindingRender {
  * Textbus 动态格式扩展接口
  * Formatter 可以在任意插槽的任意区域内生效，常用于行内样式或其它需要标记插槽内一部分内容的情况
  */
-export abstract class Formatter<T extends FormatValue> {
+export abstract class Formatter<T = FormatValue> {
   /**
    * 构造函数
    * @param name 格式的名字，在同一个编辑器实例内不可重复
@@ -74,14 +74,14 @@ export abstract class Formatter<T extends FormatValue> {
   abstract render(
     children: Array<VElement | VTextNode | ComponentInstance>,
     formatValue: T,
-    renderEnv: any): VElement | FormatHostBindingRender
+    renderEnv: unknown): VElement | FormatHostBindingRender
 }
 
 /**
  * Textbus 动态属性扩展接口
  * Attribute 可以在任意插槽的整体生效，常用于块级样式或给事个插槽附加信息的情况
  */
-export abstract class Attribute<T extends FormatValue> {
+export abstract class Attribute<T = FormatValue> {
   /**
    * 构建函数
    * @param name 属性的名字，在同一个编辑器实例内不可重复
@@ -99,6 +99,6 @@ export abstract class Attribute<T extends FormatValue> {
   abstract render(
     node: VElement,
     formatValue: T,
-    renderEnv: any
+    renderEnv: unknown
   ): void
 }

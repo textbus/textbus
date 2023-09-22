@@ -14,7 +14,7 @@ export type Formats = [formatter: Formatter<any>, value: FormatValue][]
 /**
  * 标识格式的范围
  */
-export interface FormatRange<T extends FormatValue> {
+export interface FormatRange<T = FormatValue> {
   startIndex: number
   endIndex: number
   value: T
@@ -23,21 +23,21 @@ export interface FormatRange<T extends FormatValue> {
 /**
  * 格式的字面量
  */
-export interface FormatLiteral<T extends FormatValue> {
+export interface FormatLiteral<T = FormatValue> {
   [key: string]: FormatRange<T>[]
 }
 
 /**
  * 格式的详情
  */
-export interface FormatItem<T extends FormatValue> extends FormatRange<T>{
+export interface FormatItem<T = FormatValue> extends FormatRange<T>{
   formatter: Formatter<T>
 }
 
 /**
  * 格式树
  */
-export interface FormatTree<T extends FormatValue> {
+export interface FormatTree<T = FormatValue> {
   startIndex: number
   endIndex: number
   children?: FormatTree<T>[]
