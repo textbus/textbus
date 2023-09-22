@@ -1,4 +1,13 @@
-import { jsx, JSXComponent, JSXInternal, JSXNode, onUpdated, provide, Ref, useRef } from '@viewfly/core'
+import {
+  getCurrentInstance,
+  jsx,
+  JSXComponent,
+  JSXInternal,
+  JSXNode,
+  onUpdated,
+  Ref,
+  useRef
+} from '@viewfly/core'
 import { Subject } from '@tanbo/stream'
 import {
   Component,
@@ -39,7 +48,7 @@ export class Adapter extends DomAdapter<JSXComponent, JSXInternal.Element> {
     let isRoot = true
     Object.keys(components).forEach(key => {
       this.components[key] = (props: ViewComponentProps) => {
-        const comp = provide([])
+        const comp = getCurrentInstance()
         const textbusComponent = props.component
         textbusComponent.changeMarker.onChange.subscribe(() => {
           if (textbusComponent.changeMarker.dirty) {
