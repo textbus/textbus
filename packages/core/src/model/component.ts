@@ -81,10 +81,10 @@ export class ComponentInstance<State = unknown, SlotState = unknown, Extends = u
   parent: Slot | null = null
   /**
    * 父组件
-   * @readonly
-   * @internal
    */
-  parentComponent: ComponentInstance | null = null
+  get parentComponent() {
+    return this.parent?.parent || null
+  }
   /** 组件变化标识器 */
   changeMarker = new ChangeMarker()
   /** 组件长度，固定为 1 */
