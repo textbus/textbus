@@ -283,6 +283,11 @@ export class Slots<T = any> {
     const deletedSlots = this.slots.splice(startIndex, count)
 
     deletedSlots.forEach(i => {
+      i.sliceContent().forEach(content => {
+        if (typeof content !== 'string') {
+          this.host.changeMarker.recordComponentRemoved(content)
+        }
+      })
       this.changeListeners.get(i)?.unsubscribe()
       this.changeListeners.delete(i)
     })
