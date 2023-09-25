@@ -281,17 +281,16 @@ export class NativeInput extends Input {
         document.body.appendChild(div)
         div.focus()
         setTimeout(() => {
-          const html = div.innerHTML
-          this.handlePaste(html, text)
-
           document.body.removeChild(div)
+          div.style.cssText = ''
+          this.handlePaste(div, text)
         })
       })
     )
   }
 
-  private handlePaste(html: string, text: string) {
-    const slot = this.parser.parse(html, new Slot([
+  private handlePaste(dom: HTMLElement | string, text: string) {
+    const slot = this.parser.parse(dom, new Slot([
       ContentType.BlockComponent,
       ContentType.InlineComponent,
       ContentType.Text

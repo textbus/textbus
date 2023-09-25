@@ -127,12 +127,12 @@ export class Parser {
   }
 
   /**
-   * 使用指定的组件加载器解析一段 HTML 字符串
+   * 使用指定的组件加载器解析一段 HTML 字符串或 DOM 元素
    * @param html
    * @param rootComponentLoader
    */
-  parseDoc(html: string, rootComponentLoader: ComponentLoader) {
-    const element = Parser.parseHTML(html)
+  parseDoc(html: string | HTMLElement, rootComponentLoader: ComponentLoader) {
+    const element = typeof html === 'string' ? Parser.parseHTML(html) : html
     return rootComponentLoader.read(
       element,
       this.injector,
@@ -143,12 +143,12 @@ export class Parser {
   }
 
   /**
-   * 将一段 HTML 解析到指定插槽
+   * 将一段 HTML 或 DOM 元素解析到指定插槽
    * @param html
    * @param rootSlot
    */
-  parse(html: string, rootSlot: Slot) {
-    const element = Parser.parseHTML(html)
+  parse(html: string | HTMLElement, rootSlot: Slot) {
+    const element = typeof html === 'string' ? Parser.parseHTML(html) : html
     return this.readFormats(element, rootSlot)
   }
 
