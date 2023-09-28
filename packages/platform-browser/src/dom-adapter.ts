@@ -5,7 +5,7 @@ import {
   NodeLocation,
   VElement,
   VTextNode,
-  createBidirectionalMapping
+  createBidirectionalMapping, Textbus
 } from '@textbus/core'
 import { createElement } from './_utils/uikit'
 import { VIEW_DOCUMENT } from './injection-tokens'
@@ -38,13 +38,13 @@ export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter
   })
   protected slotRootVElementCaches = new WeakMap<Slot, VElement>()
 
-  protected constructor(private mount: (host: HTMLElement, viewComponent: ViewComponent) => (void | (() => void))) {
+  protected constructor(private mount: (host: HTMLElement, viewComponent: ViewComponent, textbus: Textbus) => (void | (() => void))) {
     super()
   }
 
-  render(rootComponent: ComponentInstance): void | (() => void) {
+  render(rootComponent: ComponentInstance, textbus: Textbus): void | (() => void) {
     const view = this.componentRender(rootComponent)
-    return this.mount(this.host, view)
+    return this.mount(this.host, view, textbus)
   }
 
   abstract componentRender(component: ComponentInstance): ViewComponent
