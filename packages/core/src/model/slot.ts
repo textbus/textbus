@@ -153,7 +153,7 @@ export class Slot<T = any> {
    * 获取属性
    * @param attribute
    */
-  getAttribute(attribute: Attribute<any>) {
+  getAttribute<T>(attribute: Attribute<T>): T | null {
     return this.attributes.get(attribute) ?? null
   }
 

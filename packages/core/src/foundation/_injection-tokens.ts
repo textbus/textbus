@@ -2,6 +2,7 @@ import { InjectionToken } from '@viewfly/core'
 import { Observable } from '@tanbo/stream'
 
 import { ComponentInstance, Formatter, Component, Attribute } from '../model/_api'
+import { Textbus } from '../textbus'
 
 /**
  * 根节点及原生根元素节点引用类
@@ -19,7 +20,7 @@ export abstract class ViewAdapter {
   /** 当前平台的复制能力 */
   abstract copy(): void
   /** 根组件渲染方法 */
-  abstract render(rootComponent: ComponentInstance): (void | (() => void))
+  abstract render(rootComponent: ComponentInstance, textbus: Textbus): (void | (() => void))
 }
 
 /**
