@@ -1,4 +1,15 @@
-import { ComponentLiteral, FocusManager, Module, NativeSelectionBridge, ViewAdapter } from '@textbus/core'
+import {
+  Component,
+  ComponentInstance,
+  ComponentLiteral,
+  FocusManager,
+  makeError,
+  Module,
+  NativeSelectionBridge,
+  Registry,
+  Textbus,
+  ViewAdapter
+} from '@textbus/core'
 import { Provider } from '@viewfly/core'
 import { distinctUntilChanged, map, Subject } from '@tanbo/stream'
 
@@ -11,6 +22,8 @@ import { CollaborateCursor } from './collaborate-cursor'
 import { createElement } from './_utils/uikit'
 import { DomAdapter } from './dom-adapter'
 import { NativeInput } from './native-input'
+
+const browserErrorFn = makeError('BrowserModule')
 
 /**
  * Textbus PC 端配置接口
@@ -27,8 +40,6 @@ export interface ViewOptions {
   formatLoaders?: FormatLoader<any>[]
   /** 属性加载器 */
   attributeLoaders?: AttributeLoader<any>[]
-  /** 默认内容 */
-  content?: string | ComponentLiteral
   /** 使用 contentEditable 作为编辑器控制可编辑范围 */
   useContentEditable?: boolean
 }
@@ -100,6 +111,38 @@ export class BrowserModule implements Module {
 
     this.workbench = wrapper
     this.host.append(wrapper)
+  }
+
+  /**
+   * 解析 HTML 并返回一个组件实例
+   * @param html 要解析的 HTML
+   * @param rootComponentLoader 文档根组件加载器
+   * @param textbus
+   */
+  readDocumentByHTML(html: string, rootComponentLoader: ComponentLoader, textbus: Textbus): ComponentInstance {
+    const parser = textbus.get(Parser)
+    const doc = parser.parseDoc(html, rootComponentLoader)
+    if (doc instanceof ComponentInstance) {
+      return doc
+    }
+    throw browserErrorFn('rootComponentLoader must return a component instance.')
+  }
+
+  /**
+   * 将组件数据解析到组件实例中
+   * @param data 要解析的 JSON 数据
+   * @param rootComponent 根组件
+   * @param textbus
+   */
+  readDocumentByComponentLiteral(data: ComponentLiteral, rootComponent: Component, textbus: Textbus): ComponentInstance {
+    const registry = textbus.get(Registry)
+    return registry.createComponentByFactory(data, rootComponent)
+  }
+
+  onAfterStartup(textbus: Textbus) {
+    if (this.config.autoFocus) {
+      textbus.focus()
+    }
   }
 
   onDestroy() {
