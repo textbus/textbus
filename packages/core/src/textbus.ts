@@ -145,17 +145,18 @@ export class Textbus extends ReflectiveInjector {
     this.plugins = plugins
     this.staticProviders = providers
     this.normalizedProviders = this.staticProviders.map(i => normalizeProvider(i))
-    config.imports?.forEach(module => {
-      if (typeof module.beforeEach === 'function') {
-        module.beforeEach(this)
-      }
-    })
 
     this.onChange = this.changeEvent.asObservable()
     this.onFocus = this.focusEvent.asObservable()
     this.onBlur = this.blurEvent.asObservable()
     this.onSave = this.saveEvent.asObservable()
     this.controller = this.get(Controller)
+
+    config.imports?.forEach(module => {
+      if (typeof module.beforeEach === 'function') {
+        module.beforeEach(this)
+      }
+    })
   }
 
   /**
@@ -179,7 +180,6 @@ export class Textbus extends ReflectiveInjector {
     })
     callbacks.push(this.config.setup?.(this) || null)
     const fns = await Promise.all(callbacks)
-
 
     fns.forEach(i => {
       if (i) {
@@ -214,7 +214,7 @@ export class Textbus extends ReflectiveInjector {
         })
       )
     }
-    const destroyView = adapter.render(rootComponent)
+    const destroyView = adapter.render(rootComponent, this)
     if (typeof destroyView === 'function') {
       this.beforeDestroyCallbacks.push(destroyView)
     }
