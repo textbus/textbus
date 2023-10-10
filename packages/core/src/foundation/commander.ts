@@ -107,7 +107,8 @@ function deleteUpBySlot(selection: Selection,
     const event = new Event<Slot, DeleteEventData>(parentSlot, {
       index,
       count: 1,
-      toEnd: !deleteBefore
+      toEnd: !deleteBefore,
+      actionType: 'delete'
     })
     invokeListener(parentSlot.parent!, 'onContentDelete', event)
     if (event.isPrevented) {
@@ -137,7 +138,8 @@ function deleteUpBySlot(selection: Selection,
   const event = new Event<ComponentInstance, DeleteEventData>(parentComponent, {
     index: slotIndex,
     count: 1,
-    toEnd: !deleteBefore
+    toEnd: !deleteBefore,
+    actionType: 'delete'
   })
   invokeListener(parentComponent, 'onSlotRemove', event)
   if (!event.isPrevented) {
@@ -476,7 +478,8 @@ export class Commander {
       const event = new Event<Slot, DeleteEventData>(slot, {
         index: startIndex,
         count: endIndex - startIndex,
-        toEnd: !deleteBefore
+        toEnd: !deleteBefore,
+        actionType: 'delete'
       })
       invokeListener(slot.parent!, 'onContentDelete', event)
       if (event.isPrevented) {
@@ -508,7 +511,8 @@ export class Commander {
       const event = new Event<Slot, DeleteEventData>(endSlot, {
         index: endCutIndex,
         count: endSlot.length,
-        toEnd: !deleteBefore
+        toEnd: !deleteBefore,
+        actionType: 'move'
       })
       invokeListener(endSlot.parent!, 'onContentDelete', event)
       if (event.isPrevented) {

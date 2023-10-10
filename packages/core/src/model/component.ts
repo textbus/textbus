@@ -245,6 +245,20 @@ export interface DeleteEventData {
   count: number
   /** 是否是向结束位置删除 */
   toEnd: boolean
+  /** 删除内容还是移动内容 */
+  actionType: 'delete' | 'move'
+}
+
+/**
+ * 插槽删除事件对象
+ */
+export interface SlotRemoveEventData {
+  /** 删除数据的位置 */
+  index: number
+  /** 删除数据的长度 */
+  count: number
+  /** 是否是向结束位置删除 */
+  toEnd: boolean
 }
 
 /**
@@ -349,7 +363,7 @@ export interface EventTypes {
 
   // onSlotInserted: (event: Event<Slot, InsertEventData>) => void
   // onSlotInsert: (event: Event<Slot, InsertEventData>) => void
-  onSlotRemove: (event: Event<ComponentInstance, DeleteEventData>) => void
+  onSlotRemove: (event: Event<ComponentInstance, SlotRemoveEventData>) => void
   onSlotRemoved: (event: Event<ComponentInstance>) => void
 
   onGetRanges: (event: GetRangesEvent<ComponentInstance>) => void
@@ -657,7 +671,8 @@ export function invokeListener(target: ComponentInstance, eventType: 'onContentI
 export function invokeListener(target: ComponentInstance, eventType: 'onContentInserted', event: Event<Slot, InsertEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContentDelete', event: Event<Slot, DeleteEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContentDeleted', event: Event<Slot>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemove', event: Event<ComponentInstance, DeleteEventData>): void
+// eslint-disable-next-line max-len
+export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemove', event: Event<ComponentInstance, SlotRemoveEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemoved', event: Event<ComponentInstance>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onBreak', event: Event<Slot, BreakEventData>): void
 export function invokeListener(target: ComponentInstance, eventType: 'onContextMenu', event: ContextMenuEvent<ComponentInstance>): void
