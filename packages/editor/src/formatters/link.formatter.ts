@@ -21,6 +21,7 @@ export class LinkFormatLoader<T extends FormatValue> extends Matcher<T, Formatte
 }
 
 export class LinkFormatter implements Formatter<any> {
+  priority = -1
   name = 'link'
 
   columned = false

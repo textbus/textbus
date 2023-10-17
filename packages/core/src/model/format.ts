@@ -30,7 +30,7 @@ export interface FormatLiteral<T extends FormatValue> {
 /**
  * 格式的详情
  */
-export interface FormatItem<T extends FormatValue> extends FormatRange<T>{
+export interface FormatItem<T extends FormatValue> extends FormatRange<T> {
   formatter: Formatter<T>
 }
 
@@ -355,7 +355,9 @@ export class Format {
     }
 
     if (formats.length) {
-      tree.formats = formats
+      tree.formats = formats.sort((a, b) => {
+        return a.formatter.priority - b.formatter.priority
+      })
     }
     return tree
   }

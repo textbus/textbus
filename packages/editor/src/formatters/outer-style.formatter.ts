@@ -18,6 +18,7 @@ export class OuterStyleFormatLoader extends Matcher<any, Formatter<any>> impleme
 }
 
 export class OuterStyleFormatter implements Formatter<any> {
+  priority = 0
   columned = false
 
   constructor(public name: string,

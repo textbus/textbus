@@ -121,6 +121,7 @@ export interface PreComponentState {
 }
 
 export class CodeStyleFormatter implements Formatter<string> {
+  priority = 0
   name = 'code' + Math.random()
   columned = false
 

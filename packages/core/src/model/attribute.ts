@@ -54,15 +54,21 @@ export interface FormatHostBindingRender {
  * Formatter 可以在任意插槽的任意区域内生效，常用于行内样式或其它需要标记插槽内一部分内容的情况
  */
 export abstract class Formatter<T extends FormatValue> {
+  priority = 0
+
   /**
    * 构造函数
    * @param name 格式的名字，在同一个编辑器实例内不可重复
    * @param columned 格式是否列对齐，默认情况下，Textbus 会采用最少节点的策略进行渲染，
    *                 但在某些情况下是不适用的，你可以通过设置 columned 值为 true，让
    *                 Textbus 从格式变更处生成新的节点
+   * @param priority 渲染优先级，值越小则越先渲染
    * @protected
    */
-  protected constructor(public name: string, public columned?: boolean) {
+  protected constructor(public name: string, public columned?: boolean, priority?: number) {
+    if (typeof priority === 'number') {
+      this.priority = priority
+    }
   }
 
   /**

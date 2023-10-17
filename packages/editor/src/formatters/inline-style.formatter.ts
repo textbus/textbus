@@ -25,6 +25,7 @@ export class InlineStyleFormatLoader<T extends FormatValue> extends Matcher<T, F
 }
 
 export class InlineStyleFormatter implements Formatter<string> {
+  priority = 0
   columned = false
 
   constructor(public name: string,

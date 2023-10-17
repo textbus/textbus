@@ -17,6 +17,7 @@ export class InlineTagFormatLoader<T extends FormatValue> extends Matcher<T, For
 }
 
 export class InlineElementFormatter implements Formatter<boolean> {
+  priority = 0
   constructor(public name: string,
               public tagName: string,
               public columned: boolean) {

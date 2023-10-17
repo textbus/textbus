@@ -31,6 +31,7 @@ export class InlineTagStyleFormatLoader<T extends FormatValue> extends Matcher<T
 
 export class InlineTagStyleFormatter implements Formatter<any> {
   columned = false
+  priority = 0
 
   constructor(public name: string,
               public styleName: string) {
