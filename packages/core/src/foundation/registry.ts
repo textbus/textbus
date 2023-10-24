@@ -1,4 +1,4 @@
-import { Inject, Injectable, Injector } from '@viewfly/core'
+import { Inject, Injectable } from '@viewfly/core'
 import {
   Attribute,
   Component,
@@ -10,6 +10,7 @@ import {
   SlotLiteral
 } from '../model/_api'
 import { ATTRIBUTE_LIST, COMPONENT_LIST, FORMATTER_LIST } from './_injection-tokens'
+import { Textbus } from '../textbus'
 
 /**
  * 注册表
@@ -22,7 +23,7 @@ export class Registry {
   private formatMap = new Map<string, Formatter<any>>()
   private attributeMap = new Map<string, Attribute<any>>()
 
-  constructor(public contextInjector: Injector,
+  constructor(public textbus: Textbus,
               @Inject(COMPONENT_LIST) components: Component[],
               @Inject(ATTRIBUTE_LIST) attributes: Attribute<any>[],
               @Inject(FORMATTER_LIST) formatters: Formatter<any>[]) {
@@ -69,7 +70,7 @@ export class Registry {
   createComponentByData(name: string, data: ComponentInitData) {
     const factory = this.getComponent(name)
     if (factory) {
-      return factory.createInstance(this.contextInjector, data)
+      return factory.createInstance(this.textbus, data)
     }
     return null
   }
@@ -109,7 +110,7 @@ export class Registry {
                            factory: Component,
                            customSlotCreator?: (slotLiteral: SlotLiteral<any, any>, index: number) => Slot) {
     const slots = componentLiteral.slots.map(customSlotCreator || ((i) => this.createSlot(i)))
-    return factory.createInstance(this.contextInjector, {
+    return factory.createInstance(this.textbus, {
       state: componentLiteral.state,
       slots
     })

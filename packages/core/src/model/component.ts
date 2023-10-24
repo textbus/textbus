@@ -1,6 +1,6 @@
 import { Draft, produce, Patch, enablePatches } from 'immer'
 import { map, Observable, Subject, Subscription } from '@tanbo/stream'
-import { AbstractType, Type, InjectionToken, InjectFlags, Injector } from '@viewfly/core'
+import { AbstractType, Type, InjectionToken, InjectFlags } from '@viewfly/core'
 
 import { makeError } from '../_utils/make-error'
 import { ContentType, Slot, SlotLiteral } from './slot'
@@ -8,6 +8,7 @@ import { Formats } from './format'
 import { ChangeMarker } from './change-marker'
 import { Slots } from './slots'
 import { StateChange } from './types'
+import { Textbus } from '../textbus'
 
 enablePatches()
 
@@ -65,7 +66,7 @@ export interface ZenCodingGrammarInterceptor<Data = any> {
   key: string | string[] | RegExp | ((content: string) => boolean)
 
   /** 触发执行的方法 */
-  generateInitData(content: string, injector: Injector): Data
+  generateInitData(content: string, textbus: Textbus): Data
 }
 
 /**
@@ -79,12 +80,14 @@ export class ComponentInstance<State = unknown, SlotState = unknown, Extends = u
    * @internal
    */
   parent: Slot | null = null
+
   /**
    * 父组件
    */
   get parentComponent() {
     return this.parent?.parent || null
   }
+
   /** 组件变化标识器 */
   changeMarker = new ChangeMarker()
   /** 组件长度，固定为 1 */
@@ -109,11 +112,11 @@ export class ComponentInstance<State = unknown, SlotState = unknown, Extends = u
   protected stateChangeEvent = new Subject<StateChange<State>>()
 
   /**
-   * @param injector 当前容器上下文
+   * @param textbus 当前容器上下文
    * @param options 组件配置项
    * @param initData 初始数据
    */
-  constructor(injector: Injector,
+  constructor(textbus: Textbus,
               options: ComponentOptions<State, SlotState, Extends>,
               initData?: ComponentInitData<State, SlotState>) {
     this.onStateChange = this.stateChangeEvent.asObservable()
@@ -135,7 +138,7 @@ export class ComponentInstance<State = unknown, SlotState = unknown, Extends = u
       onChange: this.onStateChange.pipe(map(i => i.newState))
     }
     const context: ComponentContext<State> = {
-      contextInjector: injector,
+      textbus,
       changeController,
       componentInstance: this,
       eventCache: new EventCache<EventTypes>(),
@@ -271,11 +274,11 @@ export class Component<
 
   /**
    * 组件创建实例的方法
-   * @param injector
+   * @param textbus
    * @param data
    */
-  createInstance(injector: Injector, data?: ComponentInitData<State, SlotState>): ComponentInstance<State, SlotState, Extends> {
-    return new ComponentInstance<State, SlotState, Extends>(injector, this.options, data)
+  createInstance(textbus: Textbus, data?: ComponentInitData<State, SlotState>): ComponentInstance<State, SlotState, Extends> {
+    return new ComponentInstance<State, SlotState, Extends>(textbus, this.options, data)
   }
 }
 
@@ -466,7 +469,7 @@ class EventCache<T, K extends keyof T = keyof T> {
 
 interface ComponentContext<T> {
   changeController: ChangeController<T>
-  contextInjector: Injector
+  textbus: Textbus
   componentInstance: ComponentInstance
   // dynamicShortcut: Shortcut[]
   eventCache: EventCache<EventTypes>
@@ -509,11 +512,11 @@ export function defineComponent<State = unknown, SlotState = unknown, Extends = 
 /**
  * 组件 setup 方法内获取编辑器 IoC 容器的勾子
  */
-export function useContext(): Injector
+export function useContext(): Textbus
 export function useContext<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): T
-export function useContext(token: any = Injector, noFoundValue?: any, flags?: any) {
+export function useContext(token: any = Textbus, noFoundValue?: any, flags?: any) {
   const context = getCurrentContext()
-  return context.contextInjector.get(token, noFoundValue, flags)
+  return context.textbus.get(token, noFoundValue, flags)
 }
 
 /**

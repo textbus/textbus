@@ -50,25 +50,19 @@ export interface FormatHostBindingRender {
 }
 
 /**
- * Textbus 动态格式扩展接口
- * Formatter 可以在任意插槽的任意区域内生效，常用于行内样式或其它需要标记插槽内一部分内容的情况
+ * 格式配置
  */
-export abstract class Formatter<T = FormatValue> {
-  priority = 0
+export interface FormatterConfig<T> {
+  /** 渲染优先级，在相同格式范围内，越小越先渲染 */
+  priority?: number
+  /** 当光标在格式末尾并编辑时，是否自动从前继承样式 */
+  inheritable?: boolean
   /**
-   * 构造函数
-   * @param name 格式的名字，在同一个编辑器实例内不可重复
-   * @param columned 格式是否列对齐，默认情况下，Textbus 会采用最少节点的策略进行渲染，
-   *                 但在某些情况下是不适用的，你可以通过设置 columned 值为 true，让
-   *                 Textbus 从格式变更处生成新的节点
-   * @param priority 渲染优先级，值越小则越先渲染
-   * @protected
+   * 格式是否列对齐，默认情况下，Textbus 会采用最少节点的策略进行渲染，
+   * 但在某些情况下是不适用的，你可以通过设置 columned 值为 true，让
+   * Textbus 从格式变更处生成新的节点
    */
-  protected constructor(public name: string, public columned?: boolean, priority?: number) {
-    if (typeof priority === 'number') {
-      this.priority = priority
-    }
-  }
+  columned?: boolean
 
   /**
    * 格式渲染的方法
@@ -76,34 +70,73 @@ export abstract class Formatter<T = FormatValue> {
    * @param formatValue 当前格式要渲染的值
    * @param renderEnv 渲染环境变量，你可以根据条件渲染不同的结果，renderEnv 的值由 slot.toTree 方法的第二个参数决定
    */
-  abstract render(
+  render(
     children: Array<VElement | VTextNode | ComponentInstance>,
     formatValue: T,
     renderEnv: unknown): VElement | FormatHostBindingRender
 }
 
 /**
- * Textbus 动态属性扩展接口
- * Attribute 可以在任意插槽的整体生效，常用于块级样式或给事个插槽附加信息的情况
+ * Textbus 动态格式扩展接口
+ * Formatter 可以在任意插槽的任意区域内生效，常用于行内样式或其它需要标记插槽内一部分内容的情况
  */
-export abstract class Attribute<T = FormatValue> {
+export class Formatter<T = FormatValue> {
+  priority = 0
+  columned = false
+  inheritable = true
+
   /**
-   * 构建函数
-   * @param name 属性的名字，在同一个编辑器实例内不可重复
-   * @protected
+   * 构造函数
+   * @param name 格式的名字，在同一个编辑器实例内不可重复
+   * @param config 格式配置
    */
-  protected constructor(public name: string) {
+  constructor(public name: string, private config: FormatterConfig<T>) {
+    const { priority = 0, inheritable = true, columned = false } = config
+    this.priority = priority
+    this.inheritable = inheritable
+    this.columned = columned
   }
 
+  render(
+    children: Array<VElement | VTextNode | ComponentInstance>,
+    formatValue: T,
+    renderEnv: unknown): VElement | FormatHostBindingRender {
+    return this.config.render(children, formatValue, renderEnv)
+  }
+}
+
+export interface AttributeConfig<T> {
   /**
    * 渲染属性的方法
    * @param node 不附加属性的节点
    * @param formatValue 要附加属性的值
    * @param renderEnv 渲染环境变量，你可以根据条件渲染不同的结果，renderEnv 的值由 slot.toTree 方法的第二个参数决定
    */
-  abstract render(
+  render(
     node: VElement,
     formatValue: T,
     renderEnv: unknown
   ): void
+}
+
+/**
+ * Textbus 动态属性扩展接口
+ * Attribute 可以在任意插槽的整体生效，常用于块级样式或给事个插槽附加信息的情况
+ */
+export class Attribute<T = FormatValue> {
+  /**
+   * 构建函数
+   * @param name 属性的名字，在同一个编辑器实例内不可重复
+   * @param config
+   */
+  constructor(public name: string, private config: AttributeConfig<T>) {
+  }
+
+  render(
+    node: VElement,
+    formatValue: T,
+    renderEnv: unknown
+  ): void {
+    return this.config.render(node, formatValue, renderEnv)
+  }
 }

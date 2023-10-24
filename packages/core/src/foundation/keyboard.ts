@@ -1,8 +1,9 @@
-import { Inject, Injectable, Injector } from '@viewfly/core'
+import { Inject, Injectable } from '@viewfly/core'
 import { Component, Shortcut, ZenCodingGrammarInterceptor } from '../model/_api'
 import { Commander } from './commander'
 import { Selection } from './selection'
 import { COMPONENT_LIST, ZEN_CODING_DETECT } from './_injection-tokens'
+import { Textbus } from '../textbus'
 
 /**
  * 快捷键配置
@@ -42,7 +43,7 @@ export class Keyboard {
   constructor(@Inject(COMPONENT_LIST) private components: Component[],
               @Inject(ZEN_CODING_DETECT) private markdownDetect: boolean,
               private commander: Commander,
-              private injector: Injector,
+              private textbus: Textbus,
               private selection: Selection) {
     components.forEach(component => {
       const config = component.zenCoding
@@ -177,8 +178,8 @@ export class Keyboard {
       },
       action: (content: string) => {
         const commonAncestorSlot = selection.commonAncestorSlot!
-        const initData = config.generateInitData(content, this.injector)
-        const newInstance = component.createInstance(this.injector, initData)
+        const initData = config.generateInitData(content, this.textbus)
+        const newInstance = component.createInstance(this.textbus, initData)
         if (commonAncestorSlot.schema.includes(newInstance.type)) {
           selection.selectSlot(commonAncestorSlot)
           commander.delete()
