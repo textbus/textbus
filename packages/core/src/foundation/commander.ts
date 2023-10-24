@@ -1,4 +1,4 @@
-import { Injectable, Injector } from '@viewfly/core'
+import { Injectable } from '@viewfly/core'
 
 import { AbstractSelection, Range, Selection, SelectionPosition } from './selection'
 import {
@@ -20,6 +20,7 @@ import {
 } from '../model/_api'
 import { ViewAdapter, RootComponentRef } from './_injection-tokens'
 import { Registry } from './registry'
+import { Textbus } from '../textbus'
 
 function getInsertPosition(
   slot: Slot,
@@ -253,19 +254,19 @@ function deltaToSlots<T>(selection: Selection,
   return newSlots
 }
 
-function slotsToComponents<T>(injector: Injector, slots: Slot<T>[], rule: TransformRule<any, T>) {
+function slotsToComponents<T>(textbus: Textbus, slots: Slot<T>[], rule: TransformRule<any, T>) {
   const componentInstances: ComponentInstance[] = []
   if (!slots.length) {
     return componentInstances
   }
   if (rule.multipleSlot) {
-    componentInstances.push(rule.target.createInstance(injector, {
+    componentInstances.push(rule.target.createInstance(textbus, {
       state: rule.stateFactory?.(),
       slots
     }))
   } else {
     slots.forEach(childSlot => {
-      componentInstances.push(rule.target.createInstance(injector, {
+      componentInstances.push(rule.target.createInstance(textbus, {
         state: rule.stateFactory?.(),
         slots: [childSlot]
       }))
@@ -274,7 +275,7 @@ function slotsToComponents<T>(injector: Injector, slots: Slot<T>[], rule: Transf
   return componentInstances
 }
 
-function getBlockRangeToBegin(selection: Selection, slot: Slot, offset: number): SlotRange {
+function getBlockRangeToBegin(slot: Slot, offset: number): SlotRange {
   let startIndex = offset
   const content = slot.sliceContent(0, offset)
   while (content.length) {
@@ -296,7 +297,7 @@ export class Commander {
 
   constructor(protected selection: Selection,
               protected platform: ViewAdapter,
-              protected injector: Injector,
+              protected textbus: Textbus,
               protected registry: Registry,
               protected rootComponentRef: RootComponentRef) {
   }
@@ -355,10 +356,15 @@ export class Commander {
       return false
     }
     let formats = position.slot.extractFormatsByIndex(position.offset)
+    const nextFormats = position.slot.extractFormatsByIndex(position.offset + 1)
     if (formatter) {
       if (Array.isArray(formatter)) {
         formats = [
-          ...formats,
+          ...formats.filter(i => {
+            return i[0].inheritable || nextFormats.some(value => {
+              return value[0] === i[0] && value[1] === i[1]
+            })
+          }),
           ...formatter
         ]
       } else {
@@ -987,14 +993,14 @@ export class Commander {
         slot: startScope.slot,
         startIndex: 0,
         endIndex: 0
-      } : getBlockRangeToBegin(selection, startScope.slot, startScope.offset)
+      } : getBlockRangeToBegin(startScope.slot, startScope.offset)
 
       const { slot, startIndex, endIndex } = scope
       const parentComponent = slot.parent!
 
       if (!parentComponent.separable && parentComponent.slots.length > 1 && !slot.schema.includes(rule.target.instanceType)) {
         // 无法转换的情况
-        const componentInstances = slotsToComponents(this.injector, slots, rule)
+        const componentInstances = slotsToComponents(this.textbus, slots, rule)
         componentInstances.forEach(instance => {
           this.insert(instance)
         })
@@ -1017,7 +1023,7 @@ export class Commander {
           slots.unshift(...deltaToSlots(selection, slot, delta, rule, abstractSelection, 0))
           position = deleteUpBySlot(selection, slot, 0, stoppedComponent, false)
         } else {
-          const componentInstances = slotsToComponents(this.injector, slots, rule)
+          const componentInstances = slotsToComponents(this.textbus, slots, rule)
           slots = []
           selection.selectComponentEnd(parentComponent)
           componentInstances.forEach(instance => {
@@ -1034,7 +1040,7 @@ export class Commander {
           break
         }
         if (startIndex === endIndex) {
-          const componentInstances = slotsToComponents(this.injector, slots, rule)
+          const componentInstances = slotsToComponents(this.textbus, slots, rule)
           slots = []
           componentInstances.forEach(instance => {
             this.insert(instance)
@@ -1058,7 +1064,7 @@ export class Commander {
           }
 
           position = null
-          let componentInstances = slotsToComponents(this.injector, slots, rule)
+          let componentInstances = slotsToComponents(this.textbus, slots, rule)
           slots = []
           selection.selectComponentEnd(parentComponent)
           componentInstances.forEach(instance => {
@@ -1068,7 +1074,7 @@ export class Commander {
           const delta = deletedSlot.toDelta()
           const dumpSlots = deltaToSlots(selection, slot, delta, rule, abstractSelection, startIndex)
 
-          componentInstances = slotsToComponents(this.injector, dumpSlots, rule)
+          componentInstances = slotsToComponents(this.textbus, dumpSlots, rule)
 
           componentInstances.forEach((instance, index) => {
             selection.setPosition(slot, index + startIndex)
@@ -1091,7 +1097,7 @@ export class Commander {
       }
     }
 
-    const componentInstances = slotsToComponents(this.injector, slots, rule)
+    const componentInstances = slotsToComponents(this.textbus, slots, rule)
     componentInstances.forEach(instance => {
       this.insert(instance)
     })
