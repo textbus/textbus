@@ -1,6 +1,6 @@
 {
   "name": "@textbus/editor",
-  "version": "3.7.1",
+  "version": "3.7.2",
   "description": "Textbus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
   "main": "./bundles/index.js",
   "module": "./bundles/index.esm.js",
@@ -32,7 +32,7 @@
     "@tanbo/di": "^1.1.5",
     "@tanbo/stream": "^1.2.0",
     "@textbus/core": "^3.7.1",
-    "@textbus/platform-browser": "^3.7.1",
+    "@textbus/platform-browser": "^3.7.2",
     "classnames": "^2.3.2",
     "katex": "^0.16.0",
     "prismjs": "^1.23.0"
