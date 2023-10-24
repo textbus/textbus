@@ -172,7 +172,10 @@ export class Scheduler {
    */
   destroy() {
     this.subs.forEach(i => i.unsubscribe())
-    Scheduler.invokeChildComponentDestroyHook(this.rootComponentRef.component)
+    const component = this.rootComponentRef.component
+    if (component) {
+      Scheduler.invokeChildComponentDestroyHook(component)
+    }
     this.subs = []
   }
 
