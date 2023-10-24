@@ -41,8 +41,10 @@ const textbus = new Textbus({
   ]
 })
 
-const fontSizeFormatter: Formatter<string> = {
-  name: 'fontSize',
+const fontSizeFormatter = new Formatter<string>('fontSize', {
+  columned: false,
+  inheritable: true,
+  priority: 0,
   render(children: Array<VElement | VTextNode | ComponentInstance>, formatValue: string): VElement | FormatHostBindingRender {
     return createVNode('span', {
       style: {
@@ -50,7 +52,7 @@ const fontSizeFormatter: Formatter<string> = {
       }
     }, children)
   }
-}
+})
 
 const rootComponent = defineComponent({
   name: 'RootComponent',

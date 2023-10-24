@@ -5,7 +5,8 @@ import {
   NodeLocation,
   VElement,
   VTextNode,
-  createBidirectionalMapping, Textbus
+  createBidirectionalMapping,
+  Textbus
 } from '@textbus/core'
 import { createElement } from './_utils/uikit'
 import { VIEW_DOCUMENT } from './injection-tokens'
@@ -99,25 +100,7 @@ export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter
       return []
     }
     const rootVNode = this.slotRootVElementCaches.get(slot)!
-    const getNodes = (vElement: VElement, nativeNode: HTMLElement, result: Node[]) => {
-      if (vElement.location) {
-        result.push(nativeNode)
-      }
-      for (let i = 0; i < vElement.children.length; i++) {
-        const vChild = vElement.children[i]
-        const nativeChild = nativeNode.childNodes[i]
-        if (vChild instanceof VElement) {
-          getNodes(vChild, nativeChild as HTMLElement, result)
-        } else if (vChild instanceof VTextNode) {
-          result.push(nativeChild)
-        } else {
-          result.push(this.getNativeNodeByComponent(vChild)!)
-        }
-      }
-      return result
-    }
-
-    return getNodes(rootVNode, rootNativeNode as HTMLElement, [])
+    return getNodes(this, rootVNode, rootNativeNode as HTMLElement, [])
   }
 
   /**
@@ -134,38 +117,55 @@ export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter
     }
     const slot = this.slotRootNativeElementCaches.get(slotRootNode as HTMLElement)
     const rootVNode = this.slotRootVElementCaches.get(slot)!
-
-    const getLocation = (target: Node, tree: HTMLElement, vNodeTree: VElement) => {
-      if (target === tree) {
-        return { ...vNodeTree.location! }
-      }
-      const childNodes = tree.childNodes
-      for (let i = 0; i < childNodes.length; i++) {
-        const child = vNodeTree.children[i]
-        const nativeChild = tree.childNodes[i]
-        if (nativeChild === target) {
-          if (child instanceof ComponentInstance) {
-            const index = child.parent!.indexOf(child)
-            return {
-              slot: child.parent,
-              startIndex: index,
-              endIndex: index + 1
-            }
-          }
-          return child.location
-        } else if (child instanceof VElement) {
-          let r: NodeLocation | null = null
-          if (nativeChild.nodeType === Node.ELEMENT_NODE) {
-            r = getLocation(target, nativeChild as HTMLElement, child)
-          }
-          if (r) {
-            return r
-          }
-        }
-      }
-      return null
-    }
-
     return getLocation(node, slotRootNode as HTMLElement, rootVNode)
   }
+}
+
+function getNodes(adapter: DomAdapter<any, any>, vElement: VElement, nativeNode: HTMLElement, result: Node[]) {
+  if (vElement.location) {
+    result.push(nativeNode)
+  }
+  for (let i = 0; i < vElement.children.length; i++) {
+    const vChild = vElement.children[i]
+    const nativeChild = nativeNode.childNodes[i]
+    if (vChild instanceof VElement) {
+      getNodes(adapter, vChild, nativeChild as HTMLElement, result)
+    } else if (vChild instanceof VTextNode) {
+      result.push(nativeChild)
+    } else {
+      result.push(adapter.getNativeNodeByComponent(vChild)!)
+    }
+  }
+  return result
+}
+
+function getLocation(target: Node, tree: HTMLElement, vNodeTree: VElement) {
+  if (target === tree) {
+    return { ...vNodeTree.location! }
+  }
+  const childNodes = tree.childNodes
+  for (let i = 0; i < childNodes.length; i++) {
+    const child = vNodeTree.children[i]
+    const nativeChild = tree.childNodes[i]
+    if (nativeChild === target) {
+      if (child instanceof ComponentInstance) {
+        const index = child.parent!.indexOf(child)
+        return {
+          slot: child.parent,
+          startIndex: index,
+          endIndex: index + 1
+        }
+      }
+      return child.location
+    } else if (child instanceof VElement) {
+      let r: NodeLocation | null = null
+      if (nativeChild.nodeType === Node.ELEMENT_NODE) {
+        r = getLocation(target, nativeChild as HTMLElement, child)
+      }
+      if (r) {
+        return r
+      }
+    }
+  }
+  return null
 }
