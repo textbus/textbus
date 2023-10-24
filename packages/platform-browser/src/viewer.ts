@@ -199,6 +199,9 @@ export class Viewer extends Starter {
 
     if (this.options.autoFocus) {
       input.onReady.then(() => {
+        if (this.destroyed) {
+          return
+        }
         this.focus()
       })
     }
@@ -225,7 +228,7 @@ export class Viewer extends Starter {
    * 取消编辑器焦点
    */
   blur() {
-    if (this.isReady) {
+    if (this.isReady && !this.destroyed) {
       const selection = this.get(Selection)
       selection.unSelect()
       selection.restore()
