@@ -99,6 +99,8 @@ export interface TextbusConfig extends Module {
 export class Textbus extends ReflectiveInjector {
   static diScope = new Scope('Textbus')
 
+  /** 当编辑器初始化完成时触发 */
+  onReady: Observable<void>
   /** 当视图获得焦点时触发 */
   onFocus: Observable<void>
   /** 当视图失去焦点时触发 */
@@ -138,6 +140,7 @@ export class Textbus extends ReflectiveInjector {
   private focusEvent = new Subject<void>()
   private blurEvent = new Subject<void>()
   private saveEvent = new Subject<void>()
+  private readyEvent = new Subject<void>()
 
   constructor(public config: TextbusConfig) {
     super(new NullInjector(), [], Textbus.diScope)
@@ -150,6 +153,7 @@ export class Textbus extends ReflectiveInjector {
     this.onFocus = this.focusEvent.asObservable()
     this.onBlur = this.blurEvent.asObservable()
     this.onSave = this.saveEvent.asObservable()
+    this.onReady = this.readyEvent.asObservable()
     this.controller = this.get(Controller)
 
     config.imports?.forEach(module => {
@@ -219,6 +223,8 @@ export class Textbus extends ReflectiveInjector {
       this.beforeDestroyCallbacks.push(destroyView)
     }
     this.plugins.forEach(i => i.setup(this))
+    this.readyEvent.next()
+    this.readyEvent.complete()
     return this
   }
 
