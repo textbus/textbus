@@ -223,6 +223,7 @@ export class Textbus extends ReflectiveInjector {
       this.beforeDestroyCallbacks.push(destroyView)
     }
     this.plugins.forEach(i => i.setup(this))
+    this.isReady = true
     this.readyEvent.next()
     this.readyEvent.complete()
     return this
