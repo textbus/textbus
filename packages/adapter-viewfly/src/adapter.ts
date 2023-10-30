@@ -73,7 +73,6 @@ export class Adapter extends DomAdapter<JSXComponent, JSXInternal.Element> {
   componentRender(component: ComponentInstance): JSXInternal.JSXNode {
     const comp = this.components[component.name] || this.components['*']
     if (comp) {
-      component.changeMarker.rendered()
       let ref = this.componentRefs.get(component)
       if (!ref) {
         ref = useRef<HTMLElement>(rootNode => {
