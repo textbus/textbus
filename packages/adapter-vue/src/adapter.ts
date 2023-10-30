@@ -57,6 +57,7 @@ export class Adapter extends DomAdapter<VNode, VNode> {
           }
         })
         onUpdated(() => {
+          component.changeMarker.rendered()
           self.onViewUpdated.next()
         })
         onUnmounted(() => {
@@ -71,7 +72,6 @@ export class Adapter extends DomAdapter<VNode, VNode> {
   componentRender(component: ComponentInstance): VNode {
     const comp = this.components[component.name] || this.components['*']
     if (comp) {
-      component.changeMarker.rendered()
       let rootRef = this.componentRefs.get(component)
       if (!rootRef) {
         rootRef = ref<HTMLElement>()
