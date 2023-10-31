@@ -125,7 +125,7 @@ export class ComponentInstance<State = unknown, SlotState = unknown, Extends = u
     this.separable = !!options.separable
 
     if (typeof options.validate === 'function') {
-      initData = options.validate(initData)
+      initData = options.validate(textbus, initData)
     }
 
     this.state = initData?.state as any || null
@@ -237,9 +237,10 @@ export interface ComponentOptions<State, SlotState, Extends> {
 
   /**
    * 组件初始数据校验
+   * @param context
    * @param initData
    */
-  validate?(initData?: ComponentInitData<State, SlotState>): ComponentInitData<State, SlotState>
+  validate?(context: Textbus, initData?: ComponentInitData<State, SlotState>): ComponentInitData<State, SlotState>
 
   /**
    * 组件初始化实现
