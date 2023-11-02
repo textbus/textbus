@@ -130,7 +130,7 @@ export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
 
     const refFn = (nativeNode: HTMLElement) => {
       if (!nativeNode) {
-        this.slotRootNativeElementCaches.remove(nativeNode)
+        this.slotRootNativeElementCaches.remove(slot)
       } else {
         this.slotRootNativeElementCaches.set(slot, nativeNode)
       }
