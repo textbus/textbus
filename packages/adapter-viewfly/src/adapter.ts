@@ -134,6 +134,9 @@ export class Adapter extends DomAdapter<JSXComponent, JSXInternal.Element> {
     const currentRef = jsxNode.props.ref
     const ref = useRef<HTMLElement>(nativeNode => {
       this.slotRootNativeElementCaches.set(slot, nativeNode)
+      return () => {
+        this.slotRootNativeElementCaches.remove(slot)
+      }
     })
     if (currentRef instanceof Ref) {
       jsxNode.props.ref = [currentRef, ref]
