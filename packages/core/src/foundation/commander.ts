@@ -355,16 +355,16 @@ export class Commander {
     if (!position) {
       return false
     }
-    let formats = position.slot.extractFormatsByIndex(position.offset)
     const nextFormats = position.slot.extractFormatsByIndex(position.offset + 1)
+    let formats = position.slot.extractFormatsByIndex(position.offset).filter(i => {
+      return i[0].inheritable || nextFormats.some(value => {
+        return value[0] === i[0] && value[1] === i[1]
+      })
+    })
     if (formatter) {
       if (Array.isArray(formatter)) {
         formats = [
-          ...formats.filter(i => {
-            return i[0].inheritable || nextFormats.some(value => {
-              return value[0] === i[0] && value[1] === i[1]
-            })
-          }),
+          ...formats,
           ...formatter
         ]
       } else {
