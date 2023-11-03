@@ -29,7 +29,12 @@ const browserErrorFn = makeError('BrowserModule')
  * Textbus PC 端配置接口
  */
 export interface ViewOptions {
+  /** 渲染平台适配器 */
   adapter: DomAdapter<any, any>
+
+  /** 编辑器根节点 */
+  renderTo(): HTMLElement
+
   /** 自动获取焦点 */
   autoFocus?: boolean
   /** 编辑区最小高度 */
@@ -49,7 +54,7 @@ export class BrowserModule implements Module {
 
   private workbench!: HTMLElement
 
-  constructor(public host: HTMLElement, public config: ViewOptions) {
+  constructor(public config: ViewOptions) {
     const { mask, wrapper } = BrowserModule.createLayout()
     wrapper.prepend(config.adapter.host)
     if (config.minHeight) {
@@ -110,7 +115,6 @@ export class BrowserModule implements Module {
     ]
 
     this.workbench = wrapper
-    this.host.append(wrapper)
   }
 
   /**
@@ -139,14 +143,21 @@ export class BrowserModule implements Module {
     return registry.createComponentByFactory(data, rootComponent)
   }
 
+  setup() {
+    const host = this.config.renderTo()
+    if (!(host instanceof HTMLElement)) {
+      throw browserErrorFn('view container is not a HTMLElement')
+    }
+    host.append(this.workbench)
+    return () => {
+      this.workbench.remove()
+    }
+  }
+
   onAfterStartup(textbus: Textbus) {
     if (this.config.autoFocus) {
       textbus.focus()
     }
-  }
-
-  onDestroy() {
-    this.workbench.remove()
   }
 
   private static createLayout() {
