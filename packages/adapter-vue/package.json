@@ -1,6 +1,6 @@
 {
   "name": "@textbus/adapter-vue",
-  "version": "4.0.0-alpha.17",
+  "version": "4.0.0-alpha.18",
   "description": "Textbus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
   "main": "./bundles/index.js",
   "module": "./bundles/index.esm.js",
@@ -26,8 +26,8 @@
   ],
   "dependencies": {
     "@tanbo/stream": "^1.2.0",
-    "@textbus/core": "^4.0.0-alpha.17",
-    "@textbus/platform-browser": "^4.0.0-alpha.17",
+    "@textbus/core": "^4.0.0-alpha.18",
+    "@textbus/platform-browser": "^4.0.0-alpha.18",
     "vue": "^3.3.4"
   },
   "devDependencies": {
