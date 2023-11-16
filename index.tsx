@@ -30,8 +30,11 @@ const adapter = new Adapter({
     app.unmount()
   }
 })
-const browserModule = new BrowserModule(document.getElementById('editor')!, {
+const browserModule = new BrowserModule({
   adapter,
+  renderTo() {
+    return document.getElementById('editor')!
+  },
   // useContentEditable: true
 })
 
@@ -80,7 +83,7 @@ const rootComponent = defineComponent({
 const paragraphComponent = defineComponent({
   name: 'ParagraphComponent',
   type: ContentType.BlockComponent,
-  validate(initData) {
+  validate(_, initData) {
     return {
       slots: initData?.slots || [new Slot([
         ContentType.Text
