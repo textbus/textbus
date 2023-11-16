@@ -412,22 +412,6 @@ export class Textbus extends ReflectiveInjector {
     })
     keyboard.addShortcut({
       keymap: {
-        key: 'Enter',
-        shiftKey: true
-      },
-      action: () => {
-        const startOffset = selection.startOffset!
-        const startSlot = selection.startSlot!
-        const isToEnd = startOffset === startSlot.length || startSlot.isEmpty
-        const content = isToEnd ? '\n\n' : '\n'
-        const isInserted = commander.insert(content)
-        if (isInserted && isToEnd) {
-          selection.setPosition(startSlot, startOffset + 1)
-        }
-      }
-    })
-    keyboard.addShortcut({
-      keymap: {
         key: ['Delete', 'Backspace']
       },
       action: (key) => {
