@@ -5,7 +5,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/build-passing-green">
   <img src="https://img.shields.io/npm/v/%40textbus%2Fcore">
-  <img src="https://img.shields.io/npm/dm/%40viewfly/core">
+  <img src="https://img.shields.io/npm/dm/%40textbus/core">
 </p>
 
 ## 官方文档
