@@ -5,8 +5,8 @@ import {
   JSXInternal,
   JSXNode,
   onUpdated,
-  Ref,
-  useRef
+  DynamicRef,
+  createDynamicRef
 } from '@viewfly/core'
 import { Subject } from '@tanbo/stream'
 import {
@@ -25,7 +25,7 @@ const adapterError = makeError('ViewflyAdapter')
 
 export interface ViewComponentProps<T extends Component = Component> {
   component: ExtractComponentInstanceType<T>
-  rootRef: Ref<HTMLElement>
+  rootRef: DynamicRef<HTMLElement>
 }
 
 export interface ViewflyAdapterComponents {
@@ -40,7 +40,7 @@ export class Adapter extends DomAdapter<JSXComponent, JSXInternal.Element> {
 
   private components: ViewflyAdapterComponents = {}
 
-  private componentRefs = new WeakMap<ComponentInstance, Ref<HTMLElement>>()
+  private componentRefs = new WeakMap<ComponentInstance, DynamicRef<HTMLElement>>()
 
   constructor(components: ViewflyAdapterComponents,
               mount: (host: HTMLElement, root: JSXComponent) => (void | (() => void))) {
@@ -75,7 +75,7 @@ export class Adapter extends DomAdapter<JSXComponent, JSXInternal.Element> {
     if (comp) {
       let ref = this.componentRefs.get(component)
       if (!ref) {
-        ref = useRef<HTMLElement>(rootNode => {
+        ref = createDynamicRef<HTMLElement>(rootNode => {
           this.componentRootElementCaches.set(component, rootNode)
           return () => {
             this.componentRootElementCaches.remove(component)
@@ -132,13 +132,13 @@ export class Adapter extends DomAdapter<JSXComponent, JSXInternal.Element> {
     }
     const jsxNode = vNodeToJSX(vElement)
     const currentRef = jsxNode.props.ref
-    const ref = useRef<HTMLElement>(nativeNode => {
+    const ref = createDynamicRef<HTMLElement>(nativeNode => {
       this.slotRootNativeElementCaches.set(slot, nativeNode)
       return () => {
         this.slotRootNativeElementCaches.remove(slot)
       }
     })
-    if (currentRef instanceof Ref) {
+    if (currentRef instanceof DynamicRef) {
       jsxNode.props.ref = [currentRef, ref]
     } else if (Array.isArray(currentRef)) {
       currentRef.push(ref)
