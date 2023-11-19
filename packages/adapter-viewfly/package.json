@@ -28,7 +28,7 @@
     "@tanbo/stream": "^1.2.0",
     "@textbus/core": "^4.0.0-alpha.18",
     "@textbus/platform-browser": "^4.0.0-alpha.18",
-    "@viewfly/core": "^0.4.0"
+    "@viewfly/core": "^0.5.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^23.0.2",
