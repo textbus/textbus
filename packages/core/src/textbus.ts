@@ -49,13 +49,13 @@ export interface Module {
   /** 组件列表 */
   components?: Component[]
   /** 格式列表 */
-  formatters?: (Formatter<any> | ((textbus: Textbus) => Formatter<any>))[]
+  formatters?: Formatter<any>[]
   /** 属性列表 */
-  attributes?: (Attribute<any> | ((textbus: Textbus) => Attribute<any>))[]
+  attributes?: Attribute<any>[]
   /** 跨平台及基础扩展实现的提供者 */
   providers?: Provider[]
   /** 插件集合 */
-  plugins?: Array<Plugin | (() => Plugin)>
+  plugins?: Plugin[]
 
   /**
    * 当模块注册时调用
@@ -194,6 +194,8 @@ export class Textbus extends ReflectiveInjector {
     const scheduler = this.get(Scheduler)
     const history = this.get(History)
     const adapter = this.get(ViewAdapter)
+    const formatters = this.get(FORMATTER_LIST)
+    const attributes = this.get(ATTRIBUTE_LIST)
 
     this.initDefaultShortcut()
 
@@ -222,6 +224,12 @@ export class Textbus extends ReflectiveInjector {
     if (typeof destroyView === 'function') {
       this.beforeDestroyCallbacks.push(destroyView)
     }
+    formatters.forEach(f => {
+      f.setup(this)
+    })
+    attributes.forEach(a => {
+      a.setup(this)
+    })
     this.plugins.forEach(i => i.setup(this))
     this.isReady = true
     this.readyEvent.next()
@@ -274,8 +282,11 @@ export class Textbus extends ReflectiveInjector {
     this.plugins.forEach(i => i.onDestroy?.())
     this.beforeDestroyCallbacks.forEach(i => {
       i()
-    });
-    [this.get(History), this.get(Selection), this.get(Scheduler)].forEach(i => {
+    })
+    const formatters = this.get(FORMATTER_LIST)
+    const attributes = this.get(ATTRIBUTE_LIST);
+
+    [this.get(History), this.get(Selection), this.get(Scheduler), ...formatters, ...attributes].forEach(i => {
       i.destroy()
     })
   }
@@ -368,12 +379,7 @@ export class Textbus extends ReflectiveInjector {
     ]
     return {
       providers,
-      plugins: plugins.map(i => {
-        if (typeof i === 'function') {
-          return i()
-        }
-        return i
-      })
+      plugins
     }
   }
 
