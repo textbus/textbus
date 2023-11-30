@@ -138,6 +138,9 @@ export class Selection {
 
   /** 当前选区是否闭合 */
   get isCollapsed() {
+    if (this.customRanges?.length) {
+      return false
+    }
     return this.isSelected && this.startSlot === this.endSlot && this.startOffset === this.endOffset
   }
 
@@ -409,9 +412,16 @@ export class Selection {
    * @param ranges
    */
   setSelectedRanges(ranges: SlotRange[]) {
+    if (ranges.length === 0) {
+      this.unSelect()
+      return
+    }
     this.changeFromUpdateCustomRanges = true
     this.customRanges = ranges
-    this.broadcastChanged()
+    const start = ranges[0]
+    const end = ranges[ranges.length - 1]
+    this.setBaseAndExtent(start.slot, start.startIndex, end.slot, end.endIndex)
+    // this.broadcastChanged()
     this.changeFromUpdateCustomRanges = false
   }
 
