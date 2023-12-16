@@ -19,7 +19,7 @@ export interface ViewComponentProps<T extends Component = Component> {
   rootRef: Ref<HTMLElement | undefined>
 }
 
-export interface ReactAdapterComponents {
+export interface VueAdapterComponents {
   [key: string]: DefineComponent<ViewComponentProps>
 }
 
@@ -32,7 +32,7 @@ export class Adapter extends DomAdapter<VNode, VNode> {
   private components: Record<string, DefineComponent<ViewComponentProps>> = {}
   private componentRefs = new WeakMap<ComponentInstance, Ref<HTMLElement | undefined>>()
 
-  constructor(components: ReactAdapterComponents,
+  constructor(components: VueAdapterComponents,
               mount: (host: HTMLElement, root: VNode) => (void | (() => void))) {
     super(mount)
 
