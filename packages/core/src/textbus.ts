@@ -194,8 +194,6 @@ export class Textbus extends ReflectiveInjector {
     const scheduler = this.get(Scheduler)
     const history = this.get(History)
     const adapter = this.get(ViewAdapter)
-    const formatters = this.get(FORMATTER_LIST)
-    const attributes = this.get(ATTRIBUTE_LIST)
 
     this.initDefaultShortcut()
 
@@ -224,12 +222,6 @@ export class Textbus extends ReflectiveInjector {
     if (typeof destroyView === 'function') {
       this.beforeDestroyCallbacks.push(destroyView)
     }
-    formatters.forEach(f => {
-      f.setup(this)
-    })
-    attributes.forEach(a => {
-      a.setup(this)
-    })
     this.plugins.forEach(i => i.setup(this))
     this.isReady = true
     this.readyEvent.next()
@@ -283,10 +275,8 @@ export class Textbus extends ReflectiveInjector {
     this.beforeDestroyCallbacks.forEach(i => {
       i()
     })
-    const formatters = this.get(FORMATTER_LIST)
-    const attributes = this.get(ATTRIBUTE_LIST);
 
-    [this.get(History), this.get(Selection), this.get(Scheduler), ...formatters, ...attributes].forEach(i => {
+    ;[this.get(History), this.get(Selection), this.get(Scheduler)].forEach(i => {
       i.destroy()
     })
   }
