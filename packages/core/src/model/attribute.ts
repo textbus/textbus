@@ -1,7 +1,6 @@
 import { VElement, VTextNode } from './element'
 import { FormatValue } from './format'
 import { ComponentInstance } from './component'
-import { Textbus } from '../textbus'
 
 /**
  * 格式渲染可回退的渲染模式
@@ -66,17 +65,6 @@ export interface FormatterConfig<T> {
   columned?: boolean
 
   /**
-   * 格式初始化设置，将在 Textbus 启动时调用
-   * @param textbus
-   */
-  setup?(textbus: Textbus): void
-
-  /**
-   * Textbus 销毁时调用
-   */
-  onDestroy?(): void
-
-  /**
    * 格式渲染的方法
    * @param children 子节点集合
    * @param formatValue 当前格式要渲染的值
@@ -109,15 +97,6 @@ export class Formatter<T = FormatValue> {
     this.columned = columned
   }
 
-
-  setup(textbus: Textbus) {
-    this.config.setup?.(textbus)
-  }
-
-  destroy() {
-    this.config.onDestroy?.()
-  }
-
   render(
     children: Array<VElement | VTextNode | ComponentInstance>,
     formatValue: T,
@@ -127,17 +106,6 @@ export class Formatter<T = FormatValue> {
 }
 
 export interface AttributeConfig<T> {
-  /**
-   * 格式初始化设置，将在 Textbus 启动时调用
-   * @param textbus
-   */
-  setup?(textbus: Textbus): void
-
-  /**
-   * Textbus 销毁时调用
-   */
-  onDestroy?(): void
-
   /**
    * 渲染属性的方法
    * @param node 不附加属性的节点
@@ -162,14 +130,6 @@ export class Attribute<T = FormatValue> {
    * @param config
    */
   constructor(public name: string, private config: AttributeConfig<T>) {
-  }
-
-  setup(textbus: Textbus) {
-    this.config.setup?.(textbus)
-  }
-
-  destroy() {
-    this.config.onDestroy?.()
   }
 
   render(
