@@ -425,7 +425,7 @@ export class MagicInput extends Input {
 
   private handleDefaultActions(textarea) {
     this.subscription.add(
-      fromEvent<ClipboardEvent>(document, 'copy').subscribe(ev => {
+      fromEvent<ClipboardEvent>(isFirefox() ? textarea : document, 'copy').subscribe(ev => {
         const selection = this.selection
         if (!selection.isSelected) {
           return
