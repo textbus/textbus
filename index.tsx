@@ -17,8 +17,8 @@ import {
   VElement,
   VTextNode,
 } from '@textbus/core'
-import { createRoot } from 'react-dom/client'
-import { Adapter, ViewComponentProps } from '@textbus/adapter-react'
+import { Adapter, ViewComponentProps } from '@textbus/adapter-viewfly'
+import { createApp } from '@viewfly/platform-browser'
 
 async function createEditor() {
   if (!Intl.Segmenter) {
@@ -26,13 +26,13 @@ async function createEditor() {
     (Intl as any).Segmenter = await polyfill.createIntlSegmenterPolyfill()
   }
   const adapter = new Adapter({
-    RootComponent: App,
+    RootComponent: App as any,
     ParagraphComponent: Paragraph
   }, (host, root) => {
-    const app = createRoot(host)
-    app.render(root)
+    const app = createApp(root)
+    app.mount(host)
     return () => {
-      app.unmount()
+      app.destroy()
     }
   })
   const browserModule = new BrowserModule({
@@ -130,27 +130,31 @@ async function createEditor() {
   function App(props: ViewComponentProps<typeof rootComponent>) {
     const slot = props.component.slots.first
 
-    return (
-      <div className="xxxx">
-        {
-          adapter.slotRender(slot, children => {
-            return createVNode('div', {
-              'textbus-document': 'true',
-              ref: props.rootRef
-            }, children)
-          })
-        }
-      </div>
-    )
+    return () => {
+      return (
+        <div class="xxxx">
+          {
+            adapter.slotRender(slot, children => {
+              return createVNode('div', {
+                'textbus-document': 'true',
+                ref: props.rootRef
+              }, children)
+            })
+          }
+        </div>
+      )
+    }
   }
 
   function Paragraph(props: ViewComponentProps<typeof paragraphComponent>) {
     const slot = props.component.slots.first
-    return (
-      adapter.slotRender(slot, children => {
-        return createVNode('p', { ref: props.rootRef }, children)
-      })
-    )
+    return () => {
+      return (
+        adapter.slotRender(slot, children => {
+          return createVNode('p', { ref: props.rootRef }, children)
+        })
+      )
+    }
   }
 }
 

@@ -1,7 +1,6 @@
 import {
   getCurrentInstance,
   jsx,
-  JSXComponent,
   JSXInternal,
   JSXNode,
   onUpdated,
@@ -35,7 +34,7 @@ export interface ViewflyAdapterComponents {
 /**
  * Textbus 桥接 [Viewfly](https://viewfly.org) 渲染能力适配器，用于在 Viewfly 项目中渲染 Textbus 数据
  */
-export class Adapter extends DomAdapter<JSXComponent, JSXInternal.Element> {
+export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
   onViewUpdated = new Subject<void>()
 
   private components: ViewflyAdapterComponents = {}
@@ -43,7 +42,7 @@ export class Adapter extends DomAdapter<JSXComponent, JSXInternal.Element> {
   private componentRefs = new WeakMap<ComponentInstance, DynamicRef<HTMLElement>>()
 
   constructor(components: ViewflyAdapterComponents,
-              mount: (host: HTMLElement, root: JSXComponent) => (void | (() => void))) {
+              mount: (host: HTMLElement, root: JSXNode) => (void | (() => void))) {
     super(mount)
     let isRoot = true
     Object.keys(components).forEach(key => {
@@ -70,7 +69,7 @@ export class Adapter extends DomAdapter<JSXComponent, JSXInternal.Element> {
     })
   }
 
-  componentRender(component: ComponentInstance): JSXInternal.JSXNode {
+  componentRender(component: ComponentInstance): JSXInternal.ViewNode {
     const comp = this.components[component.name] || this.components['*']
     if (comp) {
       let ref = this.componentRefs.get(component)
@@ -98,7 +97,7 @@ export class Adapter extends DomAdapter<JSXComponent, JSXInternal.Element> {
     this.slotRootVElementCaches.set(slot, vElement)
 
     const vNodeToJSX = (vNode: VElement) => {
-      const children: JSXNode[] = []
+      const children: JSXInternal.ViewNode[] = []
 
       for (let i = 0; i < vNode.children.length; i++) {
         const child = vNode.children[i]
