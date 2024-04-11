@@ -24,7 +24,8 @@
       "@textbus/adapter-react": ["./packages/adapter-react/src/public-api.ts"],
       "@textbus/adapter-vue": ["./packages/adapter-vue/src/public-api.ts"]
     },
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "jsxImportSource": "@viewfly/core"
   },
   "exclude": ["packages", "_docs", "helper", "test"]
 }
