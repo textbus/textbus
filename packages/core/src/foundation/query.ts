@@ -2,13 +2,13 @@ import { Injectable } from '@viewfly/core'
 
 import { Selection } from './selection'
 import {
-  ComponentInstance,
+  Component,
   Formatter,
   FormatValue,
   Slot,
-  Component,
+  ComponentConstructor,
   Attribute,
-  SlotRange
+  SlotRange, State
 } from '../model/_api'
 
 /**
@@ -82,7 +82,7 @@ export class Query {
     }
     const states = ranges.map(i => {
       const contents = i.slot.sliceContent(i.startIndex, i.endIndex)
-      const childComponents: ComponentInstance[] = []
+      const childComponents: Component[] = []
       let hasString = false
       contents.forEach(item => {
         if (typeof item !== 'string') {
@@ -143,9 +143,9 @@ export class Query {
    * @param component 要查询的组件
    * @param filter 查询结构过滤函数，过滤不需要的数据
    */
-  queryComponent<Extends, T, U>(
-    component: Component<Extends, T, U>,
-    filter?: (instance: ComponentInstance<Extends, T, U>) => boolean): QueryState<ComponentInstance<Extends, T, U>> {
+  queryComponent<T extends State>(
+    component: ComponentConstructor<T>,
+    filter?: (instance: Component<T>) => boolean): QueryState<Component<T>> {
     if (!this.selection.isSelected) {
       return {
         state: QueryStateType.Normal,
@@ -158,10 +158,10 @@ export class Query {
 
       while (parent) {
         if (parent.name === component.name) {
-          if (!filter || filter(parent as ComponentInstance<Extends, T, U>)) {
+          if (!filter || filter(parent as Component<T>)) {
             return {
               state: QueryStateType.Enabled,
-              value: parent as ComponentInstance<Extends, T, U>
+              value: parent as Component<T>
             }
           }
         }
@@ -179,9 +179,9 @@ export class Query {
    * 查询当前选区是否包含在组件内
    * @param component 要查询的组件
    */
-  queryWrappedComponent<Extends, T, U>(
-    component: Component<Extends, T, U>
-  ): QueryState<ComponentInstance<Extends, T, U>> {
+  queryWrappedComponent<T extends State>(
+    component: ComponentConstructor<T>
+  ): QueryState<Component<T>> {
     const selection = this.selection
     if (!selection.isSelected || selection.isCollapsed) {
       return {
@@ -190,7 +190,7 @@ export class Query {
       }
     }
     const ranges = selection.getRanges()
-    const instances: ComponentInstance<Extends, T, U>[] = []
+    const instances: Component<T>[] = []
     for (const range of ranges) {
       const { startSlot, endSlot, startOffset, endOffset } = range
       if (startSlot !== endSlot ||
@@ -202,7 +202,7 @@ export class Query {
       }
       const instance = startSlot.getContentAtIndex(startOffset)
       if (typeof instance !== 'string' && instance.name === component.name) {
-        instances.push(instance as ComponentInstance<Extends, T, U>)
+        instances.push(instance as Component<T>)
       } else {
         return {
           state: QueryStateType.Normal,

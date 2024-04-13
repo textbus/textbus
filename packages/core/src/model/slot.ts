@@ -1,12 +1,11 @@
 import { Observable, Subject, Subscription } from '@tanbo/stream'
-import { Draft, Patch, produce } from 'immer'
 
-import { ComponentInstance, ComponentLiteral } from './component'
+import { Component, ComponentLiteral } from './component'
 import { Content } from './content'
 import { Format, FormatLiteral, FormatRange, FormatValue, Formats, FormatTree, FormatItem } from './format'
 import { Attribute, FormatHostBindingRender, Formatter } from './attribute'
 import { ChangeMarker } from './change-marker'
-import { Action, ApplyAction, StateChange } from './types'
+import { Action } from './types'
 import { VElement, VTextNode } from './element'
 import { makeError } from '../_utils/make-error'
 
@@ -16,7 +15,7 @@ const slotError = makeError('Slot')
  * 插槽渲染的工厂函数
  */
 export interface SlotRenderFactory {
-  (children: Array<VElement | VTextNode | ComponentInstance>): VElement
+  (children: Array<VElement | VTextNode | Component>): VElement
 }
 
 export enum ContentType {
@@ -25,16 +24,15 @@ export enum ContentType {
   BlockComponent
 }
 
-export interface SlotLiteral<T, U extends FormatValue> {
+export interface SlotLiteral<U extends FormatValue> {
   schema: ContentType[]
   content: Array<string | ComponentLiteral>
   attributes: Record<string, U>
   formats: FormatLiteral<U>
-  state: T | null
 }
 
 export interface DeltaInsert {
-  insert: string | ComponentInstance
+  insert: string | Component
   formats: Formats
 }
 
@@ -45,7 +43,7 @@ export class DeltaLite extends Array<DeltaInsert> {
 /**
  * Textbus 插槽类，用于管理组件、文本及格式的增删改查
  */
-export class Slot<T = any> {
+export class Slot {
   static placeholder = '\u200b'
 
   static get emptyPlaceholder() {
@@ -54,18 +52,17 @@ export class Slot<T = any> {
   }
 
   /** 插槽所属的组件 */
-  parent: ComponentInstance | null = null
+  parent: Component | null = null
   /** 插槽变更标记器 */
   changeMarker = new ChangeMarker()
 
   onContentChange: Observable<Action[]>
-  onStateChange: Observable<StateChange<T>>
-  onChildComponentRemove: Observable<ComponentInstance[]>
+  onChildComponentRemove: Observable<Component[]>
 
   readonly schema: ContentType[]
 
-  private componentChangeListeners = new WeakMap<ComponentInstance, Subscription>()
-  private childComponentRemoveEvent = new Subject<ComponentInstance[]>()
+  private componentChangeListeners = new WeakMap<Component, Subscription>()
+  private childComponentRemoveEvent = new Subject<Component[]>()
 
   get parentSlot() {
     return this.parent?.parent || null
@@ -99,14 +96,12 @@ export class Slot<T = any> {
   protected attributes = new Map<Attribute<any>, any>()
 
   protected contentChangeEvent = new Subject<Action[]>()
-  protected stateChangeEvent = new Subject<StateChange<T>>()
 
   protected applyFormatCoverChild = false
 
-  constructor(schema: ContentType[], public state?: T) {
+  constructor(schema: ContentType[]) {
     this.schema = schema.sort()
     this.onContentChange = this.contentChangeEvent.asObservable()
-    this.onStateChange = this.stateChangeEvent.asObservable()
     this.onChildComponentRemove = this.childComponentRemoveEvent.asObservable()
     this.content.append(Slot.emptyPlaceholder)
     this._index = 0
@@ -142,7 +137,7 @@ export class Slot<T = any> {
         name: attribute.name,
         value: v
       } : {
-        type: 'attrRemove',
+        type: 'attrDelete',
         name: attribute.name
       }]
     })
@@ -184,7 +179,7 @@ export class Slot<T = any> {
 
     this.attributes.delete(attribute)
     const applyActions: Action[] = [{
-      type: 'attrRemove',
+      type: 'attrDelete',
       name: attribute.name
     }]
     this.changeMarker.markAsDirtied({
@@ -208,54 +203,13 @@ export class Slot<T = any> {
   }
 
   /**
-   * 更新插槽状态的方法
-   * @param fn
-   * @param record
-   */
-  updateState(fn: (draft: Draft<T>) => void, record = true): T {
-    let changes!: Patch[]
-    let inverseChanges!: Patch[]
-    const oldState = this.state
-    const newState = produce(oldState, fn, (p, ip) => {
-      changes = p
-      inverseChanges = ip
-    })
-    if (changes.length === 0 && inverseChanges.length === 0) {
-      return oldState!
-    }
-    this.state = newState
-    const applyAction: ApplyAction = {
-      type: 'apply',
-      patches: changes,
-      value: newState,
-      record
-    }
-    this.changeMarker.markAsDirtied({
-      path: [],
-      apply: [applyAction],
-      unApply: [{
-        type: 'apply',
-        patches: inverseChanges,
-        value: oldState,
-        record
-      }]
-    })
-    this.stateChangeEvent.next({
-      newState: newState!,
-      oldState: oldState!,
-      record
-    })
-    return newState!
-  }
-
-  /**
    * 向插槽内写入内容，并根据当前位置的格式，自动扩展
    * @param content
    * @param formats
    */
-  write(content: string | ComponentInstance, formats?: Formats): boolean
-  write(content: string | ComponentInstance, formatter?: Formatter<any>, value?: FormatValue): boolean
-  write(content: string | ComponentInstance, formatter?: Formatter<any> | Formats, value?: FormatValue): boolean {
+  write(content: string | Component, formats?: Formats): boolean
+  write(content: string | Component, formatter?: Formatter<any>, value?: FormatValue): boolean
+  write(content: string | Component, formatter?: Formatter<any> | Formats, value?: FormatValue): boolean {
     const index = this.index
     const expandFormat = (this.isEmpty || index === 0) ? this.format.extract(0, 1) : this.format.extract(index - 1, index)
 
@@ -280,9 +234,9 @@ export class Slot<T = any> {
    * @param content
    * @param formats
    */
-  insert(content: string | ComponentInstance, formats?: Formats): boolean
-  insert(content: string | ComponentInstance, formatter?: Formatter<any>, value?: FormatValue): boolean
-  insert(content: string | ComponentInstance, formatter?: Formatter<any> | Formats, value?: FormatValue): boolean {
+  insert(content: string | Component, formats?: Formats): boolean
+  insert(content: string | Component, formatter?: Formatter<any>, value?: FormatValue): boolean
+  insert(content: string | Component, formatter?: Formatter<any> | Formats, value?: FormatValue): boolean {
     const contentType = typeof content === 'string' ? ContentType.Text : content.type
     if (!this.schema.includes(contentType)) {
       return false
@@ -346,7 +300,7 @@ export class Slot<T = any> {
       type: 'retain',
       offset: startIndex
     }, formats.length ? {
-      type: 'insert',
+      type: 'contentInsert',
       content: actionData,
       ref: content,
       formats: formats.reduce((opt: Record<string, any>, next) => {
@@ -354,7 +308,7 @@ export class Slot<T = any> {
         return opt
       }, {})
     } : {
-      type: 'insert',
+      type: 'contentInsert',
       content: actionData,
       ref: content
     }]
@@ -506,7 +460,7 @@ export class Slot<T = any> {
       type: 'delete',
       count
     }]
-    const deletedComponents: ComponentInstance[] = []
+    const deletedComponents: Component[] = []
     this.changeMarker.markAsDirtied({
       path: [],
       apply: applyActions,
@@ -516,7 +470,7 @@ export class Slot<T = any> {
       }, ...deletedData.map<Action>(item => {
         if (typeof item === 'string') {
           return {
-            type: 'insert',
+            type: 'contentInsert',
             content: item,
             ref: item
           }
@@ -527,7 +481,7 @@ export class Slot<T = any> {
         this.componentChangeListeners.delete(item)
         item.parent = null
         return {
-          type: 'insert',
+          type: 'contentInsert',
           content: item.toJSON(),
           ref: item
         }
@@ -554,7 +508,7 @@ export class Slot<T = any> {
    * 在当前插槽内删除指定的组件
    * @param component
    */
-  removeComponent(component: ComponentInstance) {
+  removeComponent(component: Component) {
     const index = this.indexOf(component)
     if (index > -1) {
       this.retain(index)
@@ -569,7 +523,7 @@ export class Slot<T = any> {
    * @param endIndex
    */
   cut(startIndex = 0, endIndex = this.length): Slot {
-    return this.cutTo(new Slot([...this.schema], this.state), startIndex, endIndex)
+    return this.cutTo(new Slot([...this.schema]), startIndex, endIndex)
   }
 
   /**
@@ -578,7 +532,7 @@ export class Slot<T = any> {
    * @param startIndex
    * @param endIndex
    */
-  cutTo<U extends Slot>(slot: U, startIndex = 0, endIndex = this.length): U {
+  cutTo(slot: Slot, startIndex = 0, endIndex = this.length): Slot {
     if (startIndex < 0) {
       startIndex = 0
     }
@@ -635,7 +589,7 @@ export class Slot<T = any> {
    * 查找组件在插槽内的索引
    * @param component
    */
-  indexOf(component: ComponentInstance) {
+  indexOf(component: Component) {
     return this.content.indexOf(component)
   }
 
@@ -684,7 +638,7 @@ export class Slot<T = any> {
   /**
    * 把插槽内容转换为 JSON
    */
-  toJSON<U extends FormatValue>(): SlotLiteral<T, U> {
+  toJSON<U extends FormatValue>(): SlotLiteral<U> {
     const attrs: Record<string, U> = {}
     this.attributes.forEach((value, key) => {
       attrs[key.name] = value
@@ -694,7 +648,6 @@ export class Slot<T = any> {
       content: this.content.toJSON(),
       attributes: attrs,
       formats: this.format.toJSON(),
-      state: this.state ?? null
     }
   }
 
@@ -853,7 +806,7 @@ export class Slot<T = any> {
     slot: Slot,
     formats: FormatTree<any>[],
     renderEnv: any) {
-    const nodes: Array<VElement | VTextNode | ComponentInstance> = []
+    const nodes: Array<VElement | VTextNode | Component> = []
     for (const child of formats) {
       if (child.formats?.length) {
         const children = child.children ?
@@ -879,7 +832,7 @@ export class Slot<T = any> {
 
   private createVDomByOverlapFormats(
     formats: (FormatItem<any>)[],
-    children: Array<VElement | VTextNode | ComponentInstance>,
+    children: Array<VElement | VTextNode | Component>,
     renderEnv: any
   ): VElement {
     const hostBindings: Array<{render: FormatHostBindingRender, item: FormatItem<any>}> = []
@@ -925,15 +878,15 @@ export class Slot<T = any> {
     slot: Slot,
     startIndex: number,
     endIndex: number
-  ): Array<VTextNode | VElement | ComponentInstance> {
-    const elements: Array<string | ComponentInstance> = slot.sliceContent(startIndex, endIndex).map(i => {
+  ): Array<VTextNode | VElement | Component> {
+    const elements: Array<string | Component> = slot.sliceContent(startIndex, endIndex).map(i => {
       if (typeof i === 'string') {
         return i.match(/\n|[^\n]+/g)!
       }
       return i
     }).flat()
     return elements.map(item => {
-      let vNode!: VElement | VTextNode | ComponentInstance
+      let vNode!: VElement | VTextNode | Component
       let length: number
       if (typeof item === 'string') {
         if (item === '\n') {

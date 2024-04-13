@@ -1,42 +1,22 @@
-import { Draft, produce, Patch, enablePatches } from 'immer'
-import { map, Observable, Subject, Subscription } from '@tanbo/stream'
+import { Subscription } from '@tanbo/stream'
 import { AbstractType, Type, InjectionToken, InjectFlags } from '@viewfly/core'
 
 import { makeError } from '../_utils/make-error'
-import { ContentType, Slot, SlotLiteral } from './slot'
+import { ContentType, Slot } from './slot'
 import { Formats } from './format'
 import { ChangeMarker } from './change-marker'
 import { Slots } from './slots'
-import { StateChange } from './types'
+import { State } from './types'
 import { Textbus } from '../textbus'
+import { MapDelta } from './delta'
 
-enablePatches()
-
-const componentErrorFn = makeError('DefineComponent')
-
-export interface SlotsComponentInitData<State, SlotState> {
-  slots: Slot<SlotState>[]
-  state?: State
-}
-
-export interface StateComponentInitData<State, SlotState> {
-  slots?: Slot<SlotState>[]
-  state: State
-}
-
-/**
- * 组件初始化数据
- */
-export type ComponentInitData<State = unknown, SlotState = unknown> =
-  SlotsComponentInitData<State, SlotState>
-  | StateComponentInitData<State, SlotState>
+const componentErrorFn = makeError('Component')
 
 /**
  * 组件 JSON 字面量接口
  */
 export interface ComponentLiteral<State = any> {
   name: string
-  slots: SlotLiteral<any, any>[]
   state: State
 }
 
@@ -69,10 +49,16 @@ export interface ZenCodingGrammarInterceptor<Data = any> {
   generateInitData(content: string, textbus: Textbus): Data
 }
 
+export interface Component<T extends State = State> {
+  separate?(start?: Slot, end?: Slot): Component<T>
+
+  setup?(): void
+}
+
 /**
  * 组件实例对象
  */
-export class ComponentInstance<State = unknown, SlotState = unknown, Extends = unknown> {
+export abstract class Component<T extends State = State> {
   id = Math.random()
   /**
    * 组件所在的插槽
@@ -93,59 +79,35 @@ export class ComponentInstance<State = unknown, SlotState = unknown, Extends = u
   /** 组件长度，固定为 1 */
   length = 1
   /** 组件的子插槽集合 */
-  slots: Slots<SlotState>
+  readonly slots = new Slots(this)
   /** 组件动态上下文菜单注册表 */
-  shortcutList: Shortcut[] = []
-  /** 当状态变更时触发 */
-  onStateChange: Observable<StateChange<State>>
-  /** 组件内部实现的方法 */
-  extends!: Extends
+  readonly shortcutList: Shortcut[] = []
   /** 组件名 */
-  name: string
+  readonly name: string
   /** 组件类型 */
-  type: ContentType
-  /** 组件是否可拆分 */
-  separable: boolean
+  readonly type: ContentType
   /** 组件状态 */
-  state: State
+  state = new MapDelta<T>(this)
 
-  protected stateChangeEvent = new Subject<StateChange<State>>()
-
-  /**
-   * @param textbus 当前容器上下文
-   * @param options 组件配置项
-   * @param initData 初始数据
-   */
   constructor(textbus: Textbus,
-              options: ComponentOptions<State, SlotState, Extends>,
-              initData?: ComponentInitData<State, SlotState>) {
-    this.onStateChange = this.stateChangeEvent.asObservable()
-    this.name = options.name
-    this.type = options.type
-    this.separable = !!options.separable
+              initData: T = {} as T) {
 
-    if (typeof options.validate === 'function') {
-      initData = options.validate(textbus, initData)
-    }
+    const { componentName, type } = this.constructor as ComponentConstructor
+    this.name = componentName
+    this.type = type
 
-    this.state = initData?.state as any || null
-    this.slots = new Slots<SlotState>(this, initData?.slots || [])
+    Object.entries(initData).forEach(([key, value]) => {
+      this.state.set(key as any, value)
+    })
 
-    const changeController: ChangeController<State> = {
-      update: (fn, record = true) => {
-        return this.updateState(fn, record)
-      },
-      onChange: this.onStateChange.pipe(map(i => i.newState))
-    }
-    const context: ComponentContext<State> = {
+    const context: ComponentContext = {
       textbus,
-      changeController,
       componentInstance: this,
       eventCache: new EventCache<EventTypes>(),
     }
     contextStack.push(context)
-    if (typeof options.setup === 'function') {
-      this.extends = options.setup()
+    if (typeof this.setup === 'function') {
+      this.setup()
     }
     onDestroy(() => {
       eventCacheMap.delete(this)
@@ -162,53 +124,12 @@ export class ComponentInstance<State = unknown, SlotState = unknown, Extends = u
   }
 
   /**
-   * 更新组件状态的方法
-   * @param fn
-   * @param record
-   */
-  updateState(fn: (draft: Draft<State>) => void, record?: boolean): State {
-    let changes!: Patch[]
-    let inverseChanges!: Patch[]
-    const oldState = this.state
-    const newState = produce(oldState, fn, (p, ip) => {
-      changes = p
-      inverseChanges = ip
-    }) as State
-    if (changes.length === 0 && inverseChanges.length === 0) {
-      return oldState!
-    }
-    this.state = newState
-    this.changeMarker.markAsDirtied({
-      path: [],
-      apply: [{
-        type: 'apply',
-        patches: changes!,
-        value: newState,
-        record: !!record
-      }],
-      unApply: [{
-        type: 'apply',
-        patches: inverseChanges!,
-        value: oldState,
-        record: !!record
-      }]
-    })
-    this.stateChangeEvent.next({
-      oldState: oldState!,
-      newState,
-      record: !!record
-    })
-    return newState
-  }
-
-  /**
    * 组件转为 JSON 数据的方法
    */
   toJSON(): ComponentLiteral<State> {
     return {
       name: this.name,
-      state: this.state ?? null as unknown as State,
-      slots: this.slots.toJSON()
+      state: this.state.toJSON()
     }
   }
 
@@ -221,81 +142,23 @@ export class ComponentInstance<State = unknown, SlotState = unknown, Extends = u
 }
 
 /**
- * Textbus 扩展组件接口
- */
-export interface ComponentOptions<State, SlotState, Extends> {
-  /** 组件名 */
-  name: string
-  /** 组件类型 */
-  type: ContentType
-  /** 组件是否可拆分 */
-  separable?: boolean
-
-  /** 输入语法糖支持 */
-  zenCoding?: ZenCodingGrammarInterceptor<ComponentInitData<State, SlotState>> |
-    ZenCodingGrammarInterceptor<ComponentInitData<State, SlotState>>[]
-
-  /**
-   * 组件初始数据校验
-   * @param context
-   * @param initData
-   */
-  validate?(context: Textbus, initData?: ComponentInitData<State, SlotState>): ComponentInitData<State, SlotState>
-
-  /**
-   * 组件初始化实现
-   */
-  setup?(): Extends
-}
-
-/**
  * Textbus 组件
  */
-export class Component<
-  State = unknown,
-  SlotState = unknown,
-  Extends = unknown> {
-
+export interface ComponentConstructor<ComponentState extends State = State> extends Type<Component<ComponentState>> {
   /** 组件名 */
-  name: string
+  componentName: string
   /** 实例数据类型 */
-  instanceType: ContentType
-  /** 组件是否可拆分 */
-  separable: boolean
+  type: ContentType
   /** 快捷语法拦截器 */
-  zenCoding: ZenCodingGrammarInterceptor<ComponentInitData<State, SlotState>> |
-    ZenCodingGrammarInterceptor<ComponentInitData<State, SlotState>>[]
-
-  constructor(private options: ComponentOptions<State, SlotState, Extends>) {
-    this.name = options.name
-    this.instanceType = options.type
-    this.separable = !!options.separable
-    this.zenCoding = options.zenCoding || []
-  }
+  zenCoding?: ZenCodingGrammarInterceptor<ComponentState> |
+    ZenCodingGrammarInterceptor<ComponentState>[]
 
   /**
    * 组件创建实例的方法
    * @param textbus
    * @param data
    */
-  createInstance(textbus: Textbus, data?: ComponentInitData<State, SlotState>): ComponentInstance<State, SlotState, Extends> {
-    return new ComponentInstance<State, SlotState, Extends>(textbus, this.options, data)
-  }
-}
-
-/**
- * 组件内状态管理器
- */
-export interface ChangeController<T> {
-  /** 组件状态变化时触发 */
-  onChange: Observable<T>
-
-  /**
-   * 组件状态更新函数
-   * @param fn
-   * @param record 是否记录此次状态变更
-   */
-  update(fn: (draft: Draft<T>) => void, record?: boolean): T
+  createInstance(textbus: Textbus, data: ComponentState): Component<ComponentState>
 }
 
 /**
@@ -305,7 +168,7 @@ export interface InsertEventData {
   /** 插槽插入的位置 */
   index: number
   /** 当前插入的内容 */
-  content: string | ComponentInstance,
+  content: string | Component,
   /** 当前插入的附加的格式 */
   formats: Formats
 }
@@ -425,11 +288,11 @@ export interface EventTypes {
   onFocusOut: () => void
   onDestroy: () => void
   onParentSlotUpdated: () => void
-  onSelectionFromFront: (event: Event<ComponentInstance>) => void
-  onSelectionFromEnd: (event: Event<ComponentInstance>) => void
+  onSelectionFromFront: (event: Event<Component>) => void
+  onSelectionFromEnd: (event: Event<Component>) => void
   onBreak: (event: Event<Slot, BreakEventData>) => void
   onPaste: (event: Event<Slot, PasteEventData>) => void
-  onContextMenu: (event: ContextMenuEvent<ComponentInstance>) => void
+  onContextMenu: (event: ContextMenuEvent<Component>) => void
 
   onContentInserted: (event: Event<Slot, InsertEventData>) => void
   onContentInsert: (event: Event<Slot, InsertEventData>) => void
@@ -438,10 +301,10 @@ export interface EventTypes {
 
   // onSlotInserted: (event: Event<Slot, InsertEventData>) => void
   // onSlotInsert: (event: Event<Slot, InsertEventData>) => void
-  onSlotRemove: (event: Event<ComponentInstance, SlotRemoveEventData>) => void
-  onSlotRemoved: (event: Event<ComponentInstance>) => void
+  onSlotRemove: (event: Event<Component, SlotRemoveEventData>) => void
+  onSlotRemoved: (event: Event<Component>) => void
 
-  onGetRanges: (event: GetRangesEvent<ComponentInstance>) => void
+  onGetRanges: (event: GetRangesEvent<Component>) => void
   onCompositionStart: (event: Event<Slot, CompositionStartEventData>) => void
   onCompositionUpdate: (event: Event<Slot, CompositionUpdateEventData>) => void
   onCompositionEnd: (event: Event<Slot>) => void
@@ -468,16 +331,15 @@ class EventCache<T, K extends keyof T = keyof T> {
   }
 }
 
-interface ComponentContext<T> {
-  changeController: ChangeController<T>
+interface ComponentContext {
   textbus: Textbus
-  componentInstance: ComponentInstance
+  componentInstance: Component
   // dynamicShortcut: Shortcut[]
   eventCache: EventCache<EventTypes>
 }
 
-const eventCacheMap = new WeakMap<ComponentInstance, EventCache<EventTypes>>()
-const contextStack: ComponentContext<any>[] = []
+const eventCacheMap = new WeakMap<Component, EventCache<EventTypes>>()
+const contextStack: ComponentContext[] = []
 
 function getCurrentContext() {
   const current = contextStack[contextStack.length - 1]
@@ -485,29 +347,6 @@ function getCurrentContext() {
     throw componentErrorFn('cannot be called outside the component!')
   }
   return current
-}
-
-/**
- * 提取组件的实例类型
- */
-export type ExtractComponentInstanceType<T> = T extends Component<infer S, infer U, infer K> ? ComponentInstance<S, U, K> : never
-/**
- * 提取组件扩展类型
- */
-export type ExtractComponentInstanceExtendsType<T> = T extends Component<infer S> ? S : never
-/**
- * 提取组件状态类型
- */
-export type ExtractComponentStateType<T> = T extends Component<any, infer S> ? S : never
-
-/**
- * Textbus 扩展组件方法
- * @param options
- */
-export function defineComponent<State = unknown, SlotState = unknown, Extends = void>(
-  options: ComponentOptions<State, SlotState, Extends>
-) {
-  return new Component<State, SlotState, Extends>(options)
 }
 
 /**
@@ -523,7 +362,7 @@ export function useContext(token: any = Textbus, noFoundValue?: any, flags?: any
 /**
  * 组件 setup 方法内获取组件实例的勾子
  */
-export function useSelf<T extends ComponentInstance>(): T {
+export function useSelf<T extends Component>(): T {
   const context = getCurrentContext()
   return context.componentInstance as T
 }
@@ -595,36 +434,36 @@ export class GetRangesEvent<T> extends Event<T> {
  * @param eventType 事件名
  * @param event 事件对象
  */
-export function invokeListener(target: ComponentInstance, eventType: 'onSelectionFromFront', event: Event<ComponentInstance>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onSelectionFromEnd', event: Event<ComponentInstance>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onContentInsert', event: Event<Slot, InsertEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onContentInserted', event: Event<Slot, InsertEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onContentDelete', event: Event<Slot, DeleteEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onContentDeleted', event: Event<Slot>): void
+export function invokeListener(target: Component, eventType: 'onSelectionFromFront', event: Event<Component>): void
+export function invokeListener(target: Component, eventType: 'onSelectionFromEnd', event: Event<Component>): void
+export function invokeListener(target: Component, eventType: 'onContentInsert', event: Event<Slot, InsertEventData>): void
+export function invokeListener(target: Component, eventType: 'onContentInserted', event: Event<Slot, InsertEventData>): void
+export function invokeListener(target: Component, eventType: 'onContentDelete', event: Event<Slot, DeleteEventData>): void
+export function invokeListener(target: Component, eventType: 'onContentDeleted', event: Event<Slot>): void
 // eslint-disable-next-line max-len
-export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemove', event: Event<ComponentInstance, SlotRemoveEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onSlotRemoved', event: Event<ComponentInstance>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onBreak', event: Event<Slot, BreakEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onContextMenu', event: ContextMenuEvent<ComponentInstance>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onPaste', event: Event<Slot, PasteEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onGetRanges', event: GetRangesEvent<ComponentInstance>): void
+export function invokeListener(target: Component, eventType: 'onSlotRemove', event: Event<Component, SlotRemoveEventData>): void
+export function invokeListener(target: Component, eventType: 'onSlotRemoved', event: Event<Component>): void
+export function invokeListener(target: Component, eventType: 'onBreak', event: Event<Slot, BreakEventData>): void
+export function invokeListener(target: Component, eventType: 'onContextMenu', event: ContextMenuEvent<Component>): void
+export function invokeListener(target: Component, eventType: 'onPaste', event: Event<Slot, PasteEventData>): void
+export function invokeListener(target: Component, eventType: 'onGetRanges', event: GetRangesEvent<Component>): void
 // eslint-disable-next-line max-len
-export function invokeListener(target: ComponentInstance, eventType: 'onCompositionStart', event: Event<Slot, CompositionStartEventData>): void
+export function invokeListener(target: Component, eventType: 'onCompositionStart', event: Event<Slot, CompositionStartEventData>): void
 // eslint-disable-next-line max-len
-export function invokeListener(target: ComponentInstance, eventType: 'onCompositionUpdate', event: Event<Slot, CompositionUpdateEventData>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onCompositionEnd', event: Event<Slot>): void
-export function invokeListener(target: ComponentInstance, eventType: 'onSelected'): void
-export function invokeListener(target: ComponentInstance, eventType: 'onUnselect'): void
-export function invokeListener(target: ComponentInstance, eventType: 'onFocus'): void
-export function invokeListener(target: ComponentInstance, eventType: 'onBlur'): void
-export function invokeListener(target: ComponentInstance, eventType: 'onFocusIn'): void
-export function invokeListener(target: ComponentInstance, eventType: 'onFocusOut'): void
-export function invokeListener(target: ComponentInstance, eventType: 'onDestroy'): void
-export function invokeListener(target: ComponentInstance, eventType: 'onParentSlotUpdated'): void
+export function invokeListener(target: Component, eventType: 'onCompositionUpdate', event: Event<Slot, CompositionUpdateEventData>): void
+export function invokeListener(target: Component, eventType: 'onCompositionEnd', event: Event<Slot>): void
+export function invokeListener(target: Component, eventType: 'onSelected'): void
+export function invokeListener(target: Component, eventType: 'onUnselect'): void
+export function invokeListener(target: Component, eventType: 'onFocus'): void
+export function invokeListener(target: Component, eventType: 'onBlur'): void
+export function invokeListener(target: Component, eventType: 'onFocusIn'): void
+export function invokeListener(target: Component, eventType: 'onFocusOut'): void
+export function invokeListener(target: Component, eventType: 'onDestroy'): void
+export function invokeListener(target: Component, eventType: 'onParentSlotUpdated'): void
 export function invokeListener<K extends keyof EventTypes,
   D = EventTypes[K] extends (args: infer U) => any ?
     U extends Event<any> ? U : never
-    : never>(target: ComponentInstance, eventType: K, event?: D) {
+    : never>(target: Component, eventType: K, event?: D) {
   if (typeof target !== 'object' || target === null) {
     return
   }
@@ -653,15 +492,15 @@ function makeEventHook<T extends keyof EventTypes>(type: T) {
  * 根据组件触发上下文菜单
  * @param component
  */
-export function triggerContextMenu(component: ComponentInstance) {
-  let comp: ComponentInstance | null = component
+export function triggerContextMenu(component: Component) {
+  let comp: Component | null = component
   const menuItems: ContextMenuConfig[][] = []
   while (comp) {
-    const event = new ContextMenuEvent<ComponentInstance>(comp, (menus: ContextMenuConfig[]) => {
+    const event = new ContextMenuEvent<Component>(comp, (menus: ContextMenuConfig[]) => {
       menuItems.push(menus)
     })
     invokeListener(
-      comp as ComponentInstance,
+      comp as Component,
       'onContextMenu',
       event
     )

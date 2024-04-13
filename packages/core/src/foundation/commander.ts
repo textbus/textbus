@@ -4,8 +4,8 @@ import { AbstractSelection, Range, Selection, SelectionPosition } from './select
 import {
   Attribute,
   BreakEventData,
+  ComponentConstructor,
   Component,
-  ComponentInstance,
   ContentType,
   DeleteEventData,
   DeltaLite,
@@ -25,7 +25,7 @@ import { Textbus } from '../textbus'
 function getInsertPosition(
   slot: Slot,
   offset: number,
-  content: string | ComponentInstance,
+  content: string | Component,
   excludeSlots: Slot[] = []
 ): SelectionPosition | null {
   if (canInsert(content, slot)) {
@@ -38,12 +38,12 @@ function getInsertPosition(
   return getNextInsertPosition(slot, content, excludeSlots)
 }
 
-function canInsert(content: string | ComponentInstance, target: Slot) {
+function canInsert(content: string | Component, target: Slot) {
   const insertType = typeof content === 'string' ? ContentType.Text : content.type
   return target.schema.includes(insertType)
 }
 
-function getNextInsertPosition(currentSlot: Slot, content: string | ComponentInstance, excludeSlots: Slot[]): SelectionPosition | null {
+function getNextInsertPosition(currentSlot: Slot, content: string | Component, excludeSlots: Slot[]): SelectionPosition | null {
   const parentComponent = currentSlot.parent!
   const slotIndex = parentComponent.slots.indexOf(currentSlot)
   if (currentSlot !== parentComponent.slots.last) {
@@ -64,7 +64,7 @@ function getNextInsertPosition(currentSlot: Slot, content: string | ComponentIns
   excludeSlots.push(parentSlot)
 
   const afterContent = parentSlot.sliceContent(index + 1)
-  const firstComponent = afterContent.filter((i): i is ComponentInstance => {
+  const firstComponent = afterContent.filter((i): i is Component => {
     return typeof i !== 'string'
   }).shift()
 
@@ -78,7 +78,7 @@ function getNextInsertPosition(currentSlot: Slot, content: string | ComponentIns
 function deleteUpBySlot(selection: Selection,
                         slot: Slot,
                         offset: number,
-                        rootComponent: ComponentInstance,
+                        rootComponent: Component,
                         deleteBefore: boolean): SelectionPosition {
   const parentComponent = slot.parent
   if (!parentComponent) {
@@ -136,7 +136,7 @@ function deleteUpBySlot(selection: Selection,
     offset: index
   } : selection.findLastPosition(parentComponent.slots.get(slotIndex - 1)!, true)
 
-  const event = new Event<ComponentInstance, DeleteEventData>(parentComponent, {
+  const event = new Event<Component, DeleteEventData>(parentComponent, {
     index: slotIndex,
     count: 1,
     toEnd: !deleteBefore,
@@ -162,23 +162,22 @@ function deleteUpBySlot(selection: Selection,
 export interface TransformContext {
   parentComponentName: string
   parentComponentState: unknown
-  slotState: unknown
 }
 
 /**
  * 组件转换规则
  */
-export interface TransformRule<ComponentState, SlotState> {
+export interface TransformRule<ComponentState> {
   /** 组件是否支持多插槽 */
   multipleSlot: boolean
   /** 要转换的目标组件 */
-  target: Component
+  target: ComponentConstructor
 
   /**
    * 创建目标组件新插槽的工厂函数
    * @param transformContext
    */
-  slotFactory(transformContext: TransformContext): Slot<SlotState>
+  slotFactory(transformContext: TransformContext): Slot
 
   /**
    * 创建组件状态的工厂函数
@@ -191,18 +190,17 @@ export interface TransformRule<ComponentState, SlotState> {
    * @param slots
    * @param state
    */
-  existingComponentTransformer?(name: string, slots: Slot[], state: any): ComponentInstance | void
+  existingComponentTransformer?(name: string, slots: Slot[], state: any): Component | void
 }
 
-function deltaToSlots<T>(selection: Selection,
+function deltaToSlots(selection: Selection,
                          source: Slot,
                          delta: DeltaLite,
-                         rule: TransformRule<any, T>,
+                         rule: TransformRule<any>,
                          abstractSelection: AbstractSelection,
-                         offset: number): Slot<T>[] {
+                         offset: number): Slot[] {
   const parentComponent = source.parent!
   const context: TransformContext = {
-    slotState: source.state,
     parentComponentName: parentComponent.name,
     parentComponentState: parentComponent.state
   }
@@ -254,8 +252,8 @@ function deltaToSlots<T>(selection: Selection,
   return newSlots
 }
 
-function slotsToComponents<T>(textbus: Textbus, slots: Slot<T>[], rule: TransformRule<any, T>) {
-  const componentInstances: ComponentInstance[] = []
+function slotsToComponents(textbus: Textbus, slots: Slot[], rule: TransformRule<any>) {
+  const componentInstances: Component[] = []
   if (!slots.length) {
     return componentInstances
   }
@@ -306,7 +304,7 @@ export class Commander {
    * 将选区内容转换为指定组件
    * @param rule
    */
-  transform<T, U>(rule: TransformRule<T, U>): boolean {
+  transform<T>(rule: TransformRule<T>): boolean {
     const selection = this.selection
     if (!selection.isSelected) {
       return false
@@ -343,9 +341,9 @@ export class Commander {
    * @param content 新插入的内容
    * @param formats 新的格式
    */
-  write(content: string | ComponentInstance, formats?: Formats): boolean
-  write<T extends FormatValue>(content: string | ComponentInstance, formatter?: Formatter<T>, value?: T): boolean
-  write<T extends FormatValue>(content: string | ComponentInstance, formatter?: Formatter<T> | Formats, value?: T): boolean {
+  write(content: string | Component, formats?: Formats): boolean
+  write<T extends FormatValue>(content: string | Component, formatter?: Formatter<T>, value?: T): boolean
+  write<T extends FormatValue>(content: string | Component, formatter?: Formatter<T> | Formats, value?: T): boolean {
     const selection = this.selection
     const canInsert = selection.isCollapsed ? true : this.delete()
     if (!canInsert) {
@@ -379,9 +377,9 @@ export class Commander {
    * @param content 新插入的内容
    * @param formats 新的格式
    */
-  insert(content: string | ComponentInstance, formats?: Formats): boolean
-  insert<T extends FormatValue>(content: string | ComponentInstance, formatter?: Formatter<T>, value?: T): boolean
-  insert<T extends FormatValue>(content: string | ComponentInstance, formatter?: Formatter<T> | Formats, value?: T): boolean {
+  insert(content: string | Component, formats?: Formats): boolean
+  insert<T extends FormatValue>(content: string | Component, formatter?: Formatter<T>, value?: T): boolean
+  insert<T extends FormatValue>(content: string | Component, formatter?: Formatter<T> | Formats, value?: T): boolean {
     const selection = this.selection
     const canInsert = selection.isCollapsed ? true : this.delete()
     if (!canInsert) {
@@ -594,7 +592,7 @@ export class Commander {
    * @param newChild 要插入的组件
    * @param ref 新组件插入组件位置的引用
    */
-  insertBefore(newChild: ComponentInstance, ref: ComponentInstance): boolean {
+  insertBefore(newChild: Component, ref: Component): boolean {
     const parentSlot = ref?.parent
     if (parentSlot) {
       const index = parentSlot.indexOf(ref)
@@ -609,7 +607,7 @@ export class Commander {
    * @param newChild 要插入的组件
    * @param ref 新组件插入组件位置的引用
    */
-  insertAfter(newChild: ComponentInstance, ref: ComponentInstance): boolean {
+  insertAfter(newChild: Component, ref: Component): boolean {
     const parentSlot = ref?.parent
     if (parentSlot) {
       const index = parentSlot.indexOf(ref) + 1
@@ -624,7 +622,7 @@ export class Commander {
    * @param oldComponent 要删除的组件
    * @param newComponent 新插入的组件
    */
-  replaceComponent(oldComponent: ComponentInstance, newComponent: ComponentInstance): boolean {
+  replaceComponent(oldComponent: Component, newComponent: Component): boolean {
     const b = this.removeComponent(oldComponent)
     if (b) {
       return this.insert(newComponent)
@@ -692,7 +690,7 @@ export class Commander {
           this.insert(insert, formats)
           continue
         }
-        if (parentComponent.separable) {
+        if (parentComponent.separate) {
           const index = parentComponent.slots.indexOf(commonAncestorSlot)
           const nextSlots = parentComponent.slots.cut(index + 1)
           const nextComponent = this.registry.createComponentByData(parentComponent.name, {
@@ -820,7 +818,7 @@ export class Commander {
     }
     this.selection.getSelectedScopes().forEach(i => {
       const contents = i.slot.sliceContent(i.startIndex, i.endIndex)
-      const childComponents: ComponentInstance[] = []
+      const childComponents: Component[] = []
       let hasInlineContent = false
       contents.forEach(item => {
         if (typeof item === 'string' || item.type === ContentType.InlineComponent) {
@@ -853,7 +851,7 @@ export class Commander {
     }
     this.selection.getSelectedScopes().forEach(i => {
       const contents = i.slot.sliceContent(i.startIndex, i.endIndex)
-      const childComponents: ComponentInstance[] = []
+      const childComponents: Component[] = []
       let hasString = false
       contents.forEach(item => {
         if (typeof item !== 'string') {
@@ -880,7 +878,7 @@ export class Commander {
   cleanAttributes(excludeAttributes: Attribute<any>[] | ((attribute: Attribute<any>) => boolean) = []) {
     this.selection.getSelectedScopes().forEach(i => {
       const contents = i.slot.sliceContent(i.startIndex, i.endIndex)
-      const childComponents: ComponentInstance[] = []
+      const childComponents: Component[] = []
       let hasString = false
       contents.forEach(item => {
         if (typeof item !== 'string') {
@@ -905,7 +903,7 @@ export class Commander {
    * 删除指定组件
    * @param component
    */
-  removeComponent(component: ComponentInstance) {
+  removeComponent(component: Component) {
     const parentSlot = component?.parent
 
     if (parentSlot) {
@@ -916,7 +914,7 @@ export class Commander {
     return false
   }
 
-  private transformByRange<T, U>(rule: TransformRule<T, U>, abstractSelection: AbstractSelection, range: Range): boolean {
+  private transformByRange<T>(rule: TransformRule<T>, abstractSelection: AbstractSelection, range: Range): boolean {
     const { startSlot, startOffset, endSlot, endOffset } = range
     const selection = this.selection
     const commonAncestorSlot = Selection.getCommonAncestorSlot(startSlot, endSlot)
@@ -924,7 +922,7 @@ export class Commander {
     if (!commonAncestorSlot || !commonAncestorComponent) {
       return false
     }
-    let stoppedComponent: ComponentInstance
+    let stoppedComponent: Component
     if (commonAncestorSlot.parent !== commonAncestorComponent ||
       (abstractSelection.anchorSlot === commonAncestorSlot && abstractSelection.focusSlot === commonAncestorSlot)) {
       stoppedComponent = commonAncestorComponent.parentComponent!
@@ -942,7 +940,7 @@ export class Commander {
     }
 
     const parentComponent = startScope.slot.parent!
-    if (parentComponent.separable) {
+    if (parentComponent.separate) {
       if (startScope.slot !== parentComponent.slots.last) {
         const slotIndex = parentComponent.slots.indexOf(startScope.slot)
         const count = parentComponent.slots.length - slotIndex
@@ -958,7 +956,7 @@ export class Commander {
             JSON.parse(JSON.stringify(parentComponent.state)) :
             parentComponent.state
 
-          let afterComponent: ComponentInstance | null = null
+          let afterComponent: Component | null = null
           if (typeof rule.existingComponentTransformer === 'function') {
             afterComponent = rule.existingComponentTransformer(parentComponent.name, deletedSlots, newState) || null
           }
@@ -973,7 +971,7 @@ export class Commander {
       }
     }
 
-    let slots: Slot<U>[] = []
+    let slots: Slot[] = []
     let position: SelectionPosition | null = null
     while (true) {
       const endPaths = selection.getPathsBySlot(startScope.slot)
@@ -998,7 +996,7 @@ export class Commander {
       const { slot, startIndex, endIndex } = scope
       const parentComponent = slot.parent!
 
-      if (!parentComponent.separable && parentComponent.slots.length > 1 && !slot.schema.includes(rule.target.instanceType)) {
+      if (!parentComponent.separate && parentComponent.slots.length > 1 && !slot.schema.includes(rule.target.type)) {
         // 无法转换的情况
         const componentInstances = slotsToComponents(this.textbus, slots, rule)
         componentInstances.forEach(instance => {
@@ -1018,7 +1016,7 @@ export class Commander {
           }
           break
         }
-        if (parentComponent.separable || parentComponent.slots.length === 1) {
+        if (parentComponent.separate || parentComponent.slots.length === 1) {
           const delta = slot.toDelta()
           slots.unshift(...deltaToSlots(selection, slot, delta, rule, abstractSelection, 0))
           position = deleteUpBySlot(selection, slot, 0, stoppedComponent, false)
@@ -1048,7 +1046,7 @@ export class Commander {
           continue
         }
         this.delete(deletedSlot => {
-          if (parentComponent.separable || parentComponent.slots.length === 1) {
+          if (parentComponent.separate || parentComponent.slots.length === 1) {
             const delta = deletedSlot.toDelta()
             slots.unshift(...deltaToSlots(selection, slot, delta, rule, abstractSelection, startIndex))
             if (startIndex > 0) {

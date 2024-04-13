@@ -1,6 +1,6 @@
 import { Observable, Subject } from '@tanbo/stream'
 
-import { ComponentInstance } from './component'
+import { Component } from './component'
 import { Operation } from './types'
 
 /**
@@ -8,7 +8,7 @@ import { Operation } from './types'
  */
 export class ChangeMarker {
   onChange: Observable<Operation>
-  onChildComponentRemoved: Observable<ComponentInstance>
+  onChildComponentRemoved: Observable<Component>
 
   get dirty() {
     return this._dirty
@@ -21,7 +21,7 @@ export class ChangeMarker {
   private _dirty = true
   private _changed = true
   private changeEvent = new Subject<Operation>()
-  private childComponentRemovedEvent = new Subject<ComponentInstance>()
+  private childComponentRemovedEvent = new Subject<Component>()
 
   constructor() {
     this.onChange = this.changeEvent.asObservable()
@@ -46,7 +46,7 @@ export class ChangeMarker {
     this._changed = this._dirty = true
   }
 
-  recordComponentRemoved(instance: ComponentInstance) {
+  recordComponentRemoved(instance: Component) {
     this.childComponentRemovedEvent.next(instance)
   }
 }

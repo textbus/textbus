@@ -1,5 +1,5 @@
 import { Slot } from './slot'
-import { ComponentInstance } from './component'
+import { Component } from './component'
 
 /**
  * Textbus 虚拟 DOM 文本节点
@@ -15,10 +15,10 @@ export interface VElementListeners {
   [listenKey: string]: <T extends Event>(ev: T) => any;
 }
 
-export type VChildNode = VElement | VTextNode | ComponentInstance | string | number | boolean | null | undefined
+export type VChildNode = VElement | VTextNode | Component | string | number | boolean | null | undefined
 
 function append(children: VChildNode[], node: VChildNode) {
-  if (node instanceof VElement || node instanceof ComponentInstance) {
+  if (node instanceof VElement || node instanceof Component) {
     children.push(node)
   } else if (node instanceof VTextNode) {
     if (node.textContent) {
@@ -54,7 +54,7 @@ export function createVNode(tagName: string,
  * Textbus 虚拟 DOM 元素节点
  */
 export class VElement {
-  children: Array<VElement | VTextNode | ComponentInstance> = []
+  children: Array<VElement | VTextNode | Component> = []
   location: NodeLocation | null = null
 
   readonly attrs = new Map<string, any>()
@@ -107,7 +107,7 @@ export class VElement {
    * 在最后位置添加一个子节点。
    * @param newNodes
    */
-  appendChild(...newNodes: Array<VElement | VTextNode | ComponentInstance>) {
+  appendChild(...newNodes: Array<VElement | VTextNode | Component>) {
     this.children.push(...newNodes)
   }
 }

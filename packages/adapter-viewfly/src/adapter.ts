@@ -10,8 +10,6 @@ import {
 import { Subject } from '@tanbo/stream'
 import {
   Component,
-  ComponentInstance,
-  ExtractComponentInstanceType,
   makeError,
   replaceEmpty,
   Slot,
@@ -23,7 +21,7 @@ import { DomAdapter } from '@textbus/platform-browser'
 const adapterError = makeError('ViewflyAdapter')
 
 export interface ViewComponentProps<T extends Component = Component> {
-  component: ExtractComponentInstanceType<T>
+  component: T
   rootRef: DynamicRef<HTMLElement>
 }
 
@@ -39,7 +37,7 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
 
   private components: ViewflyAdapterComponents = {}
 
-  private componentRefs = new WeakMap<ComponentInstance, DynamicRef<HTMLElement>>()
+  private componentRefs = new WeakMap<Component, DynamicRef<HTMLElement>>()
 
   constructor(components: ViewflyAdapterComponents,
               mount: (host: HTMLElement, root: JSXNode) => (void | (() => void))) {
@@ -69,7 +67,7 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
     })
   }
 
-  componentRender(component: ComponentInstance): JSXInternal.ViewNode {
+  componentRender(component: Component): JSXInternal.ViewNode {
     const comp = this.components[component.name] || this.components['*']
     if (comp) {
       let ref = this.componentRefs.get(component)
@@ -91,7 +89,7 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
   }
 
   slotRender(slot: Slot,
-             slotHostRender: (children: Array<VElement | VTextNode | ComponentInstance>) => VElement,
+             slotHostRender: (children: Array<VElement | VTextNode | Component>) => VElement,
              renderEnv?: any): JSXInternal.Element {
     const vElement = slot.toTree(slotHostRender, renderEnv)
     this.slotRootVElementCaches.set(slot, vElement)

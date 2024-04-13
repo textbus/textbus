@@ -1,4 +1,4 @@
-import { ChangeMarker, ComponentInstance, Operation } from '@textbus/core'
+import { ChangeMarker, Component, Operation } from '@textbus/core'
 
 describe('ChangeMarker 基本状态', () => {
   let changeMarker: ChangeMarker
@@ -186,7 +186,7 @@ describe('ChangeMarker 事件', () => {
   })
 
   test('子组件删除事件', () => {
-    const source = {} as ComponentInstance
+    const source = {} as Component
     let result: any
     changeMarker.onChildComponentRemoved.subscribe(() => {
       result = source

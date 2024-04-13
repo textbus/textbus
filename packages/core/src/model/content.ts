@@ -1,4 +1,4 @@
-import { ComponentInstance, ComponentLiteral } from './component'
+import { Component, ComponentLiteral } from './component'
 
 /**
  * Textbus 内容管理类
@@ -6,7 +6,7 @@ import { ComponentInstance, ComponentLiteral } from './component'
  */
 export class Content {
   private segmenter = new Intl.Segmenter()
-  private data: Array<string | ComponentInstance> = []
+  private data: Array<string | Component> = []
 
   /**
    * 内容的长度
@@ -63,7 +63,7 @@ export class Content {
    * @param index
    * @param content
    */
-  insert(index: number, content: string | ComponentInstance) {
+  insert(index: number, content: string | Component) {
     if (index >= this.length) {
       this.append(content)
     } else {
@@ -103,7 +103,7 @@ export class Content {
    * 把内容添加到最后
    * @param content
    */
-  append(content: ComponentInstance | string) {
+  append(content: Component | string) {
     const lastChildIndex = this.data.length - 1
     const lastChild = this.data[lastChildIndex]
     if (typeof lastChild === 'string' && typeof content === 'string') {
@@ -113,7 +113,7 @@ export class Content {
     }
   }
 
-  cut(startIndex = 0, endIndex = this.length): Array<string | ComponentInstance> {
+  cut(startIndex = 0, endIndex = this.length): Array<string | Component> {
     if (endIndex <= startIndex) {
       return []
     }
@@ -124,14 +124,14 @@ export class Content {
     return discardedContents
   }
 
-  slice(startIndex = 0, endIndex = this.length): Array<string | ComponentInstance> {
+  slice(startIndex = 0, endIndex = this.length): Array<string | Component> {
     if (startIndex >= endIndex) {
       return []
     }
     startIndex = this.correctIndex(startIndex, false)
     endIndex = this.correctIndex(endIndex, true)
     let index = 0
-    const result: Array<string | ComponentInstance> = []
+    const result: Array<string | Component> = []
     for (const el of this.data) {
       const fragmentStartIndex = index
       const len = el.length
@@ -161,7 +161,7 @@ export class Content {
     })
   }
 
-  indexOf(element: ComponentInstance): number {
+  indexOf(element: Component): number {
     let index = 0
     for (const item of this.data) {
       if (item === element) {
