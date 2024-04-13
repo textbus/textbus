@@ -1,7 +1,7 @@
 import { Injectable, Prop } from '@viewfly/core'
 import { distinctUntilChanged, map, Observable, share, Subject, Subscription } from '@tanbo/stream'
 
-import { ComponentInstance, ContentType, Event, GetRangesEvent, invokeListener, Slot, SlotRange } from '../model/_api'
+import { Component, ContentType, Event, GetRangesEvent, invokeListener, Slot, SlotRange } from '../model/_api'
 import { RootComponentRef } from './_injection-tokens'
 import { Controller } from './controller'
 
@@ -31,7 +31,7 @@ export interface Range {
 export interface SelectedSlotRange {
   startOffset: number
   endOffset: number
-  component: ComponentInstance
+  component: Component
 }
 
 /**
@@ -59,10 +59,10 @@ export interface SelectionPosition {
 export interface CommonAncestorSlotScope {
   startOffset: number
   startSlot: Slot
-  startChildComponent: ComponentInstance | null
+  startChildComponent: Component | null
   endOffset: number
   endSlot: Slot
-  endChildComponent: ComponentInstance | null
+  endChildComponent: Component | null
   startChildSlot: Slot
   endChildSlot: Slot
 }
@@ -194,7 +194,7 @@ export class Selection {
   /**
    * 选区的公共父组件
    */
-  get commonAncestorComponent(): ComponentInstance | null {
+  get commonAncestorComponent(): Component | null {
     return this._commonAncestorComponent
   }
 
@@ -242,7 +242,7 @@ export class Selection {
   }
 
   private _commonAncestorSlot: Slot | null = null
-  private _commonAncestorComponent: ComponentInstance | null = null
+  private _commonAncestorComponent: Component | null = null
 
   private _startSlot: Slot | null = null
   private _endSlot: Slot | null = null
@@ -264,7 +264,7 @@ export class Selection {
 
   constructor(private root: RootComponentRef,
               private controller: Controller) {
-    let prevFocusComponent: ComponentInstance | null
+    let prevFocusComponent: Component | null
     this.onChange = this.changeEvent.asObservable().pipe(
       distinctUntilChanged((previous, current) => {
         if (previous && current) {
@@ -277,8 +277,8 @@ export class Selection {
       }),
       share()
     )
-    let selectedComponent: ComponentInstance | null = null
-    const focusInComponents: ComponentInstance[] = []
+    let selectedComponent: Component | null = null
+    const focusInComponents: Component[] = []
     this.subscriptions.push(
       controller.onReadonlyStateChange.subscribe(b => {
         if (b) {
@@ -295,7 +295,7 @@ export class Selection {
       ).subscribe(component => {
         while (focusInComponents.length) {
           const focusOutComponent = focusInComponents.shift()!
-          let parentComponent: ComponentInstance | null = focusOutComponent
+          let parentComponent: Component | null = focusOutComponent
           while (parentComponent) {
             if (parentComponent === root.component) {
               invokeListener(focusOutComponent, 'onFocusOut')
@@ -324,7 +324,7 @@ export class Selection {
         }
       }),
       this.onChange.pipe(
-        map<any, ComponentInstance | null>(() => {
+        map<any, Component | null>(() => {
           if (this.startSlot?.parent === this.endSlot?.parent) {
             return this.startSlot?.parent || null
           }
@@ -333,7 +333,7 @@ export class Selection {
         distinctUntilChanged()
       ).subscribe(component => {
         if (prevFocusComponent) {
-          let parentComponent: ComponentInstance | null = prevFocusComponent
+          let parentComponent: Component | null = prevFocusComponent
           while (parentComponent) {
             if (parentComponent === root.component) {
               invokeListener(prevFocusComponent, 'onBlur')
@@ -525,7 +525,7 @@ export class Selection {
    * @param componentInstance
    * @param isRestore
    */
-  selectFirstPosition(componentInstance: ComponentInstance, isRestore = false) {
+  selectFirstPosition(componentInstance: Component, isRestore = false) {
     const slots = componentInstance.slots
     if (slots.length) {
       const first = slots.first!
@@ -544,7 +544,7 @@ export class Selection {
    * @param componentInstance
    * @param isRestore
    */
-  selectLastPosition(componentInstance: ComponentInstance, isRestore = false) {
+  selectLastPosition(componentInstance: Component, isRestore = false) {
     const slots = componentInstance.slots
     if (slots.length) {
       const last = slots.last!
@@ -563,7 +563,7 @@ export class Selection {
    * @param componentInstance
    * @param isRestore
    */
-  selectComponentFront(componentInstance: ComponentInstance, isRestore = false) {
+  selectComponentFront(componentInstance: Component, isRestore = false) {
     const parent = componentInstance.parent
     if (parent) {
       const index = parent.indexOf(componentInstance)
@@ -581,7 +581,7 @@ export class Selection {
    * @param componentInstance
    * @param isRestore
    */
-  selectComponentEnd(componentInstance: ComponentInstance, isRestore = false) {
+  selectComponentEnd(componentInstance: Component, isRestore = false) {
     const parent = componentInstance.parent
     if (parent) {
       const index = parent.indexOf(componentInstance)
@@ -599,7 +599,7 @@ export class Selection {
    * @param componentInstance
    * @param isRestore
    */
-  selectChildSlots(componentInstance: ComponentInstance, isRestore = false) {
+  selectChildSlots(componentInstance: Component, isRestore = false) {
     const slots = componentInstance.slots
     if (slots.length) {
       const firstPosition = this.findFirstPosition(slots.first!, false)
@@ -618,7 +618,7 @@ export class Selection {
    * @param componentInstance 要选择的组件
    * @param isRestore 是否同步触发原生选区，默认为 `false`
    */
-  selectComponent(componentInstance: ComponentInstance, isRestore = false) {
+  selectComponent(componentInstance: Component, isRestore = false) {
     const parent = componentInstance.parent
     if (parent) {
       const index = parent.indexOf(componentInstance)
@@ -669,7 +669,7 @@ export class Selection {
     if (position) {
       this.setPosition(position.slot, position.offset)
 
-      let content: ComponentInstance | string | null = null
+      let content: Component | string | null = null
       if (startSlot === this.startSlot) {
         if (startOffset === this.startOffset) {
           const first = this.root.component.slots.first!
@@ -717,7 +717,7 @@ export class Selection {
           break
         }
       }
-      let content: ComponentInstance | string | null = null
+      let content: Component | string | null = null
       if (endSlot === this.endSlot) {
         if (endOffset === this.endOffset) {
           const last = this.root.component.slots.last!
@@ -937,7 +937,7 @@ export class Selection {
    * 根据路径获取对应的组件
    * @param paths
    */
-  findComponentByPaths(paths: number[]): ComponentInstance | null {
+  findComponentByPaths(paths: number[]): Component | null {
     if (paths.length === 0) {
       return this.root.component
     }
@@ -1084,8 +1084,8 @@ export class Selection {
     const commonAncestorSlot = this.commonAncestorSlot
     const commonAncestorComponent = this.commonAncestorComponent
 
-    let startChildComponent: ComponentInstance | null = null
-    let endChildComponent: ComponentInstance | null = null
+    let startChildComponent: Component | null = null
+    let endChildComponent: Component | null = null
 
     while (startSlot !== commonAncestorSlot) {
       startChildComponent = startSlot.parent!
@@ -1320,8 +1320,8 @@ export class Selection {
     if (startComponent === endComponent) {
       return startComponent || null
     }
-    const startPaths: ComponentInstance[] = []
-    const endPaths: ComponentInstance[] = []
+    const startPaths: Component[] = []
+    const endPaths: Component[] = []
 
     while (startComponent) {
       startPaths.push(startComponent)
@@ -1340,7 +1340,7 @@ export class Selection {
       }
       endComponent = parentSlot.parent
     }
-    let f: ComponentInstance | null = null
+    let f: Component | null = null
     while (startPaths.length && endPaths.length) {
       const s = startPaths.pop()!
       const e = endPaths.pop()!
@@ -1580,8 +1580,8 @@ export class Selection {
 
     const start: SlotRange[] = []
     const end: SlotRange[] = []
-    let startParentComponent: ComponentInstance | null = null
-    let endParentComponent: ComponentInstance | null = null
+    let startParentComponent: Component | null = null
+    let endParentComponent: Component | null = null
 
     let startSlotRefIndex: number | null = null
     let endSlotRefIndex: number | null = null
@@ -1674,7 +1674,7 @@ export class Selection {
     return result
   }
 
-  private static findTreeNode(paths: number[], component: ComponentInstance): Slot | ComponentInstance | null {
+  private static findTreeNode(paths: number[], component: Component): Slot | Component | null {
     if (typeof component !== 'object') {
       return null
     }
@@ -1686,7 +1686,7 @@ export class Selection {
     }
     const position = paths.shift()!
 
-    component = slot.getContentAtIndex(position) as ComponentInstance
+    component = slot.getContentAtIndex(position) as Component
 
     if (paths.length === 0 || !component) {
       return component || null

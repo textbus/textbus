@@ -1,8 +1,8 @@
 import { DefineComponent, getCurrentInstance, h, onMounted, onUnmounted, onUpdated, Ref, ref, VNode } from 'vue'
 import { Subject } from '@tanbo/stream'
 import {
+  ComponentConstructor,
   Component,
-  ComponentInstance,
   ExtractComponentInstanceType,
   makeError,
   replaceEmpty,
@@ -14,7 +14,7 @@ import { DomAdapter } from '@textbus/platform-browser'
 
 const adapterError = makeError('VueAdapter')
 
-export interface ViewComponentProps<T extends Component = Component> {
+export interface ViewComponentProps<T extends ComponentConstructor = ComponentConstructor> {
   component: ExtractComponentInstanceType<T>
   rootRef: Ref<HTMLElement | undefined>
 }
@@ -30,7 +30,7 @@ export class Adapter extends DomAdapter<VNode, VNode> {
   onViewUpdated = new Subject<void>()
 
   private components: Record<string, DefineComponent<ViewComponentProps>> = {}
-  private componentRefs = new WeakMap<ComponentInstance, Ref<HTMLElement | undefined>>()
+  private componentRefs = new WeakMap<Component, Ref<HTMLElement | undefined>>()
 
   constructor(components: VueAdapterComponents,
               mount: (host: HTMLElement, root: VNode) => (void | (() => void))) {
@@ -69,7 +69,7 @@ export class Adapter extends DomAdapter<VNode, VNode> {
     })
   }
 
-  componentRender(component: ComponentInstance): VNode {
+  componentRender(component: Component): VNode {
     const comp = this.components[component.name] || this.components['*']
     if (comp) {
       let rootRef = this.componentRefs.get(component)
@@ -87,7 +87,7 @@ export class Adapter extends DomAdapter<VNode, VNode> {
   }
 
   slotRender(slot: Slot,
-             slotHostRender: (children: Array<VElement | VTextNode | ComponentInstance>) => VElement,
+             slotHostRender: (children: Array<VElement | VTextNode | Component>) => VElement,
              renderEnv?: any): VNode {
     const vElement = slot.toTree(slotHostRender, renderEnv)
     this.slotRootVElementCaches.set(slot, vElement)

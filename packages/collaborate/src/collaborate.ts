@@ -3,7 +3,7 @@ import { filter, map, Observable, Subject, Subscription } from '@tanbo/stream'
 import {
   AbstractSelection,
   ChangeOrigin,
-  ComponentInstance,
+  Component,
   Registry,
   Formats,
   History,
@@ -128,8 +128,8 @@ export class Collaborate implements History {
 
   protected contentSyncCaches = new WeakMap<Slot, () => void>()
   protected slotStateSyncCaches = new WeakMap<Slot, () => void>()
-  protected slotsSyncCaches = new WeakMap<ComponentInstance, () => void>()
-  protected componentStateSyncCaches = new WeakMap<ComponentInstance, () => void>()
+  protected slotsSyncCaches = new WeakMap<Component, () => void>()
+  protected componentStateSyncCaches = new WeakMap<Component, () => void>()
 
   protected localChangesAppliedEvent = new Subject<void>()
   protected selectionChangeEvent = new Subject<SelectionPaths>()
@@ -305,7 +305,7 @@ export class Collaborate implements History {
     this.manager?.destroy()
   }
 
-  protected syncRootComponent(root: YMap<any>, rootComponent: ComponentInstance) {
+  protected syncRootComponent(root: YMap<any>, rootComponent: Component) {
     let slots = root.get('slots') as YArray<YMap<any>>
     if (!slots) {
       slots = new YArray()
@@ -485,7 +485,7 @@ export class Collaborate implements History {
               content.insert(offset, action.content, action.formats || {})
             } else {
               length = 1
-              const sharedComponent = this.createSharedComponentByComponent(action.ref as ComponentInstance)
+              const sharedComponent = this.createSharedComponentByComponent(action.ref as Component)
               content.insertEmbed(offset, sharedComponent, action.formats || {})
             }
 
@@ -551,7 +551,7 @@ export class Collaborate implements History {
     })
   }
 
-  protected syncComponentSlots(remoteSlots: YArray<any>, component: ComponentInstance) {
+  protected syncComponentSlots(remoteSlots: YArray<any>, component: Component) {
     const slots = component.slots
     const syncRemote = (ev, tr) => {
       this.runRemoteUpdate(tr, () => {
@@ -608,7 +608,7 @@ export class Collaborate implements History {
     })
   }
 
-  protected syncComponentState(remoteComponent: YMap<any>, component: ComponentInstance) {
+  protected syncComponentState(remoteComponent: YMap<any>, component: Component) {
     const syncRemote = (ev, tr) => {
       this.runRemoteUpdate(tr, () => {
         ev.keysChanged.forEach(key => {
@@ -661,7 +661,7 @@ export class Collaborate implements History {
     this.updateFromRemote = false
   }
 
-  protected createSharedComponentByComponent(component: ComponentInstance): YMap<any> {
+  protected createSharedComponentByComponent(component: Component): YMap<any> {
     const sharedComponent = new YMap()
     sharedComponent.set('state', component.state)
     sharedComponent.set('name', component.name)
@@ -708,7 +708,7 @@ export class Collaborate implements History {
     return sharedSlot
   }
 
-  protected createComponentBySharedComponent(yMap: YMap<any>): ComponentInstance {
+  protected createComponentBySharedComponent(yMap: YMap<any>): Component {
     const sharedSlots = yMap.get('slots') as YArray<YMap<any>>
     const slots: Slot[] = []
     sharedSlots.forEach(sharedSlot => {
@@ -789,7 +789,7 @@ export class Collaborate implements History {
     })
   }
 
-  protected cleanSubscriptionsByComponent(component: ComponentInstance) {
+  protected cleanSubscriptionsByComponent(component: Component) {
     [this.slotsSyncCaches.get(component), this.componentStateSyncCaches.get(component)].forEach(fn => {
       if (fn) {
         fn()

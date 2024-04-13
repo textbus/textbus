@@ -1,7 +1,7 @@
 import {
 	Content,
 	ContentType,
-	ComponentInstance,
+	Component,
 	defineComponent,
 	jsx,
 	NullInjector,
@@ -11,7 +11,7 @@ import {
 
 describe('Content', () => {
 	let content: Content
-	let instance: ComponentInstance
+	let instance: Component
 	const injector = new ReflectiveInjector(new NullInjector(), [])
 	const component = defineComponent({
 		type: ContentType.InlineComponent,

@@ -1,16 +1,16 @@
 import { Observable, Subject, Subscription } from '@tanbo/stream'
 
 import { Slot } from './slot'
-import { ComponentInstance } from './component'
+import { Component } from './component'
 import { Action, Operation } from './types'
 
 /**
  * Textbus 管理组件内部插槽增删改查的类
  */
-export class Slots<T = any> {
-  readonly onChildSlotRemove: Observable<Slot<T>[]>
+export class Slots{
+  readonly onChildSlotRemove: Observable<Slot[]>
   readonly onChange: Observable<Operation>
-  readonly onChildSlotChange: Observable<Slot<T>>
+  readonly onChildSlotChange: Observable<Slot>
 
   /** 子插槽的个数 */
   get length() {
@@ -31,27 +31,25 @@ export class Slots<T = any> {
     return this._index
   }
 
-  private slots: Slot<T>[] = []
+  private slots: Slot[] = []
   private _index = 0
   private changeEvent = new Subject<Operation>()
-  private childSlotChangeEvent = new Subject<Slot<T>>()
-  private childSlotRemoveEvent = new Subject<Slot<T>[]>()
+  private childSlotChangeEvent = new Subject<Slot>()
+  private childSlotRemoveEvent = new Subject<Slot[]>()
 
   private changeListeners = new WeakMap<Slot, Subscription>()
 
-  constructor(public host: ComponentInstance,
-              slots: Slot<T>[] = []) {
+  constructor(public host: Component) {
     this.onChange = this.changeEvent.asObservable()
     this.onChildSlotChange = this.childSlotChangeEvent.asObservable()
     this.onChildSlotRemove = this.childSlotRemoveEvent.asObservable()
-    this.insert(...Array.from(new Set(slots)))
   }
 
   /**
    * 获取子插槽的下标位置
    * @param slot
    */
-  indexOf(slot: Slot<T>) {
+  indexOf(slot: Slot) {
     return this.slots.indexOf(slot)
   }
 
@@ -59,7 +57,7 @@ export class Slots<T = any> {
    * 删除指定插槽
    * @param slot
    */
-  remove(slot: Slot<T>) {
+  remove(slot: Slot) {
     const index = this.slots.indexOf(slot)
     if (index > -1) {
       this.retain(index)
@@ -74,7 +72,7 @@ export class Slots<T = any> {
    * @param slots
    * @param ref
    */
-  insertAfter(slots: Slot<T> | Slot<T>[], ref: Slot<T>) {
+  insertAfter(slots: Slot | Slot[], ref: Slot) {
     const index = this.slots.indexOf(ref)
     if (index > -1) {
       this.insertByIndex(slots, index + 1)
@@ -86,7 +84,7 @@ export class Slots<T = any> {
    * @param slots
    * @param ref
    */
-  insertBefore(slots: Slot<T> | Slot<T>[], ref: Slot<T>) {
+  insertBefore(slots: Slot | Slot[], ref: Slot) {
     const index = this.slots.indexOf(ref)
     if (index > -1) {
       this.insertByIndex(slots, index)
@@ -98,7 +96,7 @@ export class Slots<T = any> {
    * @param slots
    * @param index
    */
-  insertByIndex(slots: Slot<T> | Slot<T>[], index: number) {
+  insertByIndex(slots: Slot | Slot[], index: number) {
     if (index < 0) {
       index = 0
     }
@@ -114,7 +112,7 @@ export class Slots<T = any> {
    * 把新插槽添加到最后
    * @param slots
    */
-  push(...slots: Slot<T>[]) {
+  push(...slots: Slot[]) {
     this.retain(this.length)
     this.insert(...slots)
   }
@@ -149,7 +147,7 @@ export class Slots<T = any> {
    * 把新插槽添加到最前
    * @param slots
    */
-  unshift(...slots: Slot<T>[]) {
+  unshift(...slots: Slot[]) {
     this.retain(0)
     this.insert(...slots)
   }
@@ -158,7 +156,7 @@ export class Slots<T = any> {
    * 获取指定下标位置的插槽
    * @param index
    */
-  get(index: number): Slot<T> | null {
+  get(index: number): Slot | null {
     return this.slots[index] || null
   }
 
@@ -167,7 +165,7 @@ export class Slots<T = any> {
    * @param oldSlot 被替换的插槽
    * @param newSlot 新的插槽
    */
-  replace(oldSlot: Slot<T>, newSlot: Slot<T>) {
+  replace(oldSlot: Slot, newSlot: Slot) {
     const index = this.indexOf(oldSlot)
     if (index > 0) {
       this.retain(index)
@@ -186,7 +184,7 @@ export class Slots<T = any> {
   /**
    * 把当前插槽集合转换为数组
    */
-  toArray(): Slot<T>[] {
+  toArray(): Slot[] {
     return [...this.slots]
   }
 
@@ -202,7 +200,7 @@ export class Slots<T = any> {
    * 插入新的子插槽
    * @param slots
    */
-  insert(...slots: Slot<T>[]) {
+  insert(...slots: Slot[]) {
     if (slots.length === 0) {
       return
     }
@@ -337,7 +335,7 @@ export class Slots<T = any> {
    * 当前集合是否包含指定插槽
    * @param slot
    */
-  has(slot: Slot<T>) {
+  has(slot: Slot) {
     return this.indexOf(slot) > -1
   }
 

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Inject, Injectable } from '@viewfly/core'
 import { map, Observable, Subject, Subscription } from '@tanbo/stream'
 import { applyPatches } from 'immer'
@@ -181,165 +182,165 @@ export class LocalHistory extends History {
   }
 
   private record() {
-    let beforePaths = this.selection.getPaths()
-    this.subscription = this.scheduler.onLocalChangeBefore.subscribe(() => {
-      beforePaths = this.selection.getPaths()
-    }).add(this.scheduler.onDocChanged.pipe(map(i => {
-        const operations: Operation[] = []
-        for (const item of i) {
-          if (item.from !== ChangeOrigin.Local) {
-            continue
-          }
-          const operation = item.operation
-          const apply = operation.apply.filter(i => {
-            return i.type !== 'apply' || i.record
-          })
-          const unApply = operation.unApply.filter(i => {
-            return i.type !== 'apply' || i.record
-          })
-          if (apply.length && unApply.length) {
-
-            operations.push({
-              path: operation.path,
-              apply,
-              unApply
-            })
-          }
-        }
-        return operations
-      })).subscribe((operations) => {
-        if (!operations.length) {
-          return
-        }
-        this.historySequence.length = this.index
-        this.index++
-        const afterPaths = this.selection.getPaths()
-        this.historySequence.push({
-          operations: operations.map(i => {
-            return {
-              path: [...i.path],
-              apply: i.apply.map(j => {
-                if (j.type === 'insert' || j.type === 'insertSlot') {
-                  return {
-                    ...j,
-                    ref: null
-                  } as any
-                }
-                return j
-              }),
-              unApply: i.unApply.map(j => {
-                if (j.type === 'insert' || j.type === 'insertSlot') {
-                  return {
-                    ...j,
-                    ref: null
-                  } as any
-                }
-                return j
-              })
-            }
-          }),
-          beforePaths,
-          afterPaths
-        })
-        if (this.historySequence.length > this.stackSize) {
-          this.historySequence.shift()
-          this.index--
-        }
-        beforePaths = afterPaths
-        this.pushEvent.next()
-        this.changeEvent.next()
-      })
-    )
+    // let beforePaths = this.selection.getPaths()
+    // this.subscription = this.scheduler.onLocalChangeBefore.subscribe(() => {
+    //   beforePaths = this.selection.getPaths()
+    // }).add(this.scheduler.onDocChanged.pipe(map(i => {
+    //     const operations: Operation[] = []
+    //     for (const item of i) {
+    //       if (item.from !== ChangeOrigin.Local) {
+    //         continue
+    //       }
+    //       const operation = item.operation
+    //       const apply = operation.apply.filter(i => {
+    //         return i.type !== 'apply' || i.record
+    //       })
+    //       const unApply = operation.unApply.filter(i => {
+    //         return i.type !== 'apply' || i.record
+    //       })
+    //       if (apply.length && unApply.length) {
+    //
+    //         operations.push({
+    //           path: operation.path,
+    //           apply,
+    //           unApply
+    //         })
+    //       }
+    //     }
+    //     return operations
+    //   })).subscribe((operations) => {
+    //     if (!operations.length) {
+    //       return
+    //     }
+    //     this.historySequence.length = this.index
+    //     this.index++
+    //     const afterPaths = this.selection.getPaths()
+    //     this.historySequence.push({
+    //       operations: operations.map(i => {
+    //         return {
+    //           path: [...i.path],
+    //           apply: i.apply.map(j => {
+    //             if (j.type === 'insert' || j.type === 'insertSlot') {
+    //               return {
+    //                 ...j,
+    //                 ref: null
+    //               } as any
+    //             }
+    //             return j
+    //           }),
+    //           unApply: i.unApply.map(j => {
+    //             if (j.type === 'insert' || j.type === 'insertSlot') {
+    //               return {
+    //                 ...j,
+    //                 ref: null
+    //               } as any
+    //             }
+    //             return j
+    //           })
+    //         }
+    //       }),
+    //       beforePaths,
+    //       afterPaths
+    //     })
+    //     if (this.historySequence.length > this.stackSize) {
+    //       this.historySequence.shift()
+    //       this.index--
+    //     }
+    //     beforePaths = afterPaths
+    //     this.pushEvent.next()
+    //     this.changeEvent.next()
+    //   })
+    // )
   }
 
   private apply(historyItem: HistoryItem, back: boolean) {
-    let operations = historyItem.operations
-    if (back) {
-      operations = [...operations].reverse()
-    }
-    operations.forEach(op => {
-      const path = [...op.path]
-      const isFindSlot = path.length % 2 === 1
-      const actions = back ? op.unApply : op.apply
-
-      if (isFindSlot) {
-        const slot = this.selection.findSlotByPaths(path)!
-        actions.forEach(action => {
-          if (action.type === 'retain') {
-            const formatsObj = action.formats
-            if (formatsObj) {
-              const formats = objToFormats(formatsObj, this.registry)
-              slot.retain(action.offset, formats)
-            } else {
-              slot.retain(action.offset)
-            }
-            return
-          }
-          if (action.type === 'delete') {
-            slot.delete(action.count)
-            return
-          }
-          if (action.type === 'apply') {
-            slot.updateState(draft => {
-              applyPatches(draft, action.patches)
-            })
-            return
-          }
-          if (action.type === 'attrSet') {
-            const attribute = this.registry.getAttribute(action.name)
-            if (attribute) {
-              slot.setAttribute(attribute, action.value)
-            }
-            return
-          }
-          if (action.type === 'attrRemove') {
-            const attribute = this.registry.getAttribute(action.name)
-            if (attribute) {
-              slot.removeAttribute(attribute)
-            }
-            return
-          }
-          if (action.type === 'insert') {
-            const formatsObj = action.formats
-            let formats: Formats | void
-            if (formatsObj) {
-              formats = objToFormats(formatsObj, this.registry)
-            }
-            if (typeof action.content === 'string') {
-              formats ? slot.insert(action.content, formats) : slot.insert(action.content)
-            } else {
-              const instance = this.registry.createComponent(action.content as ComponentLiteral)
-              if (!instance) {
-                // eslint-disable-next-line max-len
-                throw historyErrorFn(`component \`${action.content.name}\` not registered, please add \`${action.content.name}\` component to the components configuration item.`)
-              }
-              formats ? slot.insert(instance, formats) : slot.insert(instance)
-            }
-          }
-        })
-      } else {
-        const component = this.selection.findComponentByPaths(path)!
-        actions.forEach(action => {
-          if (action.type === 'retain') {
-            component.slots.retain(action.offset)
-            return
-          }
-          if (action.type === 'delete') {
-            component.slots.delete(action.count)
-            return
-          }
-          if (action.type === 'insertSlot') {
-            const slot = this.registry.createSlot(action.slot)
-            component.slots.insert(slot)
-            return
-          }
-          if (action.type === 'apply') {
-            component.updateState(draft => {
-              return applyPatches(draft as any, action.patches)
-            })
-          }
-        })
-      }
-    })
+    // let operations = historyItem.operations
+    // if (back) {
+    //   operations = [...operations].reverse()
+    // }
+    // operations.forEach(op => {
+    //   const path = [...op.path]
+    //   const isFindSlot = path.length % 2 === 1
+    //   const actions = back ? op.unApply : op.apply
+    //
+    //   if (isFindSlot) {
+    //     const slot = this.selection.findSlotByPaths(path)!
+    //     actions.forEach(action => {
+    //       if (action.type === 'retain') {
+    //         const formatsObj = action.formats
+    //         if (formatsObj) {
+    //           const formats = objToFormats(formatsObj, this.registry)
+    //           slot.retain(action.offset, formats)
+    //         } else {
+    //           slot.retain(action.offset)
+    //         }
+    //         return
+    //       }
+    //       if (action.type === 'delete') {
+    //         slot.delete(action.count)
+    //         return
+    //       }
+    //       if (action.type === 'apply') {
+    //         slot.updateState(draft => {
+    //           applyPatches(draft, action.patches)
+    //         })
+    //         return
+    //       }
+    //       if (action.type === 'attrSet') {
+    //         const attribute = this.registry.getAttribute(action.name)
+    //         if (attribute) {
+    //           slot.setAttribute(attribute, action.value)
+    //         }
+    //         return
+    //       }
+    //       if (action.type === 'attrRemove') {
+    //         const attribute = this.registry.getAttribute(action.name)
+    //         if (attribute) {
+    //           slot.removeAttribute(attribute)
+    //         }
+    //         return
+    //       }
+    //       if (action.type === 'insert') {
+    //         const formatsObj = action.formats
+    //         let formats: Formats | void
+    //         if (formatsObj) {
+    //           formats = objToFormats(formatsObj, this.registry)
+    //         }
+    //         if (typeof action.content === 'string') {
+    //           formats ? slot.insert(action.content, formats) : slot.insert(action.content)
+    //         } else {
+    //           const instance = this.registry.createComponent(action.content as ComponentLiteral)
+    //           if (!instance) {
+    //             // eslint-disable-next-line max-len
+    //             throw historyErrorFn(`component \`${action.content.name}\` not registered, please add \`${action.content.name}\` component to the components configuration item.`)
+    //           }
+    //           formats ? slot.insert(instance, formats) : slot.insert(instance)
+    //         }
+    //       }
+    //     })
+    //   } else {
+    //     const component = this.selection.findComponentByPaths(path)!
+    //     actions.forEach(action => {
+    //       if (action.type === 'retain') {
+    //         component.slots.retain(action.offset)
+    //         return
+    //       }
+    //       if (action.type === 'delete') {
+    //         component.slots.delete(action.count)
+    //         return
+    //       }
+    //       if (action.type === 'insertSlot') {
+    //         const slot = this.registry.createSlot(action.slot)
+    //         component.slots.insert(slot)
+    //         return
+    //       }
+    //       if (action.type === 'apply') {
+    //         component.updateState(draft => {
+    //           return applyPatches(draft as any, action.patches)
+    //         })
+    //       }
+    //     })
+    //   }
+    // })
   }
 }

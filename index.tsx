@@ -2,10 +2,9 @@ import 'reflect-metadata'
 import { BrowserModule } from '@textbus/platform-browser'
 import {
   Commander,
-  ComponentInstance,
+  Component,
   ContentType,
   createVNode,
-  defineComponent,
   FormatHostBindingRender,
   Formatter,
   onBreak,
@@ -20,6 +19,10 @@ import {
 import { Adapter, ViewComponentProps } from '@textbus/adapter-viewfly'
 import { createApp } from '@viewfly/platform-browser'
 
+interface SingleSlot {
+  slot: Slot
+}
+
 async function createEditor() {
   if (!Intl.Segmenter) {
     const polyfill = await import('intl-segmenter-polyfill/dist/bundled');
@@ -27,7 +30,7 @@ async function createEditor() {
   }
   const adapter = new Adapter({
     RootComponent: App as any,
-    ParagraphComponent: Paragraph
+    ParagraphComponent: Paragraph as any
   }, (host, root) => {
     const app = createApp(root)
     app.mount(host)
@@ -43,59 +46,33 @@ async function createEditor() {
     // useContentEditable: true
   })
 
-  const textbus = new Textbus({
-    imports: [
-      browserModule
-    ]
-  })
+  class RootComponent extends Component<SingleSlot> {
+    static componentName = 'RootComponent'
+    static type = ContentType.BlockComponent
 
-  const fontSizeFormatter = new Formatter<string>('fontSize', {
-    columned: false,
-    inheritable: true,
-    priority: 0,
-    render(children: Array<VElement | VTextNode | ComponentInstance>, formatValue: string): VElement | FormatHostBindingRender {
-      return createVNode('span', {
-        style: {
-          fontSize: formatValue
-        }
-      }, children)
+    static createInstance(textbus: Textbus, state: SingleSlot) {
+      return new RootComponent(textbus, state)
     }
-  })
 
-  const rootComponent = defineComponent({
-    name: 'RootComponent',
-    type: ContentType.BlockComponent,
-    validate() {
-      return {
-        slots: [
-          new Slot([
-            ContentType.Text,
-            ContentType.BlockComponent
-          ])
-        ]
-      }
-    },
-    setup() {
-      const slot = useSelf().slots.get(0)!
-      for (let i = 0; i < 50; i++) {
-        const p = paragraphComponent.createInstance(useContext())
-        p.slots.first.insert(Math.random().toString(16), fontSizeFormatter, '23px')
-        slot.insert(p)
-      }
+    constructor(textbus: Textbus, state: SingleSlot) {
+      super(textbus, state)
     }
-  })
+  }
 
-  const paragraphComponent = defineComponent({
-    name: 'ParagraphComponent',
-    type: ContentType.BlockComponent,
-    validate(_, initData) {
-      return {
-        slots: initData?.slots || [new Slot([
-          ContentType.Text
-        ])]
-      }
-    },
-    setup() {
+  class ParagraphComponent extends Component<SingleSlot> {
+    static componentName = 'ParagraphComponent'
+
+    static type = ContentType.BlockComponent
+
+    static createInstance(textbus: Textbus, state: SingleSlot) {
+      return new RootComponent(textbus, state)
+    }
+
+    constructor(textbus: Textbus, state: SingleSlot) {
+      super(textbus, state)
+    }
+
+    override setup() {
       const context = useContext()
       const commander = useContext(Commander)
       const selection = useContext(Selection)
@@ -104,22 +81,48 @@ async function createEditor() {
       onBreak(ev => {
         ev.preventDefault()
         const nextContent = ev.target.cut(ev.data.index)
-        const p = paragraphComponent.createInstance(context, {
-          slots: [nextContent]
+        const p = ParagraphComponent.createInstance(context, {
+          slot: nextContent
         })
         commander.insertAfter(p, self)
         selection.selectFirstPosition(p)
       })
+    }
+  }
 
-      return {
-        show() {
-          return 'dfsafdas'
+  const textbus = new Textbus({
+    components: [
+      RootComponent,
+      ParagraphComponent
+    ],
+    imports: [
+      browserModule
+    ]
+  })
+
+  textbus.onChange.subscribe(() => {
+    console.log(rootModel.toJSON())
+  })
+
+  const fontSizeFormatter = new Formatter<string>('fontSize', {
+    columned: false,
+    inheritable: true,
+    priority: 0,
+    render(children: Array<VElement | VTextNode | Component>, formatValue: string): VElement | FormatHostBindingRender {
+      return createVNode('span', {
+        style: {
+          fontSize: formatValue
         }
-      }
+      }, children)
     }
   })
 
-  const rootModel = rootComponent.createInstance(textbus)
+  const rootModel = RootComponent.createInstance(textbus, {
+    slot: new Slot([
+      ContentType.BlockComponent,
+      ContentType.Text
+    ])
+  })
 
 
   textbus.render(rootModel)
@@ -127,7 +130,7 @@ async function createEditor() {
 
 // textbus.render(rootModel)
 
-  function App(props: ViewComponentProps<typeof rootComponent>) {
+  function App(props: ViewComponentProps<RootComponent>) {
     const slot = props.component.slots.first
 
     return () => {
@@ -146,7 +149,7 @@ async function createEditor() {
     }
   }
 
-  function Paragraph(props: ViewComponentProps<typeof paragraphComponent>) {
+  function Paragraph(props: ViewComponentProps<ParagraphComponent>) {
     const slot = props.component.slots.first
     return () => {
       return (
@@ -159,4 +162,3 @@ async function createEditor() {
 }
 
 createEditor()
-

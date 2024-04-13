@@ -1,9 +1,8 @@
 import { Inject, Injectable } from '@viewfly/core'
 import {
   Attribute,
+  ComponentConstructor,
   Component,
-  ComponentInitData,
-  ComponentInstance,
   ComponentLiteral,
   Formatter,
   Slot,
@@ -19,12 +18,12 @@ import { Textbus } from '../textbus'
  */
 @Injectable()
 export class Registry {
-  private componentMap = new Map<string, Component>()
+  private componentMap = new Map<string, ComponentConstructor>()
   private formatMap = new Map<string, Formatter<any>>()
   private attributeMap = new Map<string, Attribute<any>>()
 
   constructor(public textbus: Textbus,
-              @Inject(COMPONENT_LIST) components: Component[],
+              @Inject(COMPONENT_LIST) components: ComponentConstructor[],
               @Inject(ATTRIBUTE_LIST) attributes: Attribute<any>[],
               @Inject(FORMATTER_LIST) formatters: Formatter<any>[]) {
     components.reverse().forEach(f => {
@@ -67,7 +66,7 @@ export class Registry {
    * @param name
    * @param data
    */
-  createComponentByData(name: string, data: ComponentInitData) {
+  createComponentByData(name: string, data: any) {
     const factory = this.getComponent(name)
     if (factory) {
       return factory.createInstance(this.textbus, data)
@@ -80,22 +79,20 @@ export class Registry {
    * @param slotLiteral
    * @param customComponentCreator
    */
-  createSlot(slotLiteral: SlotLiteral<any, any>,
-             customComponentCreator?: (componentLiteral: ComponentLiteral, index: number) => ComponentInstance): Slot {
-    const slot = new Slot(slotLiteral.schema, slotLiteral.state)
+  createSlot(slotLiteral: SlotLiteral<any>,
+             customComponentCreator?: (componentLiteral: ComponentLiteral, index: number) => Component): Slot {
+    const slot = new Slot(slotLiteral.schema)
     return this.loadSlot(slot, slotLiteral, customComponentCreator)
   }
 
   /**
    * 根据组件数据生成组件实例
    * @param componentLiteral
-   * @param customSlotCreator
    */
-  createComponent(componentLiteral: ComponentLiteral,
-                  customSlotCreator?: (slotLiteral: SlotLiteral<any, any>, index: number) => Slot): ComponentInstance | null {
+  createComponent(componentLiteral: ComponentLiteral): Component | null {
     const factory = this.getComponent(componentLiteral.name)
     if (factory) {
-      return this.createComponentByFactory(componentLiteral, factory, customSlotCreator)
+      return this.createComponentByFactory(componentLiteral, factory)
     }
     return null
   }
@@ -104,16 +101,10 @@ export class Registry {
    * 指定组件创建实例
    * @param componentLiteral
    * @param factory
-   * @param customSlotCreator
    */
   createComponentByFactory(componentLiteral: ComponentLiteral,
-                           factory: Component,
-                           customSlotCreator?: (slotLiteral: SlotLiteral<any, any>, index: number) => Slot) {
-    const slots = componentLiteral.slots.map(customSlotCreator || ((i) => this.createSlot(i)))
-    return factory.createInstance(this.textbus, {
-      state: componentLiteral.state,
-      slots
-    })
+                           factory: ComponentConstructor) {
+    return factory.createInstance(this.textbus, componentLiteral)
   }
 
   /**
@@ -121,14 +112,14 @@ export class Registry {
    * @param source
    * @param target
    */
-  fillSlot<T extends SlotLiteral<any, any>, U extends Slot>(source: T, target: U): U {
+  fillSlot<T extends SlotLiteral<any>, U extends Slot>(source: T, target: U): U {
     return this.loadSlot(target, source)
   }
 
-  private loadSlot<T extends SlotLiteral<any, any>, U extends Slot>(
+  private loadSlot<T extends SlotLiteral<any>, U extends Slot>(
     slot: U,
     slotLiteral: T,
-    customComponentCreator?: (componentLiteral: ComponentLiteral, index: number) => ComponentInstance): U {
+    customComponentCreator?: (componentLiteral: ComponentLiteral, index: number) => Component): U {
     slotLiteral.content.forEach((item, index) => {
       if (typeof item !== 'string') {
         const component = customComponentCreator ? customComponentCreator(item, index) : this.createComponent(item)

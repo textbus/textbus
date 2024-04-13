@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@viewfly/core'
 import {
   Attribute,
-  ComponentInstance,
+  Component,
   FormatItem,
   Formatter,
   FormatValue,
@@ -34,7 +34,7 @@ export interface ComponentLoader {
   match(element: HTMLElement): boolean
 
   /** 读取组件内容的方法 */
-  read(element: HTMLElement, textbus: Textbus, slotParser: SlotParser): ComponentInstance | Slot | void
+  read(element: HTMLElement, textbus: Textbus, slotParser: SlotParser): Component | Slot | void
 }
 
 export interface FormatLoaderReadResult<T = FormatValue> {

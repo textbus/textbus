@@ -1,5 +1,5 @@
 import { createEditor, Editor, jumbotronComponent, listComponent, paragraphComponent } from '@textbus/editor'
-import { Commander, ComponentInstance, ContentType, RootComponentRef, Selection, Slot } from '@textbus/core'
+import { Commander, Component, ContentType, RootComponentRef, Selection, Slot } from '@textbus/core'
 
 describe('Commander:transform 转换空白', () => {
   let editor: Editor
@@ -288,10 +288,10 @@ describe('Commander:transform 转换复杂结构', () => {
     const rootComponent = editor.get(RootComponentRef).component
     const firstSlot = rootComponent.slots.get(0)!
     expect(firstSlot.length).toBe(3)
-    expect((firstSlot.getContentAtIndex(0) as ComponentInstance).name).toBe(listComponent.name)
-    expect((firstSlot.getContentAtIndex(1) as ComponentInstance).name).toBe(listComponent.name)
-    expect((firstSlot.getContentAtIndex(2) as ComponentInstance).name).toBe(jumbotronComponent.name)
-    expect((firstSlot.getContentAtIndex(2) as ComponentInstance).slots.get(0)!.length).toBe(2)
+    expect((firstSlot.getContentAtIndex(0) as Component).name).toBe(listComponent.name)
+    expect((firstSlot.getContentAtIndex(1) as Component).name).toBe(listComponent.name)
+    expect((firstSlot.getContentAtIndex(2) as Component).name).toBe(jumbotronComponent.name)
+    expect((firstSlot.getContentAtIndex(2) as Component).slots.get(0)!.length).toBe(2)
     expect(selection.getPaths()).toEqual({
       anchor: [0, 1, 0, 1],
       focus: [0, 1, 1, 2]
@@ -419,8 +419,8 @@ describe('Commander:transform 转换复杂结构', () => {
     const rootComponent = editor.get(RootComponentRef).component
     const firstSlot = rootComponent.slots.get(0)!
     expect(firstSlot.length).toBe(2)
-    expect((firstSlot.getContentAtIndex(0) as ComponentInstance).name).toBe(listComponent.name)
-    expect((firstSlot.getContentAtIndex(1) as ComponentInstance).name).toBe(listComponent.name)
+    expect((firstSlot.getContentAtIndex(0) as Component).name).toBe(listComponent.name)
+    expect((firstSlot.getContentAtIndex(1) as Component).name).toBe(listComponent.name)
     expect(selection.getPaths()).toEqual({
       anchor: [0, 1, 0, 1],
       focus: [0, 1, 4, 2]
