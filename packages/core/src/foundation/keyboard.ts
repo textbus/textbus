@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@viewfly/core'
-import { Component, Shortcut, ZenCodingGrammarInterceptor } from '../model/_api'
+import { ComponentConstructor, Shortcut, ZenCodingGrammarInterceptor } from '../model/_api'
 import { Commander } from './commander'
 import { Selection } from './selection'
 import { COMPONENT_LIST, ZEN_CODING_DETECT } from './_injection-tokens'
@@ -40,7 +40,7 @@ export class Keyboard {
   private shortcutList: ShortcutEx[] = []
   private zenCodingInterceptors: ZenCodingInterceptor[] = []
 
-  constructor(@Inject(COMPONENT_LIST) private components: Component[],
+  constructor(@Inject(COMPONENT_LIST) private components: ComponentConstructor[],
               @Inject(ZEN_CODING_DETECT) private markdownDetect: boolean,
               private commander: Commander,
               private textbus: Textbus,
@@ -157,7 +157,7 @@ export class Keyboard {
     return false
   }
 
-  private createZenCodingEx(component: Component, config: ZenCodingGrammarInterceptor) {
+  private createZenCodingEx(component: ComponentConstructor, config: ZenCodingGrammarInterceptor) {
     const selection = this.selection
     const commander = this.commander
     return {

@@ -1,6 +1,6 @@
 import {
+  ComponentConstructor,
   Component,
-  ComponentInstance,
   ComponentLiteral,
   FocusManager,
   makeError,
@@ -123,10 +123,10 @@ export class BrowserModule implements Module {
    * @param rootComponentLoader 文档根组件加载器
    * @param textbus
    */
-  readDocumentByHTML(html: string, rootComponentLoader: ComponentLoader, textbus: Textbus): ComponentInstance {
+  readDocumentByHTML(html: string, rootComponentLoader: ComponentLoader, textbus: Textbus): Component {
     const parser = textbus.get(Parser)
     const doc = parser.parseDoc(html, rootComponentLoader)
-    if (doc instanceof ComponentInstance) {
+    if (doc instanceof Component) {
       return doc
     }
     throw browserErrorFn('rootComponentLoader must return a component instance.')
@@ -138,7 +138,7 @@ export class BrowserModule implements Module {
    * @param rootComponent 根组件
    * @param textbus
    */
-  readDocumentByComponentLiteral(data: ComponentLiteral, rootComponent: Component, textbus: Textbus): ComponentInstance {
+  readDocumentByComponentLiteral(data: ComponentLiteral, rootComponent: ComponentConstructor, textbus: Textbus): Component {
     const registry = textbus.get(Registry)
     return registry.createComponentByFactory(data, rootComponent)
   }

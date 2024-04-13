@@ -1,5 +1,5 @@
 import {
-  ComponentInstance,
+  Component,
   Slot,
   ViewAdapter,
   NodeLocation,
@@ -31,8 +31,8 @@ export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter
     }
   })
 
-  protected componentRootElementCaches = createBidirectionalMapping<ComponentInstance, HTMLElement>(a => {
-    return a instanceof ComponentInstance
+  protected componentRootElementCaches = createBidirectionalMapping<Component, HTMLElement>(a => {
+    return a instanceof Component
   })
   protected slotRootNativeElementCaches = createBidirectionalMapping<Slot, HTMLElement>(a => {
     return a instanceof Slot
@@ -43,15 +43,15 @@ export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter
     super()
   }
 
-  render(rootComponent: ComponentInstance, textbus: Textbus): void | (() => void) {
+  render(rootComponent: Component, textbus: Textbus): void | (() => void) {
     const view = this.componentRender(rootComponent)
     return this.mount(this.host, view, textbus)
   }
 
-  abstract componentRender(component: ComponentInstance): ViewComponent
+  abstract componentRender(component: Component): ViewComponent
 
   abstract slotRender(slot: Slot,
-                      slotHostRender: (children: Array<VElement | VTextNode | ComponentInstance>) => VElement,
+                      slotHostRender: (children: Array<VElement | VTextNode | Component>) => VElement,
                       renderEnv: any): ViewElement
 
   override copy() {
@@ -62,7 +62,7 @@ export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter
    * 根据组件获取组件的根 DOM 节点
    * @param component
    */
-  getNativeNodeByComponent(component: ComponentInstance): HTMLElement | null {
+  getNativeNodeByComponent(component: Component): HTMLElement | null {
     return this.componentRootElementCaches.get(component) || null
   }
 
@@ -70,7 +70,7 @@ export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter
    * 根据 DOM 节点，获对对应的组件根节点，如传入的 DOM 节点不为组件的根节点，则返回 null
    * @param node
    */
-  getComponentByNativeNode(node: HTMLElement): ComponentInstance | null {
+  getComponentByNativeNode(node: HTMLElement): Component | null {
     return this.componentRootElementCaches.get(node) || null
   }
 
@@ -148,7 +148,7 @@ function getLocation(target: Node, tree: HTMLElement, vNodeTree: VElement) {
     const child = vNodeTree.children[i]
     const nativeChild = tree.childNodes[i]
     if (nativeChild === target) {
-      if (child instanceof ComponentInstance) {
+      if (child instanceof Component) {
         const index = child.parent!.indexOf(child)
         return {
           slot: child.parent,

@@ -1,6 +1,6 @@
 import { VElement, VTextNode } from './element'
 import { FormatValue } from './format'
-import { ComponentInstance } from './component'
+import { Component } from './component'
 
 /**
  * 格式渲染可回退的渲染模式
@@ -71,7 +71,7 @@ export interface FormatterConfig<T> {
    * @param renderEnv 渲染环境变量，你可以根据条件渲染不同的结果，renderEnv 的值由 slot.toTree 方法的第二个参数决定
    */
   render(
-    children: Array<VElement | VTextNode | ComponentInstance>,
+    children: Array<VElement | VTextNode | Component>,
     formatValue: T,
     renderEnv: unknown): VElement | FormatHostBindingRender
 }
@@ -98,7 +98,7 @@ export class Formatter<T = FormatValue> {
   }
 
   render(
-    children: Array<VElement | VTextNode | ComponentInstance>,
+    children: Array<VElement | VTextNode | Component>,
     formatValue: T,
     renderEnv: unknown): VElement | FormatHostBindingRender {
     return this.config.render(children, formatValue, renderEnv)

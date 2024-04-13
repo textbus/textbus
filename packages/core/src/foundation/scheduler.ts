@@ -1,7 +1,7 @@
 import { Injectable } from '@viewfly/core'
 import { map, microTask, Observable, Subject, Subscription, take } from '@tanbo/stream'
 
-import { ComponentInstance, invokeListener, Operation } from '../model/_api'
+import { Component, invokeListener, Operation } from '../model/_api'
 import { ViewAdapter, RootComponentRef } from './_injection-tokens'
 import { Selection } from './selection'
 
@@ -61,7 +61,7 @@ export class Scheduler {
   private _lastChangesHasRemoteUpdate = false
   private changeFromRemote = false
   private changeFromHistory = false
-  private instanceList = new Set<ComponentInstance>()
+  private instanceList = new Set<Component>()
 
   private docChangedEvent = new Subject<ChangeItem[]>()
   private docChangeEvent = new Subject<void>()
@@ -173,7 +173,7 @@ export class Scheduler {
     this.subs = []
   }
 
-  private static invokeChildComponentDestroyHook(parent: ComponentInstance) {
+  private static invokeChildComponentDestroyHook(parent: Component) {
     parent.slots.toArray().forEach(slot => {
       slot.sliceContent().forEach(i => {
         if (typeof i !== 'string') {

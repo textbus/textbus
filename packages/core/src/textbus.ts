@@ -1,7 +1,7 @@
 import { Injector, normalizeProvider, NullInjector, Provider, ReflectiveInjector, Scope } from '@viewfly/core'
 import { Observable, Subject } from '@tanbo/stream'
 
-import { ComponentInstance, Formatter, Component, Attribute, ComponentLiteral } from './model/_api'
+import { Component, Formatter, ComponentConstructor, Attribute, ComponentLiteral } from './model/_api'
 import {
   History,
   RootComponentRef,
@@ -47,7 +47,7 @@ export interface Plugin {
  */
 export interface Module {
   /** 组件列表 */
-  components?: Component[]
+  components?: ComponentConstructor[]
   /** 格式列表 */
   formatters?: Formatter<any>[]
   /** 属性列表 */
@@ -167,7 +167,7 @@ export class Textbus extends ReflectiveInjector {
    * 启动一个 Textbus 实例，并将根组件渲染到原生节点
    * @param rootComponent 根组件
    */
-  async render(rootComponent: ComponentInstance): Promise<this> {
+  async render(rootComponent: Component): Promise<this> {
     if (this.isDestroyed) {
       throw textbusError('Textbus instance is destroyed!')
     }

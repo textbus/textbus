@@ -1,8 +1,8 @@
 import { createElement, JSX, ReactNode, useEffect, useState } from 'react'
 import { Subject } from '@tanbo/stream'
 import {
+  ComponentConstructor,
   Component,
-  ComponentInstance,
   ExtractComponentInstanceType,
   makeError,
   replaceEmpty,
@@ -27,7 +27,7 @@ Node.prototype.removeChild = function (this: any, child: any) {
 
 const adapterError = makeError('ReactAdapter')
 
-export interface ViewComponentProps<T extends Component = Component> {
+export interface ViewComponentProps<T extends ComponentConstructor = ComponentConstructor> {
   component: ExtractComponentInstanceType<T>
   rootRef: ((rootNode: HTMLElement) => void)
 }
@@ -42,13 +42,13 @@ export interface ReactAdapterComponents {
 export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
   onViewUpdated = new Subject<void>()
 
-  private components: Record<string, (props: {component: ComponentInstance}) => JSX.Element> = {}
+  private components: Record<string, (props: {component: Component}) => JSX.Element> = {}
 
   constructor(components: ReactAdapterComponents,
               mount: (host: HTMLElement, root: JSX.Element) => (void | (() => void))) {
     super(mount)
     Object.keys(components).forEach(key => {
-      this.components[key] = (props: {component: ComponentInstance}) => {
+      this.components[key] = (props: {component: Component}) => {
         const component = props.component
         const [updateKey, refreshUpdateKey] = useState(Math.random())
 
@@ -79,7 +79,7 @@ export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
     })
   }
 
-  componentRender(component: ComponentInstance): JSX.Element {
+  componentRender(component: Component): JSX.Element {
     const comp = this.components[component.name] || this.components['*']
     if (comp) {
       component.changeMarker.rendered()
@@ -92,7 +92,7 @@ export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
   }
 
   slotRender(slot: Slot,
-             slotHostRender: (children: Array<VElement | VTextNode | ComponentInstance>) => VElement,
+             slotHostRender: (children: Array<VElement | VTextNode | Component>) => VElement,
              renderEnv?: any): JSX.Element {
     const vElement = slot.toTree(slotHostRender, renderEnv)
     this.slotRootVElementCaches.set(slot, vElement)
