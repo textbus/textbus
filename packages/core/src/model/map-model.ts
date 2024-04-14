@@ -1,22 +1,15 @@
-import { Observable, Subject } from '@tanbo/stream'
-
-import { Operation, State } from './types'
+import { DestroyCallbacks, State, TransferValueType } from './types'
 import { Component } from './component'
 import { Slot } from './slot'
-import { ArrayModel, DestroyCallbacks, TransferValueType } from './array-model'
+import { ArrayModel } from './array-model'
+import { ChangeMarker } from './change-marker'
 
 export class MapModel<T extends State> {
   destroyCallbacks: DestroyCallbacks = []
-  onChange: Observable<Operation>
-  onRemove: Observable<any>
+  readonly changeMarker = new ChangeMarker()
   readonly data = new Map<string, any>()
 
-  private changeEvent = new Subject<Operation>()
-  private removeEvent = new Subject<void>()
-
   constructor(private from: Component) {
-    this.onChange = this.changeEvent.asObservable()
-    this.onRemove = this.removeEvent.asObservable()
     this.destroyCallbacks.push(() => {
       this.data.forEach(i => {
         if (i instanceof MapModel || i instanceof ArrayModel) {
@@ -33,6 +26,7 @@ export class MapModel<T extends State> {
       return
     }
 
+    let model: Slot | MapModel<any> | ArrayModel<any> | null = null
     if (!(value as any instanceof MapModel) &&
       !(value as any instanceof ArrayModel) &&
       !(value as any instanceof Slot)) {
@@ -42,22 +36,35 @@ export class MapModel<T extends State> {
           delta.insert(item)
         })
         value = delta as any
+        model = delta as ArrayModel<any>
       } else if (typeof value === 'object' && value !== null) {
         const delta = new MapModel(this.from)
         Object.entries(value).forEach(([key, value]) => {
           delta.set(key, value)
         })
         value = delta as any
+        model = delta
       }
     }
-
     if (value as any instanceof Slot) {
       this.from.slots.push(value)
+      model = value
+    }
+    if (model) {
+      model.destroyCallbacks.push(() => {
+        model!.changeMarker.onChange.subscribe(ops => {
+          ops.path.unshift(key)
+          if (model!.changeMarker.dirty) {
+            this.changeMarker.markAsDirtied(ops)
+          } else {
+            this.changeMarker.markAsChanged(ops)
+          }
+        })
+      })
     }
 
     this.data.set(key, value)
-    this.removeEvent.next(oldValue)
-    this.changeEvent.next({
+    this.changeMarker.markAsDirtied({
       path: [],
       apply: [
         {
@@ -93,8 +100,10 @@ export class MapModel<T extends State> {
     if (this.data.has(key)) {
       const oldValue = this.data.get(key)
       this.data.delete(key)
-      this.removeEvent.next(oldValue)
-      this.changeEvent.next({
+      if (oldValue instanceof Slot || oldValue instanceof MapModel || oldValue instanceof ArrayModel) {
+        oldValue.destroy()
+      }
+      this.changeMarker.markAsDirtied({
         path: [],
         apply: [
           {
