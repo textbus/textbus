@@ -174,7 +174,7 @@ export class Scheduler {
   }
 
   private static invokeChildComponentDestroyHook(parent: Component) {
-    parent.slots.toArray().forEach(slot => {
+    parent.__slots__.forEach(slot => {
       slot.sliceContent().forEach(i => {
         if (typeof i !== 'string') {
           Scheduler.invokeChildComponentDestroyHook(i)
