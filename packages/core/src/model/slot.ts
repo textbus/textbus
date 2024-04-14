@@ -5,7 +5,7 @@ import { Content } from './content'
 import { Format, FormatLiteral, FormatRange, FormatValue, Formats, FormatTree, FormatItem } from './format'
 import { Attribute, FormatHostBindingRender, Formatter } from './attribute'
 import { ChangeMarker } from './change-marker'
-import { Action } from './types'
+import { Action, DestroyCallbacks } from './types'
 import { VElement, VTextNode } from './element'
 import { makeError } from '../_utils/make-error'
 
@@ -44,6 +44,7 @@ export class DeltaLite extends Array<DeltaInsert> {
  * Textbus 插槽类，用于管理组件、文本及格式的增删改查
  */
 export class Slot {
+  destroyCallbacks: DestroyCallbacks = []
   static placeholder = '\u200b'
 
   static get emptyPlaceholder() {
@@ -765,19 +766,6 @@ export class Slot {
     })
   }
 
-  private applyFormats(formats: Formats, startIndex: number, offset: number, background: boolean) {
-    formats.forEach(keyValue => {
-      const key = keyValue[0]
-      const value = keyValue[1]
-
-      this.format.merge(key, {
-        startIndex,
-        endIndex: startIndex + offset,
-        value
-      }, background)
-    })
-  }
-
   /**
    * 根据插槽的格式数据，生成格式树
    */
@@ -800,6 +788,24 @@ export class Slot {
       endIndex: this.length
     }
     return root
+  }
+
+  destroy() {
+    this.destroyCallbacks.forEach(i => i())
+    this.destroyCallbacks = []
+  }
+
+  private applyFormats(formats: Formats, startIndex: number, offset: number, background: boolean) {
+    formats.forEach(keyValue => {
+      const key = keyValue[0]
+      const value = keyValue[1]
+
+      this.format.merge(key, {
+        startIndex,
+        endIndex: startIndex + offset,
+        value
+      }, background)
+    })
   }
 
   private createVDomByFormatTree(
