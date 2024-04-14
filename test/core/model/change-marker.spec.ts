@@ -27,7 +27,7 @@ describe('ChangeMarker 基本状态', () => {
 describe('ChangeMarker 编辑模式变化标记', () => {
   let changeMarker: ChangeMarker
   const testOperation: Operation = {
-    path: [],
+    paths: [],
     apply: [],
     unApply: []
   }
@@ -58,7 +58,7 @@ describe('ChangeMarker 编辑模式变化标记', () => {
 describe('ChangeMarker 输出模式变化标记', () => {
   let changeMarker: ChangeMarker
   const testOperation: Operation = {
-    path: [],
+    paths: [],
     apply: [],
     unApply: []
   }
@@ -137,7 +137,7 @@ describe('ChangeMarker 重置状态', () => {
 describe('ChangeMarker 事件', () => {
   let changeMarker: ChangeMarker
   const testOperation: Operation = {
-    path: [],
+    paths: [],
     apply: [],
     unApply: []
   }
