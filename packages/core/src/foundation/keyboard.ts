@@ -179,7 +179,7 @@ export class Keyboard {
       action: (content: string) => {
         const commonAncestorSlot = selection.commonAncestorSlot!
         const initData = config.generateInitData(content, this.textbus)
-        const newInstance = component.createInstance(this.textbus, initData)
+        const newInstance = new component(this.textbus, initData)
         if (commonAncestorSlot.schema.includes(newInstance.type)) {
           selection.selectSlot(commonAncestorSlot)
           commander.delete()

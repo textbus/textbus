@@ -58,13 +58,13 @@ export type Action = InsertAction |
   AttrSetAction
 
 export interface Operation {
-  path: Array<number|string>
+  paths: Array<number|string>
   apply: Action[]
   unApply: Action[]
 }
 
-export interface State extends Record<string, any> {
-
+export interface State {
+  [key: string]: any
 }
 
 //

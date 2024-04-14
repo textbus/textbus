@@ -69,7 +69,7 @@ export class Registry {
   createComponentByData(name: string, data: any) {
     const factory = this.getComponent(name)
     if (factory) {
-      return factory.createInstance(this.textbus, data)
+      return new factory(this.textbus, data)
     }
     return null
   }
@@ -104,7 +104,7 @@ export class Registry {
    */
   createComponentByFactory(componentLiteral: ComponentLiteral,
                            factory: ComponentConstructor) {
-    return factory.createInstance(this.textbus, componentLiteral)
+    return factory.fromJSON(this.textbus, componentLiteral)
   }
 
   /**

@@ -8,6 +8,7 @@ import {
   FormatHostBindingRender,
   Formatter,
   onBreak,
+  onContentInsert,
   Selection,
   Slot,
   Textbus,
@@ -50,12 +51,31 @@ async function createEditor() {
     static componentName = 'RootComponent'
     static type = ContentType.BlockComponent
 
-    static createInstance(textbus: Textbus, state: SingleSlot) {
+    static fromJSON(textbus: Textbus, state: SingleSlot) {
       return new RootComponent(textbus, state)
     }
 
     constructor(textbus: Textbus, state: SingleSlot) {
       super(textbus, state)
+      // this.state.get('slot').
+    }
+
+    override setup() {
+      const selection = useContext(Selection)
+      onContentInsert(ev => {
+        if (typeof ev.data.content === 'string' || ev.data.content.type !== ContentType.BlockComponent) {
+          const slot = new Slot([
+            ContentType.Text
+          ])
+          const p = new ParagraphComponent(textbus, {
+            slot
+          })
+          slot.insert(ev.data.content)
+          ev.target.insert(p)
+          selection.setPosition(slot, slot.index)
+          ev.preventDefault()
+        }
+      })
     }
   }
 
@@ -64,7 +84,7 @@ async function createEditor() {
 
     static type = ContentType.BlockComponent
 
-    static createInstance(textbus: Textbus, state: SingleSlot) {
+    static fromJSON(textbus: Textbus, state: SingleSlot) {
       return new RootComponent(textbus, state)
     }
 
@@ -81,7 +101,7 @@ async function createEditor() {
       onBreak(ev => {
         ev.preventDefault()
         const nextContent = ev.target.cut(ev.data.index)
-        const p = ParagraphComponent.createInstance(context, {
+        const p = new ParagraphComponent(context, {
           slot: nextContent
         })
         commander.insertAfter(p, self)
@@ -117,13 +137,12 @@ async function createEditor() {
     }
   })
 
-  const rootModel = RootComponent.createInstance(textbus, {
+  const rootModel = new RootComponent(textbus, {
     slot: new Slot([
       ContentType.BlockComponent,
       ContentType.Text
     ])
   })
-
 
   textbus.render(rootModel)
   // 从这里开始创建编辑器
@@ -161,5 +180,6 @@ async function createEditor() {
     }
   }
 }
+
 
 createEditor()
