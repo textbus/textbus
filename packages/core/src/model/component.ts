@@ -8,7 +8,7 @@ import { ChangeMarker } from './change-marker'
 import { Slots } from './slots'
 import { State } from './types'
 import { Textbus } from '../textbus'
-import { MapDelta } from './delta'
+import { MapModel } from './map-model'
 
 const componentErrorFn = makeError('Component')
 
@@ -87,7 +87,7 @@ export abstract class Component<T extends State = State> {
   /** 组件类型 */
   readonly type: ContentType
   /** 组件状态 */
-  state = new MapDelta<T>(this)
+  state = new MapModel<T>(this)
 
   constructor(textbus: Textbus,
               initData: T = {} as T) {
