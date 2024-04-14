@@ -66,7 +66,8 @@ export class ArrayModel<U extends SharedType<any>, T = ExtractDeltaType<U>> {
       item = delta as any
       model = delta
     }
-    if (item as any instanceof Slot) {
+    const isSlot = item as any instanceof Slot
+    if (isSlot) {
       (item as Slot).parent = this.from
     }
     if (model) {
@@ -92,7 +93,9 @@ export class ArrayModel<U extends SharedType<any>, T = ExtractDeltaType<U>> {
         },
         {
           type: 'insert',
-          data
+          data,
+          isSlot,
+          ref: item
         },
       ],
       unApply: [
@@ -141,7 +144,8 @@ export class ArrayModel<U extends SharedType<any>, T = ExtractDeltaType<U>> {
         },
         ...deletedItems.map<InsertAction>((item) => {
           let data = item
-          if (item instanceof ArrayModel || item instanceof MapModel || item instanceof Slot) {
+          const isSlot = item instanceof Slot
+          if (isSlot || item instanceof ArrayModel || item instanceof MapModel) {
             data = item.toJSON()
             item.destroy()
           }
@@ -149,6 +153,8 @@ export class ArrayModel<U extends SharedType<any>, T = ExtractDeltaType<U>> {
           return {
             type: 'insert',
             data,
+            ref: item,
+            isSlot
           }
         }),
       ],
