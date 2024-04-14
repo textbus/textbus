@@ -66,16 +66,20 @@ export class ArrayModel<U extends SharedType<any>, T = ExtractDeltaType<U>> {
       item = delta as any
       model = delta
     }
+    if (item as any instanceof Slot) {
+      (item as Slot).parent = this.from
+    }
     if (model) {
+      const sub = model!.changeMarker.onChange.subscribe(ops => {
+        ops.path.unshift(this.indexOf(model as T))
+        if (model!.changeMarker.dirty) {
+          this.changeMarker.markAsDirtied(ops)
+        } else {
+          this.changeMarker.markAsChanged(ops)
+        }
+      })
       model.destroyCallbacks.push(() => {
-        model!.changeMarker.onChange.subscribe(ops => {
-          ops.path.unshift(this.indexOf(model as T))
-          if (model!.changeMarker.dirty) {
-            this.changeMarker.markAsDirtied(ops)
-          } else {
-            this.changeMarker.markAsChanged(ops)
-          }
-        })
+        sub.unsubscribe()
       })
     }
     this._data.splice(this.index, 0, item as any)

@@ -291,7 +291,7 @@ describe('Commander:transform 转换复杂结构', () => {
     expect((firstSlot.getContentAtIndex(0) as Component).name).toBe(listComponent.name)
     expect((firstSlot.getContentAtIndex(1) as Component).name).toBe(listComponent.name)
     expect((firstSlot.getContentAtIndex(2) as Component).name).toBe(jumbotronComponent.name)
-    expect((firstSlot.getContentAtIndex(2) as Component).slots.get(0)!.length).toBe(2)
+    expect((firstSlot.getContentAtIndex(2) as Component).__slots__.get(0)!.length).toBe(2)
     expect(selection.getPaths()).toEqual({
       anchor: [0, 1, 0, 1],
       focus: [0, 1, 1, 2]

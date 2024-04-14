@@ -39,6 +39,8 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
 
   private componentRefs = new WeakMap<Component, DynamicRef<HTMLElement>>()
 
+  private componentRendingStack: Component[] = []
+
   constructor(components: ViewflyAdapterComponents,
               mount: (host: HTMLElement, root: JSXNode) => (void | (() => void))) {
     super(mount)
@@ -70,6 +72,7 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
   componentRender(component: Component): JSXInternal.ViewNode {
     const comp = this.components[component.name] || this.components['*']
     if (comp) {
+
       let ref = this.componentRefs.get(component)
       if (!ref) {
         ref = createDynamicRef<HTMLElement>(rootNode => {
@@ -80,7 +83,30 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
         })
         this.componentRefs.set(component, ref)
       }
-      return jsx(comp, {
+      return jsx((props: any) => {
+
+        const instance = comp(props)
+        if (typeof instance === 'function') {
+          return () => {
+            component.__slots__.length = 0
+            this.componentRendingStack.push(component)
+            const vNode = instance()
+            this.componentRendingStack.pop()
+            return vNode
+          }
+        }
+        const self = this
+        return {
+          ...instance,
+          $render(): JSXInternal.ViewNode {
+            component.__slots__.length = 0
+            self.componentRendingStack.push(component)
+            const vNode = instance.$render()
+            self.componentRendingStack.pop()
+            return vNode
+          }
+        }
+      }, {
         component,
         rootRef: ref
       }, component.id)
@@ -91,6 +117,8 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
   slotRender(slot: Slot,
              slotHostRender: (children: Array<VElement | VTextNode | Component>) => VElement,
              renderEnv?: any): JSXInternal.Element {
+    const context = this.componentRendingStack[this.componentRendingStack.length - 1]!
+    context.__slots__.push(slot)
     const vElement = slot.toTree(slotHostRender, renderEnv)
     this.slotRootVElementCaches.set(slot, vElement)
 
