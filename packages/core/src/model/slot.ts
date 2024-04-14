@@ -131,7 +131,7 @@ export class Slot {
       }
     })
     this.changeMarker.markAsDirtied({
-      path: [],
+      paths: [],
       apply: applyActions,
       unApply: [has ? {
         type: 'attrSet',
@@ -184,7 +184,7 @@ export class Slot {
       name: attribute.name
     }]
     this.changeMarker.markAsDirtied({
-      path: [],
+      paths: [],
       apply: applyActions,
       unApply: [{
         type: 'attrSet',
@@ -268,7 +268,7 @@ export class Slot {
       }
       content.parent = this
       const sub = content.changeMarker.onChange.subscribe(ops => {
-        ops.path.unshift(this.indexOf(content))
+        ops.paths.unshift(this.indexOf(content))
         this.changeMarker.markAsChanged(ops)
       })
       sub.add(content.changeMarker.onChildComponentRemoved.subscribe(instance => {
@@ -315,7 +315,7 @@ export class Slot {
     }]
 
     this.changeMarker.markAsDirtied({
-      path: [],
+      paths: [],
       apply: applyActions,
       unApply: [{
         type: 'retain',
@@ -419,7 +419,7 @@ export class Slot {
     })
     if (applyActions.length || unApplyActions.length) {
       this.changeMarker.markAsDirtied({
-        path: [],
+        paths: [],
         apply: applyActions,
         unApply: unApplyActions
       })
@@ -463,7 +463,7 @@ export class Slot {
     }]
     const deletedComponents: Component[] = []
     this.changeMarker.markAsDirtied({
-      path: [],
+      paths: [],
       apply: applyActions,
       unApply: [{
         type: 'retain',

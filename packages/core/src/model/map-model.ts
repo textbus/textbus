@@ -47,12 +47,12 @@ export class MapModel<T extends State> {
       }
     }
     if (value as any instanceof Slot) {
-      value.parent = this.from
-      model = value
+      (value as Slot).parent = this.from
+      model = value as Slot
     }
     if (model) {
       const sub = model!.changeMarker.onChange.subscribe(ops => {
-        ops.path.unshift(key)
+        ops.paths.unshift(key)
         if (model!.changeMarker.dirty) {
           this.changeMarker.markAsDirtied(ops)
         } else {
@@ -66,7 +66,7 @@ export class MapModel<T extends State> {
 
     this.data.set(key, value)
     this.changeMarker.markAsDirtied({
-      path: [],
+      paths: [],
       apply: [
         {
           type: 'propSet',
@@ -105,7 +105,7 @@ export class MapModel<T extends State> {
         oldValue.destroy()
       }
       this.changeMarker.markAsDirtied({
-        path: [],
+        paths: [],
         apply: [
           {
             type: 'propDelete',

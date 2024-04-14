@@ -114,16 +114,11 @@ export abstract class Component<T extends State = State> {
       this.setup()
     }
     const sub = this.state.changeMarker.onChange.subscribe(op => {
-      if (this.parent) {
-        const index = this.parent.indexOf(op)
-        op.path.unshift(index)
-      }
       if (this.state.changeMarker.dirty) {
         this.changeMarker.markAsDirtied(op)
       } else {
         this.changeMarker.markAsChanged(op)
       }
-
     })
     onDestroy(() => {
       eventCacheMap.delete(this)
@@ -163,12 +158,7 @@ export interface ComponentConstructor<ComponentState extends State = State> exte
   zenCoding?: ZenCodingGrammarInterceptor<ComponentState> |
     ZenCodingGrammarInterceptor<ComponentState>[]
 
-  /**
-   * 组件创建实例的方法
-   * @param textbus
-   * @param data
-   */
-  createInstance(textbus: Textbus, data: ComponentState): Component<ComponentState>
+  fromJSON(textbus: Textbus, data: any): Component<ComponentState>
 }
 
 /**

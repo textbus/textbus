@@ -247,13 +247,13 @@ function slotsToComponents(textbus: Textbus, slots: Slot[], rule: TransformRule<
     return componentInstances
   }
   if (rule.multipleSlot) {
-    componentInstances.push(rule.target.createInstance(textbus, {
+    componentInstances.push(new rule.target(textbus, {
       state: rule.stateFactory?.(),
       slots
     }))
   } else {
     slots.forEach(childSlot => {
-      componentInstances.push(rule.target.createInstance(textbus, {
+      componentInstances.push(new rule.target(textbus, {
         state: rule.stateFactory?.(),
         slots: [childSlot]
       }))

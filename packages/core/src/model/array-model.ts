@@ -71,7 +71,7 @@ export class ArrayModel<U extends SharedType<any>, T = ExtractDeltaType<U>> {
     }
     if (model) {
       const sub = model!.changeMarker.onChange.subscribe(ops => {
-        ops.path.unshift(this.indexOf(model as T))
+        ops.paths.unshift(this.indexOf(model as T))
         if (model!.changeMarker.dirty) {
           this.changeMarker.markAsDirtied(ops)
         } else {
@@ -84,7 +84,7 @@ export class ArrayModel<U extends SharedType<any>, T = ExtractDeltaType<U>> {
     }
     this._data.splice(this.index, 0, item as any)
     const op: Operation = {
-      path: [],
+      paths: [],
       apply: [
         {
           type: 'retain',
@@ -123,7 +123,7 @@ export class ArrayModel<U extends SharedType<any>, T = ExtractDeltaType<U>> {
   delete(count: number) {
     const deletedItems = this._data.splice(this.index, count)
     const op: Operation = {
-      path: [],
+      paths: [],
       apply: [
         {
           type: 'retain',
