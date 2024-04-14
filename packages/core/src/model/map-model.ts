@@ -46,7 +46,8 @@ export class MapModel<T extends State> {
         model = delta
       }
     }
-    if (value as any instanceof Slot) {
+    const isSlot = value as any instanceof Slot
+    if (isSlot) {
       (value as Slot).parent = this.from
       model = value as Slot
     }
@@ -71,7 +72,9 @@ export class MapModel<T extends State> {
         {
           type: 'propSet',
           key,
-          value,
+          value: model ? model.toJSON() : value,
+          isSlot,
+          ref: value
         },
       ],
       unApply: [
@@ -80,6 +83,8 @@ export class MapModel<T extends State> {
             type: 'propSet',
             key,
             value: oldValue,
+            isSlot,
+            ref: model
           }
           : {
             type: 'propDelete',
@@ -101,9 +106,13 @@ export class MapModel<T extends State> {
     if (this.data.has(key)) {
       const oldValue = this.data.get(key)
       this.data.delete(key)
-      if (oldValue instanceof Slot || oldValue instanceof MapModel || oldValue instanceof ArrayModel) {
+      const isSlot = oldValue instanceof Slot
+      let value: any = oldValue
+      if (isSlot || oldValue instanceof MapModel || oldValue instanceof ArrayModel) {
+        value = oldValue.toJSON()
         oldValue.destroy()
       }
+
       this.changeMarker.markAsDirtied({
         paths: [],
         apply: [
@@ -116,7 +125,9 @@ export class MapModel<T extends State> {
           {
             type: 'propSet',
             key,
-            value: oldValue,
+            value,
+            ref: oldValue,
+            isSlot
           },
         ],
       })
