@@ -7,7 +7,7 @@ import { Action, Operation } from './types'
 /**
  * Textbus 管理组件内部插槽增删改查的类
  */
-export class Slots{
+export class Slots {
   readonly onChildSlotRemove: Observable<Slot[]>
   readonly onChange: Observable<Operation>
   readonly onChildSlotChange: Observable<Slot>

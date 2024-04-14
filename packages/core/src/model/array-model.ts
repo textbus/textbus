@@ -1,40 +1,12 @@
-import { Observable, Subject } from '@tanbo/stream'
-
-import { InsertAction, Operation } from './types'
-import { Slot } from './slot'
+import { DestroyCallbacks, ExtractDeltaType, InsertAction, Operation, SharedType } from './types'
 import { Component } from './component'
 import { MapModel } from './map-model'
-
-export type SharedConstant = boolean | string | number
-
-export type SharedArray<T extends SharedConstant | SharedMap<T> | SharedArray<T>> = Array<T>
-
-export type SharedMap<T extends SharedConstant | SharedArray<T> | SharedMap<T>> = Record<string, T>
-
-export type SharedType<T extends SharedArray<T> | SharedMap<T>> = SharedConstant | SharedArray<T> | SharedMap<T>
-
-export type ExtractDeltaType<T> =
-  T extends SharedType<infer K>
-    ? K extends SharedArray<infer Item>
-      ? ArrayModel<Item>
-      : K extends SharedMap<any>
-        ? MapModel<K>
-        : never
-    : never
-
-export type TransferValueType<T> =
-  T extends Slot ? T :
-    T extends Array<infer Item> ?
-      (Item extends SharedType<any> ?
-        ArrayModel<Item> : never) :
-      T extends Record<string, any> ? MapModel<T> : T
-
-export type DestroyCallbacks = Array<() => void>
+import { ChangeMarker } from './change-marker'
+import { Slot } from './slot'
 
 export class ArrayModel<U extends SharedType<any>, T = ExtractDeltaType<U>> {
   destroyCallbacks: DestroyCallbacks = []
-  onChange: Observable<Operation>
-  onRemove: Observable<T>
+  readonly changeMarker = new ChangeMarker()
 
   get length() {
     return this._data.length
@@ -46,13 +18,9 @@ export class ArrayModel<U extends SharedType<any>, T = ExtractDeltaType<U>> {
 
   private _data: T[] = []
 
-  private changeEvent = new Subject<Operation>()
-  private removeEvent = new Subject<T>()
   private index = 0
 
   constructor(private from: Component) {
-    this.onChange = this.changeEvent.asObservable()
-    this.onRemove = this.removeEvent.asObservable()
     this.destroyCallbacks.push(() => {
       this._data.forEach(i => {
         if (i instanceof MapModel || i instanceof ArrayModel) {
@@ -68,8 +36,9 @@ export class ArrayModel<U extends SharedType<any>, T = ExtractDeltaType<U>> {
   }
 
   insert(item: U) {
+    let model: Slot | MapModel<any> | ArrayModel<any> | null = null
     let data: any = item
-    if (item instanceof ArrayModel || item instanceof MapModel) {
+    if (item instanceof ArrayModel || item instanceof MapModel || item instanceof Slot) {
       data = item.toJSON()
       const oldIndex = this._data.indexOf(item as any)
       if (oldIndex >= 0) {
@@ -81,18 +50,33 @@ export class ArrayModel<U extends SharedType<any>, T = ExtractDeltaType<U>> {
         this.delete(1)
         this.retain(index)
       }
+      model = item
     } else if (Array.isArray(item)) {
       const delta = new ArrayModel(this.from)
       item.forEach((child) => {
         delta.insert(child)
       })
       item = delta as any
+      model = delta as ArrayModel<any>
     } else if (typeof item === 'object' && item !== null) {
       const delta = new MapModel(this.from)
       Object.entries(item).forEach(([key, value]) => {
         delta.set(key, value)
       })
       item = delta as any
+      model = delta
+    }
+    if (model) {
+      model.destroyCallbacks.push(() => {
+        model!.changeMarker.onChange.subscribe(ops => {
+          ops.path.unshift(this.indexOf(model as T))
+          if (model!.changeMarker.dirty) {
+            this.changeMarker.markAsDirtied(ops)
+          } else {
+            this.changeMarker.markAsChanged(ops)
+          }
+        })
+      })
     }
     this._data.splice(this.index, 0, item as any)
     const op: Operation = {
@@ -119,7 +103,7 @@ export class ArrayModel<U extends SharedType<any>, T = ExtractDeltaType<U>> {
       ],
     }
     this.index++
-    this.changeEvent.next(op)
+    this.changeMarker.markAsDirtied(op)
   }
 
   retain(index: number) {
@@ -152,7 +136,12 @@ export class ArrayModel<U extends SharedType<any>, T = ExtractDeltaType<U>> {
           offset: this.index,
         },
         ...deletedItems.map<InsertAction>((item) => {
-          const data = item instanceof ArrayModel || item instanceof MapModel ? item.toJSON() : item
+          let data = item
+          if (item instanceof ArrayModel || item instanceof MapModel || item instanceof Slot) {
+            data = item.toJSON()
+            item.destroy()
+          }
+
           return {
             type: 'insert',
             data,
@@ -160,10 +149,7 @@ export class ArrayModel<U extends SharedType<any>, T = ExtractDeltaType<U>> {
         }),
       ],
     }
-    deletedItems.forEach(i => {
-      this.removeEvent.next(i)
-    })
-    this.changeEvent.next(op)
+    this.changeMarker.markAsDirtied(op)
   }
 
   indexOf(child: T): number {
