@@ -77,12 +77,10 @@ export class Registry {
   /**
    * 根据插槽数据生成插槽实例
    * @param slotLiteral
-   * @param customComponentCreator
    */
-  createSlot(slotLiteral: SlotLiteral<any>,
-             customComponentCreator?: (componentLiteral: ComponentLiteral, index: number) => Component): Slot {
+  createSlot(slotLiteral: SlotLiteral<any>): Slot {
     const slot = new Slot(slotLiteral.schema)
-    return this.loadSlot(slot, slotLiteral, customComponentCreator)
+    return this.loadSlot(slot, slotLiteral)
   }
 
   /**
@@ -104,7 +102,7 @@ export class Registry {
    */
   createComponentByFactory(componentLiteral: ComponentLiteral,
                            factory: ComponentConstructor) {
-    return factory.fromJSON(this.textbus, componentLiteral)
+    return factory.fromJSON(this.textbus, componentLiteral.state)
   }
 
   /**
@@ -118,11 +116,10 @@ export class Registry {
 
   private loadSlot<T extends SlotLiteral<any>, U extends Slot>(
     slot: U,
-    slotLiteral: T,
-    customComponentCreator?: (componentLiteral: ComponentLiteral, index: number) => Component): U {
-    slotLiteral.content.forEach((item, index) => {
+    slotLiteral: T): U {
+    slotLiteral.content.forEach((item) => {
       if (typeof item !== 'string') {
-        const component = customComponentCreator ? customComponentCreator(item, index) : this.createComponent(item)
+        const component = this.createComponent(item)
         if (component) {
           slot.insert(component)
         }

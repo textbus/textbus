@@ -171,7 +171,7 @@ export interface TransformRule<ComponentState> {
   /**
    * 创建组件状态的工厂函数
    */
-  stateFactory?(): ComponentState
+  stateFactory?(slot: Slot | Slot[]): ComponentState
 
   /**
    * 当未被选中的组件转换且需要重新创建新组件时调用，如没有配置，或没有返回组件实例，则会按默认规则创建
@@ -201,7 +201,7 @@ function deltaToSlots(selection: Selection,
 
   let index = 0
   while (delta.length) {
-    const {insert, formats} = delta.shift()!
+    const { insert, formats } = delta.shift()!
     const b = canInsert(insert, newSlot)
     const oldIndex = index
     index += insert.length
@@ -247,16 +247,10 @@ function slotsToComponents(textbus: Textbus, slots: Slot[], rule: TransformRule<
     return componentInstances
   }
   if (rule.multipleSlot) {
-    componentInstances.push(new rule.target(textbus, {
-      state: rule.stateFactory?.(),
-      slots
-    }))
+    componentInstances.push(new rule.target(textbus, rule.stateFactory?.(slots)))
   } else {
     slots.forEach(childSlot => {
-      componentInstances.push(new rule.target(textbus, {
-        state: rule.stateFactory?.(),
-        slots: [childSlot]
-      }))
+      componentInstances.push(new rule.target(textbus, rule.stateFactory?.(childSlot)))
     })
   }
   return componentInstances
@@ -387,7 +381,7 @@ export class Commander {
     if (!position) {
       return false
     }
-    const {slot, offset} = position
+    const { slot, offset } = position
     const event = new Event<Slot, InsertEventData>(slot, {
       index: offset,
       content,
@@ -466,7 +460,7 @@ export class Commander {
 
     while (isDeleteRanges && scopes.length) {
       const lastScope = scopes.pop()!
-      const {slot, startIndex} = lastScope
+      const { slot, startIndex } = lastScope
       const endIndex = lastScope.endIndex
       const isFocusEnd = selection.focusSlot === slot && selection.focusOffset === endIndex
       const event = new Event<Slot, DeleteEventData>(slot, {
@@ -665,7 +659,7 @@ export class Commander {
       const delta = pasteSlot.toDelta()
       const afterDelta = new DeltaLite()
       while (delta.length) {
-        const {insert, formats} = delta.shift()!
+        const { insert, formats } = delta.shift()!
         const commonAncestorSlot = selection.commonAncestorSlot!
         if (canInsert(insert, commonAncestorSlot)) {
           this.insert(insert, formats)
@@ -700,7 +694,7 @@ export class Commander {
       }
       const snapshot = this.selection.createSnapshot()
       while (afterDelta.length) {
-        const {insert, formats} = afterDelta.shift()!
+        const { insert, formats } = afterDelta.shift()!
         this.insert(insert, formats)
       }
       snapshot.restore()
@@ -899,7 +893,7 @@ export class Commander {
   }
 
   private transformByRange<T>(rule: TransformRule<T>, abstractSelection: AbstractSelection, range: Range): boolean {
-    const {startSlot, startOffset, endSlot, endOffset} = range
+    const { startSlot, startOffset, endSlot, endOffset } = range
     const selection = this.selection
     const commonAncestorSlot = Selection.getCommonAncestorSlot(startSlot, endSlot)
     const commonAncestorComponent = Selection.getCommonAncestorComponent(startSlot, endSlot)
@@ -953,7 +947,7 @@ export class Commander {
         endIndex: 0
       } : getBlockRangeToBegin(startScope.slot, startScope.offset)
 
-      const {slot, startIndex, endIndex} = scope
+      const { slot, startIndex, endIndex } = scope
       const parentComponent = slot.parent!
 
       if (!parentComponent.separate && parentComponent.__slots__.length > 1 && !slot.schema.includes(rule.target.type)) {

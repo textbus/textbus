@@ -6,6 +6,8 @@ import { ArrayModel } from './array-model'
 export interface InsertAction {
   type: 'insert'
   data: any
+  ref: any
+  isSlot: boolean
 }
 
 export interface RetainAction {
@@ -28,6 +30,8 @@ export interface PropSetAction {
   type: 'propSet'
   key: string
   value: any
+  ref: any
+  isSlot: boolean
 }
 
 export interface AttrDeleteAction {
