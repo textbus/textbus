@@ -45,9 +45,9 @@ function canInsert(content: string | Component, target: Slot) {
 
 function getNextInsertPosition(currentSlot: Slot, content: string | Component, excludeSlots: Slot[]): SelectionPosition | null {
   const parentComponent = currentSlot.parent!
-  const slotIndex = parentComponent.slots.indexOf(currentSlot)
-  if (currentSlot !== parentComponent.slots.last) {
-    return getInsertPosition(parentComponent.slots.get(slotIndex + 1)!, 0, content, excludeSlots)
+  const slotIndex = parentComponent.__slots__.indexOf(currentSlot)
+  if (currentSlot !== parentComponent.__slots__.last) {
+    return getInsertPosition(parentComponent.__slots__.get(slotIndex + 1)!, 0, content, excludeSlots)
   }
   const parentSlot = parentComponent.parent
   if (!parentSlot) {
@@ -68,8 +68,8 @@ function getNextInsertPosition(currentSlot: Slot, content: string | Component, e
     return typeof i !== 'string'
   }).shift()
 
-  if (firstComponent && firstComponent.slots.length) {
-    return getInsertPosition(firstComponent.slots.get(0)!, 0, content, excludeSlots)
+  if (firstComponent && firstComponent.__slots__.length) {
+    return getInsertPosition(firstComponent.__slots__.get(0)!, 0, content, excludeSlots)
   }
 
   return getNextInsertPosition(parentSlot, content, excludeSlots)
@@ -97,7 +97,7 @@ function deleteUpBySlot(selection: Selection,
   const index = parentSlot.indexOf(parentComponent)
 
   // 单插槽组件
-  if (parentComponent.slots.length === 1) {
+  if (parentComponent.__slots__.length === 1) {
     if (parentComponent === rootComponent) {
       return {
         slot,
@@ -130,24 +130,13 @@ function deleteUpBySlot(selection: Selection,
     }
   }
   // 多插槽组件
-  const slotIndex = parentComponent.slots.indexOf(slot)
+  const slotIndex = parentComponent.__slots__.indexOf(slot)
   const position: SelectionPosition = slotIndex === 0 ? {
     slot: parentSlot,
     offset: index
-  } : selection.findLastPosition(parentComponent.slots.get(slotIndex - 1)!, true)
+  } : selection.findLastPosition(parentComponent.__slots__.get(slotIndex - 1)!, true)
 
-  const event = new Event<Component, DeleteEventData>(parentComponent, {
-    index: slotIndex,
-    count: 1,
-    toEnd: !deleteBefore,
-    actionType: 'delete'
-  })
-  invokeListener(parentComponent, 'onSlotRemove', event)
-  if (!event.isPrevented) {
-    const isSuccess = parentComponent.slots.remove(slot)
-    if (isSuccess) {
-      invokeListener(parentComponent, 'onSlotRemoved', new Event(parentComponent, null))
-    }
+  if (parentComponent.removeSlot?.(slot)) {
     return position
   }
   return {
@@ -194,11 +183,11 @@ export interface TransformRule<ComponentState> {
 }
 
 function deltaToSlots(selection: Selection,
-                         source: Slot,
-                         delta: DeltaLite,
-                         rule: TransformRule<any>,
-                         abstractSelection: AbstractSelection,
-                         offset: number): Slot[] {
+                      source: Slot,
+                      delta: DeltaLite,
+                      rule: TransformRule<any>,
+                      abstractSelection: AbstractSelection,
+                      offset: number): Slot[] {
   const parentComponent = source.parent!
   const context: TransformContext = {
     parentComponentName: parentComponent.name,
@@ -212,7 +201,7 @@ function deltaToSlots(selection: Selection,
 
   let index = 0
   while (delta.length) {
-    const { insert, formats } = delta.shift()!
+    const {insert, formats} = delta.shift()!
     const b = canInsert(insert, newSlot)
     const oldIndex = index
     index += insert.length
@@ -239,7 +228,7 @@ function deltaToSlots(selection: Selection,
       abstractSelection.focusOffset -= index
     }
     if (typeof insert !== 'string') {
-      const slots = insert.slots.toArray().map(childSlot => {
+      const slots = insert.__slots__.map(childSlot => {
         return deltaToSlots(selection, source, childSlot.toDelta(), rule, abstractSelection, offset)
       }).flat()
       newSlots.push(...slots)
@@ -398,7 +387,7 @@ export class Commander {
     if (!position) {
       return false
     }
-    const { slot, offset } = position
+    const {slot, offset} = position
     const event = new Event<Slot, InsertEventData>(slot, {
       index: offset,
       content,
@@ -477,7 +466,7 @@ export class Commander {
 
     while (isDeleteRanges && scopes.length) {
       const lastScope = scopes.pop()!
-      const { slot, startIndex } = lastScope
+      const {slot, startIndex} = lastScope
       const endIndex = lastScope.endIndex
       const isFocusEnd = selection.focusSlot === slot && selection.focusOffset === endIndex
       const event = new Event<Slot, DeleteEventData>(slot, {
@@ -676,7 +665,7 @@ export class Commander {
       const delta = pasteSlot.toDelta()
       const afterDelta = new DeltaLite()
       while (delta.length) {
-        const { insert, formats } = delta.shift()!
+        const {insert, formats} = delta.shift()!
         const commonAncestorSlot = selection.commonAncestorSlot!
         if (canInsert(insert, commonAncestorSlot)) {
           this.insert(insert, formats)
@@ -686,19 +675,14 @@ export class Commander {
         afterDelta.push(...commonAncestorSlot.cut(selection.startOffset!).toDelta())
         const parentComponent = commonAncestorSlot.parent!
 
-        if (commonAncestorSlot === parentComponent.slots.last) {
+        if (commonAncestorSlot === parentComponent.__slots__.last) {
           this.insert(insert, formats)
           continue
         }
         if (parentComponent.separate) {
-          const index = parentComponent.slots.indexOf(commonAncestorSlot)
-          const nextSlots = parentComponent.slots.cut(index + 1)
-          const nextComponent = this.registry.createComponentByData(parentComponent.name, {
-            state: typeof parentComponent.state === 'object' && parentComponent.state !== null ?
-              JSON.parse(JSON.stringify(parentComponent.state)) :
-              parentComponent.state,
-            slots: nextSlots
-          })!
+          const index = parentComponent.__slots__.indexOf(commonAncestorSlot)
+          const nextSlot = parentComponent.__slots__.get(index + 1)
+          const nextComponent = parentComponent.separate(nextSlot)
           afterDelta.push({
             insert: nextComponent,
             formats: []
@@ -710,13 +694,13 @@ export class Commander {
           this.insert(insert, formats)
           continue
         }
-        for (const childSlot of insert.slots.toArray()) {
+        for (const childSlot of insert.__slots__) {
           delta.unshift(...childSlot.toDelta())
         }
       }
       const snapshot = this.selection.createSnapshot()
       while (afterDelta.length) {
-        const { insert, formats } = afterDelta.shift()!
+        const {insert, formats} = afterDelta.shift()!
         this.insert(insert, formats)
       }
       snapshot.restore()
@@ -724,7 +708,7 @@ export class Commander {
       if (currentContent &&
         typeof currentContent !== 'string' &&
         currentContent.type === ContentType.BlockComponent &&
-        currentContent.slots.length > 0) {
+        currentContent.__slots__.length > 0) {
         selection.toNext()
       }
     }
@@ -831,7 +815,7 @@ export class Commander {
         i.slot.setAttribute(attribute, value)
       } else {
         childComponents.forEach(i => {
-          i.slots.toArray().forEach(slot => {
+          i.__slots__.forEach(slot => {
             slot.setAttribute(attribute, value)
           })
         })
@@ -864,7 +848,7 @@ export class Commander {
         i.slot.removeAttribute(attribute)
       } else {
         childComponents.forEach(i => {
-          i.slots.toArray().forEach(slot => {
+          i.__slots__.forEach(slot => {
             slot.removeAttribute(attribute)
           })
         })
@@ -891,7 +875,7 @@ export class Commander {
         i.slot.cleanAttributes(excludeAttributes)
       } else {
         childComponents.forEach(i => {
-          i.slots.toArray().forEach(slot => {
+          i.__slots__.forEach(slot => {
             slot.cleanAttributes(excludeAttributes)
           })
         })
@@ -915,7 +899,7 @@ export class Commander {
   }
 
   private transformByRange<T>(rule: TransformRule<T>, abstractSelection: AbstractSelection, range: Range): boolean {
-    const { startSlot, startOffset, endSlot, endOffset } = range
+    const {startSlot, startOffset, endSlot, endOffset} = range
     const selection = this.selection
     const commonAncestorSlot = Selection.getCommonAncestorSlot(startSlot, endSlot)
     const commonAncestorComponent = Selection.getCommonAncestorComponent(startSlot, endSlot)
@@ -941,33 +925,9 @@ export class Commander {
 
     const parentComponent = startScope.slot.parent!
     if (parentComponent.separate) {
-      if (startScope.slot !== parentComponent.slots.last) {
-        const slotIndex = parentComponent.slots.indexOf(startScope.slot)
-        const count = parentComponent.slots.length - slotIndex
-        const event = new Event(parentComponent, {
-          index: slotIndex + 1,
-          count: count - 1,
-          toEnd: false
-        })
-        invokeListener(parentComponent, 'onSlotRemove', event)
-        if (!event.isPrevented) {
-          const deletedSlots = parentComponent.slots.cut(slotIndex + 1, slotIndex + count)
-          const newState = typeof parentComponent.state === 'object' ?
-            JSON.parse(JSON.stringify(parentComponent.state)) :
-            parentComponent.state
-
-          let afterComponent: Component | null = null
-          if (typeof rule.existingComponentTransformer === 'function') {
-            afterComponent = rule.existingComponentTransformer(parentComponent.name, deletedSlots, newState) || null
-          }
-          if (!afterComponent) {
-            afterComponent = this.registry.createComponentByData(parentComponent.name, {
-              state: newState,
-              slots: deletedSlots
-            })
-          }
-          this.insertAfter(afterComponent!, parentComponent)
-        }
+      if (startScope.slot !== parentComponent.__slots__.last) {
+        const afterComponent = parentComponent.separate(startScope.slot)
+        this.insertAfter(afterComponent!, parentComponent)
       }
     }
 
@@ -993,10 +953,10 @@ export class Commander {
         endIndex: 0
       } : getBlockRangeToBegin(startScope.slot, startScope.offset)
 
-      const { slot, startIndex, endIndex } = scope
+      const {slot, startIndex, endIndex} = scope
       const parentComponent = slot.parent!
 
-      if (!parentComponent.separate && parentComponent.slots.length > 1 && !slot.schema.includes(rule.target.type)) {
+      if (!parentComponent.separate && parentComponent.__slots__.length > 1 && !slot.schema.includes(rule.target.type)) {
         // 无法转换的情况
         const componentInstances = slotsToComponents(this.textbus, slots, rule)
         componentInstances.forEach(instance => {
@@ -1016,7 +976,7 @@ export class Commander {
           }
           break
         }
-        if (parentComponent.separate || parentComponent.slots.length === 1) {
+        if (parentComponent.separate || parentComponent.__slots__.length === 1) {
           const delta = slot.toDelta()
           slots.unshift(...deltaToSlots(selection, slot, delta, rule, abstractSelection, 0))
           position = deleteUpBySlot(selection, slot, 0, stoppedComponent, false)
@@ -1046,7 +1006,7 @@ export class Commander {
           continue
         }
         this.delete(deletedSlot => {
-          if (parentComponent.separate || parentComponent.slots.length === 1) {
+          if (parentComponent.separate || parentComponent.__slots__.length === 1) {
             const delta = deletedSlot.toDelta()
             slots.unshift(...deltaToSlots(selection, slot, delta, rule, abstractSelection, startIndex))
             if (startIndex > 0) {

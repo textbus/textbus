@@ -381,7 +381,7 @@ export class SelectionBridge implements NativeSelectionBridge {
       this.input.composition ||
       selection.rangeCount === 0 ||
       !this.docContainer.contains(selection.anchorNode) ||
-      this.rootComponentRef.component.slots.length === 0) {
+      this.rootComponentRef.component.__slots__.length === 0) {
       return
     }
     const rawRange = selection.getRangeAt(0)
@@ -390,13 +390,13 @@ export class SelectionBridge implements NativeSelectionBridge {
     const isFocusStart = selection.focusNode === nativeRange.startContainer && selection.focusOffset === nativeRange.startOffset
     if (!this.docContainer.contains(selection.focusNode)) {
       if (isFocusEnd) {
-        const nativeNode = this.domAdapter.getNativeNodeBySlot(this.rootComponentRef.component.slots.first!)
+        const nativeNode = this.domAdapter.getNativeNodeBySlot(this.rootComponentRef.component.__slots__.first!)
         if (!nativeNode) {
           return
         }
         nativeRange.setEndAfter(nativeNode.lastChild!)
       } else {
-        const nativeNode = this.domAdapter.getNativeNodeBySlot(this.rootComponentRef.component.slots.last!)
+        const nativeNode = this.domAdapter.getNativeNodeBySlot(this.rootComponentRef.component.__slots__.last!)
         if (!nativeNode) {
           return
         }

@@ -105,7 +105,7 @@ export class Query {
       }
       const states: QueryState<T>[] = []
       for (const component of childComponents) {
-        const slots = component.slots
+        const slots = component.__slots__
         if (slots.length === 0) {
           if (i.slot.hasAttribute(attribute)) {
             states.push({
@@ -119,7 +119,7 @@ export class Query {
             }
           }
         }
-        for (const slot of slots.toArray()) {
+        for (const slot of slots) {
           if (slot.hasAttribute(attribute)) {
             states.push({
               state: QueryStateType.Enabled,
@@ -241,7 +241,7 @@ export class Query {
     let index = startIndex
 
     for (const child of childContents) {
-      if (typeof child === 'string' || child.slots.length === 0) {
+      if (typeof child === 'string' || child.__slots__.length === 0) {
         const formats = slot.getFormatRangesByFormatter(formatter, index, index + child.length)
         let s = index
         for (const f of formats) {
@@ -266,7 +266,7 @@ export class Query {
           }
         }
       } else {
-        child.slots.toArray().forEach(i => {
+        child.__slots__.forEach(i => {
           states.push(this.getStatesByRange(i, formatter, 0, i.length))
         })
       }

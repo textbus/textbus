@@ -1,5 +1,5 @@
 import { Component, ComponentLiteral } from './component'
-import { Slot, SlotLiteral } from './slot'
+import { Slot } from './slot'
 import { MapModel } from './map-model'
 import { ArrayModel } from './array-model'
 
@@ -41,12 +41,6 @@ export interface AttrSetAction {
   value: any
 }
 
-export interface SlotInsertAction {
-  type: 'insertSlot'
-  slot: SlotLiteral<any>
-  ref: Slot
-}
-
 export interface ContentInsertAction {
   type: 'contentInsert'
   content: string | ComponentLiteral
@@ -57,7 +51,6 @@ export interface ContentInsertAction {
 export type Action = InsertAction |
   RetainAction |
   DeleteAction |
-  SlotInsertAction |
   ContentInsertAction |
   PropDeleteAction |
   PropSetAction |

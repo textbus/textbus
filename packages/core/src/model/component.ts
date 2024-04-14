@@ -1,14 +1,13 @@
-import { Subscription } from '@tanbo/stream'
 import { AbstractType, Type, InjectionToken, InjectFlags } from '@viewfly/core'
 
 import { makeError } from '../_utils/make-error'
 import { ContentType, Slot } from './slot'
 import { Formats } from './format'
 import { ChangeMarker } from './change-marker'
-import { Slots } from './slots'
 import { State } from './types'
 import { Textbus } from '../textbus'
 import { MapModel } from './map-model'
+import { Slots } from './slots'
 
 const componentErrorFn = makeError('Component')
 
@@ -53,6 +52,8 @@ export interface Component<T extends State = State> {
   separate?(start?: Slot, end?: Slot): Component<T>
 
   setup?(): void
+
+  removeSlot?(slot: Slot): boolean
 }
 
 /**
@@ -78,8 +79,11 @@ export abstract class Component<T extends State = State> {
   changeMarker = new ChangeMarker()
   /** 组件长度，固定为 1 */
   length = 1
-  /** 组件的子插槽集合 */
-  readonly slots = new Slots(this)
+  /**
+   * 组件的子插槽集合
+   * @internal
+   */
+  readonly __slots__ = new Slots()
   /** 组件动态上下文菜单注册表 */
   readonly shortcutList: Shortcut[] = []
   /** 组件名 */
@@ -89,10 +93,10 @@ export abstract class Component<T extends State = State> {
   /** 组件状态 */
   state = new MapModel<T>(this)
 
-  constructor(textbus: Textbus,
-              initData: T = {} as T) {
+  protected constructor(textbus: Textbus,
+                        initData: T = {} as T) {
 
-    const { componentName, type } = this.constructor as ComponentConstructor
+    const {componentName, type} = this.constructor as ComponentConstructor
     this.name = componentName
     this.type = type
 
@@ -109,18 +113,24 @@ export abstract class Component<T extends State = State> {
     if (typeof this.setup === 'function') {
       this.setup()
     }
+    const sub = this.state.changeMarker.onChange.subscribe(op => {
+      if (this.parent) {
+        const index = this.parent.indexOf(op)
+        op.path.unshift(index)
+      }
+      if (this.state.changeMarker.dirty) {
+        this.changeMarker.markAsDirtied(op)
+      } else {
+        this.changeMarker.markAsChanged(op)
+      }
+
+    })
     onDestroy(() => {
       eventCacheMap.delete(this)
-      subscriptions.forEach(i => i.unsubscribe())
+      sub.unsubscribe()
     })
     eventCacheMap.set(this, context.eventCache)
     contextStack.pop()
-
-    const subscriptions: Subscription[] = [
-      this.slots.onChange.subscribe(ops => {
-        this.changeMarker.markAsDirtied(ops)
-      })
-    ]
   }
 
   /**
@@ -137,7 +147,7 @@ export abstract class Component<T extends State = State> {
    * 将组件转换为 string
    */
   toString(): string {
-    return this.slots.toString()
+    return this.__slots__.toString()
   }
 }
 
@@ -193,18 +203,6 @@ export interface DeleteEventData {
   toEnd: boolean
   /** 删除内容还是移动内容 */
   actionType: 'delete' | 'move'
-}
-
-/**
- * 插槽删除事件对象
- */
-export interface SlotRemoveEventData {
-  /** 删除数据的位置 */
-  index: number
-  /** 删除数据的长度 */
-  count: number
-  /** 是否是向结束位置删除 */
-  toEnd: boolean
 }
 
 /**
@@ -298,11 +296,6 @@ export interface EventTypes {
   onContentInsert: (event: Event<Slot, InsertEventData>) => void
   onContentDelete: (event: Event<Slot, DeleteEventData>) => void
   onContentDeleted: (event: Event<Slot>) => void
-
-  // onSlotInserted: (event: Event<Slot, InsertEventData>) => void
-  // onSlotInsert: (event: Event<Slot, InsertEventData>) => void
-  onSlotRemove: (event: Event<Component, SlotRemoveEventData>) => void
-  onSlotRemoved: (event: Event<Component>) => void
 
   onGetRanges: (event: GetRangesEvent<Component>) => void
   onCompositionStart: (event: Event<Slot, CompositionStartEventData>) => void
@@ -440,9 +433,6 @@ export function invokeListener(target: Component, eventType: 'onContentInsert', 
 export function invokeListener(target: Component, eventType: 'onContentInserted', event: Event<Slot, InsertEventData>): void
 export function invokeListener(target: Component, eventType: 'onContentDelete', event: Event<Slot, DeleteEventData>): void
 export function invokeListener(target: Component, eventType: 'onContentDeleted', event: Event<Slot>): void
-// eslint-disable-next-line max-len
-export function invokeListener(target: Component, eventType: 'onSlotRemove', event: Event<Component, SlotRemoveEventData>): void
-export function invokeListener(target: Component, eventType: 'onSlotRemoved', event: Event<Component>): void
 export function invokeListener(target: Component, eventType: 'onBreak', event: Event<Slot, BreakEventData>): void
 export function invokeListener(target: Component, eventType: 'onContextMenu', event: ContextMenuEvent<Component>): void
 export function invokeListener(target: Component, eventType: 'onPaste', event: Event<Slot, PasteEventData>): void
@@ -561,16 +551,6 @@ export const onPaste = makeEventHook('onPaste')
  * 组件右键菜单事件勾子
  */
 export const onContextMenu = makeEventHook('onContextMenu')
-
-/**
- * 组件子插槽删除时的勾子
- */
-export const onSlotRemove = makeEventHook('onSlotRemove')
-
-/**
- * 组件子插槽删除完成时的勾子
- */
-export const onSlotRemoved = makeEventHook('onSlotRemoved')
 
 /**
  * 组件子插槽内容删除时的勾子

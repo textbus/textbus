@@ -47,19 +47,20 @@ export class MapModel<T extends State> {
       }
     }
     if (value as any instanceof Slot) {
-      this.from.slots.push(value)
+      value.parent = this.from
       model = value
     }
     if (model) {
+      const sub = model!.changeMarker.onChange.subscribe(ops => {
+        ops.path.unshift(key)
+        if (model!.changeMarker.dirty) {
+          this.changeMarker.markAsDirtied(ops)
+        } else {
+          this.changeMarker.markAsChanged(ops)
+        }
+      })
       model.destroyCallbacks.push(() => {
-        model!.changeMarker.onChange.subscribe(ops => {
-          ops.path.unshift(key)
-          if (model!.changeMarker.dirty) {
-            this.changeMarker.markAsDirtied(ops)
-          } else {
-            this.changeMarker.markAsChanged(ops)
-          }
-        })
+        sub.unsubscribe()
       })
     }
 

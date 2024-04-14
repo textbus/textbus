@@ -131,7 +131,7 @@ async function createEditor() {
 // textbus.render(rootModel)
 
   function App(props: ViewComponentProps<RootComponent>) {
-    const slot = props.component.slots.first
+    const slot = props.component.state.get('slot')
 
     return () => {
       return (
@@ -150,7 +150,8 @@ async function createEditor() {
   }
 
   function Paragraph(props: ViewComponentProps<ParagraphComponent>) {
-    const slot = props.component.slots.first
+    // props.component.
+    const slot = props.component.state.get('slot')
     return () => {
       return (
         adapter.slotRender(slot, children => {

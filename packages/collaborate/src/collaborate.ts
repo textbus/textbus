@@ -309,7 +309,7 @@ export class Collaborate implements History {
     let slots = root.get('slots') as YArray<YMap<any>>
     if (!slots) {
       slots = new YArray()
-      rootComponent.slots.toArray().forEach(i => {
+      rootComponent.__slots__.toArray().forEach(i => {
         const sharedSlot = this.createSharedSlotBySlot(i)
         slots.push([sharedSlot])
       })
@@ -322,7 +322,7 @@ export class Collaborate implements History {
         return root.get('state')
       })
       this.yDoc.transact(() => {
-        rootComponent.slots.toArray().forEach(i => {
+        rootComponent.__slots__.toArray().forEach(i => {
           const sharedSlot = this.createSharedSlotBySlot(i)
           slots.push([sharedSlot])
         })
@@ -331,12 +331,12 @@ export class Collaborate implements History {
       rootComponent.updateState(() => {
         return root.get('state')
       })
-      rootComponent.slots.clean()
+      rootComponent.__slots__.clean()
       slots.forEach(sharedSlot => {
         const slot = this.createSlotBySharedSlot(sharedSlot)
         this.syncSlotContent(sharedSlot.get('content'), slot)
         this.syncSlotState(sharedSlot, slot)
-        rootComponent.slots.insert(slot)
+        rootComponent.__slots__.insert(slot)
       })
     }
     this.syncComponentState(root, rootComponent)
@@ -552,7 +552,7 @@ export class Collaborate implements History {
   }
 
   protected syncComponentSlots(remoteSlots: YArray<any>, component: Component) {
-    const slots = component.slots
+    const slots = component.__slots__
     const syncRemote = (ev, tr) => {
       this.runRemoteUpdate(tr, () => {
         let index = 0
@@ -667,7 +667,7 @@ export class Collaborate implements History {
     sharedComponent.set('name', component.name)
     const sharedSlots = new YArray()
     sharedComponent.set('slots', sharedSlots)
-    component.slots.toArray().forEach(slot => {
+    component.__slots__.toArray().forEach(slot => {
       const sharedSlot = this.createSharedSlotBySlot(slot)
       sharedSlots.push([sharedSlot])
     })
@@ -722,7 +722,7 @@ export class Collaborate implements History {
       slots
     })
     if (instance) {
-      instance.slots.toArray().forEach((slot, index) => {
+      instance.__slots__.toArray().forEach((slot, index) => {
         let sharedSlot = sharedSlots.get(index)
         if (!sharedSlot) {
           sharedSlot = this.createSharedSlotBySlot(slot)
@@ -795,7 +795,7 @@ export class Collaborate implements History {
         fn()
       }
     })
-    component.slots.toArray().forEach(slot => {
+    component.__slots__.toArray().forEach(slot => {
       this.cleanSubscriptionsBySlot(slot)
     })
   }

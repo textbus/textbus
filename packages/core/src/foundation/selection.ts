@@ -526,7 +526,7 @@ export class Selection {
    * @param isRestore
    */
   selectFirstPosition(componentInstance: Component, isRestore = false) {
-    const slots = componentInstance.slots
+    const slots = componentInstance.__slots__
     if (slots.length) {
       const first = slots.first!
       const { slot, offset } = this.findFirstPosition(first, false)
@@ -545,7 +545,7 @@ export class Selection {
    * @param isRestore
    */
   selectLastPosition(componentInstance: Component, isRestore = false) {
-    const slots = componentInstance.slots
+    const slots = componentInstance.__slots__
     if (slots.length) {
       const last = slots.last!
       const { slot, offset } = this.findLastPosition(last, false)
@@ -600,7 +600,7 @@ export class Selection {
    * @param isRestore
    */
   selectChildSlots(componentInstance: Component, isRestore = false) {
-    const slots = componentInstance.slots
+    const slots = componentInstance.__slots__
     if (slots.length) {
       const firstPosition = this.findFirstPosition(slots.first!, false)
       const lastPosition = this.findLastPosition(slots.last!, false)
@@ -672,7 +672,7 @@ export class Selection {
       let content: Component | string | null = null
       if (startSlot === this.startSlot) {
         if (startOffset === this.startOffset) {
-          const first = this.root.component.slots.first!
+          const first = this.root.component.__slots__.first!
           this.setPosition(first, 0)
         } else if (startOffset! - this.startOffset! === 1) {
           content = startSlot!.getContentAtIndex(this.startOffset!)
@@ -684,7 +684,7 @@ export class Selection {
         const event = new Event(content, null)
         invokeListener(content, 'onSelectionFromEnd', event)
         if (!event.isPrevented) {
-          if (content.slots.length === 0) {
+          if (content.__slots__.length === 0) {
             this.selectComponent(content)
           }
         } else {
@@ -720,7 +720,7 @@ export class Selection {
       let content: Component | string | null = null
       if (endSlot === this.endSlot) {
         if (endOffset === this.endOffset) {
-          const last = this.root.component.slots.last!
+          const last = this.root.component.__slots__.last!
           this.setPosition(last, last.length)
         } else if (this.endOffset! - endOffset! === 1) {
           content = endSlot!.getContentAtIndex(endOffset!)
@@ -732,7 +732,7 @@ export class Selection {
         const event = new Event(content, null)
         invokeListener(content, 'onSelectionFromFront', event)
         if (!event.isPrevented) {
-          if (content.slots.length === 0) {
+          if (content.__slots__.length === 0) {
             this.selectComponent(content)
           }
         } else {
@@ -894,7 +894,7 @@ export class Selection {
    * 选择整个文档
    */
   selectAll() {
-    const { first, last } = this.root.component.slots
+    const { first, last } = this.root.component.__slots__
     if (first && last) {
       this.setBaseAndExtent(first, 0, last, last.length)
       this.restore()
@@ -983,7 +983,7 @@ export class Selection {
     while (true) {
       const parent = startSlot.parent
       if (parent === ancestorComponent) {
-        startOffset = parent.slots.indexOf(startSlot)
+        startOffset = parent.__slots__.indexOf(startSlot)
         break
       }
       if (parent?.parent) {
@@ -995,7 +995,7 @@ export class Selection {
     while (true) {
       const parent = endSlot.parent
       if (parent === ancestorComponent) {
-        endOffset = parent.slots.indexOf(endSlot) + 1
+        endOffset = parent.__slots__.indexOf(endSlot) + 1
         break
       }
       if (parent?.parent) {
@@ -1036,7 +1036,7 @@ export class Selection {
   findFirstPosition(slot: Slot, toChild = true): SelectionPosition {
     const first = slot.getContentAtIndex(0)
     if (toChild && first && typeof first !== 'string') {
-      const firstChildSlot = first.slots.first
+      const firstChildSlot = first.__slots__.first
       if (firstChildSlot) {
         return this.findFirstPosition(firstChildSlot)
       }
@@ -1055,7 +1055,7 @@ export class Selection {
   findLastPosition(slot: Slot, toChild = true): SelectionPosition {
     const last = slot.getContentAtIndex(slot.length - 1)
     if (toChild && last && typeof last !== 'string') {
-      const lastChildSlot = last.slots.last
+      const lastChildSlot = last.__slots__.last
       if (lastChildSlot) {
         return this.findLastPosition(lastChildSlot)
       }
@@ -1129,7 +1129,7 @@ export class Selection {
       if (!parentComponent) {
         return null
       }
-      const slotIndex = parentComponent.slots.indexOf(slot)
+      const slotIndex = parentComponent.__slots__.indexOf(slot)
       paths.push(slotIndex)
 
       const parentSlot = parentComponent.parent
@@ -1162,7 +1162,7 @@ export class Selection {
       const current = slot.getContentAtIndex(offset)
 
       if (typeof current !== 'string') {
-        const firstChildSlot = current.slots.get(0)
+        const firstChildSlot = current.__slots__.get(0)
         if (firstChildSlot) {
           return this.findFirstPosition(firstChildSlot)
         }
@@ -1179,9 +1179,9 @@ export class Selection {
 
     while (slot) {
       const parentComponent = slot.parent!
-      const slotIndex = parentComponent.slots.indexOf(slot)
-      if (slotIndex < parentComponent.slots.length - 1) {
-        return this.findFirstPosition(parentComponent.slots.get(slotIndex + 1)!)
+      const slotIndex = parentComponent.__slots__.indexOf(slot)
+      if (slotIndex < parentComponent.__slots__.length - 1) {
+        return this.findFirstPosition(parentComponent.__slots__.get(slotIndex + 1)!)
       }
       const parentSlot = parentComponent.parent
       if (!parentSlot) {
@@ -1203,7 +1203,7 @@ export class Selection {
         const nextContent = parentSlot.getContentAtIndex(componentIndex + 1)
         if (nextContent) {
           if (typeof nextContent !== 'string') {
-            const nextFirstSlot = nextContent.slots.first
+            const nextFirstSlot = nextContent.__slots__.first
             if (nextFirstSlot) {
               return this.findFirstPosition(nextFirstSlot)
             }
@@ -1231,7 +1231,7 @@ export class Selection {
     if (offset > 0) {
       const prev = slot.getContentAtIndex(offset - 1)!
       if (prev && typeof prev !== 'string') {
-        const lastChildSlot = prev.slots.last
+        const lastChildSlot = prev.__slots__.last
         if (lastChildSlot) {
           return this.findLastPosition(lastChildSlot)
         }
@@ -1246,7 +1246,7 @@ export class Selection {
 
     while (slot) {
       const parentComponent = slot.parent!
-      const slots = parentComponent.slots
+      const slots = parentComponent.__slots__
       const slotIndex = slots.indexOf(slot)
       if (slotIndex > 0) {
         return this.findLastPosition(slots.get(slotIndex - 1)!)
@@ -1263,7 +1263,7 @@ export class Selection {
       if (componentIndex > 0) {
         const prevContent = parentSlot.getContentAtIndex(componentIndex - 1)
         if (prevContent && typeof prevContent !== 'string') {
-          const lastChildSlot = prevContent.slots.last
+          const lastChildSlot = prevContent.__slots__.last
           if (lastChildSlot) {
             return this.findLastPosition(lastChildSlot)
           }
@@ -1477,9 +1477,9 @@ export class Selection {
     let i = 0
     const contents = slot.sliceContent(startIndex, endIndex)
     contents.forEach(c => {
-      if (typeof c !== 'string' && c.type === ContentType.BlockComponent && c.slots.length !== 0) {
+      if (typeof c !== 'string' && c.type === ContentType.BlockComponent && c.__slots__.length !== 0) {
         newScope = null
-        c.slots.toArray().forEach(s => {
+        c.__slots__.forEach(s => {
           scopes.push(...this.decomposeSlotRange(s, 0, s.length))
         })
       } else if (!newScope) {
@@ -1600,7 +1600,7 @@ export class Selection {
 
       startParentComponent = startSlot.parent!
 
-      const childSlots = startParentComponent.slots
+      const childSlots = startParentComponent.__slots__
       const end = childSlots.indexOf(endSlot!)
       startSlotRefIndex = childSlots.indexOf(startSlot)
       if (startParentComponent !== commonAncestorComponent && end === -1) {
@@ -1628,7 +1628,7 @@ export class Selection {
       if (!endParentComponent) {
         break
       }
-      const childSlots = endParentComponent.slots
+      const childSlots = endParentComponent.__slots__
       const index = childSlots.indexOf(startSlot!)
 
       endSlotRefIndex = childSlots.indexOf(endSlot)
@@ -1649,7 +1649,7 @@ export class Selection {
     }
     const result: Omit<SlotRange, 'isStart' | 'isEnd'>[] = [...start]
     if (startParentComponent && startParentComponent === endParentComponent) {
-      const slots = startParentComponent.slots.slice(startSlotRefIndex! + 1, endSlotRefIndex!)
+      const slots = startParentComponent.__slots__.slice(startSlotRefIndex! + 1, endSlotRefIndex!)
       result.push(...slots.map(slot => {
         return {
           startIndex: 0,
@@ -1680,7 +1680,7 @@ export class Selection {
     }
     const firstSlotRefIndex = paths.shift()!
 
-    const slot = component.slots.get(firstSlotRefIndex)!
+    const slot = component.__slots__.get(firstSlotRefIndex)!
     if (paths.length === 0 || !slot) {
       return slot || null
     }

@@ -240,7 +240,7 @@ export class Textbus extends ReflectiveInjector {
       selection.restore()
       return
     }
-    const location = selection.findFirstPosition(rootComponentRef.component.slots.get(0)!)
+    const location = selection.findFirstPosition(rootComponentRef.component.__slots__.get(0)!)
     selection.setPosition(location.slot, location.offset)
     selection.restore()
   }
