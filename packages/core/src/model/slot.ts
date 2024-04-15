@@ -271,6 +271,10 @@ export class Slot {
         ops.paths.unshift(this.indexOf(content))
         this.changeMarker.markAsChanged(ops)
       })
+      sub.add(content.changeMarker.onTriggerPath.subscribe(paths => {
+        paths.unshift(this.indexOf(content))
+        this.changeMarker.triggerPath(paths)
+      }))
       sub.add(content.changeMarker.onChildComponentRemoved.subscribe(instance => {
         this.changeMarker.recordComponentRemoved(instance)
       }))
