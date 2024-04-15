@@ -96,7 +96,7 @@ export abstract class Component<T extends State = State> {
   protected constructor(textbus: Textbus,
                         initData: T = {} as T) {
 
-    const {componentName, type} = this.constructor as ComponentConstructor
+    const { componentName, type } = this.constructor as ComponentConstructor
     this.name = componentName
     this.type = type
 
@@ -119,7 +119,9 @@ export abstract class Component<T extends State = State> {
       } else {
         this.changeMarker.markAsChanged(op)
       }
-    })
+    }).add(this.state.changeMarker.onTriggerPath.subscribe(paths => {
+      this.changeMarker.triggerPath(paths)
+    }))
     onDestroy(() => {
       eventCacheMap.delete(this)
       sub.unsubscribe()

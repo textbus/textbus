@@ -79,6 +79,10 @@ export class ArrayModel<U extends SharedType<any>, T = ExtractDeltaType<U>> {
           this.changeMarker.markAsChanged(ops)
         }
       })
+      sub.add(model.changeMarker.onTriggerPath.subscribe(paths => {
+        paths.unshift(this.indexOf(model as T))
+        this.changeMarker.triggerPath(paths)
+      }))
       model.destroyCallbacks.push(() => {
         sub.unsubscribe()
       })
