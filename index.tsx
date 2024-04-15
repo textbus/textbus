@@ -8,7 +8,7 @@ import {
   FormatHostBindingRender,
   Formatter,
   onBreak,
-  onContentInsert,
+  onContentInsert, Registry,
   Selection,
   Slot,
   Textbus,
@@ -51,7 +51,8 @@ async function createEditor() {
     static componentName = 'RootComponent'
     static type = ContentType.BlockComponent
 
-    static fromJSON(textbus: Textbus, state: SingleSlot) {
+    static fromJSON(textbus: Textbus, state: any) {
+      state.slot = textbus.get(Registry).createSlot(state.slot)
       return new RootComponent(textbus, state)
     }
 
@@ -84,8 +85,9 @@ async function createEditor() {
 
     static type = ContentType.BlockComponent
 
-    static fromJSON(textbus: Textbus, state: SingleSlot) {
-      return new RootComponent(textbus, state)
+    static fromJSON(textbus: Textbus, state: any) {
+      state.slot = textbus.get(Registry).createSlot(state.slot)
+      return new ParagraphComponent(textbus, state)
     }
 
     constructor(textbus: Textbus, state: SingleSlot) {
@@ -105,7 +107,7 @@ async function createEditor() {
           slot: nextContent
         })
         commander.insertAfter(p, self)
-        selection.selectFirstPosition(p)
+        selection.setPosition(nextContent, 0)
       })
     }
   }

@@ -1,12 +1,17 @@
 import { Inject, Injectable } from '@viewfly/core'
 import { map, Observable, Subject, Subscription } from '@tanbo/stream'
 
-import { ArrayModel, Component, ComponentLiteral, Formats, MapModel, Operation, Slot } from '../model/_api'
-import { Selection, SelectionPaths } from './selection'
+import { ArrayModel, Component, ComponentLiteral, Formats, MapModel, Operation, Paths, Slot } from '../model/_api'
+import { Selection } from './selection'
 import { Registry } from './registry'
 import { HISTORY_STACK_SIZE, RootComponentRef } from './_injection-tokens'
 import { ChangeOrigin, Scheduler } from './scheduler'
 import { makeError } from '../_utils/make-error'
+
+interface SelectionPaths {
+  anchor: Paths
+  focus: Paths
+}
 
 /**
  * 每一次变更所产生的记录
@@ -136,7 +141,7 @@ export class LocalHistory extends History {
       this.scheduler.historyApplyTransact(() => {
         const item = this.historySequence[this.index]
         this.apply(item, false)
-        this.selection.usePaths(item.afterPaths)
+        this.usePaths(item.afterPaths)
       })
       this.index++
       this.forwardEvent.next()
@@ -152,7 +157,7 @@ export class LocalHistory extends History {
       this.scheduler.historyApplyTransact(() => {
         const item = this.historySequence[this.index - 1]
         this.apply(item, true)
-        this.selection.usePaths(item.beforePaths)
+        this.usePaths(item.beforePaths)
       })
       this.index--
       this.backEvent.next()
@@ -181,9 +186,9 @@ export class LocalHistory extends History {
   }
 
   private record() {
-    let beforePaths = this.selection.getPaths()
+    let beforePaths = this.getPaths()
     this.subscription = this.scheduler.onLocalChangeBefore.subscribe(() => {
-      beforePaths = this.selection.getPaths()
+      beforePaths = this.getPaths()
     }).add(this.scheduler.onDocChanged.pipe(map(changeItem => {
         const operations: Operation[] = []
         for (const item of changeItem) {
@@ -211,7 +216,7 @@ export class LocalHistory extends History {
         }
         this.historySequence.length = this.index
         this.index++
-        const afterPaths = this.selection.getPaths()
+        const afterPaths = this.getPaths()
         this.historySequence.push({
           operations,
           beforePaths,
@@ -222,7 +227,6 @@ export class LocalHistory extends History {
           this.index--
         }
         beforePaths = afterPaths
-        console.log(this.historySequence)
         this.pushEvent.next()
         this.changeEvent.next()
       })
@@ -237,30 +241,9 @@ export class LocalHistory extends History {
     operations.forEach(op => {
       const paths = [...op.paths]
       const actions = back ? op.unApply : op.apply
-      let currentModel: Component | Slot | MapModel<any> | ArrayModel<any> = this.rootComponentRef.component
-      while (paths.length) {
-        const path = paths.shift()
-        if (currentModel instanceof Component) {
-          currentModel = currentModel.state.get(path as string)
-          continue
-        }
-        if (currentModel instanceof Slot) {
-          currentModel = currentModel.getContentAtIndex(path as number) as Component
-          continue
-        }
-        if (currentModel instanceof MapModel) {
-          currentModel = currentModel.get(path as string)
-          continue
-        }
-        if (currentModel instanceof ArrayModel) {
-          currentModel = currentModel.get(path as number)
-          continue
-        }
-        throw historyErrorFn(`cannot find path ${path}`)
-      }
-
+      const currentModel = this.findModelByPaths(paths)
       if (!currentModel) {
-        throw historyErrorFn(`cannot find model in path ${paths.join('/')}`)
+        throw historyErrorFn(`the model for path \`${paths.join('/')}\` cannot be found in the document.`)
       }
 
       let model: any = currentModel
@@ -328,5 +311,58 @@ export class LocalHistory extends History {
         }
       })
     })
+  }
+
+  private getPaths(): SelectionPaths {
+    let anchor: Paths = []
+    let focus: Paths = []
+    if (this.selection.isSelected) {
+      anchor = this.selection.anchorSlot!.changeMarker.triggerPath([this.selection.anchorOffset!])
+      focus = this.selection.focusSlot!.changeMarker.triggerPath([this.selection.focusOffset!])
+    }
+    return {
+      anchor,
+      focus
+    }
+  }
+
+  private usePaths(paths: SelectionPaths) {
+    const anchorOffset = paths.anchor.pop()
+    const focusOffset = paths.focus.pop()
+    const anchorSlot = this.findModelByPaths(paths.anchor)
+    const focusSlot = this.findModelByPaths(paths.focus)
+
+    if (typeof anchorOffset === 'number' && typeof focusOffset === 'number' && anchorSlot instanceof Slot && focusSlot instanceof Slot) {
+      this.selection.setBaseAndExtent(anchorSlot, anchorOffset, focusSlot, focusOffset)
+    }
+  }
+
+  private findModelByPaths(paths: Paths) {
+    if (paths.length === 0) {
+      return null
+    }
+    let currentModel: Component | Slot | MapModel<any> | ArrayModel<any> = this.rootComponentRef.component
+    paths = [...paths]
+    while (paths.length) {
+      const path = paths.shift()
+      if (currentModel instanceof Component) {
+        currentModel = currentModel.state.get(path as string)
+        continue
+      }
+      if (currentModel instanceof Slot) {
+        currentModel = currentModel.getContentAtIndex(path as number) as Component
+        continue
+      }
+      if (currentModel instanceof MapModel) {
+        currentModel = currentModel.get(path as string)
+        continue
+      }
+      if (currentModel instanceof ArrayModel) {
+        currentModel = currentModel.get(path as number)
+        continue
+      }
+      throw historyErrorFn(`cannot find path ${path}`)
+    }
+    return currentModel || null
   }
 }

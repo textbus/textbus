@@ -52,7 +52,7 @@ export class MapModel<T extends State> {
       model = value as Slot
     }
     if (model) {
-      const sub = model!.changeMarker.onChange.subscribe(ops => {
+      const sub = model.changeMarker.onChange.subscribe(ops => {
         ops.paths.unshift(key)
         if (model!.changeMarker.dirty) {
           this.changeMarker.markAsDirtied(ops)
@@ -60,6 +60,10 @@ export class MapModel<T extends State> {
           this.changeMarker.markAsChanged(ops)
         }
       })
+      sub.add(model.changeMarker.onTriggerPath.subscribe(paths => {
+        paths.unshift(key)
+        this.changeMarker.triggerPath(paths)
+      }))
       model.destroyCallbacks.push(() => {
         sub.unsubscribe()
       })
