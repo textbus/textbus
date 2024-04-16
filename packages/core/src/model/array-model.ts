@@ -182,5 +182,58 @@ export class ArrayModel<U extends SharedType<any>, T = ExtractDeltaType<U>> {
   get(index: number) {
     return this._data[index]
   }
+
+  pop() {
+    this.retain(this.length - 1)
+    this.delete(1)
+  }
+
+  remove(item: T) {
+    const index = this._data.indexOf(item)
+    if (index > -1) {
+      this.retain(index)
+      this.delete(1)
+    }
+  }
+
+  insertByIndex(index: number, newItem: U) {
+    this.retain(index)
+    this.insert(newItem)
+  }
+
+  insertBefore(newItem: U, ref: T) {
+    const index = this._data.indexOf(ref)
+    if (index > -1) {
+      this.insertByIndex(index, newItem)
+    }
+  }
+
+  insertAfter(newItem: U, ref: T) {
+    const index = this._data.indexOf(ref)
+    if (index > -1) {
+      this.insertByIndex(index + 1, newItem)
+    }
+  }
+
+  find(fn: (item: T) => unknown) {
+    for (let i = 0; i < this._data.length; i++) {
+      const item = this._data[i]
+      const b = fn(item)
+      if (b) {
+        return item
+      }
+    }
+  }
+
+  findIndex(fn: (item: T) => unknown) {
+    for (let i = 0; i < this._data.length; i++) {
+      const item = this._data[i]
+      const b = fn(item)
+      if (b) {
+        return i
+      }
+    }
+    return -1
+  }
 }
 
