@@ -25,13 +25,13 @@ Node.prototype.removeChild = function (this: any, child: any) {
 
 const adapterError = makeError('ReactAdapter')
 
-export interface ViewComponentProps<T extends Component = Component> {
+export interface ViewComponentProps<T extends Component> {
   component: T
   rootRef: ((rootNode: HTMLElement) => void)
 }
 
 export interface ReactAdapterComponents {
-  [key: string]: (props: ViewComponentProps) => JSX.Element
+  [key: string]: (props: ViewComponentProps<any>) => JSX.Element
 }
 
 /**

@@ -20,13 +20,13 @@ import { DomAdapter } from '@textbus/platform-browser'
 
 const adapterError = makeError('ViewflyAdapter')
 
-export interface ViewComponentProps<T extends Component = Component> {
+export interface ViewComponentProps<T extends Component> {
   component: T
   rootRef: DynamicRef<HTMLElement>
 }
 
 export interface ViewflyAdapterComponents {
-  [key: string]: JSXInternal.ComponentSetup<ViewComponentProps>
+  [key: string]: JSXInternal.ComponentSetup<ViewComponentProps<any>>
 }
 
 /**
@@ -46,7 +46,7 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
     super(mount)
     let isRoot = true
     Object.keys(components).forEach(key => {
-      this.components[key] = (props: ViewComponentProps) => {
+      this.components[key] = (props: ViewComponentProps<Component>) => {
         const comp = getCurrentInstance()
         const textbusComponent = props.component
         textbusComponent.changeMarker.onChange.subscribe(() => {

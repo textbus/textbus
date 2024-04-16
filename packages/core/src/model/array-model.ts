@@ -1,8 +1,14 @@
-import { DestroyCallbacks, ExtractDeltaType, InsertAction, Operation, SharedType } from './types'
+import { DestroyCallbacks, InsertAction, Operation, SharedArray, SharedConstant, SharedMap, SharedType } from './types'
 import { Component } from './component'
 import { MapModel } from './map-model'
 import { ChangeMarker } from './change-marker'
 import { Slot } from './slot'
+
+export type ExtractDeltaType<T> =
+  T extends SharedArray<infer Item> ?
+    ArrayModel<Item> : T extends SharedMap<any> ?
+      MapModel<T>
+      : T extends SharedConstant ? T : never
 
 export class ArrayModel<U extends SharedType<any>, T = ExtractDeltaType<U>> {
   destroyCallbacks: DestroyCallbacks = []
@@ -14,6 +20,14 @@ export class ArrayModel<U extends SharedType<any>, T = ExtractDeltaType<U>> {
 
   get data(): T[] {
     return [...this._data]
+  }
+
+  get first() {
+    return this._data[0] || null
+  }
+
+  get last() {
+    return this._data[this._data.length - 1] || null
   }
 
   private _data: T[] = []
@@ -215,25 +229,58 @@ export class ArrayModel<U extends SharedType<any>, T = ExtractDeltaType<U>> {
     }
   }
 
-  find(fn: (item: T) => unknown) {
+  find(fn: (item: T, index: number) => unknown) {
     for (let i = 0; i < this._data.length; i++) {
       const item = this._data[i]
-      const b = fn(item)
+      const b = fn(item, i)
       if (b) {
         return item
       }
     }
   }
 
-  findIndex(fn: (item: T) => unknown) {
+  findIndex(fn: (item: T, index: number) => unknown) {
     for (let i = 0; i < this._data.length; i++) {
       const item = this._data[i]
-      const b = fn(item)
+      const b = fn(item, i)
       if (b) {
         return i
       }
     }
     return -1
   }
-}
 
+  some(fn: (item: T, index: number) => unknown) {
+    for (let i = 0; i < this._data.length; i++) {
+      const item = this._data[i]
+      const b = fn(item, i)
+      if (b) {
+        return true
+      }
+    }
+    return false
+  }
+
+  every(fn: (item: T, index: number) => unknown) {
+    for (let i = 0; i < this._data.length; i++) {
+      const item = this._data[i]
+      const b = fn(item, i)
+      if (!b) {
+        return false
+      }
+    }
+    return true
+  }
+
+  map<K>(fn: (item: T, index: number) => K): K[] {
+    return this._data.map(fn)
+  }
+
+  forEach(fn: (item: T, index: number) => void) {
+    this._data.forEach(fn)
+  }
+
+  slice(start?: number, end?: number) {
+    return this._data.slice(start, end)
+  }
+}
