@@ -63,29 +63,8 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
         onUpdated(() => {
           textbusComponent.changeMarker.rendered()
         })
-
-        return components[key](props)
-      }
-    })
-  }
-
-  componentRender(component: Component): JSXInternal.ViewNode {
-    const comp = this.components[component.name] || this.components['*']
-    if (comp) {
-
-      let ref = this.componentRefs.get(component)
-      if (!ref) {
-        ref = createDynamicRef<HTMLElement>(rootNode => {
-          this.componentRootElementCaches.set(component, rootNode)
-          return () => {
-            this.componentRootElementCaches.remove(component)
-          }
-        })
-        this.componentRefs.set(component, ref)
-      }
-      return jsx((props: any) => {
-
-        const instance = comp(props)
+        const component = props.component
+        const instance = components[key](props)
         if (typeof instance === 'function') {
           return () => {
             component.__slots__.length = 0
@@ -106,7 +85,24 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
             return vNode
           }
         }
-      }, {
+      }
+    })
+  }
+
+  componentRender(component: Component): JSXInternal.ViewNode {
+    const comp = this.components[component.name] || this.components['*']
+    if (comp) {
+      let ref = this.componentRefs.get(component)
+      if (!ref) {
+        ref = createDynamicRef<HTMLElement>(rootNode => {
+          this.componentRootElementCaches.set(component, rootNode)
+          return () => {
+            this.componentRootElementCaches.remove(component)
+          }
+        })
+        this.componentRefs.set(component, ref)
+      }
+      return jsx(comp, {
         component,
         rootRef: ref
       }, component.id)
