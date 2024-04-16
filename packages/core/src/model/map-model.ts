@@ -1,8 +1,15 @@
-import { DestroyCallbacks, State, TransferValueType } from './types'
+import { DestroyCallbacks, SharedMap, SharedType, State } from './types'
 import { Component } from './component'
 import { Slot } from './slot'
 import { ArrayModel } from './array-model'
 import { ChangeMarker } from './change-marker'
+
+export type TransferValueType<T> =
+  T extends Slot ? T :
+    T extends Array<infer Item> ?
+      Item extends SharedType<any> ?
+        ArrayModel<Item> : never :
+      T extends SharedMap<any> ? MapModel<T> : T
 
 export class MapModel<T extends State> {
   destroyCallbacks: DestroyCallbacks = []
