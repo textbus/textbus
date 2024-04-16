@@ -1,9 +1,7 @@
 import { createElement, JSX, ReactNode, useEffect, useState } from 'react'
 import { Subject } from '@tanbo/stream'
 import {
-  ComponentConstructor,
   Component,
-  ExtractComponentInstanceType,
   makeError,
   replaceEmpty,
   Slot,
@@ -27,8 +25,8 @@ Node.prototype.removeChild = function (this: any, child: any) {
 
 const adapterError = makeError('ReactAdapter')
 
-export interface ViewComponentProps<T extends ComponentConstructor = ComponentConstructor> {
-  component: ExtractComponentInstanceType<T>
+export interface ViewComponentProps<T extends Component = Component> {
+  component: T
   rootRef: ((rootNode: HTMLElement) => void)
 }
 
@@ -43,6 +41,7 @@ export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
   onViewUpdated = new Subject<void>()
 
   private components: Record<string, (props: {component: Component}) => JSX.Element> = {}
+  private componentRendingStack: Component[] = []
 
   constructor(components: ReactAdapterComponents,
               mount: (host: HTMLElement, root: JSX.Element) => (void | (() => void))) {
@@ -65,7 +64,9 @@ export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
         useEffect(() => {
           this.onViewUpdated.next()
         }, [updateKey])
-        return components[key]({
+        component.__slots__.length = 0
+        this.componentRendingStack.push(component)
+        const vNode = components[key]({
           component,
           rootRef: (rootNode: HTMLElement) => {
             if (rootNode) {
@@ -75,6 +76,8 @@ export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
             }
           }
         })
+        this.componentRendingStack.pop()
+        return vNode
       }
     })
   }
@@ -94,6 +97,8 @@ export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
   slotRender(slot: Slot,
              slotHostRender: (children: Array<VElement | VTextNode | Component>) => VElement,
              renderEnv?: any): JSX.Element {
+    const context = this.componentRendingStack[this.componentRendingStack.length - 1]!
+    context.__slots__.push(slot)
     const vElement = slot.toTree(slotHostRender, renderEnv)
     this.slotRootVElementCaches.set(slot, vElement)
 

@@ -1,9 +1,7 @@
 import { DefineComponent, getCurrentInstance, h, onMounted, onUnmounted, onUpdated, Ref, ref, VNode } from 'vue'
 import { Subject } from '@tanbo/stream'
 import {
-  ComponentConstructor,
   Component,
-  ExtractComponentInstanceType,
   makeError,
   replaceEmpty,
   Slot,
@@ -14,8 +12,8 @@ import { DomAdapter } from '@textbus/platform-browser'
 
 const adapterError = makeError('VueAdapter')
 
-export interface ViewComponentProps<T extends ComponentConstructor = ComponentConstructor> {
-  component: ExtractComponentInstanceType<T>
+export interface ViewComponentProps<T extends Component = Component> {
+  component: T
   rootRef: Ref<HTMLElement | undefined>
 }
 
@@ -31,6 +29,7 @@ export class Adapter extends DomAdapter<VNode, VNode> {
 
   private components: Record<string, DefineComponent<ViewComponentProps>> = {}
   private componentRefs = new WeakMap<Component, Ref<HTMLElement | undefined>>()
+  private componentRendingStack: Component[] = []
 
   constructor(components: VueAdapterComponents,
               mount: (host: HTMLElement, root: VNode) => (void | (() => void))) {
@@ -77,11 +76,15 @@ export class Adapter extends DomAdapter<VNode, VNode> {
         rootRef = ref<HTMLElement>()
         this.componentRefs.set(component, rootRef)
       }
-      return h(comp, {
+      component.__slots__.length = 0
+      this.componentRendingStack.push(component)
+      const vNode = h(comp, {
         component,
         rootRef,
         key: component.id
       })
+      this.componentRendingStack.pop()
+      return vNode
     }
     throw adapterError(`cannot found view component \`${component.name}\`!`)
   }
@@ -89,6 +92,8 @@ export class Adapter extends DomAdapter<VNode, VNode> {
   slotRender(slot: Slot,
              slotHostRender: (children: Array<VElement | VTextNode | Component>) => VElement,
              renderEnv?: any): VNode {
+    const context = this.componentRendingStack[this.componentRendingStack.length - 1]!
+    context.__slots__.push(slot)
     const vElement = slot.toTree(slotHostRender, renderEnv)
     this.slotRootVElementCaches.set(slot, vElement)
 
