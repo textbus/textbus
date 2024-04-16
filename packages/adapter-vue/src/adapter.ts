@@ -12,13 +12,13 @@ import { DomAdapter } from '@textbus/platform-browser'
 
 const adapterError = makeError('VueAdapter')
 
-export interface ViewComponentProps<T extends Component = Component> {
+export interface ViewComponentProps<T extends Component> {
   component: T
   rootRef: Ref<HTMLElement | undefined>
 }
 
 export interface VueAdapterComponents {
-  [key: string]: DefineComponent<ViewComponentProps>
+  [key: string]: DefineComponent<ViewComponentProps<any>>
 }
 
 /**
@@ -27,7 +27,7 @@ export interface VueAdapterComponents {
 export class Adapter extends DomAdapter<VNode, VNode> {
   onViewUpdated = new Subject<void>()
 
-  private components: Record<string, DefineComponent<ViewComponentProps>> = {}
+  private components: Record<string, DefineComponent<ViewComponentProps<any>>> = {}
   private componentRefs = new WeakMap<Component, Ref<HTMLElement | undefined>>()
   private componentRendingStack: Component[] = []
 
@@ -40,7 +40,7 @@ export class Adapter extends DomAdapter<VNode, VNode> {
       const vueComponent = components[key]
       const setup = vueComponent.setup!
       const self = this
-      vueComponent.setup = function (props: ViewComponentProps) {
+      vueComponent.setup = function (props: ViewComponentProps<Component>) {
         const component = props.component
         const vueInstance = getCurrentInstance()!
         const sub = component.changeMarker.onChange.subscribe(() => {

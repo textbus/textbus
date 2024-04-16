@@ -17,21 +17,88 @@ import {
   VElement,
   VTextNode,
 } from '@textbus/core'
-import { Adapter, ViewComponentProps } from '@textbus/adapter-viewfly'
+import { Adapter, ViewComponentProps, ViewflyAdapterComponents } from '@textbus/adapter-viewfly'
 import { createApp } from '@viewfly/platform-browser'
+import { createRef, JSXInternal } from '@viewfly/core'
 
 interface SingleSlot {
   slot: Slot
 }
+
+class RootComponent extends Component<SingleSlot> {
+  static componentName = 'RootComponent'
+  static type = ContentType.BlockComponent
+
+  static fromJSON(textbus: Textbus, state: any) {
+    state.slot = textbus.get(Registry).createSlot(state.slot)
+    return new RootComponent(textbus, state)
+  }
+
+  constructor(textbus: Textbus, state: SingleSlot) {
+    super(textbus, state)
+  }
+
+  override setup() {
+    const selection = useContext(Selection)
+    onContentInsert(ev => {
+      if (typeof ev.data.content === 'string' || ev.data.content.type !== ContentType.BlockComponent) {
+        const slot = new Slot([
+          ContentType.Text
+        ])
+        const p = new ParagraphComponent(this.textbus, {
+          slot
+        })
+        slot.insert(ev.data.content)
+        ev.target.insert(p)
+        selection.setPosition(slot, slot.index)
+        ev.preventDefault()
+      }
+    })
+  }
+}
+
+class ParagraphComponent extends Component<SingleSlot> {
+  static componentName = 'ParagraphComponent'
+
+  static type = ContentType.BlockComponent
+
+  static fromJSON(textbus: Textbus, state: any) {
+    state.slot = textbus.get(Registry).createSlot(state.slot)
+    return new ParagraphComponent(textbus, state)
+  }
+
+  constructor(textbus: Textbus, state: SingleSlot) {
+    super(textbus, state)
+  }
+
+  override setup() {
+    const context = useContext()
+    const commander = useContext(Commander)
+    const selection = useContext(Selection)
+    const self = useSelf()
+
+    onBreak(ev => {
+      ev.preventDefault()
+      const nextContent = ev.target.cut(ev.data.index)
+      const p = new ParagraphComponent(context, {
+        slot: nextContent
+      })
+      commander.insertAfter(p, self)
+      selection.setPosition(nextContent, 0)
+    })
+  }
+}
+
 
 async function createEditor() {
   if (!Intl.Segmenter) {
     const polyfill = await import('intl-segmenter-polyfill/dist/bundled');
     (Intl as any).Segmenter = await polyfill.createIntlSegmenterPolyfill()
   }
+
   const adapter = new Adapter({
-    RootComponent: App as any,
-    ParagraphComponent: Paragraph as any
+    [RootComponent.componentName]: App,
+    [ParagraphComponent.componentName]: Paragraph
   }, (host, root) => {
     const app = createApp(root)
     app.mount(host)
@@ -47,70 +114,6 @@ async function createEditor() {
     // useContentEditable: true
   })
 
-  class RootComponent extends Component<SingleSlot> {
-    static componentName = 'RootComponent'
-    static type = ContentType.BlockComponent
-
-    static fromJSON(textbus: Textbus, state: any) {
-      state.slot = textbus.get(Registry).createSlot(state.slot)
-      return new RootComponent(textbus, state)
-    }
-
-    constructor(textbus: Textbus, state: SingleSlot) {
-      super(textbus, state)
-      // this.state.get('slot').
-    }
-
-    override setup() {
-      const selection = useContext(Selection)
-      onContentInsert(ev => {
-        if (typeof ev.data.content === 'string' || ev.data.content.type !== ContentType.BlockComponent) {
-          const slot = new Slot([
-            ContentType.Text
-          ])
-          const p = new ParagraphComponent(textbus, {
-            slot
-          })
-          slot.insert(ev.data.content)
-          ev.target.insert(p)
-          selection.setPosition(slot, slot.index)
-          ev.preventDefault()
-        }
-      })
-    }
-  }
-
-  class ParagraphComponent extends Component<SingleSlot> {
-    static componentName = 'ParagraphComponent'
-
-    static type = ContentType.BlockComponent
-
-    static fromJSON(textbus: Textbus, state: any) {
-      state.slot = textbus.get(Registry).createSlot(state.slot)
-      return new ParagraphComponent(textbus, state)
-    }
-
-    constructor(textbus: Textbus, state: SingleSlot) {
-      super(textbus, state)
-    }
-
-    override setup() {
-      const context = useContext()
-      const commander = useContext(Commander)
-      const selection = useContext(Selection)
-      const self = useSelf()
-
-      onBreak(ev => {
-        ev.preventDefault()
-        const nextContent = ev.target.cut(ev.data.index)
-        const p = new ParagraphComponent(context, {
-          slot: nextContent
-        })
-        commander.insertAfter(p, self)
-        selection.setPosition(nextContent, 0)
-      })
-    }
-  }
 
   const textbus = new Textbus({
     components: [
@@ -182,6 +185,5 @@ async function createEditor() {
     }
   }
 }
-
 
 createEditor()

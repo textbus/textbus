@@ -1,7 +1,7 @@
 import { AbstractType, Type, InjectionToken, InjectFlags } from '@viewfly/core'
 
 import { makeError } from '../_utils/make-error'
-import { ContentType, Slot } from './slot'
+import { ContentType, Slot, SlotLiteral } from './slot'
 import { Formats } from './format'
 import { ChangeMarker } from './change-marker'
 import { State } from './types'
@@ -48,7 +48,7 @@ export interface ZenCodingGrammarInterceptor<Data = any> {
   generateInitData(content: string, textbus: Textbus): Data
 }
 
-export interface Component<T extends State = State> {
+export interface Component<T extends State> {
   separate?(start?: Slot, end?: Slot): Component<T>
 
   setup?(): void
@@ -93,8 +93,8 @@ export abstract class Component<T extends State = State> {
   /** 组件状态 */
   state = new MapModel<T>(this)
 
-  protected constructor(textbus: Textbus,
-                        initData: T = {} as T) {
+  constructor(public textbus: Textbus,
+              initData: T) {
 
     const { componentName, type } = this.constructor as ComponentConstructor
     this.name = componentName
@@ -148,6 +148,15 @@ export abstract class Component<T extends State = State> {
   }
 }
 
+export type ToLiteral<T> = T extends Slot ? SlotLiteral<any> :
+  T extends Array<infer Item> ? Array<ToLiteral<Item>> :
+    T extends Record<string, any> ? ComponentStateLiteral<T> : T
+
+
+export type ComponentStateLiteral<T extends State> = {
+  [Key in keyof T]: ToLiteral<T[Key]>
+}
+
 /**
  * Textbus 组件
  */
@@ -160,7 +169,7 @@ export interface ComponentConstructor<ComponentState extends State = State> exte
   zenCoding?: ZenCodingGrammarInterceptor<ComponentState> |
     ZenCodingGrammarInterceptor<ComponentState>[]
 
-  fromJSON(textbus: Textbus, data: any): Component<ComponentState>
+  fromJSON(textbus: Textbus, data: ComponentStateLiteral<ComponentState>): Component<ComponentState>
 }
 
 /**

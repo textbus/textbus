@@ -143,8 +143,8 @@ export class Query {
    * @param component 要查询的组件
    * @param filter 查询结构过滤函数，过滤不需要的数据
    */
-  queryComponent<T extends State>(
-    component: ComponentConstructor<T>,
+  queryComponent<T extends State, U extends ComponentConstructor<T>>(
+    component: U,
     filter?: (instance: Component<T>) => boolean): QueryState<Component<T>> {
     if (!this.selection.isSelected) {
       return {
@@ -157,7 +157,7 @@ export class Query {
       let parent = Selection.getCommonAncestorComponent(item.startSlot, item.endSlot)
 
       while (parent) {
-        if (parent.name === component.name) {
+        if (parent instanceof component) {
           if (!filter || filter(parent as Component<T>)) {
             return {
               state: QueryStateType.Enabled,
