@@ -14,7 +14,7 @@ export type TransferValueType<T> =
 export class MapModel<T extends State> {
   destroyCallbacks: DestroyCallbacks = []
   readonly changeMarker = new ChangeMarker()
-  readonly data = new Map<string, any>()
+  private data = new Map<string, any>()
 
   constructor(private from: Component) {
     this.destroyCallbacks.push(() => {
@@ -143,6 +143,19 @@ export class MapModel<T extends State> {
         ],
       })
     }
+  }
+
+  forEach<K extends Exclude<keyof T, number | symbol>,
+    V = TransferValueType<T[K]>>(fn: (value: V, key: K) => void) {
+    this.data.forEach((value, key) => {
+      fn(value, key as any)
+    })
+  }
+
+  clean() {
+    this.data.forEach((_, key) => {
+      this.remove(key as any)
+    })
   }
 
   destroy() {

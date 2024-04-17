@@ -56,11 +56,15 @@ export interface Component<T extends State> {
   removeSlot?(slot: Slot): boolean
 }
 
+export interface ComponentStateCreator<T extends State> {
+  (from: Component<T>): MapModel<T>
+}
+
 /**
  * 组件实例对象
  */
 export abstract class Component<T extends State = State> {
-  id = Math.random()
+  readonly id = Math.random()
   /**
    * 组件所在的插槽
    * @readonly
@@ -76,9 +80,9 @@ export abstract class Component<T extends State = State> {
   }
 
   /** 组件变化标识器 */
-  changeMarker = new ChangeMarker()
+  readonly changeMarker = new ChangeMarker()
   /** 组件长度，固定为 1 */
-  length = 1
+  readonly length = 1
   /**
    * 组件的子插槽集合
    * @internal
@@ -91,18 +95,22 @@ export abstract class Component<T extends State = State> {
   /** 组件类型 */
   readonly type: ContentType
   /** 组件状态 */
-  state = new MapModel<T>(this)
+  readonly state = new MapModel<T>(this)
 
   constructor(public textbus: Textbus,
-              initData: T) {
+              initData: T | ComponentStateCreator<T>) {
 
     const { componentName, type } = this.constructor as ComponentConstructor
     this.name = componentName
     this.type = type
 
-    Object.entries(initData).forEach(([key, value]) => {
-      this.state.set(key as any, value)
-    })
+    if (typeof initData === 'function') {
+      this.state = initData(this)
+    } else {
+      Object.entries(initData).forEach(([key, value]) => {
+        this.state.set(key as any, value)
+      })
+    }
 
     const context: ComponentContext = {
       textbus,
