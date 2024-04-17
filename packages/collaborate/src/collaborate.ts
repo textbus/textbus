@@ -13,7 +13,9 @@ import {
   Scheduler,
   Selection,
   SelectionPaths,
-  Slot
+  Slot,
+  ArrayModel,
+  MapModel
 } from '@textbus/core'
 import {
   Array as YArray,
@@ -25,7 +27,7 @@ import {
   UndoManager,
   createAbsolutePositionFromRelativePosition,
   createRelativePositionFromTypeIndex,
-  Item
+  Item, YArrayEvent, YMapEvent, YTextEvent
 } from 'yjs'
 
 const collaborateErrorFn = makeError('Collaborate')
@@ -35,7 +37,7 @@ interface CursorPosition {
   focus: RelativePosition
 }
 
-class ContentMap {
+class SlotMap {
   private slotAndYTextMap = new WeakMap<Slot, YText>()
   private yTextAndSLotMap = new WeakMap<YText, Slot>()
 
@@ -116,37 +118,32 @@ export class Collaborate implements History {
     return this.manager?.canRedo() || false
   }
 
-  protected backEvent = new Subject<void>()
-  protected forwardEvent = new Subject<void>()
-  protected changeEvent = new Subject<void>()
-  protected pushEvent = new Subject<void>()
+  private backEvent = new Subject<void>()
+  private forwardEvent = new Subject<void>()
+  private changeEvent = new Subject<void>()
+  private pushEvent = new Subject<void>()
 
-  protected manager: UndoManager | null = null
+  private manager: UndoManager | null = null
 
-  protected subscriptions: Subscription[] = []
-  protected updateFromRemote = false
+  private subscriptions: Subscription[] = []
+  private updateFromRemote = false
 
-  protected contentSyncCaches = new WeakMap<Slot, () => void>()
-  protected slotStateSyncCaches = new WeakMap<Slot, () => void>()
-  protected slotsSyncCaches = new WeakMap<Component, () => void>()
-  protected componentStateSyncCaches = new WeakMap<Component, () => void>()
+  private localChangesAppliedEvent = new Subject<void>()
+  private selectionChangeEvent = new Subject<SelectionPaths>()
+  private slotMap = new SlotMap()
 
-  protected localChangesAppliedEvent = new Subject<void>()
-  protected selectionChangeEvent = new Subject<SelectionPaths>()
-  protected contentMap = new ContentMap()
+  private updateRemoteActions: Array<UpdateItem> = []
+  private noRecord = {}
 
-  protected updateRemoteActions: Array<UpdateItem> = []
-  protected noRecord = {}
+  private historyItems: Array<CollaborateHistorySelectionPosition> = []
+  private index = 0
 
-  protected historyItems: Array<CollaborateHistorySelectionPosition> = []
-  protected index = 0
-
-  constructor(@Inject(HISTORY_STACK_SIZE) protected stackSize: number,
-              protected rootComponentRef: RootComponentRef,
-              protected scheduler: Scheduler,
-              protected registry: Registry,
-              protected selection: Selection,
-              @Optional() protected undoManagerConfig: CustomUndoManagerConfig) {
+  constructor(@Inject(HISTORY_STACK_SIZE) private stackSize: number,
+              private rootComponentRef: RootComponentRef,
+              private scheduler: Scheduler,
+              private registry: Registry,
+              private selection: Selection,
+              @Optional() private undoManagerConfig: CustomUndoManagerConfig) {
     this.onBack = this.backEvent.asObservable()
     this.onForward = this.forwardEvent.asObservable()
     this.onChange = this.changeEvent.asObservable()
@@ -182,7 +179,7 @@ export class Collaborate implements History {
       })
     )
 
-    manager.on('stack-item-added', event => {
+    manager.on('stack-item-added', (event: any) => {
       if (event.type === 'undo') {
         if (event.origin === manager) {
           this.index++
@@ -206,7 +203,7 @@ export class Collaborate implements History {
       }
       this.changeEvent.next()
     })
-    manager.on('stack-item-popped', (ev) => {
+    manager.on('stack-item-popped', (ev: any) => {
       const index = ev.type === 'undo' ? this.index : this.index - 1
       const position = this.historyItems[index] || null
       const p = ev.type === 'undo' ? position?.before : position?.after
@@ -305,50 +302,161 @@ export class Collaborate implements History {
     this.manager?.destroy()
   }
 
-  protected syncRootComponent(root: YMap<any>, rootComponent: Component) {
-    let slots = root.get('slots') as YArray<YMap<any>>
-    if (!slots) {
-      slots = new YArray()
-      rootComponent.__slots__.toArray().forEach(i => {
-        const sharedSlot = this.createSharedSlotBySlot(i)
-        slots.push([sharedSlot])
-      })
+  private syncRootComponent(root: YMap<any>, rootComponent: Component) {
+    let state = root.get('state') as YMap<any>
+    if (!state) {
+      state = new YMap<any>()
+      this.syncLocalMapToSharedMap(rootComponent.state, state, rootComponent)
       this.yDoc.transact(() => {
-        root.set('state', rootComponent.state)
-        root.set('slots', slots)
-      })
-    } else if (slots.length === 0) {
-      rootComponent.updateState(() => {
-        return root.get('state')
-      })
-      this.yDoc.transact(() => {
-        rootComponent.__slots__.toArray().forEach(i => {
-          const sharedSlot = this.createSharedSlotBySlot(i)
-          slots.push([sharedSlot])
-        })
+        root.set('state', state)
       })
     } else {
-      rootComponent.updateState(() => {
-        return root.get('state')
-      })
-      rootComponent.__slots__.clean()
-      slots.forEach(sharedSlot => {
-        const slot = this.createSlotBySharedSlot(sharedSlot)
-        this.syncSlotContent(sharedSlot.get('content'), slot)
-        this.syncSlotState(sharedSlot, slot)
-        rootComponent.__slots__.insert(slot)
-      })
+      rootComponent.state.clean()
+      this.syncSharedMapToLocalMap(state, rootComponent.state, rootComponent)
     }
-    this.syncComponentState(root, rootComponent)
-    this.syncComponentSlots(slots, rootComponent)
   }
 
-  protected getAbstractSelection(position: CursorPosition): AbstractSelection | null {
+  private syncSharedMapToLocalMap(sharedMap: YMap<any>, localMap: MapModel<any>, parent: Component<any>) {
+    sharedMap.forEach((value, key) => {
+      localMap.set(key, this.createLocalModelBySharedByModel(value, parent))
+    })
+    this.syncObject(sharedMap, localMap, parent)
+  }
+
+  private createLocalMapBySharedMap(sharedMap: YMap<any>, parent: Component<any>): MapModel<any> {
+    const localMap = new MapModel(parent)
+    this.syncSharedMapToLocalMap(sharedMap, localMap, parent)
+    return localMap
+  }
+
+  private createLocalArrayBySharedArray(sharedArray: YArray<any>, parent: Component<any>): ArrayModel<any> {
+    const localArray = new ArrayModel(parent)
+    sharedArray.forEach(item => {
+      localArray.insert(this.createLocalModelBySharedByModel(item, parent))
+    })
+    this.syncArray(sharedArray, localArray, parent)
+    return localArray
+  }
+
+  private syncLocalMapToSharedMap(localMap: MapModel<any>, sharedMap: YMap<any>, parent: Component<any>) {
+    localMap.forEach((value, key) => {
+      sharedMap.set(key, this.createSharedModelByLocalModel(value, parent))
+    })
+    this.syncObject(sharedMap, localMap, parent)
+  }
+
+  private createSharedMapByLocalMap(localMap: MapModel<any>, parent: Component<any>): YMap<any> {
+    const sharedMap = new YMap<any>()
+    this.syncLocalMapToSharedMap(localMap, sharedMap, parent)
+    return sharedMap
+  }
+
+  private createSharedArrayByLocalArray(localArray: ArrayModel<any>, parent: Component<any>): YArray<any> {
+    const sharedArray = new YArray<any>()
+    localArray.forEach(value => {
+      sharedArray.push([this.createSharedModelByLocalModel(value, parent)])
+    })
+    this.syncArray(sharedArray, localArray, parent)
+    return sharedArray
+  }
+
+  private createSharedSlotByLocalSlot(localSlot: Slot): YText {
+    const sharedSlot = new YText()
+    sharedSlot.setAttribute('__schema__', [...localSlot.schema])
+    let offset = 0
+    localSlot.toDelta().forEach(i => {
+      let formats: any = {}
+      if (i.formats) {
+        i.formats.forEach(item => {
+          formats[item[0].name] = item[1]
+        })
+      } else {
+        formats = null
+      }
+      if (typeof i.insert === 'string') {
+        sharedSlot.insert(offset, i.insert, formats)
+      } else {
+        const sharedComponent = this.createSharedComponentByLocalComponent(i.insert)
+        sharedSlot.insertEmbed(offset, sharedComponent, formats)
+      }
+      offset += i.insert.length
+    })
+    localSlot.getAttributes().forEach(item => {
+      sharedSlot.setAttribute(item[0].name, item[1])
+    })
+    this.syncSlot(sharedSlot, localSlot)
+    return sharedSlot
+  }
+
+  private createLocalSlotBySharedSlot(sharedSlot: YText): Slot {
+    const delta = sharedSlot.toDelta()
+    const localSlot = new Slot(sharedSlot.getAttribute('__schema__') || [])// TODO 这里有潜在的问题
+
+    const attrs = sharedSlot.getAttributes()
+    Object.keys(attrs).forEach(key => {
+      const attribute = this.registry.getAttribute(key)
+      if (attribute) {
+        localSlot.setAttribute(attribute, attrs[key])
+      }
+    })
+    for (const action of delta) {
+      if (action.insert) {
+        if (typeof action.insert === 'string') {
+          const formats = remoteFormatsToLocal(this.registry, action.attributes)
+          localSlot.insert(action.insert, formats)
+        } else {
+          const sharedComponent = action.insert as YMap<any>
+          const component = this.createLocalComponentBySharedComponent(sharedComponent)
+          localSlot.insert(component, remoteFormatsToLocal(this.registry, action.attributes))
+        }
+      } else {
+        throw collaborateErrorFn('unexpected delta action.')
+      }
+    }
+    this.syncSlot(sharedSlot, localSlot)
+    return localSlot
+  }
+
+  // private createSharedModelByLocalModel(sharedModel: YMap<any>, parent: Component<any>): MapModel<any>
+  // private createSharedModelByLocalModel(sharedModel: YArray<any>, parent: Component<any>): ArrayModel<any>
+  // private createSharedModelByLocalModel(sharedModel: YText, parent: Component<any>): Slot
+  // private createSharedModelByLocalModel(sharedModel: any, parent: Component<any>): any
+  private createSharedModelByLocalModel(sharedModel: any, parent: Component<any>) {
+    if (sharedModel instanceof MapModel) {
+      return this.createSharedMapByLocalMap(sharedModel, parent)
+    }
+    if (sharedModel instanceof ArrayModel) {
+      return this.createSharedArrayByLocalArray(sharedModel, parent)
+    }
+    if (sharedModel instanceof Slot) {
+      return this.createSharedSlotByLocalSlot(sharedModel)
+    }
+    return sharedModel
+  }
+
+  // private createLocalModelBySharedByModel(localModel: MapModel<any>, parent: Component<any>): MapModel<any>
+  // private createLocalModelBySharedByModel(localModel: ArrayModel<any>, parent: Component<any>): YArray<any>
+  // private createLocalModelBySharedByModel(localModel: Slot, parent: Component<any>): YText
+  // private createLocalModelBySharedByModel(localModel: any, parent: Component<any>): any
+  private createLocalModelBySharedByModel(localModel: any, parent: Component<any>) {
+    if (localModel instanceof YMap) {
+      return this.createLocalMapBySharedMap(localModel, parent)
+    }
+    if (localModel instanceof YArray) {
+      return this.createLocalArrayBySharedArray(localModel, parent)
+    }
+    if (localModel instanceof YText) {
+      return this.createLocalSlotBySharedSlot(localModel)
+    }
+    return localModel
+  }
+
+  private getAbstractSelection(position: CursorPosition): AbstractSelection | null {
     const anchorPosition = createAbsolutePositionFromRelativePosition(position.anchor, this.yDoc)
     const focusPosition = createAbsolutePositionFromRelativePosition(position.focus, this.yDoc)
     if (anchorPosition && focusPosition) {
-      const focusSlot = this.contentMap.get(focusPosition.type as YText)
-      const anchorSlot = this.contentMap.get(anchorPosition.type as YText)
+      const focusSlot = this.slotMap.get(focusPosition.type as YText)
+      const anchorSlot = this.slotMap.get(anchorPosition.type as YText)
       if (focusSlot && anchorSlot) {
         return {
           anchorSlot,
@@ -361,14 +469,14 @@ export class Collaborate implements History {
     return null
   }
 
-  protected getRelativeCursorLocation(): CursorPosition | null {
+  private getRelativeCursorLocation(): CursorPosition | null {
     const { anchorSlot, anchorOffset, focusSlot, focusOffset } = this.selection
     if (anchorSlot) {
-      const anchorYText = this.contentMap.get(anchorSlot)
+      const anchorYText = this.slotMap.get(anchorSlot)
       if (anchorYText) {
         const anchorPosition = createRelativePositionFromTypeIndex(anchorYText, anchorOffset!)
         if (focusSlot) {
-          const focusYText = this.contentMap.get(focusSlot)
+          const focusYText = this.slotMap.get(focusSlot)
           if (focusYText) {
             const focusPosition = createRelativePositionFromTypeIndex(focusYText, focusOffset!)
             return {
@@ -382,11 +490,10 @@ export class Collaborate implements History {
     return null
   }
 
-  protected syncSlotContent(content: YText, slot: Slot) {
-    this.contentMap.set(slot, content)
-    const syncRemote = (ev, tr) => {
+  private syncSlot(sharedSlot: YText, localSlot: Slot) {
+    const syncRemote = (ev: YTextEvent, tr: Transaction) => {
       this.runRemoteUpdate(tr, () => {
-        slot.retain(0)
+        localSlot.retain(0)
         ev.keysChanged.forEach(key => {
           const change = ev.keys.get(key)
           if (!change) {
@@ -396,12 +503,12 @@ export class Collaborate implements History {
           if (updateType === 'update' || updateType === 'add') {
             const attribute = this.registry.getAttribute(key)
             if (attribute) {
-              slot.setAttribute(attribute, content.getAttribute(key))
+              localSlot.setAttribute(attribute, sharedSlot.getAttribute(key))
             }
           } else if (updateType === 'delete') {
             const attribute = this.registry.getAttribute(key)
             if (attribute) {
-              slot.removeAttribute(attribute)
+              localSlot.removeAttribute(attribute)
             }
           }
         })
@@ -410,51 +517,49 @@ export class Collaborate implements History {
             if (action.attributes) {
               const formats = remoteFormatsToLocal(this.registry, action.attributes)
               if (formats.length) {
-                slot.retain(action.retain!, formats)
+                localSlot.retain(action.retain!, formats)
               }
-              slot.retain(slot.index + action.retain)
+              localSlot.retain(localSlot.index + action.retain!)
             } else {
-              slot.retain(action.retain)
+              localSlot.retain(action.retain!)
             }
           } else if (action.insert) {
-            const index = slot.index
+            const index = localSlot.index
             let length = 1
             if (typeof action.insert === 'string') {
               length = action.insert.length
-              slot.insert(action.insert, remoteFormatsToLocal(this.registry, action.attributes))
+              localSlot.insert(action.insert, remoteFormatsToLocal(this.registry, action.attributes))
             } else {
               const sharedComponent = action.insert as YMap<any>
-              const component = this.createComponentBySharedComponent(sharedComponent)
-              this.syncComponentSlots(sharedComponent.get('slots'), component)
-              this.syncComponentState(sharedComponent, component)
-              slot.insert(component)
+              const component = this.createLocalComponentBySharedComponent(sharedComponent)
+              localSlot.insert(component)
             }
             if (this.selection.isSelected && tr.origin !== this.manager) {
-              if (slot === this.selection.anchorSlot && this.selection.anchorOffset! > index) {
-                this.selection.setAnchor(slot, this.selection.anchorOffset! + length)
+              if (localSlot === this.selection.anchorSlot && this.selection.anchorOffset! > index) {
+                this.selection.setAnchor(localSlot, this.selection.anchorOffset! + length)
               }
-              if (slot === this.selection.focusSlot && this.selection.focusOffset! > index) {
-                this.selection.setFocus(slot, this.selection.focusOffset! + length)
+              if (localSlot === this.selection.focusSlot && this.selection.focusOffset! > index) {
+                this.selection.setFocus(localSlot, this.selection.focusOffset! + length)
               }
             }
           } else if (action.delete) {
-            const index = slot.index
-            slot.delete(action.delete)
+            const index = localSlot.index
+            localSlot.delete(action.delete)
             if (this.selection.isSelected && tr.origin !== this.manager) {
-              if (slot === this.selection.anchorSlot && this.selection.anchorOffset! >= index) {
-                this.selection.setAnchor(slot, this.selection.startOffset! - action.delete)
+              if (localSlot === this.selection.anchorSlot && this.selection.anchorOffset! >= index) {
+                this.selection.setAnchor(localSlot, this.selection.startOffset! - action.delete)
               }
-              if (slot === this.selection.focusSlot && this.selection.focusOffset! >= index) {
-                this.selection.setFocus(slot, this.selection.focusOffset! - action.delete)
+              if (localSlot === this.selection.focusSlot && this.selection.focusOffset! >= index) {
+                this.selection.setFocus(localSlot, this.selection.focusOffset! - action.delete)
               }
             }
           }
         })
       })
     }
-    content.observe(syncRemote)
+    sharedSlot.observe(syncRemote)
 
-    const sub = slot.onContentChange.subscribe(actions => {
+    const sub = localSlot.onContentChange.subscribe(actions => {
       this.runLocalUpdate(() => {
         let offset = 0
         let length = 0
@@ -472,173 +577,179 @@ export class Collaborate implements History {
                 }
               })
               if (length) {
-                content.format(offset, action.offset, formats)
+                sharedSlot.format(offset, action.offset, formats)
               }
             } else {
               offset = action.offset
             }
-          } else if (action.type === 'insert') {
-            const delta = content.toDelta()
+          } else if (action.type === 'contentInsert') {
+            const delta = sharedSlot.toDelta()
             const isEmpty = delta.length === 1 && delta[0].insert === Slot.emptyPlaceholder
             if (typeof action.content === 'string') {
               length = action.content.length
-              content.insert(offset, action.content, action.formats || {})
+              sharedSlot.insert(offset, action.content, action.formats || {})
             } else {
               length = 1
-              const sharedComponent = this.createSharedComponentByComponent(action.ref as Component)
-              content.insertEmbed(offset, sharedComponent, action.formats || {})
+              const sharedComponent = this.createSharedComponentByLocalComponent(action.ref as Component)
+              sharedSlot.insertEmbed(offset, sharedComponent, action.formats || {})
             }
 
             if (isEmpty && offset === 0) {
-              content.delete(content.length - 1, 1)
+              sharedSlot.delete(sharedSlot.length - 1, 1)
             }
             offset += length
           } else if (action.type === 'delete') {
-            const delta = content.toDelta()
-            if (content.length) {
-              content.delete(offset, action.count)
+            const delta = sharedSlot.toDelta()
+            if (sharedSlot.length) {
+              sharedSlot.delete(offset, action.count)
             }
-            if (content.length === 0) {
-              content.insert(0, '\n', delta[0]?.attributes)
+            if (sharedSlot.length === 0) {
+              sharedSlot.insert(0, '\n', delta[0]?.attributes)
             }
           } else if (action.type === 'attrSet') {
-            content.setAttribute(action.name, action.value)
-          } else if (action.type === 'attrRemove') {
-            content.removeAttribute(action.name)
+            sharedSlot.setAttribute(action.name, action.value)
+          } else if (action.type === 'attrDelete') {
+            sharedSlot.removeAttribute(action.name)
           }
         }
       })
     })
 
-    sub.add(slot.onChildComponentRemove.subscribe(components => {
-      components.forEach(c => {
-        this.cleanSubscriptionsByComponent(c)
-      })
-    }))
-    this.contentSyncCaches.set(slot, () => {
-      content.unobserve(syncRemote)
+    this.slotMap.set(localSlot, sharedSlot)
+
+    localSlot.destroyCallbacks.push(() => {
+      this.slotMap.delete(localSlot)
+      sharedSlot.unobserve(syncRemote)
       sub.unsubscribe()
     })
   }
 
-  protected syncSlotState(remoteSlot: YMap<any>, slot: Slot) {
-    const syncRemote = (ev, tr) => {
-      this.runRemoteUpdate(tr, () => {
-        ev.keysChanged.forEach(key => {
-          if (key === 'state') {
-            const state = (ev.target as YMap<any>).get('state')
-            slot.updateState(draft => {
-              if (typeof draft === 'object' && draft !== null) {
-                Object.assign(draft, state)
-              } else {
-                return state
-              }
-            })
-          }
-        })
-      })
+  private createSharedComponentByLocalComponent(component: Component): YMap<any> {
+    const sharedComponent = new YMap()
+    const sharedState = this.createSharedMapByLocalMap(component.state, component)
+    sharedComponent.set('name', component.name)
+    sharedComponent.set('state', sharedState)
+    return sharedComponent
+  }
+
+
+  private createLocalComponentBySharedComponent(yMap: YMap<any>): Component {
+    const componentName = yMap.get('name') as string
+    const sharedState = yMap.get('state') as YMap<any>
+
+    const instance = this.registry.createComponentByData(componentName, (component: Component<any>) => {
+      return this.createLocalMapBySharedMap(sharedState, component)
+    })
+    if (instance) {
+      return instance
     }
-    remoteSlot.observe(syncRemote)
 
-    const sub = slot.onStateChange.subscribe(change => {
-      this.runLocalUpdate(() => {
-        remoteSlot.set('state', change.newState)
-      }, change.record)
-    })
-    this.slotStateSyncCaches.set(slot, () => {
-      remoteSlot.unobserve(syncRemote)
-      sub.unsubscribe()
-    })
+    throw collaborateErrorFn(`cannot find component factory \`${componentName}\`.`)
   }
 
-  protected syncComponentSlots(remoteSlots: YArray<any>, component: Component) {
-    const slots = component.__slots__
-    const syncRemote = (ev, tr) => {
+  /**
+   * 双向同步数组
+   * @param sharedArray
+   * @param localArray
+   * @param parent
+   * @private
+   */
+  private syncArray(sharedArray: YArray<any>, localArray: ArrayModel<any>, parent: Component<any>) {
+    const sub = localArray.changeMarker.onChange.subscribe((op) => {
+      this.runLocalUpdate(() => {
+        let index = 0
+        for (const action of op.apply) {
+          switch (action.type) {
+            case 'retain':
+              index = action.offset
+              break
+            case 'insert': {
+              const data = this.createSharedModelByLocalModel(action.ref, parent)
+              sharedArray.insert(index, [data])
+            }
+              break
+            case 'delete':
+              sharedArray.delete(index, 1)
+              break
+          }
+        }
+      })
+    })
+
+    const syncRemote = (ev: YArrayEvent<any>, tr: Transaction) => {
       this.runRemoteUpdate(tr, () => {
         let index = 0
-        slots.retain(index)
-        ev.delta.forEach(action => {
+        localArray.retain(index)
+        ev.delta.forEach((action) => {
           if (Reflect.has(action, 'retain')) {
-            index += action.retain
-            slots.retain(index)
+            index += action.retain as number
+            localArray.retain(index)
           } else if (action.insert) {
-            (action.insert as Array<YMap<any>>).forEach(item => {
-              const slot = this.createSlotBySharedSlot(item)
-              slots.insert(slot)
-              this.syncSlotContent(item.get('content'), slot)
-              this.syncSlotState(item, slot)
+            (action.insert as Array<YMap<any>>).forEach((item) => {
+              const value = this.createLocalModelBySharedByModel(item, parent)
+              localArray.insert(value)
               index++
             })
           } else if (action.delete) {
-            slots.retain(index)
-            slots.delete(action.delete)
+            localArray.retain(index)
+            localArray.delete(action.delete)
           }
         })
       })
     }
-    remoteSlots.observe(syncRemote)
 
-    const sub = slots.onChange.subscribe(operations => {
-      this.runLocalUpdate(() => {
-        const applyActions = operations.apply
-        let index: number
-        applyActions.forEach(action => {
-          if (action.type === 'retain') {
-            index = action.offset
-          } else if (action.type === 'insertSlot') {
-            const sharedSlot = this.createSharedSlotBySlot(action.ref)
-            remoteSlots.insert(index, [sharedSlot])
-            index++
-          } else if (action.type === 'delete') {
-            remoteSlots.delete(index, action.count)
-          }
-        })
-      })
-    })
-
-    sub.add(slots.onChildSlotRemove.subscribe(slots => {
-      slots.forEach(slot => {
-        this.cleanSubscriptionsBySlot(slot)
-      })
-    }))
-
-    this.slotsSyncCaches.set(component, () => {
-      remoteSlots.unobserve(syncRemote)
+    sharedArray.observe(syncRemote)
+    localArray.destroyCallbacks.push(() => {
       sub.unsubscribe()
+      sharedArray.unobserve(syncRemote)
     })
   }
 
-  protected syncComponentState(remoteComponent: YMap<any>, component: Component) {
-    const syncRemote = (ev, tr) => {
+  /**
+   * 双向同步对象
+   * @param sharedObject
+   * @param localObject
+   * @param parent
+   * @private
+   */
+  private syncObject(sharedObject: YMap<any>, localObject: MapModel<any>, parent: Component<any>) {
+    const syncRemote = (ev: YMapEvent<any>, tr: Transaction) => {
       this.runRemoteUpdate(tr, () => {
-        ev.keysChanged.forEach(key => {
-          if (key === 'state') {
-            const state = (ev.target as YMap<any>).get('state')
-            component.updateState(draft => {
-              if (typeof draft === 'object' && draft !== null) {
-                Object.assign(draft, state)
-              } else {
-                return state
-              }
-            })
+        ev.changes.keys.forEach((item, key) => {
+          if (item.action === 'add' || item.action === 'update') {
+            const value = sharedObject.get(key)
+            localObject.set(key, this.createLocalModelBySharedByModel(value, parent))
+          } else {
+            localObject.remove(key)
           }
         })
       })
     }
-    remoteComponent.observe(syncRemote)
 
-    const sub = component.onStateChange.subscribe(change => {
+    sharedObject.observe(syncRemote)
+
+    const sub = localObject.changeMarker.onChange.subscribe((op) => {
       this.runLocalUpdate(() => {
-        remoteComponent.set('state', change.newState)
-      }, change.record)
+        for (const action of op.apply) {
+          switch (action.type) {
+            case 'propSet':
+              sharedObject.set(action.key, this.createSharedModelByLocalModel(action.value, parent))
+              break
+            case 'propDelete':
+              sharedObject.delete(action.key)
+              break
+          }
+        }
+      })
     })
-    this.componentStateSyncCaches.set(component, () => {
-      remoteComponent.unobserve(syncRemote)
+
+    localObject.destroyCallbacks.push(function () {
+      sharedObject.unobserve(syncRemote)
       sub.unsubscribe()
     })
   }
 
-  protected runLocalUpdate(fn: () => void, record = true) {
+  private runLocalUpdate(fn: () => void, record = true) {
     if (this.updateFromRemote) {
       return
     }
@@ -648,7 +759,7 @@ export class Collaborate implements History {
     })
   }
 
-  protected runRemoteUpdate(tr: Transaction, fn: () => void) {
+  private runRemoteUpdate(tr: Transaction, fn: () => void) {
     if (tr.origin === this.yDoc) {
       return
     }
@@ -659,145 +770,6 @@ export class Collaborate implements History {
       this.scheduler.remoteUpdateTransact(fn)
     }
     this.updateFromRemote = false
-  }
-
-  protected createSharedComponentByComponent(component: Component): YMap<any> {
-    const sharedComponent = new YMap()
-    sharedComponent.set('state', component.state)
-    sharedComponent.set('name', component.name)
-    const sharedSlots = new YArray()
-    sharedComponent.set('slots', sharedSlots)
-    component.__slots__.toArray().forEach(slot => {
-      const sharedSlot = this.createSharedSlotBySlot(slot)
-      sharedSlots.push([sharedSlot])
-    })
-    this.syncComponentSlots(sharedSlots, component)
-    this.syncComponentState(sharedComponent, component)
-    return sharedComponent
-  }
-
-  protected createSharedSlotBySlot(slot: Slot): YMap<any> {
-    const sharedSlot = new YMap()
-    sharedSlot.set('schema', slot.schema)
-    sharedSlot.set('state', slot.state)
-    const sharedContent = new YText()
-    sharedSlot.set('content', sharedContent)
-    let offset = 0
-    slot.toDelta().forEach(i => {
-      let formats: any = {}
-      if (i.formats) {
-        i.formats.forEach(item => {
-          formats[item[0].name] = item[1]
-        })
-      } else {
-        formats = null
-      }
-      if (typeof i.insert === 'string') {
-        sharedContent.insert(offset, i.insert, formats)
-      } else {
-        const sharedComponent = this.createSharedComponentByComponent(i.insert)
-        sharedContent.insertEmbed(offset, sharedComponent, formats)
-      }
-      offset += i.insert.length
-    })
-    slot.getAttributes().forEach(item => {
-      sharedContent.setAttribute(item[0].name, item[1])
-    })
-    this.syncSlotContent(sharedContent, slot)
-    this.syncSlotState(sharedSlot, slot)
-    return sharedSlot
-  }
-
-  protected createComponentBySharedComponent(yMap: YMap<any>): Component {
-    const sharedSlots = yMap.get('slots') as YArray<YMap<any>>
-    const slots: Slot[] = []
-    sharedSlots.forEach(sharedSlot => {
-      const slot = this.createSlotBySharedSlot(sharedSlot)
-      slots.push(slot)
-    })
-    const name = yMap.get('name')
-    const state = yMap.get('state')
-    const instance = this.registry.createComponentByData(name, {
-      state,
-      slots
-    })
-    if (instance) {
-      instance.__slots__.toArray().forEach((slot, index) => {
-        let sharedSlot = sharedSlots.get(index)
-        if (!sharedSlot) {
-          sharedSlot = this.createSharedSlotBySlot(slot)
-          sharedSlots.push([sharedSlot])
-        }
-        this.syncSlotState(sharedSlot, slot)
-        this.syncSlotContent(sharedSlot.get('content'), slot)
-      })
-      return instance
-    }
-
-    throw collaborateErrorFn(`cannot find component factory \`${name}\`.`)
-  }
-
-  protected createSlotBySharedSlot(sharedSlot: YMap<any>): Slot {
-    const content = sharedSlot.get('content') as YText
-    const delta = content.toDelta()
-
-    const slot = this.registry.createSlot({
-      schema: sharedSlot.get('schema'),
-      state: sharedSlot.get('state'),
-      attributes: {},
-      formats: {},
-      content: []
-    })
-
-    const attrs = content.getAttributes()
-    Object.keys(attrs).forEach(key => {
-      const attribute = this.registry.getAttribute(key)
-      if (attribute) {
-        slot.setAttribute(attribute, attrs[key])
-      }
-    })
-    for (const action of delta) {
-      if (action.insert) {
-        if (typeof action.insert === 'string') {
-          const formats = remoteFormatsToLocal(this.registry, action.attributes)
-          slot.insert(action.insert, formats)
-        } else {
-          const sharedComponent = action.insert as YMap<any>
-          const component = this.createComponentBySharedComponent(sharedComponent)
-          slot.insert(component, remoteFormatsToLocal(this.registry, action.attributes))
-          this.syncComponentSlots(sharedComponent.get('slots'), component)
-          this.syncComponentState(sharedComponent, component)
-        }
-      } else {
-        throw collaborateErrorFn('unexpected delta action.')
-      }
-    }
-    return slot
-  }
-
-  protected cleanSubscriptionsBySlot(slot: Slot) {
-    this.contentMap.delete(slot);
-    [this.contentSyncCaches.get(slot), this.slotStateSyncCaches.get(slot)].forEach(fn => {
-      if (fn) {
-        fn()
-      }
-    })
-    slot.sliceContent().forEach(i => {
-      if (typeof i !== 'string') {
-        this.cleanSubscriptionsByComponent(i)
-      }
-    })
-  }
-
-  protected cleanSubscriptionsByComponent(component: Component) {
-    [this.slotsSyncCaches.get(component), this.componentStateSyncCaches.get(component)].forEach(fn => {
-      if (fn) {
-        fn()
-      }
-    })
-    component.__slots__.toArray().forEach(slot => {
-      this.cleanSubscriptionsBySlot(slot)
-    })
   }
 }
 
