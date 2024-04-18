@@ -16,7 +16,7 @@ import {
   InsertEventData,
   invokeListener,
   Slot,
-  SlotRange
+  SlotRange, State
 } from '../model/_api'
 import { ViewAdapter, RootComponentRef } from './_injection-tokens'
 import { Registry } from './registry'
@@ -146,40 +146,26 @@ function deleteUpBySlot(selection: Selection,
 }
 
 /**
- * 组件转换上下文
- */
-export interface TransformContext {
-  parentComponentName: string
-  parentComponentState: unknown
-}
-
-/**
  * 组件转换规则
  */
-export interface TransformRule<ComponentState> {
+export interface TransformRule<ComponentState extends State,
+  Multi extends boolean = boolean,
+  S = Multi extends true ? Slot : Slot[]> {
   /** 组件是否支持多插槽 */
-  multipleSlot: boolean
+  multipleSlot: Multi
   /** 要转换的目标组件 */
-  target: ComponentConstructor
+  target: ComponentConstructor<ComponentState>
 
   /**
    * 创建目标组件新插槽的工厂函数
-   * @param transformContext
+   * @param from
    */
-  slotFactory(transformContext: TransformContext): Slot
+  slotFactory(from: Component<any>): Slot
 
   /**
    * 创建组件状态的工厂函数
    */
-  stateFactory?(slot: Slot | Slot[]): ComponentState
-
-  /**
-   * 当未被选中的组件转换且需要重新创建新组件时调用，如没有配置，或没有返回组件实例，则会按默认规则创建
-   * @param name
-   * @param slots
-   * @param state
-   */
-  existingComponentTransformer?(name: string, slots: Slot[], state: any): Component | void
+  stateFactory(slots: S): ComponentState
 }
 
 function deltaToSlots(selection: Selection,
@@ -189,11 +175,7 @@ function deltaToSlots(selection: Selection,
                       abstractSelection: AbstractSelection,
                       offset: number): Slot[] {
   const parentComponent = source.parent!
-  const context: TransformContext = {
-    parentComponentName: parentComponent.name,
-    parentComponentState: parentComponent.state
-  }
-  let newSlot = rule.slotFactory(context)
+  let newSlot = rule.slotFactory(parentComponent)
   delta.attributes.forEach((value, key) => {
     newSlot.setAttribute(key, value)
   })
@@ -233,7 +215,7 @@ function deltaToSlots(selection: Selection,
       }).flat()
       newSlots.push(...slots)
     }
-    newSlot = rule.slotFactory(context)
+    newSlot = rule.slotFactory(parentComponent)
     delta.attributes.forEach((value, key) => {
       newSlot.setAttribute(key, value)
     })
@@ -247,10 +229,10 @@ function slotsToComponents(textbus: Textbus, slots: Slot[], rule: TransformRule<
     return componentInstances
   }
   if (rule.multipleSlot) {
-    componentInstances.push(new rule.target(textbus, rule.stateFactory?.(slots)))
+    componentInstances.push(new rule.target(textbus, rule.stateFactory(slots)))
   } else {
     slots.forEach(childSlot => {
-      componentInstances.push(new rule.target(textbus, rule.stateFactory?.(childSlot)))
+      componentInstances.push(new rule.target(textbus, rule.stateFactory(childSlot)))
     })
   }
   return componentInstances
@@ -287,7 +269,7 @@ export class Commander {
    * 将选区内容转换为指定组件
    * @param rule
    */
-  transform<T>(rule: TransformRule<T>): boolean {
+  transform<T extends State>(rule: TransformRule<T>): boolean {
     const selection = this.selection
     if (!selection.isSelected) {
       return false
@@ -892,7 +874,7 @@ export class Commander {
     return false
   }
 
-  private transformByRange<T>(rule: TransformRule<T>, abstractSelection: AbstractSelection, range: Range): boolean {
+  private transformByRange<T extends State>(rule: TransformRule<T>, abstractSelection: AbstractSelection, range: Range): boolean {
     const { startSlot, startOffset, endSlot, endOffset } = range
     const selection = this.selection
     const commonAncestorSlot = Selection.getCommonAncestorSlot(startSlot, endSlot)
