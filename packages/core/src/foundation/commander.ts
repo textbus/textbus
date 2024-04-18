@@ -4,7 +4,6 @@ import { AbstractSelection, Range, Selection, SelectionPosition } from './select
 import {
   Attribute,
   BreakEventData,
-  ComponentConstructor,
   Component,
   ContentType,
   DeleteEventData,
@@ -16,7 +15,7 @@ import {
   InsertEventData,
   invokeListener,
   Slot,
-  SlotRange, State
+  SlotRange
 } from '../model/_api'
 import { ViewAdapter, RootComponentRef } from './_injection-tokens'
 import { Registry } from './registry'
@@ -145,16 +144,11 @@ function deleteUpBySlot(selection: Selection,
   }
 }
 
-/**
- * 组件转换规则
- */
-export interface TransformRule<ComponentState extends State,
-  Multi extends boolean = boolean,
-  S = Multi extends true ? Slot : Slot[]> {
+export interface SingleSlotTransformRule {
+  /** 目标组件的数据类型 */
+  targetType: ContentType
   /** 组件是否支持多插槽 */
-  multipleSlot: Multi
-  /** 要转换的目标组件 */
-  target: ComponentConstructor<ComponentState>
+  multipleSlot: false
 
   /**
    * 创建目标组件新插槽的工厂函数
@@ -165,13 +159,36 @@ export interface TransformRule<ComponentState extends State,
   /**
    * 创建组件状态的工厂函数
    */
-  stateFactory(slots: S): ComponentState
+  stateFactory(slot: Slot): Component<any>
 }
+
+export interface MultiSlotTransformRule {
+  /** 目标组件的数据类型 */
+  targetType: ContentType
+  /** 组件是否支持多插槽 */
+  multipleSlot: true
+
+  /**
+   * 创建目标组件新插槽的工厂函数
+   * @param from
+   */
+  slotFactory(from: Component<any>): Slot
+
+  /**
+   * 创建组件状态的工厂函数
+   */
+  stateFactory(slots: Slot[]): Component<any>
+}
+
+/**
+ * 组件转换规则
+ */
+export type TransformRule = SingleSlotTransformRule | MultiSlotTransformRule
 
 function deltaToSlots(selection: Selection,
                       source: Slot,
                       delta: DeltaLite,
-                      rule: TransformRule<any>,
+                      rule: TransformRule,
                       abstractSelection: AbstractSelection,
                       offset: number): Slot[] {
   const parentComponent = source.parent!
@@ -223,16 +240,16 @@ function deltaToSlots(selection: Selection,
   return newSlots
 }
 
-function slotsToComponents(textbus: Textbus, slots: Slot[], rule: TransformRule<any>) {
+function slotsToComponents(textbus: Textbus, slots: Slot[], rule: TransformRule) {
   const componentInstances: Component[] = []
   if (!slots.length) {
     return componentInstances
   }
   if (rule.multipleSlot) {
-    componentInstances.push(new rule.target(textbus, rule.stateFactory(slots)))
+    componentInstances.push(rule.stateFactory(slots))
   } else {
     slots.forEach(childSlot => {
-      componentInstances.push(new rule.target(textbus, rule.stateFactory(childSlot)))
+      componentInstances.push(rule.stateFactory(childSlot))
     })
   }
   return componentInstances
@@ -269,7 +286,7 @@ export class Commander {
    * 将选区内容转换为指定组件
    * @param rule
    */
-  transform<T extends State>(rule: TransformRule<T>): boolean {
+  transform(rule: TransformRule): boolean {
     const selection = this.selection
     if (!selection.isSelected) {
       return false
@@ -874,7 +891,7 @@ export class Commander {
     return false
   }
 
-  private transformByRange<T extends State>(rule: TransformRule<T>, abstractSelection: AbstractSelection, range: Range): boolean {
+  private transformByRange(rule: TransformRule, abstractSelection: AbstractSelection, range: Range): boolean {
     const { startSlot, startOffset, endSlot, endOffset } = range
     const selection = this.selection
     const commonAncestorSlot = Selection.getCommonAncestorSlot(startSlot, endSlot)
@@ -932,7 +949,7 @@ export class Commander {
       const { slot, startIndex, endIndex } = scope
       const parentComponent = slot.parent!
 
-      if (!parentComponent.separate && parentComponent.__slots__.length > 1 && !slot.schema.includes(rule.target.type)) {
+      if (!parentComponent.separate && parentComponent.__slots__.length > 1 && !slot.schema.includes(rule.targetType)) {
         // 无法转换的情况
         const componentInstances = slotsToComponents(this.textbus, slots, rule)
         componentInstances.forEach(instance => {
