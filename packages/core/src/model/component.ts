@@ -48,11 +48,27 @@ export interface ZenCodingGrammarInterceptor<Data = any> {
   generateInitData(content: string, textbus: Textbus): Data
 }
 
+/**
+ * 组件扩展可选方法
+ */
 export interface Component<T extends State> {
+  /**
+   * 从当前组件拆分出一个新的同类组件
+   * @param start 拆分的开始插槽
+   * @param end 拆分的结束插槽
+   */
   separate?(start?: Slot, end?: Slot): Component<T>
 
+  /**
+   * 组件初始化时调用的方法，可以此方法内同步使用 Textbus 提供的一系列勾子函数
+   */
   setup?(): void
 
+  /**
+   * 当 Textbus 默认行为尝试删除插槽时调用，返回 true 表示删除成功。
+   * 需要注意的是，实际删除是由组件自己完成的
+   * @param slot
+   */
   removeSlot?(slot: Slot): boolean
 }
 
