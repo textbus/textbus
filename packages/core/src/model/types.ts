@@ -3,8 +3,8 @@ import { Slot } from './slot'
 
 export interface InsertAction {
   type: 'insert'
-  data: any
-  ref: any
+  data: any[]
+  ref: any[]
   isSlot: boolean
 }
 
