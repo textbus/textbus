@@ -3,7 +3,7 @@ import { BrowserModule } from '@textbus/platform-browser'
 import {
   Commander,
   Component,
-  ContentType,
+  ContentType, createArrayProxy,
   createVNode,
   FormatHostBindingRender,
   Formatter,
@@ -17,9 +17,9 @@ import {
   VElement,
   VTextNode,
 } from '@textbus/core'
-import { Adapter, ViewComponentProps, ViewflyAdapterComponents } from '@textbus/adapter-viewfly'
+import { Adapter, ViewComponentProps } from '@textbus/adapter-viewfly'
 import { createApp } from '@viewfly/platform-browser'
-import { createRef, JSXInternal } from '@viewfly/core'
+import { Array as YArray } from 'yjs'
 
 interface SingleSlot {
   slot: Slot
@@ -187,3 +187,8 @@ async function createEditor() {
 }
 
 createEditor()
+
+const arr = createArrayProxy([2, 4, 1])
+
+arr.pop()
+
