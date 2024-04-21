@@ -1,4 +1,3 @@
-// eslint-disable
 import { Inject, Injectable } from '@viewfly/core'
 import { map, Observable, Subject, Subscription } from '@tanbo/stream'
 
@@ -235,83 +234,89 @@ export class LocalHistory extends History {
   }
 
   private apply(historyItem: HistoryItem, back: boolean) {
-    // let operations = historyItem.operations
-    // if (back) {
-    //   operations = [...operations].reverse()
-    // }
-    // operations.forEach(op => {
-    //   const paths = [...op.paths]
-    //   const actions = back ? op.unApply : op.apply
-    //   const currentModel = this.findModelByPaths(paths)
-    //   if (!currentModel) {
-    //     throw historyErrorFn(`the model for path \`${paths.join('/')}\` cannot be found in the document.`)
-    //   }
-    //
-    //   let model: any = currentModel
-    //   if (model instanceof Component) {
-    //     model = model.state
-    //   }
-    //   actions.forEach(action => {
-    //     switch (action.type) {
-    //       case 'retain': {
-    //         const formatsObj = action.formats
-    //         if (formatsObj) {
-    //           const formats = objToFormats(formatsObj, this.registry)
-    //           model.retain(action.offset, formats)
-    //         } else {
-    //           model.retain(action.offset)
-    //         }
-    //       }
-    //         break
-    //       case 'attrDelete':
-    //         model.removeAttribute(action.name)
-    //         break
-    //       case 'attrSet':
-    //         model.setAttribute(action.name, action.value)
-    //         break
-    //       case 'insert':
-    //         if (action.isSlot) {
-    //           // const slot = this.registry.createSlot(action.data)
-    //           // model.insert(slot)
-    //         } else {
-    //           model.insert(action.data)
-    //         }
-    //         break
-    //       case 'contentInsert': {
-    //         const formatsObj = action.formats
-    //         let formats: Formats | null = null
-    //         if (formatsObj) {
-    //           formats = objToFormats(formatsObj, this.registry)
-    //         }
-    //         if (typeof action.content === 'string') {
-    //           formats ? model.insert(action.content, formats) : model.insert(action.content)
-    //         } else {
-    //           const instance = this.registry.createComponent(action.content as ComponentLiteral)
-    //           if (!instance) {
-    //             // eslint-disable-next-line max-len
-    //             throw historyErrorFn(`component \`${action.content.name}\` not registered, please add \`${action.content.name}\` component to the components configuration item.`)
-    //           }
-    //           formats ? model.insert(instance, formats) : model.insert(instance)
-    //         }
-    //       }
-    //         break
-    //       case 'delete':
-    //         model.delete(action.count)
-    //         break
-    //       case 'propDelete':
-    //         model.remove(action.key)
-    //         break
-    //       case 'propSet':
-    //         if (action.isSlot) {
-    //           const slot = this.registry.createSlot(action.value)
-    //           model.set(action.key, slot)
-    //         } else {
-    //           model.set(action.key, action.value)
-    //         }
-    //         break
-    //     }
-    //   })
-    // })
+    let operations = historyItem.operations
+    if (back) {
+      operations = [...operations].reverse()
+    }
+    operations.forEach(op => {
+      const paths = [...op.paths]
+      const actions = back ? op.unApply : op.apply
+      const currentModel = this.findModelByPaths(paths)
+      if (!currentModel) {
+        throw historyErrorFn(`the model for path \`${paths.join('/')}\` cannot be found in the document.`)
+      }
+
+      let model: any = currentModel
+      if (model instanceof Component) {
+        model = model.state
+      }
+      let index = 0
+      actions.forEach(action => {
+        switch (action.type) {
+          case 'retain': {
+            index = action.offset
+            const formatsObj = action.formats
+            if (formatsObj) {
+              const formats = objToFormats(formatsObj, this.registry)
+              model.retain(action.offset, formats)
+            } else {
+              model.retain(action.offset)
+            }
+          }
+            break
+          case 'attrDelete':
+            model.removeAttribute(action.name)
+            break
+          case 'attrSet':
+            model.setAttribute(action.name, action.value)
+            break
+          case 'insert': {
+            let data = action.data
+            if (action.isSlot) {
+              data = data.map(i => this.registry.createSlot(i))
+            }
+            model.splice(index, 0, ...data)
+          }
+            break
+          case 'contentInsert': {
+            const formatsObj = action.formats
+            let formats: Formats | null = null
+            if (formatsObj) {
+              formats = objToFormats(formatsObj, this.registry)
+            }
+            if (typeof action.content === 'string') {
+              formats ? model.insert(action.content, formats) : model.insert(action.content)
+            } else {
+              const instance = this.registry.createComponent(action.content as ComponentLiteral)
+              if (!instance) {
+                // eslint-disable-next-line max-len
+                throw historyErrorFn(`component \`${action.content.name}\` not registered, please add \`${action.content.name}\` component to the components configuration item.`)
+              }
+              formats ? model.insert(instance, formats) : model.insert(instance)
+            }
+          }
+            break
+          case 'delete':
+            if (model instanceof Slot) {
+              model.delete(action.count)
+            } else {
+              model.splice(index, action.count)
+            }
+            break
+          case 'propDelete':
+            model.remove(action.key)
+            break
+          case 'propSet':
+            if (action.isSlot) {
+              const slot = this.registry.createSlot(action.value)
+              model.set(action.key, slot)
+            } else {
+              model.set(action.key, action.value)
+            }
+            break
+        }
+      })
+    })
   }
 
   private getPaths(): SelectionPaths {
@@ -328,42 +333,42 @@ export class LocalHistory extends History {
   }
 
   private usePaths(paths: SelectionPaths) {
-    // const anchorOffset = paths.anchor.pop()
-    // const focusOffset = paths.focus.pop()
-    // const anchorSlot = this.findModelByPaths(paths.anchor)
-    // const focusSlot = this.findModelByPaths(paths.focus)
-    //
-    // if (typeof anchorOffset === 'number' && typeof focusOffset === 'number' && anchorSlot instanceof Slot && focusSlot instanceof Slot) {
-    //   this.selection.setBaseAndExtent(anchorSlot, anchorOffset, focusSlot, focusOffset)
-    // }
+    const anchorOffset = paths.anchor.pop()
+    const focusOffset = paths.focus.pop()
+    const anchorSlot = this.findModelByPaths(paths.anchor)
+    const focusSlot = this.findModelByPaths(paths.focus)
+
+    if (typeof anchorOffset === 'number' && typeof focusOffset === 'number' && anchorSlot instanceof Slot && focusSlot instanceof Slot) {
+      this.selection.setBaseAndExtent(anchorSlot, anchorOffset, focusSlot, focusOffset)
+    }
   }
 
   private findModelByPaths(paths: Paths) {
-  //   if (paths.length === 0) {
-  //     return null
-  //   }
-  //   let currentModel: Component | Slot | MapModel<any> | ArrayModel<any> = this.rootComponentRef.component
-  //   paths = [...paths]
-  //   while (paths.length) {
-  //     const path = paths.shift()
-  //     if (currentModel instanceof Component) {
-  //       currentModel = currentModel.state.get(path as string)
-  //       continue
-  //     }
-  //     if (currentModel instanceof Slot) {
-  //       currentModel = currentModel.getContentAtIndex(path as number) as Component
-  //       continue
-  //     }
-  //     if (currentModel instanceof MapModel) {
-  //       currentModel = currentModel.get(path as string)
-  //       continue
-  //     }
-  //     if (currentModel instanceof ArrayModel) {
-  //       currentModel = currentModel.get(path as number)
-  //       continue
-  //     }
-  //     throw historyErrorFn(`cannot find path ${path}`)
-  //   }
-  //   return currentModel || null
+    if (paths.length === 0) {
+      return null
+    }
+    let currentModel: Component | Slot = this.rootComponentRef.component
+    paths = [...paths]
+    while (paths.length) {
+      const path = paths.shift()
+      if (currentModel instanceof Component) {
+        currentModel = currentModel.state[path as string]
+        continue
+      }
+      if (currentModel instanceof Slot) {
+        currentModel = currentModel.getContentAtIndex(path as number) as Component
+        continue
+      }
+      if (Array.isArray(currentModel)) {
+        currentModel = currentModel[path as number]
+        continue
+      }
+      if (typeof currentModel === 'object' && currentModel !== null) {
+        currentModel = currentModel[path as string]
+        continue
+      }
+      throw historyErrorFn(`cannot find path ${path}`)
+    }
+    return currentModel || null
   }
 }

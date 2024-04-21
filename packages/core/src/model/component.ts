@@ -7,7 +7,7 @@ import { ChangeMarker } from './change-marker'
 import { State } from './types'
 import { Textbus } from '../textbus'
 import { Slots } from './slots'
-import { createObjectProxy, ProxyModel } from './proxy'
+import { createObjectProxy, objectToJSON, ProxyModel } from './proxy'
 
 const componentErrorFn = makeError('Component')
 
@@ -174,30 +174,6 @@ export abstract class Component<T extends State = State> {
   }
 }
 
-function valueToJSON(value: any): any {
-  if (Array.isArray(value)) {
-    return arrayToJSON(value)
-  }
-  if (value instanceof Slot) {
-    return value.toJSON()
-  }
-  if (typeof value === 'object' && value !== null) {
-    return objectToJSON(value)
-  }
-  return value
-}
-
-function objectToJSON(obj: Record<string, any>) {
-  const jsonState: Record<string, any> = {}
-  Object.entries(obj).forEach(([key, value]) => {
-    jsonState[key] = valueToJSON(value)
-  })
-  return jsonState
-}
-
-function arrayToJSON(items: any[]): any[] {
-  return items.map(i => valueToJSON(i))
-}
 
 export type ToLiteral<T> = T extends Slot ? SlotLiteral<any> :
   T extends Array<infer Item> ? Array<ToLiteral<Item>> :
