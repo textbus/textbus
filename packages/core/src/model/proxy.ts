@@ -8,6 +8,31 @@ export interface Group {
   isSlot: boolean
 }
 
+function valueToJSON(value: any): any {
+  if (Array.isArray(value)) {
+    return arrayToJSON(value)
+  }
+  if (value instanceof Slot) {
+    return value.toJSON()
+  }
+  if (typeof value === 'object' && value !== null) {
+    return objectToJSON(value)
+  }
+  return value
+}
+
+export function objectToJSON(obj: Record<string, any>) {
+  const jsonState: Record<string, any> = {}
+  Object.entries(obj).forEach(([key, value]) => {
+    jsonState[key] = valueToJSON(value)
+  })
+  return jsonState
+}
+
+function arrayToJSON(items: any[]): any[] {
+  return items.map(i => valueToJSON(i))
+}
+
 const proxyCache = new WeakMap<object, any>()
 
 function valueToProxy(value: any, component: Component<any>, init: (parentChangeMarker: ChangeMarker) => void) {
@@ -84,7 +109,7 @@ function createArrayProxyHandlers(source: any[], proxy: any, changeMarker: Chang
                 offset: length
               }, {
                 type: 'insert',
-                data: group.items,
+                data: valueToJSON(group.items),
                 ref: group.items,
                 isSlot: group.isSlot
               }],
@@ -124,8 +149,8 @@ function createArrayProxyHandlers(source: any[], proxy: any, changeMarker: Chang
               offset: offset - 1
             }, {
               type: 'insert',
-              data: item,
-              ref: item,
+              data: valueToJSON([item]),
+              ref: [item],
               isSlot: item instanceof Slot
             }]
           })
@@ -150,7 +175,7 @@ function createArrayProxyHandlers(source: any[], proxy: any, changeMarker: Chang
                 offset: index
               }, {
                 type: 'insert',
-                data: group.items,
+                data: valueToJSON(group.items),
                 ref: group.items,
                 isSlot: group.isSlot
               }],
@@ -189,8 +214,8 @@ function createArrayProxyHandlers(source: any[], proxy: any, changeMarker: Chang
               offset: 0
             }, {
               type: 'insert',
-              data: item,
-              ref: item,
+              data: valueToJSON([item]),
+              ref: [item],
               isSlot: item instanceof Slot
             }]
           })
@@ -229,7 +254,7 @@ function createArrayProxyHandlers(source: any[], proxy: any, changeMarker: Chang
                 offset: index
               }, {
                 type: 'insert',
-                data: group.items,
+                data: valueToJSON(group.items),
                 ref: group.items,
                 isSlot: group.isSlot
               }]
@@ -245,7 +270,7 @@ function createArrayProxyHandlers(source: any[], proxy: any, changeMarker: Chang
                 offset: startIndex
               }, {
                 type: 'insert',
-                data: group.items,
+                data: valueToJSON(group.items),
                 ref: group.items,
                 isSlot: group.isSlot
               }],
