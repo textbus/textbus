@@ -44,7 +44,6 @@ export class DeltaLite extends Array<DeltaInsert> {
  * Textbus 插槽类，用于管理组件、文本及格式的增删改查
  */
 export class Slot {
-  destroyCallbacks: DestroyCallbacks = []
   static placeholder = '\u200b'
 
   static get emptyPlaceholder() {
@@ -792,11 +791,6 @@ export class Slot {
       endIndex: this.length
     }
     return root
-  }
-
-  destroy() {
-    this.destroyCallbacks.forEach(i => i())
-    this.destroyCallbacks = []
   }
 
   private applyFormats(formats: Formats, startIndex: number, offset: number, background: boolean) {

@@ -1,7 +1,7 @@
 import { Observable, Subject } from '@tanbo/stream'
 
 import { Component } from './component'
-import { Operation } from './types'
+import { DestroyCallbacks, Operation } from './types'
 
 export type Paths = Array<string|number>
 
@@ -9,6 +9,7 @@ export type Paths = Array<string|number>
  * 用来标识组件或插槽的数据变化
  */
 export class ChangeMarker {
+  destroyCallbacks: DestroyCallbacks = []
   onTriggerPath: Observable<Paths>
   onChange: Observable<Operation>
   onChildComponentRemoved: Observable<Component>
@@ -58,5 +59,10 @@ export class ChangeMarker {
 
   recordComponentRemoved(instance: Component) {
     this.childComponentRemovedEvent.next(instance)
+  }
+
+  destroy() {
+    this.destroyCallbacks.forEach(i => i())
+    this.destroyCallbacks = []
   }
 }
