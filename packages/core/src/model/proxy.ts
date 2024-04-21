@@ -1,0 +1,427 @@
+import { ChangeMarker } from './change-marker'
+import { Slot } from './slot'
+import { Action } from './types'
+import { Component } from './component'
+
+export interface Group {
+  items: any[]
+  isSlot: boolean
+}
+
+const proxyCache = new WeakMap<object, any>()
+
+function valueToProxy(value: any, component: Component<any>, init: (parentChangeMarker: ChangeMarker) => void) {
+  if (proxyCache.has(value)) {
+    return proxyCache.get(value)
+  }
+  if (value instanceof Slot) {
+    value.parent = component
+    init(value.changeMarker)
+    return value
+  }
+  if (Array.isArray(value)) {
+    const v = createArrayProxy(value, component)
+    init(v.__model__)
+    proxyCache.set(value, v)
+    return v
+  }
+  if (typeof value === 'object' && value !== null) {
+    const v = createObjectProxy(value, component)
+    init(v.__model__)
+    proxyCache.set(value, v)
+    return v
+  }
+  return value
+}
+
+function toGroup(args: any[]) {
+  const groups: Group[] = []
+  let group: Group | null = null
+
+  for (const item of args) {
+    const isSlot = item instanceof Slot
+    if (!group) {
+      group = {
+        isSlot,
+        items: [item]
+      }
+      groups.push(group)
+      continue
+    }
+    if (group.isSlot === isSlot) {
+      group.items.push(item)
+    } else {
+      group = {
+        isSlot,
+        items: [item]
+      }
+      groups.push(group)
+    }
+  }
+  return groups
+}
+
+function createArrayProxyHandlers(source: any[], proxy: any, changeMarker: ChangeMarker) {
+  let ignoreChange = false
+
+  return {
+    get ignoreChange() {
+      return ignoreChange
+    },
+    createPush() {
+      return function (this: any[], ...args: any[]) {
+        if (this === proxy) {
+          ignoreChange = true
+          let length = source.length
+          const groups = toGroup(args)
+          const result = source.push(...args)
+          ignoreChange = false
+          groups.forEach(group => {
+            changeMarker.markAsDirtied({
+              paths: [],
+              apply: [{
+                type: 'retain',
+                offset: length
+              }, {
+                type: 'insert',
+                data: group.items,
+                ref: group.items,
+                isSlot: group.isSlot
+              }],
+              unApply: [{
+                type: 'retain',
+                offset: length
+              }, {
+                type: 'delete',
+                count: group.items.length
+              }]
+            })
+            length += group.items.length
+          })
+          return result
+        }
+        return this.push(...args)
+      }
+    },
+    createPop() {
+      return function (this: any[]) {
+        if (this === proxy) {
+          ignoreChange = true
+          const offset = source.length
+          const item = source.pop()
+          ignoreChange = false
+          changeMarker.markAsDirtied({
+            paths: [],
+            apply: [{
+              type: 'retain',
+              offset: offset - 1
+            }, {
+              type: 'delete',
+              count: 1
+            }],
+            unApply: [{
+              type: 'retain',
+              offset: offset - 1
+            }, {
+              type: 'insert',
+              data: item,
+              ref: item,
+              isSlot: item instanceof Slot
+            }]
+          })
+          return item
+        }
+        return this.pop()
+      }
+    },
+    createUnshift() {
+      return function (this: any[], ...args: any[]) {
+        if (this === proxy) {
+          ignoreChange = true
+          const groups = toGroup(args)
+          const result = source.unshift(...args)
+          ignoreChange = false
+          let index = 0
+          groups.forEach(group => {
+            changeMarker.markAsDirtied({
+              paths: [],
+              apply: [{
+                type: 'retain',
+                offset: index
+              }, {
+                type: 'insert',
+                data: group.items,
+                ref: group.items,
+                isSlot: group.isSlot
+              }],
+              unApply: [{
+                type: 'retain',
+                offset: index
+              }, {
+                type: 'delete',
+                count: group.items.length
+              }]
+            })
+            index += group.items.length
+          })
+          return result
+        }
+        return this.unshift(...args)
+      }
+    },
+    createShift() {
+      return function (this: any[]) {
+        if (this === proxy) {
+          ignoreChange = true
+          const item = source.shift()
+          ignoreChange = false
+          changeMarker.markAsDirtied({
+            paths: [],
+            apply: [{
+              type: 'retain',
+              offset: 0
+            }, {
+              type: 'delete',
+              count: 1
+            }],
+            unApply: [{
+              type: 'retain',
+              offset: 0
+            }, {
+              type: 'insert',
+              data: item,
+              ref: item,
+              isSlot: item instanceof Slot
+            }]
+          })
+          return item
+        }
+        return this.pop()
+      }
+    },
+    createSplice() {
+      return function (this: any[], startIndex: number, deleteCount?: number, ...args: any[]) {
+        if (this === proxy) {
+          ignoreChange = true
+          const groups = toGroup(args)
+          if (typeof deleteCount !== 'number') {
+            deleteCount = source.length
+          }
+          if (deleteCount < 0) {
+            deleteCount = 0
+          }
+          const deletedItems = source.splice(startIndex, deleteCount, ...args)
+          ignoreChange = false
+          const deletedGroups = toGroup(deletedItems)
+          let index = startIndex
+          deletedGroups.forEach(group => {
+            changeMarker.markAsDirtied({
+              paths: [],
+              apply: [{
+                type: 'retain',
+                offset: index
+              }, {
+                type: 'delete',
+                count: group.items.length
+              }],
+              unApply: [{
+                type: 'retain',
+                offset: index
+              }, {
+                type: 'insert',
+                data: group.items,
+                ref: group.items,
+                isSlot: group.isSlot
+              }]
+            })
+            index += group.items.length
+          })
+
+          groups.forEach(group => {
+            changeMarker.markAsDirtied({
+              paths: [],
+              apply: [{
+                type: 'retain',
+                offset: startIndex
+              }, {
+                type: 'insert',
+                data: group.items,
+                ref: group.items,
+                isSlot: group.isSlot
+              }],
+              unApply: [{
+                type: 'retain',
+                offset: startIndex
+              }, {
+                type: 'delete',
+                count: group.items.length
+              }]
+            })
+            startIndex += group.items.length
+          })
+          return deletedItems
+        }
+        return this.push(...args)
+      }
+    }
+  }
+}
+
+export type ProxyModel<T extends object> = {
+  [Key in keyof T]: T[Key] extends Slot ? T[Key] : T[Key] extends object ? ProxyModel<T[Key]> : T[Key]
+} & {
+  __model__: ChangeMarker
+}
+
+
+export function createArrayProxy<T extends any[]>(raw: T, component: Component<any>): ProxyModel<T> {
+  const changeMarker = new ChangeMarker()
+  const recordChildSlot = new WeakMap<Slot, true>()
+  const proxy = new Proxy(raw, {
+    set(target, p, newValue, receiver) {
+      if (p === 'length') {
+        return Reflect.set(target, p, newValue, receiver)
+      }
+      const has = Object.hasOwn(raw, p)
+      const oldValue = raw[p]
+      const unApplyAction: Action = has ? {
+        type: 'propSet',
+        key: p as string,
+        ref: oldValue,
+        value: oldValue,
+        isSlot: oldValue instanceof Slot
+      } : {
+        type: 'propDelete',
+        key: p as string
+      }
+
+      const b = Reflect.set(target, p, newValue, receiver)
+      if (!handlers.ignoreChange) {
+        changeMarker.markAsDirtied({
+          paths: [],
+          apply: [{
+            type: 'propSet',
+            key: p as string,
+            ref: newValue,
+            value: newValue,
+            isSlot: newValue instanceof Slot
+          }],
+          unApply: [unApplyAction]
+        })
+      }
+      return b
+    },
+    get(target, p, receiver) {
+      if (p === '__model__') {
+        return changeMarker
+      }
+      if (p === 'pop') {
+        return handlers.createPop()
+      }
+      if (p === 'push') {
+        return handlers.createPush()
+      }
+      if (p === 'shift') {
+        return handlers.createShift()
+      }
+      if (p === 'unshift') {
+        return handlers.createUnshift()
+      }
+      if (p === 'splice') {
+        return handlers.createSplice()
+      }
+      const value = Reflect.get(target, p, receiver)
+
+      const model = valueToProxy(value, component, childChangeMarker => {
+        if (value instanceof Slot) {
+          if (recordChildSlot.has(value)) {
+            return
+          }
+          recordChildSlot.set(value, true)
+        }
+        const sub = childChangeMarker.onChange.subscribe(ops => {
+          ops.paths.unshift(raw.indexOf(value))
+          if (model!.changeMarker.dirty) {
+            changeMarker.markAsDirtied(ops)
+          } else {
+            changeMarker.markAsChanged(ops)
+          }
+        })
+        sub.add(childChangeMarker.onTriggerPath.subscribe(paths => {
+          paths.unshift(raw.indexOf(value))
+          changeMarker.triggerPath(paths)
+        }))
+        changeMarker.destroyCallbacks.push(() => {
+          sub.unsubscribe()
+        })
+      })
+      return model
+    }
+  })
+  const handlers = createArrayProxyHandlers(raw, proxy, changeMarker)
+  return proxy as any
+}
+
+export function createObjectProxy<T extends object>(raw: T, component: Component): ProxyModel<T> {
+  const changeMarker = new ChangeMarker()
+  const recordChildSlot = new WeakMap<Slot, true>()
+  const proxy = new Proxy(raw, {
+    get(target, p, receiver) {
+      if (p === '__model__') {
+        return changeMarker
+      }
+      const value = Reflect.get(target, p, receiver)
+      return valueToProxy(value, component, (childChangeMarker) => {
+        if (value instanceof Slot) {
+          if (recordChildSlot.has(value)) {
+            return
+          }
+          recordChildSlot.set(value, true)
+        }
+        const sub = childChangeMarker.onChange.subscribe(ops => {
+          ops.paths.unshift(p as string)
+          if (changeMarker.dirty) {
+            changeMarker.markAsDirtied(ops)
+          } else {
+            changeMarker.markAsChanged(ops)
+          }
+        })
+        sub.add(childChangeMarker.onTriggerPath.subscribe(paths => {
+          paths.unshift(p as string)
+          changeMarker.triggerPath(paths)
+        }))
+        changeMarker.destroyCallbacks.push(() => {
+          sub.unsubscribe()
+        })
+      })
+    },
+    set(target, p, newValue, receiver) {
+      const has = Object.hasOwn(raw, p)
+      const oldValue = raw[p]
+      const b = Reflect.set(target, p, newValue, receiver)
+      const unApplyAction: Action = has ? {
+        type: 'propSet',
+        key: p as string,
+        value: oldValue,
+        ref: oldValue,
+        isSlot: oldValue instanceof Slot
+      } : {
+        type: 'propDelete',
+        key: p as string
+      }
+      changeMarker.markAsDirtied({
+        paths: [],
+        apply: [{
+          type: 'propSet',
+          key: p as string,
+          value: newValue,
+          ref: newValue,
+          isSlot: newValue instanceof Slot,
+        }],
+        unApply: [unApplyAction]
+      })
+      return b
+    },
+  })
+  return proxy as any
+}
