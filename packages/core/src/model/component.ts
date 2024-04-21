@@ -6,8 +6,8 @@ import { Formats } from './format'
 import { ChangeMarker } from './change-marker'
 import { State } from './types'
 import { Textbus } from '../textbus'
-import { MapModel } from './map-model'
 import { Slots } from './slots'
+import { createObjectProxy, ProxyModel } from './proxy'
 
 const componentErrorFn = makeError('Component')
 
@@ -73,7 +73,7 @@ export interface Component<T extends State> {
 }
 
 export interface ComponentStateCreator<T extends State> {
-  (from: Component<T>): MapModel<T>
+  (from: Component<T>): ProxyModel<T>
 }
 
 /**
@@ -111,7 +111,7 @@ export abstract class Component<T extends State = State> {
   /** 组件类型 */
   readonly type: ContentType
   /** 组件状态 */
-  readonly state = new MapModel<T>(this)
+  readonly state: ProxyModel<T>
 
   constructor(public textbus: Textbus,
               initData: T | ComponentStateCreator<T>) {
@@ -123,9 +123,10 @@ export abstract class Component<T extends State = State> {
     if (typeof initData === 'function') {
       this.state = initData(this)
     } else {
-      Object.entries(initData).forEach(([key, value]) => {
-        this.state.set(key as any, value)
-      })
+      this.state = createObjectProxy(initData, this)
+      // Object.entries(initData).forEach(([key, value]) => {
+      //   this.state.set(key as any, value)
+      // })
     }
 
     const context: ComponentContext = {
@@ -137,13 +138,14 @@ export abstract class Component<T extends State = State> {
     if (typeof this.setup === 'function') {
       this.setup()
     }
-    const sub = this.state.changeMarker.onChange.subscribe(op => {
-      if (this.state.changeMarker.dirty) {
+    const changeMarker = this.state.__model__
+    const sub = changeMarker.onChange.subscribe(op => {
+      if (changeMarker.dirty) {
         this.changeMarker.markAsDirtied(op)
       } else {
         this.changeMarker.markAsChanged(op)
       }
-    }).add(this.state.changeMarker.onTriggerPath.subscribe(paths => {
+    }).add(changeMarker.onTriggerPath.subscribe(paths => {
       this.changeMarker.triggerPath(paths)
     }))
     onDestroy(() => {
@@ -160,7 +162,7 @@ export abstract class Component<T extends State = State> {
   toJSON(): ComponentLiteral<State> {
     return {
       name: this.name,
-      state: this.state.toJSON()
+      state: objectToJSON(this.state)
     }
   }
 
@@ -170,6 +172,31 @@ export abstract class Component<T extends State = State> {
   toString(): string {
     return this.__slots__.toString()
   }
+}
+
+function valueToJSON(value: any): any {
+  if (Array.isArray(value)) {
+    return arrayToJSON(value)
+  }
+  if (value instanceof Slot) {
+    return value.toJSON()
+  }
+  if (typeof value === 'object' && value !== null) {
+    return objectToJSON(value)
+  }
+  return value
+}
+
+function objectToJSON(obj: Record<string, any>) {
+  const jsonState: Record<string, any> = {}
+  Object.entries(obj).forEach(([key, value]) => {
+    jsonState[key] = valueToJSON(value)
+  })
+  return jsonState
+}
+
+function arrayToJSON(items: any[]): any[] {
+  return items.map(i => valueToJSON(i))
 }
 
 export type ToLiteral<T> = T extends Slot ? SlotLiteral<any> :

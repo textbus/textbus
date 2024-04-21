@@ -3,7 +3,7 @@ import { BrowserModule } from '@textbus/platform-browser'
 import {
   Commander,
   Component,
-  ContentType, createArrayProxy,
+  ContentType,
   createVNode,
   FormatHostBindingRender,
   Formatter,
@@ -19,7 +19,7 @@ import {
 } from '@textbus/core'
 import { Adapter, ViewComponentProps } from '@textbus/adapter-viewfly'
 import { createApp } from '@viewfly/platform-browser'
-import { Array as YArray } from 'yjs'
+import { createArrayProxy } from './packages/core/src/model/proxy'
 
 interface SingleSlot {
   slot: Slot
@@ -125,10 +125,6 @@ async function createEditor() {
     ]
   })
 
-  textbus.onChange.subscribe(() => {
-    console.log(rootModel.toJSON())
-  })
-
   const fontSizeFormatter = new Formatter<string>('fontSize', {
     columned: false,
     inheritable: true,
@@ -149,13 +145,17 @@ async function createEditor() {
     ])
   })
 
+
+  rootModel.changeMarker.onChange.subscribe(op => {
+    console.log(op)
+  })
   textbus.render(rootModel)
   // 从这里开始创建编辑器
 
 // textbus.render(rootModel)
 
   function App(props: ViewComponentProps<RootComponent>) {
-    const slot = props.component.state.get('slot')
+    const slot = props.component.state.slot
 
     return () => {
       return (
@@ -175,8 +175,9 @@ async function createEditor() {
 
   function Paragraph(props: ViewComponentProps<ParagraphComponent>) {
     // props.component.
-    const slot = props.component.state.get('slot')
     return () => {
+      const slot = props.component.state.slot
+
       return (
         adapter.slotRender(slot, children => {
           return createVNode('p', { ref: props.rootRef }, children)
@@ -187,8 +188,3 @@ async function createEditor() {
 }
 
 createEditor()
-
-const arr = createArrayProxy([2, 4, 1])
-
-arr.pop()
-
