@@ -50,6 +50,15 @@ export interface ContentInsertAction {
   formats?: Record<string, any>
 }
 
+export interface SetIndexAction {
+  type: 'setIndex'
+  index: number
+  value: any
+  ref: any
+  afterLength: number
+  isSlot: boolean
+}
+
 export type Action = InsertAction |
   RetainAction |
   DeleteAction |
@@ -57,7 +66,8 @@ export type Action = InsertAction |
   PropDeleteAction |
   PropSetAction |
   AttrDeleteAction |
-  AttrSetAction
+  AttrSetAction |
+  SetIndexAction
 
 export interface Operation {
   paths: Array<number | string>
