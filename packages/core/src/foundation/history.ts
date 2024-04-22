@@ -255,12 +255,14 @@ export class LocalHistory extends History {
         switch (action.type) {
           case 'retain': {
             index = action.offset
-            const formatsObj = action.formats
-            if (formatsObj) {
-              const formats = objToFormats(formatsObj, this.registry)
-              model.retain(action.offset, formats)
-            } else {
-              model.retain(action.offset)
+            if (model instanceof Slot) {
+              const formatsObj = action.formats
+              if (formatsObj) {
+                const formats = objToFormats(formatsObj, this.registry)
+                model.retain(action.offset, formats)
+              } else {
+                model.retain(action.offset)
+              }
             }
           }
             break
@@ -312,6 +314,12 @@ export class LocalHistory extends History {
               model.set(action.key, slot)
             } else {
               model.set(action.key, action.value)
+            }
+            break
+          case 'setIndex':
+            model[action.index] = action.isSlot ? this.registry.createSlot(action.value) : action.value
+            if (model.length !== action.afterLength) {
+              model.length = action.afterLength
             }
             break
         }
