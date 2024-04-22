@@ -138,7 +138,7 @@ export abstract class Component<T extends State = State> {
     if (typeof this.setup === 'function') {
       this.setup()
     }
-    const changeMarker = this.state.__model__
+    const changeMarker = this.state.__changeMarker__
     const sub = changeMarker.onChange.subscribe(op => {
       if (changeMarker.dirty) {
         this.changeMarker.markAsDirtied(op)

@@ -5,7 +5,7 @@ import { Content } from './content'
 import { Format, FormatLiteral, FormatRange, FormatValue, Formats, FormatTree, FormatItem } from './format'
 import { Attribute, FormatHostBindingRender, Formatter } from './attribute'
 import { ChangeMarker } from './change-marker'
-import { Action, DestroyCallbacks } from './types'
+import { Action } from './types'
 import { VElement, VTextNode } from './element'
 import { makeError } from '../_utils/make-error'
 
