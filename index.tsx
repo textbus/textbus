@@ -1,3 +1,4 @@
+/* eslint-disable */
 import 'reflect-metadata'
 import { BrowserModule } from '@textbus/platform-browser'
 import {
@@ -19,13 +20,16 @@ import {
 } from '@textbus/core'
 import { Adapter, ViewComponentProps } from '@textbus/adapter-viewfly'
 import { createApp } from '@viewfly/platform-browser'
-import { createArrayProxy } from './packages/core/src/model/proxy'
 
 interface SingleSlot {
   slot: Slot
 }
 
-class RootComponent extends Component<SingleSlot> {
+interface RooComponentState extends SingleSlot {
+  arr: any[]
+}
+
+class RootComponent extends Component<RooComponentState> {
   static componentName = 'RootComponent'
   static type = ContentType.BlockComponent
 
@@ -34,7 +38,7 @@ class RootComponent extends Component<SingleSlot> {
     return new RootComponent(textbus, state)
   }
 
-  constructor(textbus: Textbus, state: SingleSlot) {
+  constructor(textbus: Textbus, state: RooComponentState) {
     super(textbus, state)
   }
 
@@ -142,7 +146,8 @@ async function createEditor() {
     slot: new Slot([
       ContentType.BlockComponent,
       ContentType.Text
-    ])
+    ]),
+    arr: [2, 3]
   })
 
 
@@ -155,11 +160,19 @@ async function createEditor() {
 // textbus.render(rootModel)
 
   function App(props: ViewComponentProps<RootComponent>) {
-    const slot = props.component.state.slot
+    const { slot, arr } = props.component.state
 
     return () => {
       return (
         <div class="xxxx">
+          <div>
+            <div>{arr.join('/')}</div>
+            <button onClick={() => {
+              arr.push(3)
+              arr[0] = Math.random()
+            }}>btn
+            </button>
+          </div>
           {
             adapter.slotRender(slot, children => {
               return createVNode('div', {
@@ -174,10 +187,8 @@ async function createEditor() {
   }
 
   function Paragraph(props: ViewComponentProps<ParagraphComponent>) {
-    // props.component.
+    const slot = props.component.state.slot
     return () => {
-      const slot = props.component.state.slot
-
       return (
         adapter.slotRender(slot, children => {
           return createVNode('p', { ref: props.rootRef }, children)
