@@ -14,8 +14,9 @@ import {
   Selection,
   SelectionPaths,
   Slot,
-  ArrayModel,
-  MapModel
+  ProxyModel,
+  createObjectProxy,
+  createArrayProxy
 } from '@textbus/core'
 import {
   Array as YArray,
@@ -316,42 +317,40 @@ export class Collaborate implements History {
     }
   }
 
-  private syncSharedMapToLocalMap(sharedMap: YMap<any>, localMap: MapModel<any>, parent: Component<any>) {
+  private syncSharedMapToLocalMap(sharedMap: YMap<any>, localMap: ProxyModel<Record<string, any>>, parent: Component<any>) {
     sharedMap.forEach((value, key) => {
-      localMap.set(key, this.createLocalModelBySharedByModel(value, parent))
+      localMap[key] = this.createLocalModelBySharedByModel(value, parent)
     })
     this.syncObject(sharedMap, localMap, parent)
   }
 
-  private createLocalMapBySharedMap(sharedMap: YMap<any>, parent: Component<any>): MapModel<any> {
-    const localMap = new MapModel(parent)
+  private createLocalMapBySharedMap(sharedMap: YMap<any>, parent: Component<any>): ProxyModel<Record<string, any>> {
+    const localMap = createObjectProxy({}, parent)
     this.syncSharedMapToLocalMap(sharedMap, localMap, parent)
     return localMap
   }
 
-  private createLocalArrayBySharedArray(sharedArray: YArray<any>, parent: Component<any>): ArrayModel<any> {
-    const localArray = new ArrayModel(parent)
-    sharedArray.forEach(item => {
-      localArray.insert(this.createLocalModelBySharedByModel(item, parent))
-    })
+  private createLocalArrayBySharedArray(sharedArray: YArray<any>, parent: Component<any>): ProxyModel<any[]> {
+    const localArray = createArrayProxy<any[]>([], parent)
+    localArray.push(...sharedArray.map(item => this.createLocalModelBySharedByModel(item, parent)))
     this.syncArray(sharedArray, localArray, parent)
     return localArray
   }
 
-  private syncLocalMapToSharedMap(localMap: MapModel<any>, sharedMap: YMap<any>, parent: Component<any>) {
-    localMap.forEach((value, key) => {
+  private syncLocalMapToSharedMap(localMap: ProxyModel<Record<string, any>>, sharedMap: YMap<any>, parent: Component<any>) {
+    Object.entries(localMap).forEach(([key, value]) => {
       sharedMap.set(key, this.createSharedModelByLocalModel(value, parent))
     })
     this.syncObject(sharedMap, localMap, parent)
   }
 
-  private createSharedMapByLocalMap(localMap: MapModel<any>, parent: Component<any>): YMap<any> {
+  private createSharedMapByLocalMap(localMap: ProxyModel<Record<string, any>>, parent: Component<any>): YMap<any> {
     const sharedMap = new YMap<any>()
     this.syncLocalMapToSharedMap(localMap, sharedMap, parent)
     return sharedMap
   }
 
-  private createSharedArrayByLocalArray(localArray: ArrayModel<any>, parent: Component<any>): YArray<any> {
+  private createSharedArrayByLocalArray(localArray: ProxyModel<any[]>, parent: Component<any>): YArray<any> {
     const sharedArray = new YArray<any>()
     localArray.forEach(value => {
       sharedArray.push([this.createSharedModelByLocalModel(value, parent)])
@@ -417,38 +416,30 @@ export class Collaborate implements History {
     return localSlot
   }
 
-  // private createSharedModelByLocalModel(sharedModel: YMap<any>, parent: Component<any>): MapModel<any>
-  // private createSharedModelByLocalModel(sharedModel: YArray<any>, parent: Component<any>): ArrayModel<any>
-  // private createSharedModelByLocalModel(sharedModel: YText, parent: Component<any>): Slot
-  // private createSharedModelByLocalModel(sharedModel: any, parent: Component<any>): any
-  private createSharedModelByLocalModel(sharedModel: any, parent: Component<any>) {
-    if (sharedModel instanceof MapModel) {
-      return this.createSharedMapByLocalMap(sharedModel, parent)
+  private createSharedModelByLocalModel(localModel: any, parent: Component<any>) {
+    if (localModel instanceof Slot) {
+      return this.createSharedSlotByLocalSlot(localModel)
     }
-    if (sharedModel instanceof ArrayModel) {
-      return this.createSharedArrayByLocalArray(sharedModel, parent)
+    if (Array.isArray(localModel)) {
+      return this.createSharedArrayByLocalArray(localModel as ProxyModel<any[]>, parent)
     }
-    if (sharedModel instanceof Slot) {
-      return this.createSharedSlotByLocalSlot(sharedModel)
-    }
-    return sharedModel
-  }
-
-  // private createLocalModelBySharedByModel(localModel: MapModel<any>, parent: Component<any>): MapModel<any>
-  // private createLocalModelBySharedByModel(localModel: ArrayModel<any>, parent: Component<any>): YArray<any>
-  // private createLocalModelBySharedByModel(localModel: Slot, parent: Component<any>): YText
-  // private createLocalModelBySharedByModel(localModel: any, parent: Component<any>): any
-  private createLocalModelBySharedByModel(localModel: any, parent: Component<any>) {
-    if (localModel instanceof YMap) {
-      return this.createLocalMapBySharedMap(localModel, parent)
-    }
-    if (localModel instanceof YArray) {
-      return this.createLocalArrayBySharedArray(localModel, parent)
-    }
-    if (localModel instanceof YText) {
-      return this.createLocalSlotBySharedSlot(localModel)
+    if (typeof localModel === 'object' && localModel !== null) {
+      return this.createSharedMapByLocalMap(localModel, parent)
     }
     return localModel
+  }
+
+  private createLocalModelBySharedByModel(sharedModel: any, parent: Component<any>) {
+    if (sharedModel instanceof YMap) {
+      return this.createLocalMapBySharedMap(sharedModel, parent)
+    }
+    if (sharedModel instanceof YArray) {
+      return this.createLocalArrayBySharedArray(sharedModel, parent)
+    }
+    if (sharedModel instanceof YText) {
+      return this.createLocalSlotBySharedSlot(sharedModel)
+    }
+    return sharedModel
   }
 
   private getAbstractSelection(position: CursorPosition): AbstractSelection | null {
@@ -617,7 +608,7 @@ export class Collaborate implements History {
 
     this.slotMap.set(localSlot, sharedSlot)
 
-    localSlot.destroyCallbacks.push(() => {
+    localSlot.changeMarker.destroyCallbacks.push(() => {
       this.slotMap.delete(localSlot)
       sharedSlot.unobserve(syncRemote)
       sub.unsubscribe()
@@ -631,7 +622,6 @@ export class Collaborate implements History {
     sharedComponent.set('state', sharedState)
     return sharedComponent
   }
-
 
   private createLocalComponentBySharedComponent(yMap: YMap<any>): Component {
     const componentName = yMap.get('name') as string
@@ -654,22 +644,28 @@ export class Collaborate implements History {
    * @param parent
    * @private
    */
-  private syncArray(sharedArray: YArray<any>, localArray: ArrayModel<any>, parent: Component<any>) {
-    const sub = localArray.changeMarker.onChange.subscribe((op) => {
+  private syncArray(sharedArray: YArray<any>, localArray: ProxyModel<any[]>, parent: Component<any>) {
+    const sub = localArray.__changeMarker__.onSelfChange.subscribe((actions) => {
       this.runLocalUpdate(() => {
         let index = 0
-        for (const action of op.apply) {
+        for (const action of actions) {
           switch (action.type) {
             case 'retain':
               index = action.offset
               break
             case 'insert': {
-              const data = this.createSharedModelByLocalModel(action.ref, parent)
+              const data = action.ref.map(item => {
+                return this.createSharedModelByLocalModel(item, parent)
+              })
               sharedArray.insert(index, [data])
             }
               break
             case 'delete':
               sharedArray.delete(index, 1)
+              break
+            case 'setIndex':
+              sharedArray.delete(action.index, 1)
+              sharedArray.insert(action.index, this.createSharedModelByLocalModel(action.ref, parent))
               break
           }
         }
@@ -679,27 +675,24 @@ export class Collaborate implements History {
     const syncRemote = (ev: YArrayEvent<any>, tr: Transaction) => {
       this.runRemoteUpdate(tr, () => {
         let index = 0
-        localArray.retain(index)
         ev.delta.forEach((action) => {
           if (Reflect.has(action, 'retain')) {
             index += action.retain as number
-            localArray.retain(index)
           } else if (action.insert) {
-            (action.insert as Array<YMap<any>>).forEach((item) => {
-              const value = this.createLocalModelBySharedByModel(item, parent)
-              localArray.insert(value)
-              index++
+            const data = (action.insert as Array<any>).map((item) => {
+              return this.createLocalModelBySharedByModel(item, parent)
             })
+            localArray.splice(index, 0, ...data)
+            index += data.length
           } else if (action.delete) {
-            localArray.retain(index)
-            localArray.delete(action.delete)
+            localArray.splice(index, action.delete)
           }
         })
       })
     }
 
     sharedArray.observe(syncRemote)
-    localArray.destroyCallbacks.push(() => {
+    localArray.__changeMarker__.destroyCallbacks.push(() => {
       sub.unsubscribe()
       sharedArray.unobserve(syncRemote)
     })
@@ -712,15 +705,15 @@ export class Collaborate implements History {
    * @param parent
    * @private
    */
-  private syncObject(sharedObject: YMap<any>, localObject: MapModel<any>, parent: Component<any>) {
+  private syncObject(sharedObject: YMap<any>, localObject: ProxyModel<Record<string, any>>, parent: Component<any>) {
     const syncRemote = (ev: YMapEvent<any>, tr: Transaction) => {
       this.runRemoteUpdate(tr, () => {
         ev.changes.keys.forEach((item, key) => {
           if (item.action === 'add' || item.action === 'update') {
             const value = sharedObject.get(key)
-            localObject.set(key, this.createLocalModelBySharedByModel(value, parent))
+            localObject[key] = this.createLocalModelBySharedByModel(value, parent)
           } else {
-            localObject.remove(key)
+            Reflect.deleteProperty(localObject, key)
           }
         })
       })
@@ -728,9 +721,9 @@ export class Collaborate implements History {
 
     sharedObject.observe(syncRemote)
 
-    const sub = localObject.changeMarker.onChange.subscribe((op) => {
+    const sub = localObject.__changeMarker__.onSelfChange.subscribe((actions) => {
       this.runLocalUpdate(() => {
-        for (const action of op.apply) {
+        for (const action of actions) {
           switch (action.type) {
             case 'propSet':
               sharedObject.set(action.key, this.createSharedModelByLocalModel(action.value, parent))
