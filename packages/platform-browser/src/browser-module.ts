@@ -143,13 +143,18 @@ export class BrowserModule implements Module {
     return registry.createComponentByFactory(data, rootComponent)
   }
 
-  setup() {
+  setup(textbus: Textbus) {
     const host = this.config.renderTo()
     if (!(host instanceof HTMLElement)) {
       throw browserErrorFn('view container is not a HTMLElement')
     }
+
+    const cursor = textbus.get(CollaborateCursor)
+    cursor.init()
+
     host.append(this.workbench)
     return () => {
+      cursor.destroy()
       this.workbench.remove()
     }
   }
