@@ -306,15 +306,11 @@ export class LocalHistory extends History {
             }
             break
           case 'propDelete':
-            model.remove(action.key)
+            Reflect.deleteProperty(model, action.key)
             break
-          case 'propSet':
-            if (action.isSlot) {
-              const slot = this.registry.createSlot(action.value)
-              model.set(action.key, slot)
-            } else {
-              model.set(action.key, action.value)
-            }
+          case 'propSet': {
+            model[action.key] = action.isSlot ? this.registry.createSlot(action.value) : action.value
+          }
             break
           case 'setIndex':
             model[action.index] = action.isSlot ? this.registry.createSlot(action.value) : action.value
