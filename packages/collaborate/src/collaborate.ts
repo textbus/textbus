@@ -307,13 +307,13 @@ export class Collaborate implements History {
     let state = root.get('state') as YMap<any>
     if (!state) {
       state = new YMap<any>()
-      this.syncLocalMapToSharedMap(rootComponent.state, state, rootComponent)
+      this.syncLocalMapToSharedMap(rootComponent.state as ProxyModel<Record<string, any>>, state, rootComponent)
       this.yDoc.transact(() => {
         root.set('state', state)
       })
     } else {
       rootComponent.state.clean()
-      this.syncSharedMapToLocalMap(state, rootComponent.state, rootComponent)
+      this.syncSharedMapToLocalMap(state, rootComponent.state as ProxyModel<Record<string, any>>, rootComponent)
     }
   }
 
@@ -325,13 +325,13 @@ export class Collaborate implements History {
   }
 
   private createLocalMapBySharedMap(sharedMap: YMap<any>, parent: Component<any>): ProxyModel<Record<string, any>> {
-    const localMap = createObjectProxy({}, parent)
+    const localMap = createObjectProxy({}, parent) as ProxyModel<Record<string, any>>
     this.syncSharedMapToLocalMap(sharedMap, localMap, parent)
     return localMap
   }
 
   private createLocalArrayBySharedArray(sharedArray: YArray<any>, parent: Component<any>): ProxyModel<any[]> {
-    const localArray = createArrayProxy<any[]>([], parent)
+    const localArray = createArrayProxy<any[]>([], parent) as ProxyModel<any[]>
     localArray.push(...sharedArray.map(item => this.createLocalModelBySharedByModel(item, parent)))
     this.syncArray(sharedArray, localArray, parent)
     return localArray
@@ -617,7 +617,7 @@ export class Collaborate implements History {
 
   private createSharedComponentByLocalComponent(component: Component): YMap<any> {
     const sharedComponent = new YMap()
-    const sharedState = this.createSharedMapByLocalMap(component.state, component)
+    const sharedState = this.createSharedMapByLocalMap(component.state as ProxyModel<Record<string, any>>, component)
     sharedComponent.set('name', component.name)
     sharedComponent.set('state', sharedState)
     return sharedComponent
