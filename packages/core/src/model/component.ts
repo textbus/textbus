@@ -7,7 +7,7 @@ import { ChangeMarker } from './change-marker'
 import { State } from './types'
 import { Textbus } from '../textbus'
 import { Slots } from './slots'
-import { createObjectProxy, objectToJSON, ProxyModel } from './proxy'
+import { createObjectProxy, objectToJSON } from './proxy'
 
 const componentErrorFn = makeError('Component')
 
@@ -73,7 +73,7 @@ export interface Component<T extends State> {
 }
 
 export interface ComponentStateCreator<T extends State> {
-  (from: Component<T>): ProxyModel<T>
+  (from: Component<T>): T
 }
 
 /**
@@ -111,7 +111,7 @@ export abstract class Component<T extends State = State> {
   /** 组件类型 */
   readonly type: ContentType
   /** 组件状态 */
-  readonly state: ProxyModel<T>
+  readonly state: T
 
   constructor(public textbus: Textbus,
               initData: T | ComponentStateCreator<T>) {
@@ -138,7 +138,7 @@ export abstract class Component<T extends State = State> {
     if (typeof this.setup === 'function') {
       this.setup()
     }
-    const changeMarker = this.state.__changeMarker__
+    const changeMarker = this.state.__changeMarker__ as ChangeMarker
     const sub = changeMarker.onChange.subscribe(op => {
       if (changeMarker.dirty) {
         this.changeMarker.markAsDirtied(op)
