@@ -1,20 +1,11 @@
 import { Injectable, Optional } from '@viewfly/core'
-import { Selection, SelectionPaths, AbstractSelection, Scheduler, Textbus } from '@textbus/core'
+import { Selection, AbstractSelection, Scheduler, Textbus } from '@textbus/core'
 import { fromEvent, Subject, Subscription } from '@tanbo/stream'
+import { ActivityInfo, UserActivity } from '@textbus/collaborate'
 
 import { VIEW_CONTAINER } from './injection-tokens'
 import { SelectionBridge } from './selection-bridge'
 import { createElement, getLayoutRectByRange, Rect } from './_utils/uikit'
-
-/**
- * 远程用户及光标位置信息
- */
-export interface RemoteSelection {
-  id: string
-  color: string
-  username: string
-  paths: SelectionPaths
-}
 
 export interface SelectionRect extends Rect {
   color: string
@@ -89,13 +80,14 @@ export class CollaborateCursor {
   private onRectsChange = new Subject<SelectionRect[]>()
 
   private subscription = new Subscription()
-  private currentSelection: RemoteSelection[] = []
+  private currentSelection: ActivityInfo[] = []
   private container: HTMLElement
 
   constructor(textbus: Textbus,
               private nativeSelection: SelectionBridge,
               private scheduler: Scheduler,
               private selection: Selection,
+              @Optional() private userActivity: UserActivity,
               @Optional() private awarenessDelegate?: CollaborateSelectionAwarenessDelegate) {
     this.container = textbus.get(VIEW_CONTAINER)
     this.canvasContainer.append(this.canvas)
@@ -117,6 +109,16 @@ export class CollaborateCursor {
     }))
   }
 
+  init() {
+    if (this.userActivity) {
+      this.subscription.add(
+        this.userActivity.onStateChange.subscribe(v => {
+          this.draw(v)
+        })
+      )
+    }
+  }
+
   /**
    * 刷新协作光标，由于 Textbus 只会绘制可视区域的光标，当可视区域发生变化时，需要重新绘制
    */
@@ -132,7 +134,7 @@ export class CollaborateCursor {
    * 根据远程用户光标位置，绘制协作光标
    * @param paths
    */
-  draw(paths: RemoteSelection[]) {
+  private draw(paths: ActivityInfo[]) {
     this.currentSelection = paths
     const containerRect = this.container.getBoundingClientRect()
     this.canvas.style.top = containerRect.top * -1 + 'px'
@@ -143,10 +145,10 @@ export class CollaborateCursor {
     const users: SelectionRect[] = []
 
     paths.filter(i => {
-      return i.paths.anchor.length && i.paths.focus.length
+      return i.selection.anchor.length && i.selection.focus.length
     }).forEach(item => {
-      const anchorPaths = [...item.paths.anchor]
-      const focusPaths = [...item.paths.focus]
+      const anchorPaths = [...item.selection.anchor]
+      const focusPaths = [...item.selection.focus]
       const anchorOffset = anchorPaths.pop()!
       const anchorSlot = this.selection.findSlotByPaths(anchorPaths)
       const focusOffset = focusPaths.pop()!

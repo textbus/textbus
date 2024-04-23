@@ -21,6 +21,9 @@
     "paths": {
       "@textbus/core": [
         "../core/src/public-api.ts"
+      ],
+      "@textbus/collaborate": [
+        "../collaborate/src/public-api.ts"
       ]
     }
   },
