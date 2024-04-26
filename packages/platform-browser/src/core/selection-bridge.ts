@@ -18,7 +18,6 @@ import { EDITOR_OPTIONS, VIEW_DOCUMENT, VIEW_MASK } from './injection-tokens'
 import { createElement, getLayoutRectByRange, Rect } from '../_utils/uikit'
 import { Input, ViewOptions } from './types'
 
-
 /**
  * Textbus PC 端选区桥接实现
  */
@@ -141,7 +140,30 @@ export class SelectionBridge implements NativeSelectionBridge {
       return
     }
 
-    this.nativeSelection.setBaseAndExtent(anchor.node, anchor.offset, focus.node, focus.offset)
+    function tryOffset(position: {node: Node, offset: number}) {
+      if (position.node.nodeType === Node.TEXT_NODE) {
+        const len = position.node.textContent!.length
+        if (position.offset > len) {
+          position.offset = len
+        }
+      } else if (position.node.nodeType === Node.ELEMENT_NODE) {
+        const len = position.node.childNodes.length
+        if (position.offset > len) {
+          position.offset = len
+        }
+      }
+    }
+
+    tryOffset(focus)
+    tryOffset(anchor)
+
+    try {
+      this.nativeSelection.setBaseAndExtent(anchor.node, anchor.offset, focus.node, focus.offset)
+    } catch (e) {
+      setTimeout(() => {
+        throw e
+      })
+    }
     if (this.nativeSelection.rangeCount) {
       const nativeRange = this.nativeSelection.getRangeAt(0)
       this.selectionChangeEvent.next(nativeRange)
@@ -168,8 +190,8 @@ export class SelectionBridge implements NativeSelectionBridge {
   }
 
   getPositionByRange(abstractSelection: AbstractSelection) {
-    let focus!: { node: Node, offset: number } | null
-    let anchor!: { node: Node, offset: number } | null
+    let focus!: {node: Node, offset: number} | null
+    let anchor!: {node: Node, offset: number} | null
     try {
       focus = this.findSelectedNodeAndOffset(abstractSelection.focusSlot!, abstractSelection.focusOffset!)
       anchor = focus
@@ -444,7 +466,7 @@ export class SelectionBridge implements NativeSelectionBridge {
     connector.setSelection(null)
   }
 
-  private findSelectedNodeAndOffset(slot: Slot, offset: number): { node: Node, offset: number } | null {
+  private findSelectedNodeAndOffset(slot: Slot, offset: number): {node: Node, offset: number} | null {
     const prev = slot.getContentAtIndex(offset - 1)
     const vNodes = this.renderer.getVNodesBySlot(slot)
 
