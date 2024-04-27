@@ -67,6 +67,7 @@ export class Scheduler {
   private docChangeEvent = new Subject<void>()
   private localChangeBeforeEvent = new Subject<void>()
   private subs: Subscription[] = []
+  private updatedTasks: Array<() => void> = []
 
   constructor(private rootComponentRef: RootComponentRef,
               private viewAdapter: ViewAdapter,
@@ -95,6 +96,14 @@ export class Scheduler {
     this.changeFromHistory = true
     task()
     this.changeFromHistory = false
+  }
+
+  /**
+   * 添加文档渲染后副作用任务
+   * @param fn
+   */
+  addUpdatedTask(fn: () => void) {
+    this.updatedTasks.push(fn)
   }
 
   /**
@@ -141,6 +150,11 @@ export class Scheduler {
         this.instanceList.add(instance)
       }),
       this.viewAdapter.onViewUpdated.pipe(microTask()).subscribe(() => {
+        const tasks = this.updatedTasks
+        this.updatedTasks = []
+        tasks.forEach(fn => {
+          fn()
+        })
         this.selection.restore(this._lastChangesHasLocalUpdate)
         this.instanceList.forEach(instance => {
           let comp = instance
@@ -165,6 +179,7 @@ export class Scheduler {
    * 销毁调度器
    */
   destroy() {
+    this.updatedTasks = []
     this.subs.forEach(i => i.unsubscribe())
     const component = this.rootComponentRef.component
     if (component) {

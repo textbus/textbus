@@ -272,6 +272,11 @@ export class Textbus extends ReflectiveInjector {
     return rootComponentRef.component.toJSON()
   }
 
+  nextTick(task: () => void) {
+    const scheduler = this.get(Scheduler)
+    scheduler.addUpdatedTask(task)
+  }
+
   /**
    * 销毁 Textbus 实例
    */
