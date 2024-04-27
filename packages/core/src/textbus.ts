@@ -197,6 +197,12 @@ export class Textbus extends ReflectiveInjector {
 
     this.initDefaultShortcut()
 
+    this.config.imports?.forEach(module => {
+      module.onAfterStartup?.(this)
+    })
+
+    this.config.onAfterStartup?.(this)
+
     history.listen()
     scheduler.run()
 
