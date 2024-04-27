@@ -4,6 +4,7 @@ import { Commander } from './commander'
 import { Selection } from './selection'
 import { COMPONENT_LIST, ZEN_CODING_DETECT } from './_injection-tokens'
 import { Textbus } from '../textbus'
+import { Scheduler } from './scheduler'
 
 /**
  * 快捷键配置
@@ -44,6 +45,7 @@ export class Keyboard {
               @Inject(ZEN_CODING_DETECT) private markdownDetect: boolean,
               private commander: Commander,
               private textbus: Textbus,
+              private scheduler: Scheduler,
               private selection: Selection) {
     components.forEach(component => {
       const config = component.zenCoding
@@ -157,7 +159,7 @@ export class Keyboard {
     return false
   }
 
-  private createZenCodingEx(component: ComponentConstructor, config: ZenCodingGrammarInterceptor) {
+  private createZenCodingEx(component: ComponentConstructor, config: ZenCodingGrammarInterceptor<any>) {
     const selection = this.selection
     const commander = this.commander
     return {
@@ -178,7 +180,7 @@ export class Keyboard {
       },
       action: (content: string) => {
         const commonAncestorSlot = selection.commonAncestorSlot!
-        const initData = config.generateInitData(content, this.textbus)
+        const initData = config.createState(content, this.textbus)
         const newInstance = new component(this.textbus, initData)
         if (commonAncestorSlot.schema.includes(newInstance.type)) {
           selection.selectSlot(commonAncestorSlot)
@@ -197,13 +199,15 @@ export class Keyboard {
           commander.delete()
           commander.insert(newInstance)
         }
-        const newSlot = newInstance.__slots__.first
-        if (newSlot) {
-          selection.setPosition(newSlot, 0)
-        } else if (newInstance.parent) {
-          const index = newInstance.parent.indexOf(newInstance)
-          selection.setPosition(newInstance.parent, index + 1)
-        }
+        this.scheduler.addUpdatedTask(() => {
+          const newSlot = newInstance.__slots__.first
+          if (newSlot) {
+            selection.setPosition(newSlot, 0)
+          } else if (newInstance.parent) {
+            const index = newInstance.parent.indexOf(newInstance)
+            selection.setPosition(newInstance.parent, index + 1)
+          }
+        })
         return true
       }
     }
