@@ -519,5 +519,14 @@ export class Textbus extends ReflectiveInjector {
         history.forward()
       }
     })
+    keyboard.addShortcut({
+      keymap: {
+        key: 'y',
+        ctrlKey: true,
+      },
+      action: () => {
+        history.forward()
+      }
+    })
   }
 }
