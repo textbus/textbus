@@ -1,7 +1,7 @@
 import { DefineComponent, getCurrentInstance, h, onMounted, onUnmounted, onUpdated, Ref, ref, VNode } from 'vue'
 import { Subject } from '@tanbo/stream'
 import {
-  Component,
+  Component, invokeListener,
   makeError,
   replaceEmpty,
   Slot,
@@ -108,6 +108,9 @@ export class Adapter extends DomAdapter<VNode, VNode> {
           children.push(replaceEmpty(child.textContent))
         } else {
           children.push(this.componentRender(child))
+          if (!this.firstRending) {
+            invokeListener(child, 'onParentSlotUpdated')
+          }
         }
       }
       const props: any = {

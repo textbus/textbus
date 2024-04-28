@@ -11,6 +11,7 @@ export type Paths = Array<string | number>
 export class ChangeMarker {
   destroyCallbacks: DestroyCallbacks = []
   onTriggerPath: Observable<Paths>
+  onForceChange: Observable<void>
   onChange: Observable<Operation>
   onChildComponentRemoved: Observable<Component>
   onSelfChange: Observable<Action[]>
@@ -29,17 +30,35 @@ export class ChangeMarker {
   private triggerPathEvent = new Subject<Paths>()
   private selfChangeEvent = new Subject<Action[]>()
   private childComponentRemovedEvent = new Subject<Component>()
+  private forceChangeEvent = new Subject<void>()
 
   constructor() {
     this.onChange = this.changeEvent.asObservable()
     this.onTriggerPath = this.triggerPathEvent.asObservable()
     this.onChildComponentRemoved = this.childComponentRemovedEvent.asObservable()
     this.onSelfChange = this.selfChangeEvent.asObservable()
+    this.onForceChange = this.forceChangeEvent.asObservable()
   }
 
   triggerPath(paths: Paths) {
     this.triggerPathEvent.next(paths)
     return paths
+  }
+
+  forceMarkDirtied() {
+    if (this._dirty) {
+      return
+    }
+    this._dirty = true
+    this.forceMarkChanged()
+  }
+
+  forceMarkChanged() {
+    if (this._changed) {
+      return
+    }
+    this._changed = true
+    this.forceChangeEvent.next()
   }
 
   markAsDirtied(operation: Operation) {

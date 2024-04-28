@@ -7,9 +7,9 @@ import {
   DynamicRef,
   createDynamicRef
 } from '@viewfly/core'
-import { Subject } from '@tanbo/stream'
+import { merge, Subject } from '@tanbo/stream'
 import {
-  Component,
+  Component, invokeListener,
   makeError,
   replaceEmpty,
   Slot,
@@ -49,7 +49,8 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
       this.components[key] = (props: ViewComponentProps<Component>) => {
         const comp = getCurrentInstance()
         const textbusComponent = props.component
-        textbusComponent.changeMarker.onChange.subscribe(() => {
+        merge(textbusComponent.changeMarker.onChange,
+          textbusComponent.changeMarker.onForceChange).subscribe(() => {
           if (textbusComponent.changeMarker.dirty) {
             comp.markAsDirtied()
           }
@@ -129,6 +130,9 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
           children.push(replaceEmpty(child.textContent))
         } else {
           children.push(this.componentRender(child))
+          if (!this.firstRending) {
+            invokeListener(child, 'onParentSlotUpdated')
+          }
         }
       }
       const props: any = {

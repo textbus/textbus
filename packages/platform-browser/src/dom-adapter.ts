@@ -31,6 +31,8 @@ export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter
     }
   })
 
+  protected firstRending = true
+
   protected componentRootElementCaches = createBidirectionalMapping<Component, HTMLElement>(a => {
     return a instanceof Component
   })
@@ -45,6 +47,7 @@ export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter
 
   render(rootComponent: Component, textbus: Textbus): void | (() => void) {
     const view = this.componentRender(rootComponent)
+    this.firstRending = false
     return this.mount(this.host, view, textbus)
   }
 

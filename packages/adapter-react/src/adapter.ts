@@ -1,7 +1,7 @@
 import { createElement, JSX, ReactNode, useEffect, useState } from 'react'
 import { Subject } from '@tanbo/stream'
 import {
-  Component,
+  Component, invokeListener,
   makeError,
   replaceEmpty,
   Slot,
@@ -113,6 +113,9 @@ export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
           children.push(replaceEmpty(child.textContent))
         } else {
           children.push(this.componentRender(child))
+          if (!this.firstRending) {
+            invokeListener(child, 'onParentSlotUpdated')
+          }
         }
       }
       const props: any = {
