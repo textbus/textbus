@@ -147,7 +147,15 @@ export abstract class Component<T extends State = State> {
       }
     }).add(changeMarker.onTriggerPath.subscribe(paths => {
       this.changeMarker.triggerPath(paths)
-    }))
+    })).add(
+      changeMarker.onForceChange.subscribe(() => {
+        if (changeMarker.dirty) {
+          this.changeMarker.forceMarkDirtied()
+        } else {
+          this.changeMarker.forceMarkChanged()
+        }
+      })
+    )
     onDestroy(() => {
       eventCacheMap.delete(this)
       sub.unsubscribe()

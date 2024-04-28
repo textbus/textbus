@@ -277,6 +277,9 @@ export class Slot {
       sub.add(content.changeMarker.onChildComponentRemoved.subscribe(instance => {
         this.changeMarker.recordComponentRemoved(instance)
       }))
+      sub.add(content.changeMarker.onForceChange.subscribe(() => {
+        this.changeMarker.forceMarkChanged()
+      }))
       this.componentChangeListeners.set(content, sub)
     }
     let formats: Formats = []
