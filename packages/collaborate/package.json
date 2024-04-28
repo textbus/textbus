@@ -27,7 +27,7 @@
   "dependencies": {
     "@tanbo/stream": "^1.2.3",
     "@textbus/core": "^4.0.0-alpha.30",
-    "@viewfly/core": "^0.6.0",
+    "@viewfly/core": "^0.6.1",
     "reflect-metadata": "^0.1.13",
     "y-websocket": "^1.4.3",
     "yjs": "^13.6.14"

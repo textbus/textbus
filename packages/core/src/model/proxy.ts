@@ -389,6 +389,10 @@ export function createArrayProxy<T extends any[]>(raw: T, component: Component<a
           component.changeMarker.reset()
           changeMarker.markAsChanged(ops)
         })
+        sub.add(childChangeMarker.onForceChange.subscribe(() => {
+          component.changeMarker.reset()
+          changeMarker.forceMarkChanged()
+        }))
         sub.add(childChangeMarker.onTriggerPath.subscribe(paths => {
           paths.unshift(raw.indexOf(value))
           changeMarker.triggerPath(paths)
@@ -430,6 +434,10 @@ export function createObjectProxy<T extends object>(raw: T, component: Component
           component.changeMarker.reset()
           changeMarker.markAsChanged(ops)
         })
+        sub.add(childChangeMarker.onForceChange.subscribe(() => {
+          component.changeMarker.reset()
+          changeMarker.forceMarkChanged()
+        }))
         sub.add(childChangeMarker.onTriggerPath.subscribe(paths => {
           paths.unshift(p as string)
           changeMarker.triggerPath(paths)
