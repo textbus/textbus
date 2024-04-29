@@ -376,11 +376,7 @@ export class MagicInput extends Input {
       this.textarea?.focus()
       setTimeout(() => {
         if (!this.nativeFocus && this.isFocus) {
-          this.subscription.unsubscribe()
-          this.textarea?.parentNode?.removeChild(this.textarea)
-          this.subscription = new Subscription()
-          this.init()
-          this.textarea?.focus()
+          this.reInit()
         }
       })
     }
@@ -398,6 +394,20 @@ export class MagicInput extends Input {
     this.subscription.unsubscribe()
   }
 
+  private reInit(delay = false) {
+    this.subscription.unsubscribe()
+    this.textarea?.parentNode?.removeChild(this.textarea)
+    this.subscription = new Subscription()
+    this.init()
+    if (delay) {
+      setTimeout(() => {
+        this.textarea?.focus()
+      })
+    } else {
+      this.textarea?.focus()
+    }
+  }
+
   private init() {
     const doc = this.doc
     const contentBody = doc.body
@@ -407,7 +417,10 @@ export class MagicInput extends Input {
     this.textarea = textarea
     this.subscription.add(
       fromEvent(textarea, 'blur').subscribe(() => {
-        this.isFocus = false
+        if (this.isFocus) {
+          this.isFocus = false
+          this.reInit(true)
+        }
         this.nativeFocus = false
         this.caret.hide()
       }),
