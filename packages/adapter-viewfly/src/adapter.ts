@@ -49,6 +49,10 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
         onUpdated(() => {
           this.componentRendingStack.pop()
           textbusComponent.changeMarker.rendered()
+          if (!this.componentRootElementCaches.get(textbusComponent)) {
+            // eslint-disable-next-line max-len
+            throw adapterError(`Component \`${textbusComponent.name}\` is not bound to rootRef, you must bind rootRef to the root element node of the component view.`)
+          }
         })
         const component = props.component
         const instance = components[key](props)
@@ -117,6 +121,8 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
           }
         }
       }
+      const key = vNode.attrs.get('key')
+      vNode.attrs.delete('key')
       const props: any = {
         ...(Array.from(vNode.attrs).reduce((a, b) => {
           a[b[0]] = b[1]
@@ -135,7 +141,7 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
       if (children.length) {
         props.children = children
       }
-      return jsx(vNode.tagName, props)
+      return jsx(vNode.tagName, props, key)
     }
     const jsxNode = vNodeToJSX(vElement)
     const currentRef = jsxNode.props.ref

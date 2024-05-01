@@ -78,6 +78,11 @@ export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
         })
         useEffect(() => {
           this.componentRendingStack.pop()
+
+          if (!this.componentRootElementCaches.get(component)) {
+            // eslint-disable-next-line max-len
+            throw adapterError(`Component \`${component.name}\` is not bound to rootRef, you must bind rootRef to the root element node of the component view.`)
+          }
         })
         return vNode
       }
