@@ -76,7 +76,9 @@ export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
             }
           }
         })
-        this.componentRendingStack.pop()
+        useEffect(() => {
+          this.componentRendingStack.pop()
+        })
         return vNode
       }
     })

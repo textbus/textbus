@@ -1,20 +1,6 @@
-import {
-  getCurrentInstance,
-  jsx,
-  JSXNode,
-  onUpdated,
-  DynamicRef,
-  createDynamicRef
-} from '@viewfly/core'
+import { createDynamicRef, DynamicRef, getCurrentInstance, jsx, JSXNode, onUpdated } from '@viewfly/core'
 import { merge, Subject } from '@tanbo/stream'
-import {
-  Component, invokeListener,
-  makeError,
-  replaceEmpty,
-  Slot,
-  VElement,
-  VTextNode
-} from '@textbus/core'
+import { Component, invokeListener, makeError, replaceEmpty, Slot, VElement, VTextNode } from '@textbus/core'
 import { DomAdapter } from '@textbus/platform-browser'
 
 const adapterError = makeError('ViewflyAdapter')
@@ -61,6 +47,7 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
           isRoot = false
         }
         onUpdated(() => {
+          this.componentRendingStack.pop()
           textbusComponent.changeMarker.rendered()
         })
         const component = props.component
@@ -69,9 +56,7 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
           return () => {
             component.__slots__.length = 0
             this.componentRendingStack.push(component)
-            const vNode = instance()
-            this.componentRendingStack.pop()
-            return vNode
+            return instance()
           }
         }
         const self = this
@@ -80,9 +65,7 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
           $render(): JSXInternal.ViewNode {
             component.__slots__.length = 0
             self.componentRendingStack.push(component)
-            const vNode = instance.$render()
-            self.componentRendingStack.pop()
-            return vNode
+            return instance.$render()
           }
         }
       }
