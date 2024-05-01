@@ -52,6 +52,11 @@ export class Adapter extends DomAdapter<VNode, VNode> {
           self.componentRendingStack.pop()
           component.changeMarker.rendered()
           self.onViewUpdated.next()
+
+          if (!(self.componentRefs.get(component)?.value instanceof HTMLElement)) {
+            // eslint-disable-next-line max-len
+            throw adapterError(`Component \`${component.name}\` is not bound to rootRef, you must bind rootRef to the root element node of the component view.`)
+          }
         })
         onUnmounted(() => {
           sub.unsubscribe()
