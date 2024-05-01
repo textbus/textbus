@@ -1,13 +1,6 @@
 import { DefineComponent, getCurrentInstance, h, onMounted, onUnmounted, onUpdated, Ref, ref, VNode } from 'vue'
 import { Subject } from '@tanbo/stream'
-import {
-  Component, invokeListener,
-  makeError,
-  replaceEmpty,
-  Slot,
-  VElement,
-  VTextNode
-} from '@textbus/core'
+import { Component, invokeListener, makeError, replaceEmpty, Slot, VElement, VTextNode } from '@textbus/core'
 import { DomAdapter } from '@textbus/platform-browser'
 
 const adapterError = makeError('VueAdapter')
@@ -56,13 +49,32 @@ export class Adapter extends DomAdapter<VNode, VNode> {
           }
         })
         onUpdated(() => {
+          self.componentRendingStack.pop()
           component.changeMarker.rendered()
           self.onViewUpdated.next()
         })
         onUnmounted(() => {
           sub.unsubscribe()
         })
-        return (setup as any)(props)
+        const result = (setup as any)(props)
+        if (typeof result === 'function') {
+          return function () {
+            component.__slots__.length = 0
+            self.componentRendingStack.push(component)
+            return result()
+          }
+        }
+        return result
+      }
+
+      if (vueComponent.render) {
+        const oldRender = vueComponent.render
+        vueComponent.render = function (context: any) {
+          context.component.__slots__.length = 0
+          self.componentRendingStack.push(context.component)
+
+          oldRender.apply(this, context)
+        }
       }
       this.components[key] = vueComponent
     })
@@ -76,15 +88,11 @@ export class Adapter extends DomAdapter<VNode, VNode> {
         rootRef = ref<HTMLElement>()
         this.componentRefs.set(component, rootRef)
       }
-      component.__slots__.length = 0
-      this.componentRendingStack.push(component)
-      const vNode = h(comp, {
+      return h(comp, {
         component,
         rootRef,
         key: component.id
       })
-      this.componentRendingStack.pop()
-      return vNode
     }
     throw adapterError(`cannot found view component \`${component.name}\`!`)
   }
