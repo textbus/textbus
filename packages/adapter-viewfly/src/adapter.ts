@@ -1,7 +1,6 @@
 import {
   getCurrentInstance,
   jsx,
-  JSXInternal,
   JSXNode,
   onUpdated,
   DynamicRef,
