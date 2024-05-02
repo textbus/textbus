@@ -82,6 +82,7 @@ export class CollaborateCursor {
   private subscription = new Subscription()
   private currentSelection: ActivityInfo[] = []
   private container: HTMLElement
+  private ratio = window.devicePixelRatio || 1
 
   constructor(textbus: Textbus,
               private nativeSelection: SelectionBridge,
@@ -138,8 +139,9 @@ export class CollaborateCursor {
     this.currentSelection = paths
     const containerRect = this.container.getBoundingClientRect()
     this.canvas.style.top = containerRect.top * -1 + 'px'
-    this.canvas.width = this.canvas.offsetWidth
-    this.canvas.height = this.canvas.offsetHeight
+    this.canvas.width = this.canvas.offsetWidth * this.ratio
+    this.canvas.height = this.canvas.offsetHeight * this.ratio
+    this.context.scale(this.ratio, this.ratio)
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
     const users: SelectionRect[] = []
