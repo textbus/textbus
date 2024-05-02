@@ -312,7 +312,9 @@ export class Collaborate implements History {
         root.set('state', state)
       })
     } else {
-      rootComponent.state.clean()
+      Object.keys(rootComponent.state).forEach(key => {
+        Reflect.deleteProperty(rootComponent.state, key)
+      })
       this.syncSharedMapToLocalMap(state, rootComponent.state as ProxyModel<Record<string, any>>, rootComponent)
     }
   }
@@ -736,7 +738,7 @@ export class Collaborate implements History {
       })
     })
 
-    localObject.destroyCallbacks.push(function () {
+    localObject.__changeMarker__.destroyCallbacks.push(function () {
       sharedObject.unobserve(syncRemote)
       sub.unsubscribe()
     })
