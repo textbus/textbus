@@ -23,7 +23,7 @@ import {
   Slot, Textbus
 } from '@textbus/core'
 
-import { Caret, CaretPosition, CompositionState, Input, Scroller } from './types'
+import { Caret, CaretPosition, Input, Scroller } from './types'
 import { VIEW_DOCUMENT } from './injection-tokens'
 import { isSafari, isMac, isMobileBrowser, isFirefox } from './_utils/env'
 import { Parser } from './parser'
@@ -151,7 +151,7 @@ export class NativeInput extends Input {
   caret = new NativeCaret(this.scheduler)
 
   composition = false
-  compositionState: CompositionState | null = null
+  // compositionState: CompositionState | null = null
 
   onReady = Promise.resolve()
 
@@ -359,7 +359,6 @@ export class NativeInput extends Input {
     let startIndex: number
     const compositionStart = () => {
       this.composition = true
-      this.compositionState = null
       startIndex = this.selection.startOffset!
       const startSlot = this.selection.startSlot!
       const event = new Event<Slot, CompositionStartEventData>(startSlot, {
@@ -369,11 +368,6 @@ export class NativeInput extends Input {
     }
     const compositionUpdate = (data: string) => {
       const startSlot = this.selection.startSlot!
-      this.compositionState = {
-        slot: startSlot,
-        index: startIndex,
-        data
-      }
       const event = new Event<Slot, CompositionUpdateEventData>(startSlot, {
         index: startIndex,
         data
@@ -477,7 +471,6 @@ export class NativeInput extends Input {
         return !this.ignoreComposition
       })).subscribe(() => {
         this.composition = true
-        this.compositionState = null
         startIndex = this.selection.startOffset!
         const startSlot = this.selection.startSlot!
         const event = new Event<Slot, CompositionStartEventData>(startSlot, {
@@ -489,11 +482,6 @@ export class NativeInput extends Input {
         return !this.ignoreComposition
       })).subscribe(ev => {
         const startSlot = this.selection.startSlot!
-        this.compositionState = {
-          slot: startSlot,
-          index: startIndex,
-          data: ev.data
-        }
         const event = new Event(startSlot, {
           index: startIndex,
           data: ev.data
@@ -559,7 +547,6 @@ export class NativeInput extends Input {
           )
       ).subscribe(text => {
         this.composition = false
-        this.compositionState = null
         if (text) {
           this.commander.write(text)
         }

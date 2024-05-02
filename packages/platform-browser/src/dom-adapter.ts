@@ -8,8 +8,16 @@ import {
   createBidirectionalMapping,
   Textbus
 } from '@textbus/core'
+
 import { createElement } from './_utils/uikit'
 import { VIEW_DOCUMENT } from './injection-tokens'
+
+export interface CompositionState {
+  slot: Slot
+  text: string
+  offset: number
+  index: number
+}
 
 /**
  * Textbus PC 端浏览器渲染能力桥接器抽象类，提供了 DOM 元素查询能力，具体渲染能力由各前端框架实现相应桥接
@@ -30,6 +38,8 @@ export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter
       id: 'textbus-' + Number((Math.random() + '').substring(2)).toString(16)
     }
   })
+  compositionNode: HTMLElement|null = null
+  composition: CompositionState | null = null
 
   protected firstRending = true
 

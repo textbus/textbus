@@ -151,9 +151,9 @@ async function createEditor() {
   })
 
 
-  rootModel.changeMarker.onChange.subscribe(op => {
-    console.log(op)
-  })
+  // rootModel.changeMarker.onChange.subscribe(op => {
+  //   console.log(op)
+  // })
   textbus.render(rootModel)
   // 从这里开始创建编辑器
 
@@ -164,15 +164,7 @@ async function createEditor() {
 
     return () => {
       return (
-        <div class="xxxx">
-          <div>
-            <div>{arr.join('/')}</div>
-            <button onClick={() => {
-              arr.push(3)
-              arr[0] = Math.random()
-            }}>btn
-            </button>
-          </div>
+        <div>
           {
             adapter.slotRender(slot, children => {
               return createVNode('div', {
