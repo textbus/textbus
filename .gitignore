@@ -6,7 +6,6 @@ package/bundles
 bundles/
 zip
 .idea
-pnpm-lock.yaml
 coverage/
 *.swp
 *.swo
