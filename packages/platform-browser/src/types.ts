@@ -1,4 +1,3 @@
-import { Slot } from '@textbus/core'
 import { Observable } from '@tanbo/stream'
 
 import { Rect } from './_utils/uikit'
@@ -31,12 +30,6 @@ export interface Caret {
   correctScrollTop(scroller: Scroller): void
 }
 
-export interface CompositionState {
-  slot: Slot
-  index: number
-  data: string
-}
-
 export abstract class Input {
   /**
    * @experimental
@@ -45,7 +38,6 @@ export abstract class Input {
   /**
    * @experimental
    */
-  abstract compositionState: CompositionState | null
   abstract onReady: Promise<void>
   abstract caret: Caret
   abstract disabled: boolean

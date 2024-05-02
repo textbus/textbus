@@ -390,8 +390,11 @@ export function createArrayProxy<T extends any[]>(raw: T, component: Component<a
           changeMarker.markAsChanged(ops)
         })
         sub.add(childChangeMarker.onForceChange.subscribe(() => {
-          component.changeMarker.reset()
-          changeMarker.forceMarkChanged()
+          if (childChangeMarker.dirty) {
+            component.changeMarker.forceMarkDirtied()
+          } else {
+            component.changeMarker.forceMarkChanged()
+          }
         }))
         sub.add(childChangeMarker.onTriggerPath.subscribe(paths => {
           paths.unshift(raw.indexOf(value))
@@ -426,8 +429,6 @@ export function createObjectProxy<T extends object>(raw: T, component: Component
             return
           }
           recordChildSlot.set(value, true)
-        } else {
-          console.log(p)
         }
         const sub = childChangeMarker.onChange.subscribe(ops => {
           ops.paths.unshift(p as string)
@@ -435,8 +436,11 @@ export function createObjectProxy<T extends object>(raw: T, component: Component
           changeMarker.markAsChanged(ops)
         })
         sub.add(childChangeMarker.onForceChange.subscribe(() => {
-          component.changeMarker.reset()
-          changeMarker.forceMarkChanged()
+          if (childChangeMarker.dirty) {
+            component.changeMarker.forceMarkDirtied()
+          } else {
+            component.changeMarker.forceMarkChanged()
+          }
         }))
         sub.add(childChangeMarker.onTriggerPath.subscribe(paths => {
           paths.unshift(p as string)

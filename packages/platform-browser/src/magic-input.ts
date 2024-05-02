@@ -17,7 +17,8 @@ import { createElement, getLayoutRectByRange } from './_utils/uikit'
 import { Parser } from './parser'
 import { isFirefox, isMac, isSafari, isWindows } from './_utils/env'
 import { VIEW_MASK } from './injection-tokens'
-import { Caret, CaretPosition, CompositionState, Input, Scroller } from './types'
+import { Caret, CaretPosition, Input, Scroller } from './types'
+import { DomAdapter } from './dom-adapter'
 
 const iframeHTML = `
 <!DOCTYPE html>
@@ -49,17 +50,11 @@ class ExperimentalCaret implements Caret {
   onPositionChange: Observable<CaretPosition | null>
   onStyleChange: Observable<CaretStyle>
   elementRef: HTMLElement
-  compositionState: CompositionState | null = null
 
   get rect() {
     return this.caret.getBoundingClientRect()
   }
 
-  compositionElement = createElement('span', {
-    styles: {
-      textDecoration: 'underline'
-    }
-  })
   private timer: any = null
   private caret: HTMLElement
   private oldPosition: CaretPosition | null = null
@@ -86,6 +81,7 @@ class ExperimentalCaret implements Caret {
   private isFixed = false
 
   constructor(
+    private adapter: DomAdapter<any, any>,
     private scheduler: Scheduler,
     private editorMask: HTMLElement) {
     this.onPositionChange = this.positionChangeEvent.pipe(distinctUntilChanged())
@@ -236,12 +232,11 @@ class ExperimentalCaret implements Caret {
       this.positionChangeEvent.next(null)
       return
     }
-    if (this.compositionState) {
-      const compositionElement = this.compositionElement
-      compositionElement.innerText = this.compositionState.data
+    const compositionNode = this.adapter.compositionNode
+    if (compositionNode) {
       nativeRange = nativeRange.cloneRange()
-      nativeRange.insertNode(compositionElement)
-      nativeRange.selectNodeContents(compositionElement)
+      nativeRange.insertNode(compositionNode)
+      nativeRange.selectNodeContents(compositionNode)
       nativeRange.collapse()
     }
     const rect = getLayoutRectByRange(nativeRange)
@@ -303,9 +298,8 @@ class ExperimentalCaret implements Caret {
 @Injectable()
 export class MagicInput extends Input {
   composition = false
-  compositionState: CompositionState | null = null
   onReady: Promise<void>
-  caret = new ExperimentalCaret(this.scheduler, this.textbus.get(VIEW_MASK))
+  caret = new ExperimentalCaret(this.adapter, this.scheduler, this.textbus.get(VIEW_MASK))
 
   set disabled(b: boolean) {
     this._disabled = b
@@ -335,7 +329,8 @@ export class MagicInput extends Input {
 
   private ignoreComposition = false // 有 bug 版本搜狗拼音
 
-  constructor(private parser: Parser,
+  constructor(private adapter: DomAdapter<any, any>,
+              private parser: Parser,
               private keyboard: Keyboard,
               private commander: Commander,
               private selection: Selection,
@@ -417,12 +412,19 @@ export class MagicInput extends Input {
     this.textarea = textarea
     this.subscription.add(
       fromEvent(textarea, 'blur').subscribe(() => {
-        if (this.isFocus) {
-          this.isFocus = false
-          this.reInit(true)
-        }
+        // if (this.isFocus) {
+        //   this.isFocus = false
+        //   this.reInit(true)
+        // }
+        this.isFocus = false
         this.nativeFocus = false
         this.caret.hide()
+        if (this.adapter.composition) {
+          const slot = this.adapter.composition.slot
+          this.adapter.composition = null
+          this.adapter.compositionNode = null
+          slot.changeMarker.forceMarkDirtied()
+        }
       }),
       fromEvent(textarea, 'focus').subscribe(() => {
         this.nativeFocus = true
@@ -566,7 +568,6 @@ export class MagicInput extends Input {
           this.commander.delete()
         }
         this.composition = true
-        this.caret.compositionState = this.compositionState = null
         startIndex = this.selection.startOffset!
         const startSlot = this.selection.startSlot!
         const event = new Event<Slot, CompositionStartEventData>(startSlot, {
@@ -584,11 +585,13 @@ export class MagicInput extends Input {
           return
         }
         const startSlot = this.selection.startSlot!
-        this.caret.compositionState = this.compositionState = {
+        this.adapter.composition = {
           slot: startSlot,
-          index: startIndex,
-          data: ev.data
+          text: ev.data,
+          offset: ev.data.length,
+          index: startIndex
         }
+
         this.caret.refresh(true)
         const event = new Event(startSlot, {
           index: startIndex,
@@ -596,6 +599,7 @@ export class MagicInput extends Input {
         })
 
         invokeListener(startSlot.parent!, 'onCompositionUpdate', event)
+        startSlot.changeMarker.forceMarkDirtied()
       })
     )
     let isCompositionEnd = false
@@ -630,22 +634,11 @@ export class MagicInput extends Input {
           )
       ).subscribe(text => {
         this.composition = false
-        this.caret.compositionState = this.compositionState = null
-        const compositionElement = this.caret.compositionElement
-        let nextSibling = compositionElement.nextSibling
-        while (nextSibling) {
-          if (!nextSibling.textContent) {
-            const next = nextSibling.nextSibling
-            nextSibling.remove()
-            nextSibling = next
-            continue
-          }
-          nextSibling.remove()
-          break
-        }
-        compositionElement.remove()
+        this.adapter.composition = null
         if (text) {
           this.commander.write(text)
+        } else {
+          this.selection.startSlot?.changeMarker.forceMarkDirtied()
         }
         if (isCompositionEnd) {
           const startSlot = this.selection.startSlot

@@ -169,8 +169,12 @@ export class CollaborateCursor {
         return
       }
       const nativeRange = document.createRange()
-      nativeRange.setStart(anchor.node, anchor.offset)
-      nativeRange.setEnd(focus.node, focus.offset)
+      try {
+        nativeRange.setStart(anchor.node, anchor.offset)
+        nativeRange.setEnd(focus.node, focus.offset)
+      } catch (e) {
+        return
+      }
       if ((anchor.node !== focus.node || anchor.offset !== focus.offset) && nativeRange.collapsed) {
         nativeRange.setStart(focus.node, focus.offset)
         nativeRange.setEnd(anchor.node, anchor.offset)
