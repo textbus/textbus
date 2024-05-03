@@ -4,7 +4,7 @@ import { BrowserModule } from '@textbus/platform-browser'
 import {
   Commander,
   Component,
-  ContentType,
+  ContentType, createArrayProxy,
   createVNode,
   FormatHostBindingRender,
   Formatter,
@@ -150,10 +150,13 @@ async function createEditor() {
     arr: [2, 3]
   })
 
+  const arr = createArrayProxy([{}, {}], rootModel);
 
-  // rootModel.changeMarker.onChange.subscribe(op => {
-  //   console.log(op)
-  // })
+  (arr as any).__changeMarker__.onChange.subscribe(op => {
+    console.log(op)
+  })
+
+  arr.push({a: 333})
   textbus.render(rootModel)
   // 从这里开始创建编辑器
 
