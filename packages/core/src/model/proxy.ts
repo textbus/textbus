@@ -2,9 +2,6 @@ import { ChangeMarker } from './change-marker'
 import { Slot } from './slot'
 import { Action } from './types'
 import { Component } from './component'
-import { makeError } from '../_utils/make-error'
-
-const proxyErrorFn = makeError('Proxy')
 
 export interface Group {
   items: any[]
@@ -39,8 +36,8 @@ function arrayToJSON(items: any[]): any[] {
 const proxyCache = new WeakMap<object, any>()
 
 function getType(n: any) {
-  const t = Object.prototype.toString.call(n)
-  return t.slice(8).substring(0, t.length - 1)
+  const t = Object.prototype.toString.call(n).slice(8)
+  return t.substring(0, t.length - 1)
 }
 
 function isType(n: any, type: string) {
@@ -69,11 +66,13 @@ function valueToProxy(value: any, component: Component<any>, init: (parentChange
     init(v.__changeMarker__)
     return v
   }
-  if (value === null || value === void 0) {
-    return value
-  }
+  // if (value === null || value === void 0) {
+  //   return value
+  // }
+  //
+  // console.error(`Textbus data model does not support the "${getType(value)}" type `)
 
-  throw proxyErrorFn(`Textbus data model does not support the ${getType(value)} type `)
+  return value
 }
 
 function toGroup(args: any[]) {
@@ -121,7 +120,45 @@ export type ProxyModel<T extends object> = {
   __changeMarker__: ChangeMarker
 }
 
-function createArrayProxyHandlers(source: any[], proxy: any, changeMarker: ChangeMarker) {
+function track(value: any,
+               component: Component<any>,
+               recordChildSlot: WeakMap<Slot, true>,
+               changeMarker: ChangeMarker,
+               getKey: (value: any) => string | number) {
+  return valueToProxy(value, component, childChangeMarker => {
+    if (value instanceof Slot) {
+      if (recordChildSlot.has(value)) {
+        return
+      }
+      recordChildSlot.set(value, true)
+    }
+    const sub = childChangeMarker.onChange.subscribe(ops => {
+      ops.paths.unshift(getKey(value))
+      component.changeMarker.reset()
+      changeMarker.markAsChanged(ops)
+    })
+    sub.add(childChangeMarker.onForceChange.subscribe(() => {
+      if (childChangeMarker.dirty) {
+        component.changeMarker.forceMarkDirtied()
+      } else {
+        component.changeMarker.forceMarkChanged()
+      }
+    }))
+    sub.add(childChangeMarker.onTriggerPath.subscribe(paths => {
+      paths.unshift(getKey(value))
+      changeMarker.triggerPath(paths)
+    }))
+    changeMarker.destroyCallbacks.push(() => {
+      sub.unsubscribe()
+    })
+  })
+}
+
+function createArrayProxyHandlers(source: any[],
+                                  proxy: any,
+                                  changeMarker: ChangeMarker,
+                                  component: Component<any>,
+                                  recordChildSlot: WeakMap<Slot, true>) {
   let ignoreChange = false
 
   return {
@@ -145,7 +182,9 @@ function createArrayProxyHandlers(source: any[], proxy: any, changeMarker: Chang
               }, {
                 type: 'insert',
                 data: valueToJSON(group.items),
-                ref: group.items,
+                ref: group.items.map(i => {
+                  return track(i, component, recordChildSlot, changeMarker, v => source.indexOf(v))
+                }),
                 isSlot: group.isSlot
               }],
               unApply: [{
@@ -212,7 +251,9 @@ function createArrayProxyHandlers(source: any[], proxy: any, changeMarker: Chang
               }, {
                 type: 'insert',
                 data: valueToJSON(group.items),
-                ref: group.items,
+                ref: group.items.map(i => {
+                  return track(i, component, recordChildSlot, changeMarker, v => source.indexOf(v))
+                }),
                 isSlot: group.isSlot
               }],
               unApply: [{
@@ -308,7 +349,9 @@ function createArrayProxyHandlers(source: any[], proxy: any, changeMarker: Chang
               }, {
                 type: 'insert',
                 data: valueToJSON(group.items),
-                ref: group.items,
+                ref: group.items.map(i => {
+                  return track(i, component, recordChildSlot, changeMarker, v => source.indexOf(v))
+                }),
                 isSlot: group.isSlot
               }],
               unApply: [{
@@ -357,7 +400,9 @@ export function createArrayProxy<T extends any[]>(raw: T, component: Component<a
             index,
             afterLength: raw.length,
             value: valueToJSON(newValue),
-            ref: newValue,
+            ref: track(newValue, component, recordChildSlot, changeMarker, () => {
+              return p as string
+            }),
             isSlot: newValue instanceof Slot
           }],
           unApply: [{
@@ -393,36 +438,12 @@ export function createArrayProxy<T extends any[]>(raw: T, component: Component<a
       }
       const value = Reflect.get(target, p, receiver)
 
-      return valueToProxy(value, component, childChangeMarker => {
-        if (value instanceof Slot) {
-          if (recordChildSlot.has(value)) {
-            return
-          }
-          recordChildSlot.set(value, true)
-        }
-        const sub = childChangeMarker.onChange.subscribe(ops => {
-          ops.paths.unshift(raw.indexOf(value))
-          component.changeMarker.reset()
-          changeMarker.markAsChanged(ops)
-        })
-        sub.add(childChangeMarker.onForceChange.subscribe(() => {
-          if (childChangeMarker.dirty) {
-            component.changeMarker.forceMarkDirtied()
-          } else {
-            component.changeMarker.forceMarkChanged()
-          }
-        }))
-        sub.add(childChangeMarker.onTriggerPath.subscribe(paths => {
-          paths.unshift(raw.indexOf(value))
-          changeMarker.triggerPath(paths)
-        }))
-        changeMarker.destroyCallbacks.push(() => {
-          sub.unsubscribe()
-        })
+      return track(value, component, recordChildSlot, changeMarker, v => {
+        return raw.indexOf(v)
       })
     }
   })
-  const handlers = createArrayProxyHandlers(raw, proxy, changeMarker)
+  const handlers = createArrayProxyHandlers(raw, proxy, changeMarker, component, recordChildSlot)
   proxyCache.set(raw, proxy)
   return proxy as any
 }
@@ -439,32 +460,8 @@ export function createObjectProxy<T extends object>(raw: T, component: Component
         return changeMarker
       }
       const value = Reflect.get(target, p, receiver)
-      return valueToProxy(value, component, (childChangeMarker) => {
-        if (value instanceof Slot) {
-          if (recordChildSlot.has(value)) {
-            return
-          }
-          recordChildSlot.set(value, true)
-        }
-        const sub = childChangeMarker.onChange.subscribe(ops => {
-          ops.paths.unshift(p as string)
-          component.changeMarker.reset()
-          changeMarker.markAsChanged(ops)
-        })
-        sub.add(childChangeMarker.onForceChange.subscribe(() => {
-          if (childChangeMarker.dirty) {
-            component.changeMarker.forceMarkDirtied()
-          } else {
-            component.changeMarker.forceMarkChanged()
-          }
-        }))
-        sub.add(childChangeMarker.onTriggerPath.subscribe(paths => {
-          paths.unshift(p as string)
-          changeMarker.triggerPath(paths)
-        }))
-        changeMarker.destroyCallbacks.push(() => {
-          sub.unsubscribe()
-        })
+      return track(value, component, recordChildSlot, changeMarker, () => {
+        return p as string
       })
     },
     set(target, p, newValue, receiver) {
@@ -490,7 +487,7 @@ export function createObjectProxy<T extends object>(raw: T, component: Component
           type: 'propSet',
           key: p as string,
           value: newValue,
-          ref: newValue,
+          ref: track(newValue, component, recordChildSlot, changeMarker, () => p as string),
           isSlot: newValue instanceof Slot,
         }],
         unApply: [unApplyAction]
