@@ -38,7 +38,7 @@ export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter
       id: 'textbus-' + Number((Math.random() + '').substring(2)).toString(16)
     }
   })
-  compositionNode: HTMLElement|null = null
+  compositionNode: HTMLElement | null = null
   composition: CompositionState | null = null
 
   protected firstRending = true
@@ -132,6 +132,71 @@ export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter
     const rootVNode = this.slotRootVElementCaches.get(slot)!
     return getLocation(node, slotRootNode as HTMLElement, rootVNode)
   }
+
+  protected insertCompositionByIndex(slot: Slot,
+                                     vNode: VElement,
+                                     composition: CompositionState,
+                                     createCompositionNode: (composition: CompositionState) => VElement) {
+    const location = vNode.location
+    const nodes = vNode.children
+
+    if (location && location.slot === composition.slot) {
+      for (let i = 0; i < nodes.length; i++) {
+        const child = nodes[i]
+        if (child instanceof VTextNode) {
+          const childLocation = child.location
+          if (childLocation) {
+            if (composition.index > childLocation.startIndex && composition.index <= childLocation.endIndex) {
+              const compositionNode = createCompositionNode(composition)
+              if (composition.index === childLocation.endIndex) {
+                nodes.splice(i + 1, 0, compositionNode)
+                break
+              }
+              const splitIndex = composition.index - childLocation.startIndex
+              const beforeNode = new VTextNode(child.textContent.slice(0, splitIndex))
+              beforeNode.location = {
+                slot: childLocation.slot,
+                startIndex: childLocation.startIndex,
+                endIndex: childLocation.startIndex + splitIndex
+              }
+
+              const afterNode = new VTextNode(child.textContent.slice(splitIndex))
+              afterNode.location = {
+                slot: childLocation.slot,
+                startIndex: composition.index,
+                endIndex: childLocation.endIndex
+              }
+              nodes.splice(i, 1, beforeNode, compositionNode, afterNode)
+              break
+            } else if (composition.index === 0 && childLocation.startIndex === 0) {
+              nodes.unshift(createCompositionNode(composition))
+              break
+            }
+          }
+        } else if (child instanceof Component) {
+          const componentIndex = slot.indexOf(child)
+          if (composition.index === componentIndex + 1) {
+            nodes.splice(i + 1, 0, createCompositionNode(composition))
+            break
+          } else if (componentIndex === 0 && composition.index === 0) {
+            nodes.unshift(createCompositionNode(composition))
+            break
+          }
+        } else if (child.tagName === 'br') {
+          const location = child.location
+          if (location) {
+            if (location.endIndex === composition.index) {
+              nodes.splice(i + 1, 0, createCompositionNode(composition))
+              break
+            } else if (location.startIndex === 0 && composition.index === 0) {
+              nodes.unshift(createCompositionNode(composition))
+              break
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 function getNodes(adapter: DomAdapter<any, any>, vElement: VElement, nativeNode: HTMLElement, result: Node[]) {
@@ -154,7 +219,7 @@ function getNodes(adapter: DomAdapter<any, any>, vElement: VElement, nativeNode:
 
 function getLocation(target: Node, tree: HTMLElement, vNodeTree: VElement) {
   if (target === tree) {
-    return { ...vNodeTree.location! }
+    return {...vNodeTree.location!}
   }
   const childNodes = tree.childNodes
   for (let i = 0; i < childNodes.length; i++) {

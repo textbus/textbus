@@ -1,4 +1,4 @@
-import { DefineComponent, getCurrentInstance, h, onMounted, onUnmounted, onUpdated, Ref, ref, VNode } from 'vue'
+import { DefineComponent, getCurrentInstance, h, onMounted, onUnmounted, onUpdated, Ref, ref, VNode, watchEffect } from 'vue'
 import { Subject } from '@tanbo/stream'
 import { Component, invokeListener, makeError, replaceEmpty, Slot, VElement, VTextNode } from '@textbus/core'
 import { DomAdapter } from '@textbus/platform-browser'
@@ -24,10 +24,15 @@ export class Adapter extends DomAdapter<VNode, VNode> {
   private componentRefs = new WeakMap<Component, Ref<HTMLElement | undefined>>()
   private componentRendingStack: Component[] = []
 
+  private compositionRef = ref<HTMLElement>()
+
   constructor(components: VueAdapterComponents,
               mount: (host: HTMLElement, root: VNode) => (void | (() => void))) {
     super(mount)
 
+    watchEffect(() => {
+      this.compositionNode = this.compositionRef.value || null
+    })
 
     Object.keys(components).forEach(key => {
       const vueComponent = components[key]
@@ -112,7 +117,18 @@ export class Adapter extends DomAdapter<VNode, VNode> {
 
     const vNodeToJSX = (vNode: VElement) => {
       const children: Array<VNode | string> = []
-
+      if (this.composition && this.composition.slot === slot) {
+        this.insertCompositionByIndex(slot, vNode, this.composition, () => {
+          return new VElement('span', {
+            style: {
+              textDecoration: 'underline'
+            },
+            ref: this.compositionRef
+          }, [
+            new VTextNode(this.composition!.text)
+          ])
+        })
+      }
       for (let i = 0; i < vNode.children.length; i++) {
         const child = vNode.children[i]
         if (child instanceof VElement) {

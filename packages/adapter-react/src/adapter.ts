@@ -40,14 +40,14 @@ export interface ReactAdapterComponents {
 export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
   onViewUpdated = new Subject<void>()
 
-  private components: Record<string, (props: {component: Component}) => JSX.Element> = {}
+  private components: Record<string, (props: { component: Component }) => JSX.Element> = {}
   private componentRendingStack: Component[] = []
 
   constructor(components: ReactAdapterComponents,
               mount: (host: HTMLElement, root: JSX.Element) => (void | (() => void))) {
     super(mount)
     Object.keys(components).forEach(key => {
-      this.components[key] = (props: {component: Component}) => {
+      this.components[key] = (props: { component: Component }) => {
         const component = props.component
         const [updateKey, refreshUpdateKey] = useState(Math.random())
 
@@ -111,7 +111,20 @@ export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
 
     const vNodeToJSX = (vNode: VElement) => {
       const children: ReactNode[] = []
-
+      if (this.composition && this.composition.slot === slot) {
+        this.insertCompositionByIndex(slot, vNode, this.composition, () => {
+          return new VElement('span', {
+            style: {
+              textDecoration: 'underline'
+            },
+            ref: (node: HTMLElement) => {
+              this.compositionNode = node
+            }
+          }, [
+            new VTextNode(this.composition!.text)
+          ])
+        })
+      }
       for (let i = 0; i < vNode.children.length; i++) {
         const child = vNode.children[i]
         if (child instanceof VElement) {

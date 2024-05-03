@@ -1,7 +1,7 @@
 import { createDynamicRef, DynamicRef, getCurrentInstance, jsx, JSXNode, onUpdated } from '@viewfly/core'
 import { merge, Subject } from '@tanbo/stream'
 import { Component, invokeListener, makeError, replaceEmpty, Slot, VElement, VTextNode } from '@textbus/core'
-import { CompositionState, DomAdapter } from '@textbus/platform-browser'
+import { DomAdapter } from '@textbus/platform-browser'
 
 const adapterError = makeError('ViewflyAdapter')
 
@@ -108,7 +108,22 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
     const vNodeToJSX = (vNode: VElement) => {
       const children: JSXInternal.ViewNode[] = []
       if (this.composition && this.composition.slot === slot) {
-        this.insertCompositionByIndex(slot, vNode, this.composition)
+        this.insertCompositionByIndex(slot, vNode, this.composition, () => {
+          const ref = createDynamicRef<HTMLElement>(node => {
+            this.compositionNode = node
+            return () => {
+              this.compositionNode = null
+            }
+          })
+          return new VElement('span', {
+            style: {
+              textDecoration: 'underline'
+            },
+            ref
+          }, [
+            new VTextNode(this.composition!.text)
+          ])
+        })
       }
       for (let i = 0; i < vNode.children.length; i++) {
         const child = vNode.children[i]
@@ -162,84 +177,5 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
     }
     slot.changeMarker.rendered()
     return jsxNode
-  }
-
-  private insertCompositionByIndex(slot: Slot, vNode: VElement, composition: CompositionState) {
-    const location = vNode.location
-    const nodes = vNode.children
-
-    if (location && location.slot === composition.slot) {
-      for (let i = 0; i < nodes.length; i++) {
-        const child = nodes[i]
-        if (child instanceof VTextNode) {
-          const childLocation = child.location
-          if (childLocation) {
-            if (composition.index > childLocation.startIndex && composition.index <= childLocation.endIndex) {
-              const compositionNode = this.createCompositionNode(composition)
-              if (composition.index === childLocation.endIndex) {
-                nodes.splice(i + 1, 0, compositionNode)
-                break
-              }
-              const splitIndex = composition.index - childLocation.startIndex
-              const beforeNode = new VTextNode(child.textContent.slice(0, splitIndex))
-              beforeNode.location = {
-                slot: childLocation.slot,
-                startIndex: childLocation.startIndex,
-                endIndex: childLocation.startIndex + splitIndex
-              }
-
-              const afterNode = new VTextNode(child.textContent.slice(splitIndex))
-              afterNode.location = {
-                slot: childLocation.slot,
-                startIndex: composition.index,
-                endIndex: childLocation.endIndex
-              }
-              nodes.splice(i, 1, beforeNode, compositionNode, afterNode)
-              break
-            } else if (composition.index === 0 && childLocation.startIndex === 0) {
-              nodes.unshift(this.createCompositionNode(composition))
-              break
-            }
-          }
-        } else if (child instanceof Component) {
-          const componentIndex = slot.indexOf(child)
-          if (composition.index === componentIndex + 1) {
-            nodes.splice(i + 1, 0, this.createCompositionNode(composition))
-            break
-          } else if (componentIndex === 0 && composition.index === 0) {
-            nodes.unshift(this.createCompositionNode(composition))
-            break
-          }
-        } else if (child.tagName === 'br') {
-          const location = child.location
-          if (location) {
-            if (location.endIndex === composition.index) {
-              nodes.splice(i + 1, 0, this.createCompositionNode(composition))
-              break
-            } else if (location.startIndex === 0 && composition.index === 0) {
-              nodes.unshift(this.createCompositionNode(composition))
-              break
-            }
-          }
-        }
-      }
-    }
-  }
-
-  private createCompositionNode(composition: CompositionState) {
-    const ref = createDynamicRef<HTMLElement>(node => {
-      this.compositionNode = node
-      return () => {
-        this.compositionNode = null
-      }
-    })
-    return new VElement('span', {
-      style: {
-        textDecoration: 'underline'
-      },
-      ref
-    }, [
-      new VTextNode(composition.text)
-    ])
   }
 }
