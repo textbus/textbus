@@ -235,7 +235,6 @@ class ExperimentalCaret implements Caret {
     const compositionNode = this.adapter.compositionNode
     if (compositionNode) {
       nativeRange = nativeRange.cloneRange()
-      nativeRange.insertNode(compositionNode)
       nativeRange.selectNodeContents(compositionNode)
       nativeRange.collapse()
     }
