@@ -337,13 +337,17 @@ export class LocalHistory extends History {
   }
 
   private usePaths(paths: SelectionPaths) {
-    const anchorOffset = paths.anchor.pop()
-    const focusOffset = paths.focus.pop()
-    const anchorSlot = this.findModelByPaths(paths.anchor)
-    const focusSlot = this.findModelByPaths(paths.focus)
+    const anchor = [...paths.anchor]
+    const focus = [...paths.focus]
+    const anchorOffset = anchor.pop()
+    const focusOffset = focus.pop()
+    const anchorSlot = this.findModelByPaths(anchor)
+    const focusSlot = this.findModelByPaths(focus)
 
     if (typeof anchorOffset === 'number' && typeof focusOffset === 'number' && anchorSlot instanceof Slot && focusSlot instanceof Slot) {
-      this.selection.setBaseAndExtent(anchorSlot, anchorOffset, focusSlot, focusOffset)
+      this.scheduler.addUpdatedTask(() => {
+        this.selection.setBaseAndExtent(anchorSlot, anchorOffset, focusSlot, focusOffset)
+      })
     }
   }
 
