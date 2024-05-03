@@ -659,7 +659,7 @@ export class Collaborate implements History {
               const data = action.ref.map(item => {
                 return this.createSharedModelByLocalModel(item, parent)
               })
-              sharedArray.insert(index, [data])
+              sharedArray.insert(index, data)
             }
               break
             case 'delete':
@@ -667,7 +667,7 @@ export class Collaborate implements History {
               break
             case 'setIndex':
               sharedArray.delete(action.index, 1)
-              sharedArray.insert(action.index, this.createSharedModelByLocalModel(action.ref, parent))
+              sharedArray.insert(action.index, [this.createSharedModelByLocalModel(action.ref, parent)])
               break
           }
         }
