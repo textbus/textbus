@@ -2,6 +2,9 @@ import { ChangeMarker } from './change-marker'
 import { Slot } from './slot'
 import { Action } from './types'
 import { Component } from './component'
+import { makeError } from '../_utils/make-error'
+
+const proxyErrorFn = makeError('Proxy')
 
 export interface Group {
   items: any[]
@@ -35,6 +38,15 @@ function arrayToJSON(items: any[]): any[] {
 
 const proxyCache = new WeakMap<object, any>()
 
+function getType(n: any) {
+  const t = Object.prototype.toString.call(n)
+  return t.slice(8).substring(0, t.length - 1)
+}
+
+function isType(n: any, type: string) {
+  return getType(n) === type
+}
+
 function valueToProxy(value: any, component: Component<any>, init: (parentChangeMarker: ChangeMarker) => void) {
   if (value instanceof Slot) {
     value.parent = component
@@ -49,7 +61,7 @@ function valueToProxy(value: any, component: Component<any>, init: (parentChange
     init(v.__changeMarker__)
     return v
   }
-  if (typeof value === 'object' && value !== null) {
+  if (isType(value, 'Object')) {
     if (proxyCache.has(value)) {
       return proxyCache.get(value)
     }
@@ -57,7 +69,11 @@ function valueToProxy(value: any, component: Component<any>, init: (parentChange
     init(v.__changeMarker__)
     return v
   }
-  return value
+  if (value === null || value === void 0) {
+    return value
+  }
+
+  throw proxyErrorFn(`Textbus data model does not support the ${getType(value)} type `)
 }
 
 function toGroup(args: any[]) {
