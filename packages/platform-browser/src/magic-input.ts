@@ -422,7 +422,7 @@ export class MagicInput extends Input {
           const slot = this.adapter.composition.slot
           this.adapter.composition = null
           this.adapter.compositionNode = null
-          slot.changeMarker.forceMarkDirtied()
+          slot.__changeMarker__.forceMarkDirtied()
         }
       }),
       fromEvent(textarea, 'focus').subscribe(() => {
@@ -597,7 +597,7 @@ export class MagicInput extends Input {
         })
 
         invokeListener(startSlot.parent!, 'onCompositionUpdate', event)
-        startSlot.changeMarker.forceMarkDirtied()
+        startSlot.__changeMarker__.forceMarkDirtied()
       })
     )
     let isCompositionEnd = false
@@ -636,7 +636,7 @@ export class MagicInput extends Input {
         if (text) {
           this.commander.write(text)
         } else {
-          this.selection.startSlot?.changeMarker.forceMarkDirtied()
+          this.selection.startSlot?.__changeMarker__.forceMarkDirtied()
         }
         if (isCompositionEnd) {
           const startSlot = this.selection.startSlot

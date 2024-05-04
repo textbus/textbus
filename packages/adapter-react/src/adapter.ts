@@ -177,7 +177,7 @@ export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
       vElement.attrs.set('ref', refFn)
     }
 
-    slot.changeMarker.rendered()
+    slot.__changeMarker__.rendered()
     return vNodeToJSX(vElement)
   }
 }

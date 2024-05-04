@@ -72,31 +72,28 @@ export interface Component<T extends State> {
   removeSlot?(slot: Slot): boolean
 }
 
-export interface ComponentStateCreator<T extends State> {
-  (from: Component<T>): T
-}
-
 /**
  * 组件实例对象
  */
 export abstract class Component<T extends State = State> {
   readonly id = Math.random()
+
   /**
    * 组件所在的插槽
    * @readonly
    * @internal
    */
-  parent: Slot | null = null
+  get parent(): Slot | null {
+    return this.changeMarker.parentModel as Slot
+  }
 
   /**
    * 父组件
    */
-  get parentComponent() {
+  get parentComponent(): Component | null {
     return this.parent?.parent || null
   }
 
-  /** 组件变化标识器 */
-  readonly changeMarker = new ChangeMarker()
   /** 组件长度，固定为 1 */
   readonly length = 1
   /**
@@ -113,21 +110,18 @@ export abstract class Component<T extends State = State> {
   /** 组件状态 */
   readonly state: T
 
+  /** 组件变化标识器 */
+  readonly changeMarker: ChangeMarker
+
   constructor(public textbus: Textbus,
-              initData: T | ComponentStateCreator<T>) {
+              initData: T) {
 
     const { componentName, type } = this.constructor as ComponentConstructor
     this.name = componentName
     this.type = type
-
-    if (typeof initData === 'function') {
-      this.state = initData(this)
-    } else {
-      this.state = createObjectProxy(initData, this)
-      // Object.entries(initData).forEach(([key, value]) => {
-      //   this.state.set(key as any, value)
-      // })
-    }
+    this.state = createObjectProxy(initData)
+    this.changeMarker = this.state.__changeMarker__
+    this.changeMarker.host = this
 
     const context: ComponentContext = {
       textbus,
@@ -138,27 +132,9 @@ export abstract class Component<T extends State = State> {
     if (typeof this.setup === 'function') {
       this.setup()
     }
-    const changeMarker = this.state.__changeMarker__ as ChangeMarker
-    const sub = changeMarker.onChange.subscribe(op => {
-      if (changeMarker.dirty) {
-        this.changeMarker.markAsDirtied(op)
-      } else {
-        this.changeMarker.markAsChanged(op)
-      }
-    }).add(changeMarker.onTriggerPath.subscribe(paths => {
-      this.changeMarker.triggerPath(paths)
-    })).add(
-      changeMarker.onForceChange.subscribe(() => {
-        if (changeMarker.dirty) {
-          this.changeMarker.forceMarkDirtied()
-        } else {
-          this.changeMarker.forceMarkChanged()
-        }
-      })
-    )
+
     onDestroy(() => {
       eventCacheMap.delete(this)
-      sub.unsubscribe()
     })
     eventCacheMap.set(this, context.eventCache)
     contextStack.pop()

@@ -1,4 +1,4 @@
-import { Observable, Subject, Subscription } from '@tanbo/stream'
+import { Observable, Subject } from '@tanbo/stream'
 
 import { Component, ComponentLiteral } from './component'
 import { Content } from './content'
@@ -51,21 +51,27 @@ export class Slot {
     return '\n'
   }
 
-  /** 插槽所属的组件 */
-  parent: Component | null = null
   /** 插槽变更标记器 */
-  changeMarker = new ChangeMarker()
+  __changeMarker__ = new ChangeMarker(this)
 
   onContentChange: Observable<Action[]>
-  onChildComponentRemove: Observable<Component[]>
 
   readonly schema: ContentType[]
 
-  private componentChangeListeners = new WeakMap<Component, Subscription>()
-  private childComponentRemoveEvent = new Subject<Component[]>()
+  /** 插槽所属的组件 */
+  get parent(): Component | null {
+    let parentModel = this.__changeMarker__.parentModel
+    while (parentModel) {
+      if (parentModel.__changeMarker__.host instanceof Component) {
+        return parentModel.__changeMarker__.host
+      }
+      parentModel = parentModel.__changeMarker__.parentModel
+    }
+    return null
+  }
 
-  get parentSlot() {
-    return this.parent?.parent || null
+  get parentSlot(): Slot | null {
+    return this.parent?.changeMarker.parentModel as Slot || null
   }
 
   /** 插槽内容长度 */
@@ -102,7 +108,6 @@ export class Slot {
   constructor(schema: ContentType[]) {
     this.schema = schema.sort()
     this.onContentChange = this.contentChangeEvent.asObservable()
-    this.onChildComponentRemove = this.childComponentRemoveEvent.asObservable()
     this.content.append(Slot.emptyPlaceholder)
     this._index = 0
   }
@@ -129,7 +134,7 @@ export class Slot {
         })
       }
     })
-    this.changeMarker.markAsDirtied({
+    this.__changeMarker__.markAsDirtied({
       paths: [],
       apply: applyActions,
       unApply: [has ? {
@@ -182,7 +187,7 @@ export class Slot {
       type: 'attrDelete',
       name: attribute.name
     }]
-    this.changeMarker.markAsDirtied({
+    this.__changeMarker__.markAsDirtied({
       paths: [],
       apply: applyActions,
       unApply: [{
@@ -265,22 +270,7 @@ export class Slot {
       if (content.parent) {
         content.parent.removeComponent(content)
       }
-      content.parent = this
-      const sub = content.changeMarker.onChange.subscribe(ops => {
-        ops.paths.unshift(this.indexOf(content))
-        this.changeMarker.markAsChanged(ops)
-      })
-      sub.add(content.changeMarker.onTriggerPath.subscribe(paths => {
-        paths.unshift(this.indexOf(content))
-        this.changeMarker.triggerPath(paths)
-      }))
-      sub.add(content.changeMarker.onChildComponentRemoved.subscribe(instance => {
-        this.changeMarker.recordComponentRemoved(instance)
-      }))
-      sub.add(content.changeMarker.onForceChange.subscribe(() => {
-        this.changeMarker.forceMarkChanged()
-      }))
-      this.componentChangeListeners.set(content, sub)
+      content.changeMarker.parentModel = this
     }
     let formats: Formats = []
     if (formatter) {
@@ -320,7 +310,7 @@ export class Slot {
       ref: content
     }]
 
-    this.changeMarker.markAsDirtied({
+    this.__changeMarker__.markAsDirtied({
       paths: [],
       apply: applyActions,
       unApply: [{
@@ -424,7 +414,7 @@ export class Slot {
       index += offset
     })
     if (applyActions.length || unApplyActions.length) {
-      this.changeMarker.markAsDirtied({
+      this.__changeMarker__.markAsDirtied({
         paths: [],
         apply: applyActions,
         unApply: unApplyActions
@@ -467,8 +457,7 @@ export class Slot {
       type: 'delete',
       count
     }]
-    const deletedComponents: Component[] = []
-    this.changeMarker.markAsDirtied({
+    this.__changeMarker__.markAsDirtied({
       paths: [],
       apply: applyActions,
       unApply: [{
@@ -482,11 +471,7 @@ export class Slot {
             ref: item
           }
         }
-        deletedComponents.push(item)
-        this.changeMarker.recordComponentRemoved(item)
-        this.componentChangeListeners.get(item)?.unsubscribe()
-        this.componentChangeListeners.delete(item)
-        item.parent = null
+        this.__changeMarker__.recordComponentRemoved(item)
         return {
           type: 'contentInsert',
           content: item.toJSON(),
@@ -495,9 +480,6 @@ export class Slot {
       }), ...Slot.createActionByFormat(deletedFormat)]
     })
     this.contentChangeEvent.next(applyActions)
-    if (deletedComponents.length) {
-      this.childComponentRemoveEvent.next(deletedComponents)
-    }
     return true
   }
 
