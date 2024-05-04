@@ -169,7 +169,7 @@ export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter
               nodes.splice(i, 1, beforeNode, compositionNode, afterNode)
               break
             } else if (composition.index === 0 && childLocation.startIndex === 0) {
-              nodes.unshift(createCompositionNode(composition))
+              nodes.splice(i, 0, createCompositionNode(composition))
               break
             }
           }
@@ -179,7 +179,7 @@ export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter
             nodes.splice(i + 1, 0, createCompositionNode(composition))
             break
           } else if (componentIndex === 0 && composition.index === 0) {
-            nodes.unshift(createCompositionNode(composition))
+            nodes.splice(i, 0, createCompositionNode(composition))
             break
           }
         } else if (child.tagName === 'br') {
@@ -189,7 +189,7 @@ export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter
               nodes.splice(i + 1, 0, createCompositionNode(composition))
               break
             } else if (location.startIndex === 0 && composition.index === 0) {
-              nodes.unshift(createCompositionNode(composition))
+              nodes.splice(i, 0, createCompositionNode(composition))
               break
             }
           }
@@ -219,7 +219,7 @@ function getNodes(adapter: DomAdapter<any, any>, vElement: VElement, nativeNode:
 
 function getLocation(target: Node, tree: HTMLElement, vNodeTree: VElement) {
   if (target === tree) {
-    return {...vNodeTree.location!}
+    return { ...vNodeTree.location! }
   }
   const childNodes = tree.childNodes
   for (let i = 0; i < childNodes.length; i++) {
