@@ -26,7 +26,6 @@ interface SingleSlot {
 }
 
 interface RooComponentState extends SingleSlot {
-  arr: any[]
 }
 
 class RootComponent extends Component<RooComponentState> {
@@ -147,23 +146,24 @@ async function createEditor() {
       ContentType.BlockComponent,
       ContentType.Text
     ]),
-    arr: [2, 3]
   })
 
-  const arr = createArrayProxy([{}, {}], rootModel);
+  // rootModel.changeMarker.onChange.subscribe(op => {
+  //   console.log(op)
+  // })
 
-  (arr as any).__changeMarker__.onChange.subscribe(op => {
-    console.log(op)
-  })
+  // const selection = textbus.get(Selection)
+  // selection.onChange.subscribe(() => {
+  //   console.log(selection.startSlot, selection.startOffset)
+  // })
 
-  arr.push({a: 333})
   textbus.render(rootModel)
   // 从这里开始创建编辑器
 
 // textbus.render(rootModel)
 
   function App(props: ViewComponentProps<RootComponent>) {
-    const { slot, arr } = props.component.state
+    const { slot } = props.component.state
 
     return () => {
       return (

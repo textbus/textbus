@@ -327,12 +327,12 @@ export class LocalHistory extends History {
     let anchor: Paths = []
     let focus: Paths = []
     if (this.selection.isSelected) {
-      anchor = this.selection.anchorSlot!.changeMarker.triggerPath([this.selection.anchorOffset!])
-      focus = this.selection.focusSlot!.changeMarker.triggerPath([this.selection.focusOffset!])
+      anchor = this.selection.anchorSlot!.__changeMarker__.triggerPath()
+      focus = this.selection.focusSlot!.__changeMarker__.triggerPath()
     }
     return {
-      anchor,
-      focus
+      anchor: [...anchor, this.selection.anchorOffset!],
+      focus: [...focus, this.selection.focusOffset!]
     }
   }
 

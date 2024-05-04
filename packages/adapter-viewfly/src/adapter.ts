@@ -175,7 +175,7 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
     } else {
       jsxNode.props.ref = ref
     }
-    slot.changeMarker.rendered()
+    slot.__changeMarker__.rendered()
     return jsxNode
   }
 }
