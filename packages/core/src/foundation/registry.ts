@@ -27,7 +27,7 @@ export class Registry {
               @Inject(ATTRIBUTE_LIST) attributes: Attribute<any>[],
               @Inject(FORMATTER_LIST) formatters: Formatter<any>[]) {
     components.reverse().forEach(f => {
-      this.componentMap.set(f.name, f)
+      this.componentMap.set(f.componentName, f)
     })
     attributes.reverse().forEach(f => {
       this.attributeMap.set(f.name, f)
