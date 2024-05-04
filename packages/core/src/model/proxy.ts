@@ -1,7 +1,6 @@
 import { ChangeMarker } from './change-marker'
 import { Slot } from './slot'
 import { Action } from './types'
-import { Component } from './component'
 
 export interface Group {
   items: any[]
@@ -33,7 +32,7 @@ function arrayToJSON(items: any[]): any[] {
   return items.map(i => valueToJSON(i))
 }
 
-const proxyToRawCache = new WeakMap<object, any>()
+const rawToProxyCache = new WeakMap<object, any>()
 const proxyRecord = new WeakMap<object, true>
 
 function getType(n: any) {
@@ -41,38 +40,25 @@ function getType(n: any) {
   return t.substring(0, t.length - 1)
 }
 
-function isType(n: any, type: string) {
+export function isType(n: any, type: string) {
   return getType(n) === type
 }
 
-function valueToProxy(value: any, component: Component<any>, init: (parentChangeMarker: ChangeMarker) => void) {
+export function valueToProxy(value: any, parentModel: ProxyModel<any>) {
   if (value instanceof Slot) {
-    value.parent = component
-    init(value.changeMarker)
+    value.__changeMarker__.parentModel = parentModel
     return value
   }
   if (Array.isArray(value)) {
-    if (proxyToRawCache.has(value)) {
-      return proxyToRawCache.get(value)
-    }
-    const v = createArrayProxy(value, component) as ProxyModel<any[]>
-    init(v.__changeMarker__)
+    const v = rawToProxyCache.has(value) ? rawToProxyCache.get(value) as ProxyModel<any[]> : createArrayProxy(value) as ProxyModel<any[]>
+    v.__changeMarker__.parentModel = parentModel
     return v
   }
   if (isType(value, 'Object')) {
-    if (proxyToRawCache.has(value)) {
-      return proxyToRawCache.get(value)
-    }
-    const v = createObjectProxy(value, component)
-    init(v.__changeMarker__)
+    const v = rawToProxyCache.has(value) ? rawToProxyCache.get(value) as ProxyModel<any> : createObjectProxy(value)
+    v.__changeMarker__.parentModel = parentModel
     return v
   }
-  // if (value === null || value === void 0) {
-  //   return value
-  // }
-  //
-  // console.error(`Textbus data model does not support the "${getType(value)}" type `)
-
   return value
 }
 
@@ -104,8 +90,8 @@ function toGroup(args: any[]) {
 }
 
 export function toRaw(item: object) {
-  if (proxyToRawCache.has(item)) {
-    return proxyToRawCache.get(item)
+  if (proxyRecord.has(item)) {
+    return (item as ProxyModel<any>).__changeMarker__.host
   }
   return item
 }
@@ -121,45 +107,9 @@ export type ProxyModel<T extends object> = {
   __changeMarker__: ChangeMarker
 }
 
-function track(value: any,
-               component: Component<any>,
-               recordChildSlot: WeakMap<Slot, true>,
-               changeMarker: ChangeMarker,
-               getKey: (value: any) => string | number) {
-  return valueToProxy(value, component, childChangeMarker => {
-    if (value instanceof Slot) {
-      if (recordChildSlot.has(value)) {
-        return
-      }
-      recordChildSlot.set(value, true)
-    }
-    const sub = childChangeMarker.onChange.subscribe(ops => {
-      ops.paths.unshift(getKey(value))
-      component.changeMarker.reset()
-      changeMarker.markAsChanged(ops)
-    })
-    sub.add(childChangeMarker.onForceChange.subscribe(() => {
-      if (childChangeMarker.dirty) {
-        component.changeMarker.forceMarkDirtied()
-      } else {
-        component.changeMarker.forceMarkChanged()
-      }
-    }))
-    sub.add(childChangeMarker.onTriggerPath.subscribe(paths => {
-      paths.unshift(getKey(value))
-      changeMarker.triggerPath(paths)
-    }))
-    changeMarker.destroyCallbacks.push(() => {
-      sub.unsubscribe()
-    })
-  })
-}
-
 function createArrayProxyHandlers(source: any[],
                                   proxy: any,
-                                  changeMarker: ChangeMarker,
-                                  component: Component<any>,
-                                  recordChildSlot: WeakMap<Slot, true>) {
+                                  changeMarker: ChangeMarker) {
   let ignoreChange = false
 
   return {
@@ -184,7 +134,7 @@ function createArrayProxyHandlers(source: any[],
                 type: 'insert',
                 data: valueToJSON(group.items),
                 ref: group.items.map(i => {
-                  return track(i, component, recordChildSlot, changeMarker, v => source.indexOf(v))
+                  return valueToProxy(i, proxy)
                 }),
                 isSlot: group.isSlot
               }],
@@ -253,7 +203,7 @@ function createArrayProxyHandlers(source: any[],
                 type: 'insert',
                 data: valueToJSON(group.items),
                 ref: group.items.map(i => {
-                  return track(i, component, recordChildSlot, changeMarker, v => source.indexOf(v))
+                  return valueToProxy(i, proxy)
                 }),
                 isSlot: group.isSlot
               }],
@@ -351,7 +301,7 @@ function createArrayProxyHandlers(source: any[],
                 type: 'insert',
                 data: valueToJSON(group.items),
                 ref: group.items.map(i => {
-                  return track(i, component, recordChildSlot, changeMarker, v => source.indexOf(v))
+                  return valueToProxy(i, proxy)
                 }),
                 isSlot: group.isSlot
               }],
@@ -373,22 +323,21 @@ function createArrayProxyHandlers(source: any[],
   }
 }
 
-export function createArrayProxy<T extends any[]>(raw: T, component: Component<any>): T {
+export function createArrayProxy<T extends any[]>(raw: T): T {
   if (proxyRecord.has(raw)) {
     return raw
   }
-  if (proxyToRawCache.has(raw)) {
-    return proxyToRawCache.get(raw)
+  if (rawToProxyCache.has(raw)) {
+    return rawToProxyCache.get(raw)
   }
-  const changeMarker = new ChangeMarker()
-  const recordChildSlot = new WeakMap<Slot, true>()
+  const changeMarker = new ChangeMarker(raw)
   const proxy = new Proxy(raw, {
     set(target, p, newValue, receiver) {
       if (p === 'length') {
         return Reflect.set(target, p, newValue, receiver)
       }
-      if (proxyToRawCache.has(newValue)) {
-        newValue = proxyToRawCache.get(newValue)
+      if (rawToProxyCache.has(newValue)) {
+        newValue = rawToProxyCache.get(newValue)
       }
       const oldValue = raw[p]
       const length = raw.length
@@ -404,9 +353,7 @@ export function createArrayProxy<T extends any[]>(raw: T, component: Component<a
             index,
             afterLength: raw.length,
             value: valueToJSON(newValue),
-            ref: track(newValue, component, recordChildSlot, changeMarker, () => {
-              return p as string
-            }),
+            ref: valueToProxy(newValue, proxy as ProxyModel<T>),
             isSlot: newValue instanceof Slot
           }],
           unApply: [{
@@ -442,39 +389,34 @@ export function createArrayProxy<T extends any[]>(raw: T, component: Component<a
       }
       const value = Reflect.get(target, p, receiver)
 
-      return track(value, component, recordChildSlot, changeMarker, v => {
-        return raw.indexOf(v)
-      })
+      return valueToProxy(value, proxy)
     }
   })
-  const handlers = createArrayProxyHandlers(raw, proxy, changeMarker, component, recordChildSlot)
-  proxyToRawCache.set(raw, proxy)
+  const handlers = createArrayProxyHandlers(raw, proxy, changeMarker)
+  rawToProxyCache.set(raw, proxy)
   proxyRecord.set(proxy, true)
   return proxy as any
 }
 
-export function createObjectProxy<T extends object>(raw: T, component: Component): T {
+export function createObjectProxy<T extends object>(raw: T): T {
   if (proxyRecord.has(raw)) {
     return raw
   }
-  if (proxyToRawCache.has(raw)) {
-    return proxyToRawCache.get(raw)
+  if (rawToProxyCache.has(raw)) {
+    return rawToProxyCache.get(raw)
   }
-  const changeMarker = new ChangeMarker()
-  const recordChildSlot = new WeakMap<Slot, true>()
+  const changeMarker = new ChangeMarker(raw)
   const proxy = new Proxy(raw, {
     get(target, p, receiver) {
       if (p === markKey) {
         return changeMarker
       }
       const value = Reflect.get(target, p, receiver)
-      return track(value, component, recordChildSlot, changeMarker, () => {
-        return p as string
-      })
+      return valueToProxy(value, proxy)
     },
     set(target, p, newValue, receiver) {
-      if (proxyToRawCache.has(newValue)) {
-        newValue = proxyToRawCache.get(newValue)
+      if (rawToProxyCache.has(newValue)) {
+        newValue = rawToProxyCache.get(newValue)
       }
       const has = Object.hasOwn(raw, p)
       const oldValue = raw[p]
@@ -495,7 +437,7 @@ export function createObjectProxy<T extends object>(raw: T, component: Component
           type: 'propSet',
           key: p as string,
           value: newValue,
-          ref: track(newValue, component, recordChildSlot, changeMarker, () => p as string),
+          ref: valueToProxy(newValue, proxy as ProxyModel<T>),
           isSlot: newValue instanceof Slot,
         }],
         unApply: [unApplyAction]
@@ -523,7 +465,7 @@ export function createObjectProxy<T extends object>(raw: T, component: Component
       return b
     },
   })
-  proxyToRawCache.set(raw, proxy)
+  rawToProxyCache.set(raw, proxy)
   proxyRecord.set(proxy, true)
   return proxy as any
 }

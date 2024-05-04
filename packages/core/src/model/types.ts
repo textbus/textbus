@@ -72,6 +72,7 @@ export type Action = InsertAction |
 export interface Operation {
   paths: Array<number | string>
   apply: Action[]
+  source?: Component<any>
   unApply: Action[]
 }
 
