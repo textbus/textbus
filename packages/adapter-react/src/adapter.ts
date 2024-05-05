@@ -40,14 +40,14 @@ export interface ReactAdapterComponents {
 export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
   onViewUpdated = new Subject<void>()
 
-  private components: Record<string, (props: { component: Component }) => JSX.Element> = {}
+  private components: Record<string, (props: {component: Component}) => JSX.Element> = {}
   private componentRendingStack: Component[] = []
 
   constructor(components: ReactAdapterComponents,
               mount: (host: HTMLElement, root: JSX.Element) => (void | (() => void))) {
     super(mount)
     Object.keys(components).forEach(key => {
-      this.components[key] = (props: { component: Component }) => {
+      this.components[key] = (props: {component: Component}) => {
         const component = props.component
         const [updateKey, refreshUpdateKey] = useState(Math.random())
 
@@ -77,7 +77,10 @@ export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
           }
         })
         useEffect(() => {
-          this.componentRendingStack.pop()
+          const context = this.componentRendingStack[this.componentRendingStack.length - 1]!
+          if (context === component) {
+            this.componentRendingStack.pop()
+          }
 
           if (!this.componentRootElementCaches.get(component)) {
             // eslint-disable-next-line max-len
@@ -105,7 +108,13 @@ export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
              slotHostRender: (children: Array<VElement | VTextNode | Component>) => VElement,
              renderEnv?: any): JSX.Element {
     const context = this.componentRendingStack[this.componentRendingStack.length - 1]!
-    context.__slots__.push(slot)
+    if (context) {
+      context.__slots__.push(slot)
+    } else if (!this.renderedSlotCache.has(slot)) {
+      throw adapterError(`Unrendered slots must be rendered together with the corresponding "${slot.parent?.name || 'unknown'}" component`)
+    }
+    this.renderedSlotCache.set(slot, true)
+
     const vElement = slot.toTree(slotHostRender, renderEnv)
     this.slotRootVElementCaches.set(slot, vElement)
 

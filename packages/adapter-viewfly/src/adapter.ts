@@ -47,7 +47,10 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
           isRoot = false
         }
         onUpdated(() => {
-          this.componentRendingStack.pop()
+          const context = this.componentRendingStack[this.componentRendingStack.length - 1]!
+          if (context === component) {
+            this.componentRendingStack.pop()
+          }
           textbusComponent.changeMarker.rendered()
           if (!this.componentRootElementCaches.get(textbusComponent)) {
             // eslint-disable-next-line max-len
@@ -101,7 +104,13 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
              slotHostRender: (children: Array<VElement | VTextNode | Component>) => VElement,
              renderEnv?: any): JSXInternal.Element {
     const context = this.componentRendingStack[this.componentRendingStack.length - 1]!
-    context.__slots__.push(slot)
+    if (context) {
+      context.__slots__.push(slot)
+    } else if (!this.renderedSlotCache.has(slot)) {
+      throw adapterError(`Unrendered slots must be rendered together with the corresponding "${slot.parent?.name || 'unknown'}" component`)
+    }
+    this.renderedSlotCache.set(slot, true)
+
     const vElement = slot.toTree(slotHostRender, renderEnv)
     this.slotRootVElementCaches.set(slot, vElement)
 

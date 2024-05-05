@@ -20,6 +20,7 @@ import {
 } from '@textbus/core'
 import { Adapter, ViewComponentProps } from '@textbus/adapter-viewfly'
 import { createApp } from '@viewfly/platform-browser'
+import { getCurrentInstance } from '@viewfly/core'
 
 interface SingleSlot {
   slot: Slot
@@ -162,20 +163,31 @@ async function createEditor() {
 
 // textbus.render(rootModel)
 
+  function SlotRender(props: any) {
+    const i = getCurrentInstance()
+    props.slot.__changeMarker__.onChange.subscribe(() => {
+      if (props.slot.__changeMarker__.dirty) {
+        i.markAsDirtied()
+      }
+    })
+    return () => {
+      console.log('rootSlot---')
+      return adapter.slotRender(props.slot, children => {
+        return createVNode('div', {
+          'textbus-document': 'true',
+        }, children)
+      })
+    }
+  }
+
   function App(props: ViewComponentProps<RootComponent>) {
     const { slot } = props.component.state
 
     return () => {
+      console.log('rootComponent')
       return (
-        <div>
-          {
-            adapter.slotRender(slot, children => {
-              return createVNode('div', {
-                'textbus-document': 'true',
-                ref: props.rootRef
-              }, children)
-            })
-          }
+        <div ref={props.rootRef}>
+          <SlotRender slot={slot}/>
         </div>
       )
     }
@@ -184,6 +196,7 @@ async function createEditor() {
   function Paragraph(props: ViewComponentProps<ParagraphComponent>) {
     const slot = props.component.state.slot
     return () => {
+      console.log('paragraphComponent')
       return (
         adapter.slotRender(slot, children => {
           return createVNode('p', { ref: props.rootRef }, children)
