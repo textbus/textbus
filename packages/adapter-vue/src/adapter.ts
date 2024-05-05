@@ -54,7 +54,10 @@ export class Adapter extends DomAdapter<VNode, VNode> {
           }
         })
         onUpdated(() => {
-          self.componentRendingStack.pop()
+          const context = self.componentRendingStack[self.componentRendingStack.length - 1]!
+          if (context === component) {
+            self.componentRendingStack.pop()
+          }
           component.changeMarker.rendered()
           self.onViewUpdated.next()
 
@@ -111,7 +114,13 @@ export class Adapter extends DomAdapter<VNode, VNode> {
              slotHostRender: (children: Array<VElement | VTextNode | Component>) => VElement,
              renderEnv?: any): VNode {
     const context = this.componentRendingStack[this.componentRendingStack.length - 1]!
-    context.__slots__.push(slot)
+    if (context) {
+      context.__slots__.push(slot)
+    } else if (!this.renderedSlotCache.has(slot)) {
+      throw adapterError(`Unrendered slots must be rendered together with the corresponding "${slot.parent?.name || 'unknown'}" component`)
+    }
+    this.renderedSlotCache.set(slot, true)
+
     const vElement = slot.toTree(slotHostRender, renderEnv)
     this.slotRootVElementCaches.set(slot, vElement)
 

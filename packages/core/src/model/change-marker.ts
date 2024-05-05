@@ -50,25 +50,28 @@ export class ChangeMarker {
     return []
   }
 
-  forceMarkDirtied() {
+  forceMarkDirtied(source?: Component<any>) {
     if (this._dirty) {
       return
     }
     this._dirty = true
-    this.forceMarkChanged()
+    this.forceMarkChanged(source)
   }
 
-  forceMarkChanged() {
+  forceMarkChanged(source?: Component<any>) {
     if (this._changed) {
       return
     }
     this._changed = true
     this.forceChangeEvent.next()
     if (this.parentModel) {
-      if (this._dirty) {
-        this.parentModel.__changeMarker__.forceMarkDirtied()
+      if (!source) {
+        source = this.host instanceof Component ? this.host : source
+      }
+      if (source) {
+        this.parentModel.__changeMarker__.forceMarkChanged(source)
       } else {
-        this.parentModel.__changeMarker__.forceMarkChanged()
+        this.parentModel.__changeMarker__.forceMarkDirtied(source)
       }
     }
   }
