@@ -50,6 +50,7 @@ export abstract class DomAdapter<ViewComponent, ViewElement> extends ViewAdapter
     return a instanceof Slot
   })
   protected slotRootVElementCaches = new WeakMap<Slot, VElement>()
+  protected renderedSlotCache = new WeakMap<Slot, true>()
 
   protected constructor(private mount: (host: HTMLElement, viewComponent: ViewComponent, textbus: Textbus) => (void | (() => void))) {
     super()
