@@ -21,6 +21,7 @@ import {
 import { Adapter, ViewComponentProps } from '@textbus/adapter-viewfly'
 import { createApp } from '@viewfly/platform-browser'
 import { getCurrentInstance } from '@viewfly/core'
+import { merge } from '@tanbo/stream'
 
 interface SingleSlot {
   slot: Slot
@@ -163,15 +164,15 @@ async function createEditor() {
 
 // textbus.render(rootModel)
 
-  function SlotRender(props: any) {
+  function SlotRender(props: {slot: Slot}) {
     const i = getCurrentInstance()
-    props.slot.__changeMarker__.onChange.subscribe(() => {
+    const slot = props.slot
+    merge(slot.__changeMarker__.onChange, slot.__changeMarker__.onForceChange).subscribe(() => {
       if (props.slot.__changeMarker__.dirty) {
         i.markAsDirtied()
       }
     })
     return () => {
-      console.log('rootSlot---')
       return adapter.slotRender(props.slot, children => {
         return createVNode('div', {
           'textbus-document': 'true',
