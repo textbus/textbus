@@ -159,6 +159,10 @@ function createArrayProxyHandlers(source: any[],
           ignoreChange = true
           const offset = source.length
           const item = source.pop()
+          const proxy = rawToProxyCache.get(item)
+          if (proxy) {
+            proxy.__changeMarker__.parentModel = null
+          }
           ignoreChange = false
           changeMarker.markAsDirtied({
             paths: [],
@@ -227,6 +231,10 @@ function createArrayProxyHandlers(source: any[],
         if (this === proxy) {
           ignoreChange = true
           const item = source.shift()
+          const proxy = rawToProxyCache.get(item)
+          if (proxy) {
+            proxy.__changeMarker__.parentModel = null
+          }
           ignoreChange = false
           changeMarker.markAsDirtied({
             paths: [],
@@ -265,6 +273,12 @@ function createArrayProxyHandlers(source: any[],
             deleteCount = 0
           }
           const deletedItems = source.splice(startIndex, deleteCount, ...args)
+          deletedItems.forEach(i => {
+            const proxy = rawToProxyCache.get(i)
+            if (proxy) {
+              proxy.__changeMarker__.parentModel = null
+            }
+          })
           ignoreChange = false
           const deletedGroups = toGroup(deletedItems)
           let index = startIndex
@@ -340,6 +354,10 @@ export function createArrayProxy<T extends any[]>(raw: T): T {
         newValue = rawToProxyCache.get(newValue)
       }
       const oldValue = raw[p]
+      const proxy = rawToProxyCache.get(oldValue)
+      if (proxy) {
+        proxy.__changeMarker__.parentModel = null
+      }
       const length = raw.length
 
       const b = Reflect.set(target, p, newValue, receiver)
@@ -420,6 +438,10 @@ export function createObjectProxy<T extends object>(raw: T): T {
       }
       const has = Object.hasOwn(raw, p)
       const oldValue = raw[p]
+      const proxy = rawToProxyCache.get(oldValue)
+      if (proxy) {
+        proxy.__changeMarker__.parentModel = null
+      }
       const b = Reflect.set(target, p, newValue, receiver)
       const unApplyAction: Action = has ? {
         type: 'propSet',
@@ -447,6 +469,10 @@ export function createObjectProxy<T extends object>(raw: T): T {
     deleteProperty(target, p) {
       const has = Object.hasOwn(raw, p)
       const oldValue = raw[p]
+      const proxy = rawToProxyCache.get(oldValue)
+      if (proxy) {
+        proxy.__changeMarker__.parentModel = null
+      }
       const b = Reflect.deleteProperty(target, p)
       changeMarker.markAsDirtied({
         paths: [],

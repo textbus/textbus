@@ -471,6 +471,7 @@ export class Slot {
             ref: item
           }
         }
+        item.changeMarker.parentModel = null
         this.__changeMarker__.recordComponentRemoved(item)
         return {
           type: 'contentInsert',
