@@ -181,10 +181,10 @@ importers:
         specifier: ^1.2.3
         version: 1.2.3
       '@textbus/core':
-        specifier: ^4.0.0-alpha.31
+        specifier: ^4.0.0-alpha.37
         version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.0.0-alpha.32
+        specifier: ^4.0.0-alpha.37
         version: link:../platform-browser
       react:
         specifier: ^17.0.0 || ^18.0.0
@@ -215,10 +215,10 @@ importers:
         specifier: ^1.2.3
         version: 1.2.3
       '@textbus/core':
-        specifier: ^4.0.0-alpha.31
+        specifier: ^4.0.0-alpha.37
         version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.0.0-alpha.32
+        specifier: ^4.0.0-alpha.37
         version: link:../platform-browser
       '@viewfly/core':
         specifier: ^0.6.3
@@ -246,10 +246,10 @@ importers:
         specifier: ^1.2.3
         version: 1.2.3
       '@textbus/core':
-        specifier: ^4.0.0-alpha.31
+        specifier: ^4.0.0-alpha.37
         version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.0.0-alpha.32
+        specifier: ^4.0.0-alpha.37
         version: link:../platform-browser
       vue:
         specifier: ^3.3.4
@@ -277,7 +277,7 @@ importers:
         specifier: ^1.2.3
         version: 1.2.3
       '@textbus/core':
-        specifier: ^4.0.0-alpha.31
+        specifier: ^4.0.0-alpha.37
         version: link:../core
       '@viewfly/core':
         specifier: ^0.6.3
@@ -342,10 +342,10 @@ importers:
         specifier: ^1.2.3
         version: 1.2.3
       '@textbus/collaborate':
-        specifier: ^4.0.0-alpha.31
+        specifier: ^4.0.0-alpha.37
         version: link:../collaborate
       '@textbus/core':
-        specifier: ^4.0.0-alpha.31
+        specifier: ^4.0.0-alpha.37
         version: link:../core
       '@viewfly/core':
         specifier: ^0.6.3
@@ -376,7 +376,7 @@ importers:
         specifier: ^1.2.3
         version: 1.2.3
       '@textbus/core':
-        specifier: ^4.0.0-alpha.31
+        specifier: ^4.0.0-alpha.37
         version: link:../core
       '@viewfly/core':
         specifier: ^0.6.3

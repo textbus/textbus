@@ -136,6 +136,7 @@ function deleteUpBySlot(selection: Selection,
   } : selection.findLastPosition(parentComponent.__slots__.get(slotIndex - 1)!, true)
 
   if (parentComponent.removeSlot?.(slot)) {
+    parentComponent.__slots__.splice(slotIndex, 1)
     return position
   }
   return {
@@ -919,7 +920,10 @@ export class Commander {
     const parentComponent = startScope.slot.parent!
     if (parentComponent.separate) {
       if (startScope.slot !== parentComponent.__slots__.last) {
-        const afterComponent = parentComponent.separate(startScope.slot)
+        const slotIndex = parentComponent.__slots__.indexOf(startScope.slot)
+        const count = parentComponent.__slots__.length - slotIndex
+        const deletedSlots = parentComponent.__slots__.splice(slotIndex + 1, slotIndex + count)
+        const afterComponent = parentComponent.separate(deletedSlots[0], deletedSlots[deletedSlots.length - 1])
         this.insertAfter(afterComponent!, parentComponent)
       }
     }
