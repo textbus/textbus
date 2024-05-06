@@ -72,6 +72,7 @@ export class Adapter extends DomAdapter<VNode, VNode> {
         const result = (setup as any)(props)
         if (typeof result === 'function') {
           return function () {
+            component.__slots__.forEach(i => self.renderedSlotCache.delete(i))
             component.__slots__.length = 0
             self.componentRendingStack.push(component)
             return result()
