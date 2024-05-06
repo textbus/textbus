@@ -64,6 +64,7 @@ export class Adapter extends DomAdapter<JSX.Element, JSX.Element> {
         useEffect(() => {
           this.onViewUpdated.next()
         }, [updateKey])
+        component.__slots__.forEach(i => this.renderedSlotCache.delete(i))
         component.__slots__.length = 0
         this.componentRendingStack.push(component)
         const vNode = components[key]({
