@@ -1,4 +1,4 @@
-import { createDynamicRef, DynamicRef, getCurrentInstance, jsx, JSXNode, onUpdated } from '@viewfly/core'
+import { createDynamicRef, DynamicRef, getCurrentInstance, jsx, JSXNode, onUpdated, withAnnotation } from '@viewfly/core'
 import { merge, Subject } from '@tanbo/stream'
 import { Component, invokeListener, makeError, replaceEmpty, Slot, VElement, VTextNode } from '@textbus/core'
 import { DomAdapter } from '@textbus/platform-browser'
@@ -30,8 +30,11 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
               mount: (host: HTMLElement, root: JSXNode) => (void | (() => void))) {
     super(mount)
     let isRoot = true
-    Object.keys(components).forEach(key => {
-      this.components[key] = (props: ViewComponentProps<Component>) => {
+    Object.entries(components).forEach(([key, viewFlyComponent]) => {
+
+      this.components[key] = withAnnotation({
+        ...viewFlyComponent.annotation
+      }, (props: ViewComponentProps<Component>) => {
         const comp = getCurrentInstance()
         const textbusComponent = props.component
         merge(textbusComponent.changeMarker.onChange,
@@ -58,7 +61,7 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
           }
         })
         const component = props.component
-        const instance = components[key](props)
+        const instance = viewFlyComponent(props)
         if (typeof instance === 'function') {
           return () => {
             component.__slots__.forEach(i => this.renderedSlotCache.delete(i))
@@ -77,7 +80,7 @@ export class Adapter extends DomAdapter<JSXNode, JSXInternal.Element> {
             return instance.$render()
           }
         }
-      }
+      })
     })
   }
 
