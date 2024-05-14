@@ -104,7 +104,7 @@ export class SelectionBridge implements NativeSelectionBridge {
   }
 
   getRect(location: SelectionPosition) {
-    const { focus, anchor } = this.getPositionByRange({
+    const {focus, anchor} = this.getPositionByRange({
       focusOffset: location.offset,
       anchorOffset: location.offset,
       focusSlot: location.slot,
@@ -132,7 +132,7 @@ export class SelectionBridge implements NativeSelectionBridge {
       return
     }
 
-    const { focus, anchor } = this.getPositionByRange(abstractSelection)
+    const {focus, anchor} = this.getPositionByRange(abstractSelection)
     if (!focus || !anchor) {
       this.nativeSelection.removeAllRanges()
       this.selectionChangeEvent.next(null)
@@ -140,7 +140,10 @@ export class SelectionBridge implements NativeSelectionBridge {
       return
     }
 
-    function tryOffset(position: {node: Node, offset: number}) {
+    function tryOffset(position: { node: Node, offset: number }) {
+      if (!position.node) {
+        return
+      }
       if (position.node.nodeType === Node.TEXT_NODE) {
         const len = position.node.textContent!.length
         if (position.offset > len) {
@@ -154,10 +157,9 @@ export class SelectionBridge implements NativeSelectionBridge {
       }
     }
 
-    tryOffset(focus)
-    tryOffset(anchor)
-
     try {
+      tryOffset(focus)
+      tryOffset(anchor)
       this.nativeSelection.setBaseAndExtent(anchor.node, anchor.offset, focus.node, focus.offset)
     } catch (e) {
       setTimeout(() => {
@@ -190,8 +192,8 @@ export class SelectionBridge implements NativeSelectionBridge {
   }
 
   getPositionByRange(abstractSelection: AbstractSelection) {
-    let focus!: {node: Node, offset: number} | null
-    let anchor!: {node: Node, offset: number} | null
+    let focus!: { node: Node, offset: number } | null
+    let anchor!: { node: Node, offset: number } | null
     try {
       focus = this.findSelectedNodeAndOffset(abstractSelection.focusSlot!, abstractSelection.focusOffset!)
       anchor = focus
@@ -433,7 +435,7 @@ export class SelectionBridge implements NativeSelectionBridge {
         anchorSlot: endPosition.slot,
         anchorOffset: endPosition.offset
       }
-      const { focus, anchor } = this.getPositionByRange(abstractSelection)
+      const {focus, anchor} = this.getPositionByRange(abstractSelection)
       if (focus && anchor) {
         let start = anchor
         let end = focus
@@ -466,7 +468,7 @@ export class SelectionBridge implements NativeSelectionBridge {
     connector.setSelection(null)
   }
 
-  private findSelectedNodeAndOffset(slot: Slot, offset: number): {node: Node, offset: number} | null {
+  private findSelectedNodeAndOffset(slot: Slot, offset: number): { node: Node, offset: number } | null {
     const prev = slot.getContentAtIndex(offset - 1)
     const vNodes = this.renderer.getVNodesBySlot(slot)
 
