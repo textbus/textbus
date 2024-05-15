@@ -17,9 +17,10 @@ import {
   Slot,
   SlotRange
 } from '../model/_api'
-import { ViewAdapter, RootComponentRef } from './_injection-tokens'
+import { RootComponentRef } from './_injection-tokens'
 import { Registry } from './registry'
 import { Textbus } from '../textbus'
+import { Adapter } from './adapter'
 
 function getInsertPosition(
   slot: Slot,
@@ -277,7 +278,7 @@ function getBlockRangeToBegin(slot: Slot, offset: number): SlotRange {
 export class Commander {
 
   constructor(protected selection: Selection,
-              protected platform: ViewAdapter,
+              protected adapter: Adapter,
               protected textbus: Textbus,
               protected registry: Registry,
               protected rootComponentRef: RootComponentRef) {
@@ -617,7 +618,7 @@ export class Commander {
    * 复制当前选区内容
    */
   copy() {
-    this.platform.copy()
+    this.adapter.copy()
   }
 
   /**

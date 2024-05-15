@@ -1,1 +1,1 @@
-export * from './adapter'
+export * from './vue-adapter'

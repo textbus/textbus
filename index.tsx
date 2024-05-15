@@ -15,12 +15,12 @@ import {
   Textbus,
   useContext,
   useSelf,
-  VElement,
+  VElement, Adapter,
   VTextNode,
 } from '@textbus/core'
-import { Adapter, ViewComponentProps } from '@textbus/adapter-viewfly'
-import { createApp } from '@viewfly/platform-browser'
-import { getCurrentInstance } from '@viewfly/core'
+import { ViewflyAdapter, ViewflyVDomAdapter, ViewComponentProps } from '@textbus/adapter-viewfly'
+import { createApp, HTMLRenderer, OutputTranslator } from '@viewfly/platform-browser'
+import { getCurrentInstance, inject } from '@viewfly/core'
 import { merge } from '@tanbo/stream'
 
 interface SingleSlot {
@@ -101,26 +101,42 @@ async function createEditor() {
     (Intl as any).Segmenter = await polyfill.createIntlSegmenterPolyfill()
   }
 
-  const adapter = new Adapter({
+  const adapter = new ViewflyAdapter({
     [RootComponent.componentName]: App,
     [ParagraphComponent.componentName]: Paragraph
-  }, (host, root) => {
-    const app = createApp(root)
+  }, (host, root, context) => {
+    const app = createApp(root, {
+      context
+    })
     app.mount(host)
     return () => {
       app.destroy()
     }
   })
   const browserModule = new BrowserModule({
-    adapter,
+    adapter: adapter,
     renderTo() {
       return document.getElementById('editor')!
     },
     // useContentEditable: true
   })
 
+  const htmlRenderer = new ViewflyVDomAdapter({
+    [RootComponent.componentName]: App as any,
+    [ParagraphComponent.componentName]: Paragraph
+  }, (host, root, context) => {
+    const app = createApp(root, {
+      context,
+      nativeRenderer: new HTMLRenderer()
+    })
+    app.mount(host)
+    return () => {
+      app.destroy()
+    }
+  })
 
   const textbus = new Textbus({
+    additionalAdapters: [htmlRenderer],
     components: [
       RootComponent,
       ParagraphComponent
@@ -150,6 +166,12 @@ async function createEditor() {
     ]),
   })
 
+  const t = new OutputTranslator()
+
+  htmlRenderer.onViewUpdated.subscribe(() => {
+    // console.log(rootModel)
+    console.log(t.transform(htmlRenderer.host))
+  })
   // rootModel.changeMarker.onChange.subscribe(op => {
   //   console.log(op)
   // })
@@ -172,6 +194,8 @@ async function createEditor() {
         i.markAsDirtied()
       }
     })
+    const adapter = inject(Adapter)
+    console.log(adapter, '=====')
     return () => {
       return adapter.slotRender(props.slot, children => {
         return createVNode('div', {
@@ -196,6 +220,7 @@ async function createEditor() {
 
   function Paragraph(props: ViewComponentProps<ParagraphComponent>) {
     const slot = props.component.state.slot
+    const adapter = inject(Adapter)
     return () => {
       console.log('paragraphComponent')
       return (
