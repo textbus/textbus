@@ -20,7 +20,8 @@ import {
   Keyboard,
   Scheduler,
   Selection,
-  Slot, Textbus
+  Slot,
+  Textbus
 } from '@textbus/core'
 
 import { Caret, CaretPosition, Input, Scroller } from './types'
@@ -186,7 +187,7 @@ export class NativeInput extends Input {
               private scheduler: Scheduler,
               private selection: Selection,
               private keyboard: Keyboard,
-              private domAdapter: DomAdapter<any, any>,
+              private domAdapter: DomAdapter,
               private commander: Commander,
               private controller: Controller) {
     super()
@@ -290,7 +291,7 @@ export class NativeInput extends Input {
     )
   }
 
-  private handlePaste(dom: HTMLElement | string | HTMLElement, text: string) {
+  private handlePaste(dom: HTMLElement | string, text: string) {
     const slot = this.parser.parse(dom, new Slot([
       ContentType.BlockComponent,
       ContentType.InlineComponent,

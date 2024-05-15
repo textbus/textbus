@@ -2,25 +2,12 @@ import { InjectionToken } from '@viewfly/core'
 import { Observable } from '@tanbo/stream'
 
 import { Component, Formatter, ComponentConstructor, Attribute } from '../model/_api'
-import { Textbus } from '../textbus'
 
 /**
  * 根节点及原生根元素节点引用类
  */
 export abstract class RootComponentRef {
   abstract component: Component
-}
-
-/**
- * Textbus 渲染适配器
- */
-export abstract class ViewAdapter {
-  /** 当视图更新时触发事件的可观察对象，用于通知 Textbus 视图渲染已完成 */
-  abstract onViewUpdated: Observable<void>
-  /** 当前平台的复制能力 */
-  abstract copy(): void
-  /** 根组件渲染方法 */
-  abstract render(rootComponent: Component, textbus: Textbus): (void | (() => void))
 }
 
 /**

@@ -1,4 +1,4 @@
-import { Module, NativeSelectionBridge, ViewAdapter } from '@textbus/core'
+import { Module, NativeSelectionBridge, Renderer } from '@textbus/core'
 import { Provider } from '@viewfly/core'
 
 import { NodeSelectionBridge } from './node-selection-bridge'
@@ -9,7 +9,7 @@ export class NodeModule implements Module {
     provide: NativeSelectionBridge,
     useValue: new NodeSelectionBridge()
   }, {
-    provide: ViewAdapter,
+    provide: Renderer,
     useValue: new NodeViewAdapter()
   }]
 }

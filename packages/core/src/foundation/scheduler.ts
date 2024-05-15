@@ -2,8 +2,9 @@ import { Injectable } from '@viewfly/core'
 import { map, microTask, Observable, Subject, Subscription, take } from '@tanbo/stream'
 
 import { Component, invokeListener, Operation } from '../model/_api'
-import { ViewAdapter, RootComponentRef } from './_injection-tokens'
+import { RootComponentRef } from './_injection-tokens'
 import { Selection } from './selection'
+import { Adapter } from './adapter'
 
 /**
  * 数据变更源
@@ -70,7 +71,7 @@ export class Scheduler {
   private updatedTasks: Array<() => void> = []
 
   constructor(private rootComponentRef: RootComponentRef,
-              private viewAdapter: ViewAdapter,
+              private adapter: Adapter,
               private selection: Selection) {
     this.onDocChanged = this.docChangedEvent.asObservable()
     this.onDocChange = this.docChangeEvent.asObservable()
@@ -149,7 +150,7 @@ export class Scheduler {
       changeMarker.onChildComponentRemoved.subscribe(instance => {
         this.instanceList.add(instance)
       }),
-      this.viewAdapter.onViewUpdated.pipe(microTask()).subscribe(() => {
+      this.adapter.onViewUpdated.pipe(microTask()).subscribe(() => {
         const tasks = this.updatedTasks
         this.updatedTasks = []
         tasks.forEach(fn => {

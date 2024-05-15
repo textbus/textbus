@@ -8,7 +8,7 @@ import {
   NativeSelectionBridge,
   Registry,
   Textbus,
-  ViewAdapter
+  Adapter,
 } from '@textbus/core'
 import { Provider } from '@viewfly/core'
 import { distinctUntilChanged, map, Subject } from '@tanbo/stream'
@@ -20,8 +20,8 @@ import { Input } from './types'
 import { MagicInput } from './magic-input'
 import { CollaborateCursor } from './collaborate-cursor'
 import { createElement } from './_utils/uikit'
-import { DomAdapter } from './dom-adapter'
 import { NativeInput } from './native-input'
+import { DomAdapter } from './dom-adapter'
 
 const browserErrorFn = makeError('BrowserModule')
 
@@ -29,8 +29,8 @@ const browserErrorFn = makeError('BrowserModule')
  * Textbus PC 端配置接口
  */
 export interface ViewOptions {
-  /** 渲染平台适配器 */
-  adapter: DomAdapter<any, any>
+  /** 跨平台适配器 */
+  adapter: DomAdapter
 
   /** 编辑器根节点 */
   renderTo(): HTMLElement
@@ -79,11 +79,8 @@ export class BrowserModule implements Module {
       provide: Input,
       useClass: config.useContentEditable ? NativeInput : MagicInput
     }, {
-      provide: ViewAdapter,
-      useFactory(v) {
-        return v
-      },
-      deps: [DomAdapter]
+      provide: Adapter,
+      useValue: config.adapter
     }, {
       provide: DomAdapter,
       useValue: config.adapter
