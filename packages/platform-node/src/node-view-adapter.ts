@@ -1,7 +1,7 @@
-import { ViewAdapter } from '@textbus/core'
+import { Renderer } from '@textbus/core'
 import { Subject } from '@tanbo/stream'
 
-export class NodeViewAdapter extends ViewAdapter {
+export class NodeViewAdapter extends Renderer {
   onViewUpdated = new Subject<void>()
 
   copy() {

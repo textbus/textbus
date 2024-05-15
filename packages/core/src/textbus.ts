@@ -20,10 +20,10 @@ import {
   RootComponentRef,
   Scheduler,
   Selection,
-  ViewAdapter,
   ZEN_CODING_DETECT,
 } from './foundation/_api'
 import { makeError } from './_utils/make-error'
+import { Adapter } from './foundation/adapter'
 
 const textbusError = makeError('Textbus')
 
@@ -92,6 +92,8 @@ export interface TextbusConfig extends Module {
   historyStackSize?: number
   /** 是否只读 */
   readonly?: boolean
+  /** 附加的渲染器。常用于在内存中渲染 HTML 字符串*/
+  additionalAdapters?: Adapter<any, any>[]
 }
 
 /**
@@ -194,7 +196,7 @@ export class Textbus extends ReflectiveInjector {
 
     const scheduler = this.get(Scheduler)
     const history = this.get(History)
-    const adapter = this.get(ViewAdapter)
+    const viewRenderer = this.get(Adapter)
 
     this.initDefaultShortcut()
 
@@ -225,10 +227,20 @@ export class Textbus extends ReflectiveInjector {
         })
       )
     }
-    const destroyView = adapter.render(rootComponent, this)
+    const destroyView = viewRenderer.render(rootComponent, this)
     if (typeof destroyView === 'function') {
       this.beforeDestroyCallbacks.push(destroyView)
     }
+    this.config.additionalAdapters?.forEach(adapter => {
+      const childInjector = new ReflectiveInjector(this, [{
+        provide: Adapter,
+        useValue: adapter
+      }])
+      const fn = adapter.render(rootComponent, childInjector)
+      if (typeof fn === 'function') {
+        this.beforeDestroyCallbacks.push(fn)
+      }
+    })
     this.plugins.forEach(i => i.setup(this))
     this.isReady = true
     this.readyEvent.next()
@@ -373,9 +385,9 @@ export class Textbus extends ReflectiveInjector {
           throw textbusError('You must implement the `NativeSelectionBridge` interface to start Textbus!')
         }
       }, {
-        provide: ViewAdapter,
+        provide: Adapter,
         useFactory() {
-          throw textbusError('You must implement the `ViewAdapter` interface to start Textbus!')
+          throw textbusError('You must implement the `ViewRenderer` interface to start Textbus!')
         }
       }
     ]

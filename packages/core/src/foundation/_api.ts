@@ -1,4 +1,5 @@
 export * from './_injection-tokens'
+export * from './adapter'
 export * from './commander'
 export * from './controller'
 export * from './history'

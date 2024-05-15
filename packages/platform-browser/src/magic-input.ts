@@ -10,7 +10,8 @@ import {
   Keyboard,
   Scheduler,
   Selection,
-  Slot, Textbus
+  Slot,
+  Textbus
 } from '@textbus/core'
 
 import { createElement, getLayoutRectByRange } from './_utils/uikit'
@@ -81,7 +82,7 @@ class ExperimentalCaret implements Caret {
   private isFixed = false
 
   constructor(
-    private adapter: DomAdapter<any, any>,
+    private domRenderer: DomAdapter,
     private scheduler: Scheduler,
     private editorMask: HTMLElement) {
     this.onPositionChange = this.positionChangeEvent.pipe(distinctUntilChanged())
@@ -233,7 +234,7 @@ class ExperimentalCaret implements Caret {
       this.positionChangeEvent.next(null)
       return
     }
-    const compositionNode = this.adapter.compositionNode
+    const compositionNode = this.domRenderer.compositionNode
     if (compositionNode) {
       nativeRange = nativeRange.cloneRange()
       nativeRange.selectNodeContents(compositionNode)
@@ -299,7 +300,7 @@ class ExperimentalCaret implements Caret {
 export class MagicInput extends Input {
   composition = false
   onReady: Promise<void>
-  caret = new ExperimentalCaret(this.adapter, this.scheduler, this.textbus.get(VIEW_MASK))
+  caret = new ExperimentalCaret(this.domAdapter, this.scheduler, this.textbus.get(VIEW_MASK))
 
   set disabled(b: boolean) {
     this._disabled = b
@@ -329,7 +330,7 @@ export class MagicInput extends Input {
 
   private ignoreComposition = false // 有 bug 版本搜狗拼音
 
-  constructor(private adapter: DomAdapter<any, any>,
+  constructor(private domAdapter: DomAdapter,
               private parser: Parser,
               private keyboard: Keyboard,
               private commander: Commander,
@@ -419,10 +420,10 @@ export class MagicInput extends Input {
         this.isFocus = false
         this.nativeFocus = false
         this.caret.hide()
-        if (this.adapter.composition) {
-          const slot = this.adapter.composition.slot
-          this.adapter.composition = null
-          this.adapter.compositionNode = null
+        if (this.domAdapter.composition) {
+          const slot = this.domAdapter.composition.slot
+          this.domAdapter.composition = null
+          this.domAdapter.compositionNode = null
           slot.__changeMarker__.forceMarkDirtied()
         }
       }),
@@ -585,7 +586,7 @@ export class MagicInput extends Input {
           return
         }
         const startSlot = this.selection.startSlot!
-        this.adapter.composition = {
+        this.domAdapter.composition = {
           slot: startSlot,
           text: ev.data,
           offset: ev.data.length,
@@ -634,7 +635,7 @@ export class MagicInput extends Input {
           )
       ).subscribe(text => {
         this.composition = false
-        this.adapter.composition = null
+        this.domAdapter.composition = null
         if (text) {
           this.commander.write(text)
         } else {

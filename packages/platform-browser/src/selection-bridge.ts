@@ -14,8 +14,8 @@ import {
 import { EDITOR_OPTIONS, VIEW_DOCUMENT } from './injection-tokens'
 import { getLayoutRectByRange, Rect } from './_utils/uikit'
 import { Input } from './types'
-import { DomAdapter } from './dom-adapter'
 import { ViewOptions } from './browser-module'
+import { DomAdapter } from './dom-adapter'
 
 /**
  * Textbus PC 端选区桥接实现
@@ -45,7 +45,7 @@ export class SelectionBridge implements NativeSelectionBridge {
               private selection: Selection,
               private rootComponentRef: RootComponentRef,
               private input: Input,
-              private domAdapter: DomAdapter<any, any>) {
+              private domAdapter: DomAdapter) {
     this.docContainer = textbus.get(VIEW_DOCUMENT)
     this.onSelectionChange = this.selectionChangeEvent.asObservable().pipe(filter(() => {
       return !controller.readonly

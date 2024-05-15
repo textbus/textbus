@@ -2,7 +2,7 @@ import {
   ComponentInitData,
   ContentType, Controller,
   defineComponent,
-  jsx, Ref, Renderer,
+  jsx, Ref, Adapter,
   Slot,
   useContext, useDynamicShortcut, useRef,
   useSelf,
@@ -10,7 +10,7 @@ import {
   useState
 } from '@textbus/core'
 import { Injector, NullInjector, ReflectiveInjector } from '@tanbo/di'
-import { DomRenderer } from '@textbus/platform-browser'
+import { DomAdapter } from '@textbus/platform-browser'
 
 describe('Component', () => {
   test('正确返回组件', () => {
@@ -229,11 +229,11 @@ describe('Component Hooks', () => {
       }
     })
     const componentInstance = testComponent.createInstance(injector)
-    const renderer = new Renderer(new Controller(false), {
+    const renderer = new Adapter(new Controller(false), {
       component: componentInstance,
       host: document.createElement('div')
     })
-    renderer.nativeRenderer = new DomRenderer()
+    renderer.nativeRenderer = new DomAdapter()
     renderer.render()
     setTimeout(() => {
       expect(ref.current).toBeInstanceOf(HTMLParagraphElement)
