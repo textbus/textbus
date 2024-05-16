@@ -55,6 +55,9 @@ export class ViewflyAdapter extends DomAdapter<JSXInternal.ViewNode, JSXInternal
         const currentRef = vEle.attrs.get('ref')
         const ref = createDynamicRef<HTMLElement>(nativeNode => {
           update(nativeNode)
+          return () => {
+            update(null)
+          }
         })
         if (currentRef instanceof DynamicRef) {
           vEle.attrs.set('ref', [currentRef, ref])
