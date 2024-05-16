@@ -57,6 +57,9 @@ export class ViewflyVDomAdapter extends Adapter<VDOMElement, VDOMText, JSXIntern
         const currentRef = vEle.attrs.get('ref')
         const ref = createDynamicRef<VDOMElement>(nativeNode => {
           update(nativeNode)
+          return () => {
+            update(null)
+          }
         })
         if (currentRef instanceof DynamicRef) {
           vEle.attrs.set('ref', [currentRef, ref])
