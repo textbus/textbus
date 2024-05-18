@@ -146,46 +146,24 @@ function deleteUpBySlot(selection: Selection,
   }
 }
 
-export interface SingleSlotTransformRule {
-  /** 目标组件的数据类型 */
-  targetType: ContentType
-  /** 组件是否支持多插槽 */
-  multipleSlot: false
-
-  /**
-   * 创建目标组件新插槽的工厂函数
-   * @param from
-   */
-  slotFactory(from: Component<any>): Slot
-
-  /**
-   * 创建组件状态的工厂函数
-   */
-  stateFactory(slot: Slot): Component<any>
-}
-
-export interface MultiSlotTransformRule {
-  /** 目标组件的数据类型 */
-  targetType: ContentType
-  /** 组件是否支持多插槽 */
-  multipleSlot: true
-
-  /**
-   * 创建目标组件新插槽的工厂函数
-   * @param from
-   */
-  slotFactory(from: Component<any>): Slot
-
-  /**
-   * 创建组件状态的工厂函数
-   */
-  stateFactory(slots: Slot[]): Component<any>
-}
-
 /**
  * 组件转换规则
  */
-export type TransformRule = SingleSlotTransformRule | MultiSlotTransformRule
+export interface TransformRule {
+  /** 目标组件的数据类型 */
+  targetType: ContentType
+
+  /**
+   * 创建目标组件新插槽的工厂函数
+   * @param from
+   */
+  slotFactory(from: Component<any>): Slot
+
+  /**
+   * 创建组件状态的工厂函数
+   */
+  stateFactory(slots: Slot[], textbus: Textbus): Component<any>[]
+}
 
 function deltaToSlots(selection: Selection,
                       source: Slot,
@@ -247,13 +225,7 @@ function slotsToComponents(textbus: Textbus, slots: Slot[], rule: TransformRule)
   if (!slots.length) {
     return componentInstances
   }
-  if (rule.multipleSlot) {
-    componentInstances.push(rule.stateFactory(slots))
-  } else {
-    slots.forEach(childSlot => {
-      componentInstances.push(rule.stateFactory(childSlot))
-    })
-  }
+  componentInstances.push(...rule.stateFactory(slots, textbus))
   return componentInstances
 }
 
