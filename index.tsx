@@ -1,6 +1,6 @@
 /* eslint-disable */
 import 'reflect-metadata'
-import { BrowserModule } from '@textbus/platform-browser'
+import { BrowserModule, DomAdapter } from '@textbus/platform-browser'
 import {
   Commander,
   Component,
@@ -143,7 +143,14 @@ async function createEditor() {
     ],
     imports: [
       browserModule
-    ]
+    ],
+    plugins: [{
+      setup(textbus) {
+        const adapter = textbus.get(DomAdapter)
+        const a = adapter.getNativeNodeBySlot(rootModel.state.slot)
+        console.log(a)
+      },
+    }]
   })
 
   const fontSizeFormatter = new Formatter<string>('fontSize', {
