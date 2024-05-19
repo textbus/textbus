@@ -159,7 +159,7 @@ export abstract class Component<T extends State = State> {
 }
 
 
-export type ToLiteral<T> = T extends Slot ? SlotLiteral<any> :
+export type ToLiteral<T> = T extends Slot ? SlotLiteral :
   T extends Array<infer Item> ? Array<ToLiteral<Item>> :
     T extends Record<string, any> ? ComponentStateLiteral<T> : T
 
