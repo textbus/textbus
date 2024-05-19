@@ -78,7 +78,7 @@ export class Registry {
    * 根据插槽数据生成插槽实例
    * @param slotLiteral
    */
-  createSlot(slotLiteral: SlotLiteral<any>): Slot {
+  createSlot(slotLiteral: SlotLiteral): Slot {
     const slot = new Slot(slotLiteral.schema)
     return this.loadSlot(slot, slotLiteral)
   }
@@ -110,11 +110,11 @@ export class Registry {
    * @param source
    * @param target
    */
-  fillSlot<T extends SlotLiteral<any>, U extends Slot>(source: T, target: U): U {
+  fillSlot<T extends SlotLiteral, U extends Slot>(source: T, target: U): U {
     return this.loadSlot(target, source)
   }
 
-  private loadSlot<T extends SlotLiteral<any>, U extends Slot>(
+  private loadSlot<T extends SlotLiteral, U extends Slot>(
     slot: U,
     slotLiteral: T): U {
     slotLiteral.content.forEach((item) => {
