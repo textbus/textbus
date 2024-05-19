@@ -4,8 +4,7 @@ import { Slot } from './slot'
 export interface InsertAction {
   type: 'insert'
   data: any[]
-  ref: any[]
-  isSlot: boolean
+  ref: any[] | null
 }
 
 export interface RetainAction {
@@ -29,7 +28,6 @@ export interface PropSetAction {
   key: string
   value: any
   ref: any
-  isSlot: boolean
 }
 
 export interface AttrDeleteAction {
@@ -56,7 +54,6 @@ export interface SetIndexAction {
   value: any
   ref: any
   afterLength: number
-  isSlot: boolean
 }
 
 export type Action = InsertAction |
