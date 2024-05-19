@@ -22,57 +22,45 @@ import { Registry } from './registry'
 import { Textbus } from '../textbus'
 import { Adapter } from './adapter'
 
-function getInsertPosition(
-  slot: Slot,
-  offset: number,
-  content: string | Component,
-  excludeSlots: Slot[] = []
-): SelectionPosition | null {
-  if (canInsert(content, slot)) {
-    return {
-      slot,
-      offset
-    }
-  }
-  excludeSlots.push(slot)
-  return getNextInsertPosition(slot, content, excludeSlots)
-}
-
 function canInsert(content: string | Component, target: Slot) {
   const insertType = typeof content === 'string' ? ContentType.Text : content.type
   return target.schema.includes(insertType)
 }
 
-function getNextInsertPosition(currentSlot: Slot, content: string | Component, excludeSlots: Slot[]): SelectionPosition | null {
-  const parentComponent = currentSlot.parent!
-  const slotIndex = parentComponent.__slots__.indexOf(currentSlot)
-  if (currentSlot !== parentComponent.__slots__.last) {
-    return getInsertPosition(parentComponent.__slots__.get(slotIndex + 1)!, 0, content, excludeSlots)
+function getNextInsertPosition(currentSlot: Slot,
+                               content: string | Component,
+                               index: number,
+                               excludeSlots: Slot[]): SelectionPosition | null {
+  if (!excludeSlots.includes(currentSlot)) {
+    return {
+      slot: currentSlot,
+      offset: index
+    }
   }
-  const parentSlot = parentComponent.parent
-  if (!parentSlot) {
+  // 查找同插槽下当前位置后的子组件插槽
+  const afterContent = currentSlot.sliceContent(index + 1)
+  const afterSiblingComponents = afterContent.filter((i): i is Component => {
+    return typeof i !== 'string'
+  })
+
+  while (afterSiblingComponents.length) {
+    const firstComponent = afterSiblingComponents.shift()
+    if (firstComponent && firstComponent.__slots__.length) {
+      return {
+        slot: firstComponent.__slots__.first,
+        offset: 0
+      }
+    }
+  }
+
+  // 当相邻插槽无法插入时，向上查找可插入位置
+  const parentComponent = currentSlot.parent
+  if (!parentComponent) {
     return null
   }
-  if (excludeSlots.includes(parentSlot)) {
-    return getNextInsertPosition(parentSlot, content, excludeSlots)
-  }
-  const index = parentSlot.indexOf(parentComponent)
-  const position = getInsertPosition(parentSlot, index + 1, content, excludeSlots)
-  if (position) {
-    return position
-  }
-  excludeSlots.push(parentSlot)
-
-  const afterContent = parentSlot.sliceContent(index + 1)
-  const firstComponent = afterContent.filter((i): i is Component => {
-    return typeof i !== 'string'
-  }).shift()
-
-  if (firstComponent && firstComponent.__slots__.length) {
-    return getInsertPosition(firstComponent.__slots__.get(0)!, 0, content, excludeSlots)
-  }
-
-  return getNextInsertPosition(parentSlot, content, excludeSlots)
+  const parentSlot = parentComponent.parent!
+  const parentIndex = parentSlot.indexOf(parentComponent)
+  return getNextInsertPosition(parentSlot, content, parentIndex + 1, excludeSlots)
 }
 
 function deleteUpBySlot(selection: Selection,
@@ -301,20 +289,25 @@ export class Commander {
   write<T extends FormatValue>(content: string | Component, formatter?: Formatter<T>, value?: T): boolean
   write<T extends FormatValue>(content: string | Component, formatter?: Formatter<T> | Formats, value?: T): boolean {
     const selection = this.selection
-    const canInsert = selection.isCollapsed ? true : this.delete()
-    if (!canInsert) {
+    const is = selection.isCollapsed ? true : this.delete()
+    if (!is) {
       return false
     }
-    const position = getInsertPosition(selection.startSlot!, selection.startOffset!, content)
-    if (!position) {
-      return false
+
+    const position: SelectionPosition = {
+      slot: selection.startSlot!,
+      offset: selection.startOffset!
     }
-    const nextFormats = position.slot.extractFormatsByIndex(position.offset + 1)
-    let formats = position.slot.extractFormatsByIndex(position.offset).filter(i => {
-      return i[0].inheritable || nextFormats.some(value => {
-        return value[0] === i[0] && value[1] === i[1]
+
+    let formats: Formats = []
+    if (canInsert(content, position.slot)) {
+      const nextFormats = position.slot.extractFormatsByIndex(position.offset + 1)
+      formats = position.slot.extractFormatsByIndex(position.offset).filter(i => {
+        return i[0].inheritable || nextFormats.some(value => {
+          return value[0] === i[0] && value[1] === i[1]
+        })
       })
-    })
+    }
     if (formatter) {
       if (Array.isArray(formatter)) {
         formats = [
@@ -337,8 +330,8 @@ export class Commander {
   insert<T extends FormatValue>(content: string | Component, formatter?: Formatter<T>, value?: T): boolean
   insert<T extends FormatValue>(content: string | Component, formatter?: Formatter<T> | Formats, value?: T): boolean {
     const selection = this.selection
-    const canInsert = selection.isCollapsed ? true : this.delete()
-    if (!canInsert) {
+    const is = selection.isCollapsed ? true : this.delete()
+    if (!is) {
       return false
     }
     let formats: Formats = []
@@ -350,31 +343,42 @@ export class Commander {
       }
     }
 
-    const position = getInsertPosition(selection.startSlot!, selection.startOffset!, content)
-    if (!position) {
-      return false
-    }
-    const { slot, offset } = position
-    const event = new Event<Slot, InsertEventData>(slot, {
-      index: offset,
-      content,
-      formats
-    })
-    invokeListener(slot.parent!, 'onContentInsert', event)
-    if (!event.isPrevented) {
-      slot.retain(offset)
-      slot.insert(content, formats)
-      const insertedEvent = new Event<Slot, InsertEventData>(slot, {
+    let slot = selection.startSlot!
+    let offset = selection.startOffset!
+    const excludeSlots: Slot[] = []
+    while (true) {
+      const event = new Event<Slot, InsertEventData>(slot, {
         index: offset,
         content,
         formats
       })
-      invokeListener(slot.parent!, 'onContentInserted', insertedEvent)
-      if (!insertedEvent.isPrevented) {
-        selection.setBaseAndExtent(slot, slot.index, slot, slot.index)
+      invokeListener(slot.parent!, 'onContentInsert', event)
+      if (!event.isPrevented) {
+        if (canInsert(content, slot)) {
+          slot.retain(offset)
+          slot.insert(content, formats)
+          const insertedEvent = new Event<Slot, InsertEventData>(slot, {
+            index: offset,
+            content,
+            formats
+          })
+          invokeListener(slot.parent!, 'onContentInserted', insertedEvent)
+          if (!insertedEvent.isPrevented) {
+            selection.setBaseAndExtent(slot, slot.index, slot, slot.index)
+          }
+        } else {
+          excludeSlots.push(slot)
+          const p = getNextInsertPosition(slot, content, offset, excludeSlots)
+          if (p) {
+            slot = p.slot
+            offset = p.offset
+            continue
+          }
+          return false
+        }
       }
+      return !event.isPrevented
     }
-    return !event.isPrevented
   }
 
   /**

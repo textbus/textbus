@@ -168,8 +168,7 @@ async function createEditor() {
 
   const rootModel = new RootComponent(textbus, {
     slot: new Slot([
-      ContentType.BlockComponent,
-      ContentType.Text
+      ContentType.BlockComponent
     ]),
   })
 
