@@ -2,11 +2,6 @@ import { ChangeMarker } from './change-marker'
 import { Slot } from './slot'
 import { Action } from './types'
 
-export interface Group {
-  items: any[]
-  isSlot: boolean
-}
-
 function valueToJSON(value: any): any {
   if (Array.isArray(value)) {
     return arrayToJSON(value)
@@ -62,33 +57,6 @@ export function valueToProxy(value: any, parentModel: ProxyModel<any>) {
   return value
 }
 
-function toGroup(args: any[]) {
-  const groups: Group[] = []
-  let group: Group | null = null
-
-  for (const item of args) {
-    const isSlot = item instanceof Slot
-    if (!group) {
-      group = {
-        isSlot,
-        items: [item]
-      }
-      groups.push(group)
-      continue
-    }
-    if (group.isSlot === isSlot) {
-      group.items.push(item)
-    } else {
-      group = {
-        isSlot,
-        items: [item]
-      }
-      groups.push(group)
-    }
-  }
-  return groups
-}
-
 export function toRaw(item: object) {
   if (proxyRecord.has(item)) {
     return (item as ProxyModel<any>).__changeMarker__.host
@@ -120,33 +88,25 @@ function createArrayProxyHandlers(source: any[],
       return function (this: any[], ...args: any[]) {
         if (this === proxy) {
           ignoreChange = true
-          let length = source.length
-          const groups = toGroup(args)
           const result = source.push(...args)
           ignoreChange = false
-          groups.forEach(group => {
-            changeMarker.markAsDirtied({
-              paths: [],
-              apply: [{
-                type: 'retain',
-                offset: length
-              }, {
-                type: 'insert',
-                data: valueToJSON(group.items),
-                ref: group.items.map(i => {
-                  return valueToProxy(i, proxy)
-                }),
-                isSlot: group.isSlot
-              }],
-              unApply: [{
-                type: 'retain',
-                offset: length
-              }, {
-                type: 'delete',
-                count: group.items.length
-              }]
-            })
-            length += group.items.length
+          changeMarker.markAsDirtied({
+            paths: [],
+            apply: [{
+              type: 'retain',
+              offset: length
+            }, {
+              type: 'insert',
+              data: valueToJSON(args),
+              ref: args,
+            }],
+            unApply: [{
+              type: 'retain',
+              offset: length
+            }, {
+              type: 'delete',
+              count: args.length
+            }]
           })
           return result
         }
@@ -179,8 +139,7 @@ function createArrayProxyHandlers(source: any[],
             }, {
               type: 'insert',
               data: valueToJSON([item]),
-              ref: [item],
-              isSlot: item instanceof Slot
+              ref: null
             }]
           })
           return item
@@ -193,33 +152,25 @@ function createArrayProxyHandlers(source: any[],
         args = toRows(args)
         if (this === proxy) {
           ignoreChange = true
-          const groups = toGroup(args)
           const result = source.unshift(...args)
           ignoreChange = false
-          let index = 0
-          groups.forEach(group => {
-            changeMarker.markAsDirtied({
-              paths: [],
-              apply: [{
-                type: 'retain',
-                offset: index
-              }, {
-                type: 'insert',
-                data: valueToJSON(group.items),
-                ref: group.items.map(i => {
-                  return valueToProxy(i, proxy)
-                }),
-                isSlot: group.isSlot
-              }],
-              unApply: [{
-                type: 'retain',
-                offset: index
-              }, {
-                type: 'delete',
-                count: group.items.length
-              }]
-            })
-            index += group.items.length
+          changeMarker.markAsDirtied({
+            paths: [],
+            apply: [{
+              type: 'retain',
+              offset: 0
+            }, {
+              type: 'insert',
+              data: valueToJSON(args),
+              ref: args,
+            }],
+            unApply: [{
+              type: 'retain',
+              offset: 0
+            }, {
+              type: 'delete',
+              count: args.length
+            }]
           })
           return result
         }
@@ -251,8 +202,7 @@ function createArrayProxyHandlers(source: any[],
             }, {
               type: 'insert',
               data: valueToJSON([item]),
-              ref: [item],
-              isSlot: item instanceof Slot
+              ref: null,
             }]
           })
           return item
@@ -265,7 +215,6 @@ function createArrayProxyHandlers(source: any[],
         args = toRows(args)
         if (this === proxy) {
           ignoreChange = true
-          const groups = toGroup(args)
           if (typeof deleteCount !== 'number') {
             deleteCount = source.length
           }
@@ -280,54 +229,44 @@ function createArrayProxyHandlers(source: any[],
             }
           })
           ignoreChange = false
-          const deletedGroups = toGroup(deletedItems)
-          let index = startIndex
-          deletedGroups.forEach(group => {
-            changeMarker.markAsDirtied({
-              paths: [],
-              apply: [{
-                type: 'retain',
-                offset: index
-              }, {
-                type: 'delete',
-                count: group.items.length
-              }],
-              unApply: [{
-                type: 'retain',
-                offset: index
-              }, {
-                type: 'insert',
-                data: valueToJSON(group.items),
-                ref: group.items,
-                isSlot: group.isSlot
-              }]
-            })
-            index += group.items.length
+          const index = startIndex
+          changeMarker.markAsDirtied({
+            paths: [],
+            apply: [{
+              type: 'retain',
+              offset: index
+            }, {
+              type: 'delete',
+              count: deletedItems.length
+            }],
+            unApply: [{
+              type: 'retain',
+              offset: index
+            }, {
+              type: 'insert',
+              data: valueToJSON(deletedItems),
+              ref: null,
+            }]
           })
-
-          groups.forEach(group => {
-            changeMarker.markAsDirtied({
-              paths: [],
-              apply: [{
-                type: 'retain',
-                offset: startIndex
-              }, {
-                type: 'insert',
-                data: valueToJSON(group.items),
-                ref: group.items.map(i => {
-                  return valueToProxy(i, proxy)
-                }),
-                isSlot: group.isSlot
-              }],
-              unApply: [{
-                type: 'retain',
-                offset: startIndex
-              }, {
-                type: 'delete',
-                count: group.items.length
-              }]
-            })
-            startIndex += group.items.length
+          changeMarker.markAsDirtied({
+            paths: [],
+            apply: [{
+              type: 'retain',
+              offset: startIndex
+            }, {
+              type: 'insert',
+              data: valueToJSON(args),
+              ref: args.map(i => {
+                return valueToProxy(i, proxy)
+              })
+            }],
+            unApply: [{
+              type: 'retain',
+              offset: startIndex
+            }, {
+              type: 'delete',
+              count: args.length
+            }]
           })
           return deletedItems
         }
@@ -372,15 +311,13 @@ export function createArrayProxy<T extends any[]>(raw: T): T {
             afterLength: raw.length,
             value: valueToJSON(newValue),
             ref: valueToProxy(newValue, proxy as ProxyModel<T>),
-            isSlot: newValue instanceof Slot
           }],
           unApply: [{
             type: 'setIndex',
             index,
             afterLength: length,
             value: valueToJSON(oldValue),
-            ref: oldValue,
-            isSlot: oldValue instanceof Slot
+            ref: null
           }]
         })
       }
@@ -446,9 +383,8 @@ export function createObjectProxy<T extends object>(raw: T): T {
       const unApplyAction: Action = has ? {
         type: 'propSet',
         key: p as string,
-        value: oldValue,
-        ref: oldValue,
-        isSlot: oldValue instanceof Slot
+        value: valueToJSON(oldValue),
+        ref: null,
       } : {
         type: 'propDelete',
         key: p as string
@@ -458,9 +394,8 @@ export function createObjectProxy<T extends object>(raw: T): T {
         apply: [{
           type: 'propSet',
           key: p as string,
-          value: newValue,
+          value: valueToJSON(newValue),
           ref: valueToProxy(newValue, proxy as ProxyModel<T>),
-          isSlot: newValue instanceof Slot,
         }],
         unApply: [unApplyAction]
       })
@@ -483,9 +418,8 @@ export function createObjectProxy<T extends object>(raw: T): T {
         unApply: has ? [{
           type: 'propSet',
           key: p as string,
-          value: oldValue,
-          ref: oldValue,
-          isSlot: oldValue instanceof Slot
+          value: valueToJSON(oldValue),
+          ref: null,
         }] : []
       })
       return b
