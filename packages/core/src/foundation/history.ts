@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@viewfly/core'
 import { map, Observable, Subject, Subscription } from '@tanbo/stream'
 
-import { Component, ComponentLiteral, Formats, Operation, Paths, Slot } from '../model/_api'
+import { Component, ComponentLiteral, Formats, Operation, Paths, Slot, SlotJSON } from '../model/_api'
 import { Selection } from './selection'
 import { Registry } from './registry'
 import { HISTORY_STACK_SIZE, RootComponentRef } from './_injection-tokens'
@@ -195,7 +195,7 @@ export class LocalHistory extends History {
           if (item.from !== ChangeOrigin.Local) {
             continue
           }
-          const { apply, unApply, paths } = item.operation;
+          const {apply, unApply, paths} = item.operation;
           [...apply, ...unApply].forEach(i => {
             if (i.type === 'insert' || i.type === 'propSet') {
               i.ref = null
@@ -277,7 +277,7 @@ export class LocalHistory extends History {
             if (action.isSlot) {
               data = data.map(i => this.registry.createSlot(i))
             }
-            model.splice(index, 0, ...data)
+            model.splice(index, 0, ...data.map(i => this.valueToModel(i)))
           }
             break
           case 'contentInsert': {
@@ -309,11 +309,11 @@ export class LocalHistory extends History {
             Reflect.deleteProperty(model, action.key)
             break
           case 'propSet': {
-            model[action.key] = action.isSlot ? this.registry.createSlot(action.value) : action.value
+            model[action.key] = action.isSlot ? this.registry.createSlot(action.value) : this.valueToModel(action.value)
           }
             break
           case 'setIndex':
-            model[action.index] = action.isSlot ? this.registry.createSlot(action.value) : action.value
+            model[action.index] = action.isSlot ? this.registry.createSlot(action.value) : this.valueToModel(action.value)
             if (model.length !== action.afterLength) {
               model.length = action.afterLength
             }
@@ -321,6 +321,25 @@ export class LocalHistory extends History {
         }
       })
     })
+  }
+
+  private valueToModel(value: any) {
+    if (Array.isArray(value)) {
+      return value.map(i => {
+        return this.valueToModel(i)
+      })
+    }
+    if (value instanceof SlotJSON) {
+      return this.registry.createSlot(value)
+    }
+    if (typeof value === 'object' && value !== null) {
+      const model: Record<string, any> = {}
+      Object.entries(value).forEach(([key, value]) => {
+        model[key] = this.valueToModel(value)
+      })
+      return model
+    }
+    return value
   }
 
   private getPaths(): SelectionPaths {

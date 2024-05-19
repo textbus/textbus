@@ -24,11 +24,11 @@ export enum ContentType {
   BlockComponent
 }
 
-export interface SlotLiteral<U extends FormatValue> {
+export interface SlotLiteral {
   schema: ContentType[]
   content: Array<string | ComponentLiteral>
-  attributes: Record<string, U>
-  formats: FormatLiteral<U>
+  attributes: Record<string, FormatValue>
+  formats: FormatLiteral
 }
 
 export interface DeltaInsert {
@@ -613,7 +613,7 @@ export class Slot {
   /**
    * 获取插槽格式的数组集合
    */
-  getFormats(): FormatItem<FormatValue>[] {
+  getFormats(): FormatItem[] {
     return this.format.toArray()
   }
 
@@ -628,17 +628,17 @@ export class Slot {
   /**
    * 把插槽内容转换为 JSON
    */
-  toJSON<U extends FormatValue>(): SlotLiteral<U> {
-    const attrs: Record<string, U> = {}
+  toJSON(): SlotLiteral {
+    const attrs: Record<string, any> = {}
     this.attributes.forEach((value, key) => {
       attrs[key.name] = value
     })
-    return {
-      schema: this.schema,
-      content: this.content.toJSON(),
-      attributes: attrs,
-      formats: this.format.toJSON(),
-    }
+    return new SlotJSON(
+      [...this.schema],
+      this.content.toJSON(),
+      attrs,
+      this.format.toJSON()
+    )
   }
 
   toString() {
@@ -825,7 +825,7 @@ export class Slot {
     children: Array<VElement | VTextNode | Component>,
     renderEnv: any
   ): VElement {
-    const hostBindings: Array<{render: FormatHostBindingRender, item: FormatItem<any>}> = []
+    const hostBindings: Array<{ render: FormatHostBindingRender, item: FormatItem<any> }> = []
     let host: VElement | null = null
     for (let i = formats.length - 1; i > -1; i--) {
       const item = formats[i]
@@ -849,7 +849,7 @@ export class Slot {
       children = [next]
     }
     for (const binding of hostBindings) {
-      const { render, item } = binding
+      const {render, item} = binding
       if (!host) {
         host = new VElement(render.fallbackTagName)
         host.location = {
@@ -918,5 +918,13 @@ export class Slot {
         }
       }]
     }).flat()
+  }
+}
+
+export class SlotJSON implements SlotLiteral {
+  constructor(public schema: ContentType[],
+              public content: Array<string | ComponentLiteral>,
+              public attributes: Record<string, any>,
+              public formats: FormatLiteral) {
   }
 }
