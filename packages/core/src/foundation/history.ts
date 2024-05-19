@@ -195,7 +195,7 @@ export class LocalHistory extends History {
           if (item.from !== ChangeOrigin.Local) {
             continue
           }
-          const {apply, unApply, paths} = item.operation;
+          const { apply, unApply, paths } = item.operation;
           [...apply, ...unApply].forEach(i => {
             if (i.type === 'insert' || i.type === 'propSet') {
               i.ref = null
@@ -273,11 +273,8 @@ export class LocalHistory extends History {
             model.setAttribute(action.name, action.value)
             break
           case 'insert': {
-            let data = action.data
-            if (action.isSlot) {
-              data = data.map(i => this.registry.createSlot(i))
-            }
-            model.splice(index, 0, ...data.map(i => this.valueToModel(i)))
+            const data = this.valueToModel(action.data)
+            model.splice(index, 0, ...data)
           }
             break
           case 'contentInsert': {
@@ -309,11 +306,11 @@ export class LocalHistory extends History {
             Reflect.deleteProperty(model, action.key)
             break
           case 'propSet': {
-            model[action.key] = action.isSlot ? this.registry.createSlot(action.value) : this.valueToModel(action.value)
+            model[action.key] = this.valueToModel(action.value)
           }
             break
           case 'setIndex':
-            model[action.index] = action.isSlot ? this.registry.createSlot(action.value) : this.valueToModel(action.value)
+            model[action.index] = this.valueToModel(action.value)
             if (model.length !== action.afterLength) {
               model.length = action.afterLength
             }

@@ -654,7 +654,11 @@ export class Collaborate implements History {
               index = action.offset
               break
             case 'insert': {
-              const data = action.ref.map(item => {
+              const ref = action.ref
+              if (!Array.isArray(ref)) {
+                throw collaborateErrorFn('The insertion action must have a reference value.')
+              }
+              const data = ref.map(item => {
                 return this.createSharedModelByLocalModel(item)
               })
               sharedArray.insert(index, data)
