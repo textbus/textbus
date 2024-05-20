@@ -10,6 +10,9 @@ import {
 } from '../model/_api'
 import { ATTRIBUTE_LIST, COMPONENT_LIST, FORMATTER_LIST } from './_injection-tokens'
 import { Textbus } from '../textbus'
+import { makeError } from '../_utils/make-error'
+
+const registryErrorFn = makeError('Registry')
 
 /**
  * 注册表
@@ -102,7 +105,10 @@ export class Registry {
    */
   createComponentByFactory(componentLiteral: ComponentLiteral,
                            factory: ComponentConstructor) {
-    return factory.fromJSON(this.textbus, componentLiteral.state)
+    if (typeof factory.fromJSON === 'function') {
+      return factory.fromJSON(this.textbus, componentLiteral.state)
+    }
+    throw registryErrorFn(`Component ${factory.componentName} does not implement the fromJSON method.`)
   }
 
   /**
