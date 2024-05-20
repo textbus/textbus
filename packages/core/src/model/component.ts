@@ -180,7 +180,7 @@ export interface ComponentConstructor<ComponentState extends State = State> exte
   zenCoding?: ZenCodingGrammarInterceptor<ComponentState> |
     ZenCodingGrammarInterceptor<ComponentState>[]
 
-  fromJSON(textbus: Textbus, data: ComponentStateLiteral<ComponentState>): Component<ComponentState>
+  fromJSON?(textbus: Textbus, data: ComponentStateLiteral<ComponentState>): Component<ComponentState>
 }
 
 /**
