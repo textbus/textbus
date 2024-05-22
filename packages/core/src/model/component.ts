@@ -40,7 +40,7 @@ export interface Shortcut {
 
 export interface ZenCodingGrammarInterceptor<T extends State> {
   /** 匹配字符 */
-  match: RegExp | ((content: string) => boolean)
+  match: RegExp | ((content: string, textbus: Textbus) => boolean)
   /** 触发键 */
   key: string | string[] | RegExp | ((content: string) => boolean)
 
