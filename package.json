@@ -7,6 +7,7 @@
   "typings": "./bundles/public-api.d.ts",
   "scripts": {
     "start": "webpack-dev-server",
+    "build:lib": "lerna run build:lib",
     "publish:lib": "lerna publish",
     "lint-staged": "lint-staged",
     "lint": "eslint packages --ext .ts,.tsx --max-warnings 0",
