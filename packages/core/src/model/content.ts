@@ -5,7 +5,15 @@ import { Component, ComponentLiteral } from './component'
  * Content 属于 Slot 的私有属性，在实际场景中，开发者不需在关注此类，也不需要访问或操作此类
  */
 export class Content {
-  private segmenter = new Intl.Segmenter()
+  private static get segmenter() {
+    if (Content._segmenter) {
+      return Content._segmenter
+    }
+    Content._segmenter = new Intl.Segmenter()
+    return Content._segmenter
+  }
+
+  static _segmenter: Intl.Segmenter | null = null
   private data: Array<string | Component> = []
 
   /**
@@ -34,7 +42,7 @@ export class Content {
           const endIndex = Math.min(startIndex + 30, item.length)
 
           const fragment = item.slice(startIndex, endIndex)
-          const segments = this.segmenter.segment(fragment)
+          const segments = Content.segmenter.segment(fragment)
 
           let offset = startIndex
           for (const p of segments) {

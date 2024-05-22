@@ -15,7 +15,7 @@
     "moduleResolution": "node",
     "inlineSourceMap": true,
     "inlineSources": true,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "outDir": "bundles/",
     "downlevelIteration": true
   },

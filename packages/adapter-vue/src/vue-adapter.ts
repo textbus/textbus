@@ -1,5 +1,5 @@
 import { Component, CompositionState, makeError, VElement, ViewMount, VTextNode } from '@textbus/core'
-import { DefineComponent, h, ref, Ref, VNode } from 'vue'
+import { DefineComponent, getCurrentInstance, h, onMounted, onUnmounted, onUpdated, ref, Ref, VNode } from 'vue'
 import { DomAdapter } from '@textbus/platform-browser'
 
 const adapterError = makeError('VueAdapter')
@@ -80,7 +80,7 @@ export class VueAdapter extends DomAdapter<VNode, VNode> {
           ...(Array.from(vNode.attrs).reduce((a, b) => {
             a[b[0]] = b[1]
             return a
-          }, {}))
+          }, {} as Record<string, any>))
         }
         if (vNode.classes.size) {
           props.class = Array.from(vNode.classes).join(' ')
@@ -89,11 +89,74 @@ export class VueAdapter extends DomAdapter<VNode, VNode> {
           props.style = Array.from(vNode.styles).reduce((a, b) => {
             a[b[0]] = b[1]
             return a
-          }, {})
+          }, {} as Record<string, any>)
         }
         return h(vNode.tagName, props, ...children)
       }
     }, mount)
+
+    // watchEffect(() => {
+    //   this.compositionNode = this.compositionRef.value || null
+    // })
+
+    Object.keys(components).forEach(key => {
+      const vueComponent = components[key]
+      const setup = vueComponent.setup!
+      const self = this
+      vueComponent.setup = function (props: ViewComponentProps<Component>) {
+        const component = props.component
+        const vueInstance = getCurrentInstance()!
+        const sub = component.changeMarker.onChange.subscribe(() => {
+          if (component.changeMarker.dirty) {
+            vueInstance.proxy!.$forceUpdate()
+          }
+        })
+        onMounted(() => {
+          if (props.rootRef.value) {
+            self.componentRootElementCaches.set(component, props.rootRef.value)
+          } else {
+            self.componentRootElementCaches.remove(component)
+          }
+        })
+        onUpdated(() => {
+          const context = self.componentRendingStack[self.componentRendingStack.length - 1]!
+          if (context === component) {
+            self.componentRendingStack.pop()
+          }
+          component.changeMarker.rendered()
+          self.onViewUpdated.next()
+
+          if (!(self.componentRefs.get(component)?.value instanceof HTMLElement)) {
+            // eslint-disable-next-line max-len
+            throw adapterError(`Component \`${component.name}\` is not bound to rootRef, you must bind rootRef to the root element node of the component view.`)
+          }
+        })
+        onUnmounted(() => {
+          sub.unsubscribe()
+        })
+        const result = (setup as any)(props)
+        if (typeof result === 'function') {
+          return function () {
+            component.__slots__.forEach(i => self.renderedSlotCache.delete(i))
+            component.__slots__.length = 0
+            self.componentRendingStack.push(component)
+            return result()
+          }
+        }
+        return result
+      }
+
+      if (vueComponent.render) {
+        const oldRender = vueComponent.render
+        vueComponent.render = function (context: any, ...args: any[]) {
+          context.component.__slots__.length = 0
+          self.componentRendingStack.push(context.component)
+
+          return oldRender.apply(this, [context, ...args])
+        }
+      }
+      this.components[key] = vueComponent
+    })
   }
 
   override copy() {

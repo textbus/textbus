@@ -284,7 +284,7 @@ export function createArrayProxy<T extends any[]>(raw: T): T {
     return rawToProxyCache.get(raw)
   }
   const changeMarker = new ChangeMarker(raw)
-  const proxy = new Proxy(raw, {
+  const proxy: any = new Proxy(raw, {
     set(target, p, newValue, receiver) {
       if (p === 'length') {
         return Reflect.set(target, p, newValue, receiver)
@@ -292,7 +292,7 @@ export function createArrayProxy<T extends any[]>(raw: T): T {
       if (rawToProxyCache.has(newValue)) {
         newValue = rawToProxyCache.get(newValue)
       }
-      const oldValue = raw[p]
+      const oldValue = (raw as any)[p]
       const proxy = rawToProxyCache.get(oldValue)
       if (proxy) {
         proxy.__changeMarker__.parentModel = null
@@ -361,7 +361,7 @@ export function createObjectProxy<T extends object>(raw: T): T {
     return rawToProxyCache.get(raw)
   }
   const changeMarker = new ChangeMarker(raw)
-  const proxy = new Proxy(raw, {
+  const proxy: any = new Proxy(raw, {
     get(target, p, receiver) {
       if (p === markKey) {
         return changeMarker
@@ -374,7 +374,7 @@ export function createObjectProxy<T extends object>(raw: T): T {
         newValue = rawToProxyCache.get(newValue)
       }
       const has = Object.hasOwn(raw, p)
-      const oldValue = raw[p]
+      const oldValue = (raw as any)[p]
       const proxy = rawToProxyCache.get(oldValue)
       if (proxy) {
         proxy.__changeMarker__.parentModel = null
@@ -403,7 +403,7 @@ export function createObjectProxy<T extends object>(raw: T): T {
     },
     deleteProperty(target, p) {
       const has = Object.hasOwn(raw, p)
-      const oldValue = raw[p]
+      const oldValue = (raw as any)[p]
       const proxy = rawToProxyCache.get(oldValue)
       if (proxy) {
         proxy.__changeMarker__.parentModel = null

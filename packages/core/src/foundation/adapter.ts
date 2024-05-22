@@ -283,7 +283,7 @@ export abstract class Adapter<
     return result
   }
 
-  private getLocation(target: NativeElement, tree: NativeElement, vNodeTree: VElement) {
+  private getLocation(target: NativeElement, tree: NativeElement, vNodeTree: VElement): NodeLocation | null {
     if (target === tree) {
       return { ...vNodeTree.location! }
     }
@@ -295,7 +295,7 @@ export abstract class Adapter<
         if (child instanceof Component) {
           const index = child.parent!.indexOf(child)
           return {
-            slot: child.parent,
+            slot: child.parent!,
             startIndex: index,
             endIndex: index + 1
           }

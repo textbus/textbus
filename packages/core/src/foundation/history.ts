@@ -320,7 +320,7 @@ export class LocalHistory extends History {
     })
   }
 
-  private valueToModel(value: any) {
+  private valueToModel(value: any): any {
     if (Array.isArray(value)) {
       return value.map(i => {
         return this.valueToModel(i)
@@ -343,8 +343,8 @@ export class LocalHistory extends History {
     let anchor: Paths = []
     let focus: Paths = []
     if (this.selection.isSelected) {
-      anchor = this.selection.anchorSlot!.__changeMarker__.triggerPath()
-      focus = this.selection.focusSlot!.__changeMarker__.triggerPath()
+      anchor = this.selection.anchorSlot!.__changeMarker__.getPaths()
+      focus = this.selection.focusSlot!.__changeMarker__.getPaths()
     }
     return {
       anchor: [...anchor, this.selection.anchorOffset!],
