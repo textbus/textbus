@@ -42,7 +42,7 @@ export class Keyboard {
   private zenCodingInterceptors: ZenCodingInterceptor[] = []
 
   constructor(@Inject(COMPONENT_LIST) private components: ComponentConstructor[],
-              @Inject(ZEN_CODING_DETECT) private markdownDetect: boolean,
+              @Inject(ZEN_CODING_DETECT) private zenCoding: boolean,
               private commander: Commander,
               private textbus: Textbus,
               private scheduler: Scheduler,
@@ -85,7 +85,7 @@ export class Keyboard {
     // const reg = /\w+/.test(key) ? new RegExp(`^${key}$`, 'i') : new RegExp(`^[${key.replace(/([-^\\\]\[])/g, '\\$1')}]$`, 'i')
 
     const commonAncestorSlot = this.selection.commonAncestorSlot!
-    if (this.markdownDetect &&
+    if (this.zenCoding &&
       !keymapState.ctrlKey &&
       !keymapState.shiftKey &&
       !keymapState.altKey &&
@@ -163,8 +163,8 @@ export class Keyboard {
     const selection = this.selection
     const commander = this.commander
     return {
-      match(content: string) {
-        return typeof config.match === 'function' ? config.match(content) : config.match.test(content)
+      match: (content: string) => {
+        return typeof config.match === 'function' ? config.match(content, this.textbus) : config.match.test(content)
       },
       try(key: string): boolean {
         if (typeof config.key === 'string') {
