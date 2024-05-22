@@ -1296,8 +1296,8 @@ export class Selection {
     endSlot: Slot,
     endIndex: number,
     discardEmptyScope = false) {
-    const commonAncestorSlot = Selection.getCommonAncestorSlot(startSlot, endSlot)
-    const commonAncestorComponent = Selection.getCommonAncestorComponent(startSlot, endSlot)
+    const commonAncestorSlot = Selection.getCommonAncestorSlot(startSlot, endSlot)!
+    const commonAncestorComponent = Selection.getCommonAncestorComponent(startSlot, endSlot)!
     return this.getScopesByRange(
       startSlot,
       startIndex,
@@ -1574,8 +1574,8 @@ export class Selection {
     startIndex: number,
     endSlot: Slot,
     endIndex: number,
-    commonAncestorSlot,
-    commonAncestorComponent,
+    commonAncestorSlot: Slot,
+    commonAncestorComponent: Component<any>,
     discardEmptyScope = false): SlotRange[] {
 
     const start: SlotRange[] = []

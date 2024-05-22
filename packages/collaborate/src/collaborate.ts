@@ -40,17 +40,17 @@ interface CursorPosition {
 
 class SlotMap {
   private slotAndYTextMap = new WeakMap<Slot, YText>()
-  private yTextAndSLotMap = new WeakMap<YText, Slot>()
+  private yTextAndSlotMap = new WeakMap<YText, Slot>()
 
   set(key: Slot, value: YText): void
   set(key: YText, value: Slot): void
   set(key: any, value: any) {
     if (key instanceof Slot) {
       this.slotAndYTextMap.set(key, value)
-      this.yTextAndSLotMap.set(value, key)
+      this.yTextAndSlotMap.set(value, key)
     } else {
       this.slotAndYTextMap.set(value, key)
-      this.yTextAndSLotMap.set(key, value)
+      this.yTextAndSlotMap.set(key, value)
     }
   }
 
@@ -60,7 +60,7 @@ class SlotMap {
     if (key instanceof Slot) {
       return this.slotAndYTextMap.get(key) || null
     }
-    return this.yTextAndSLotMap.get(key) || null
+    return this.yTextAndSlotMap.get(key) || null
   }
 
   delete(key: Slot | YText) {
@@ -68,11 +68,11 @@ class SlotMap {
       const v = this.slotAndYTextMap.get(key)
       this.slotAndYTextMap.delete(key)
       if (v) {
-        this.yTextAndSLotMap.delete(v)
+        this.yTextAndSlotMap.delete(v)
       }
     } else {
-      const v = this.yTextAndSLotMap.get(key)
-      this.yTextAndSLotMap.delete(key)
+      const v = this.yTextAndSlotMap.get(key)
+      this.yTextAndSlotMap.delete(key)
       if (v) {
         this.slotAndYTextMap.delete(v)
       }

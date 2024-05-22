@@ -439,7 +439,7 @@ export class MagicInput extends Input {
     this.handleDefaultActions(textarea)
   }
 
-  private handleDefaultActions(textarea) {
+  private handleDefaultActions(textarea: HTMLTextAreaElement) {
     this.subscription.add(
       fromEvent<ClipboardEvent>(isFirefox() ? textarea : document, 'copy').subscribe(ev => {
         const selection = this.selection

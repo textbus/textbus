@@ -1,5 +1,4 @@
 import { Component, ComponentLiteral } from './component'
-import { Slot } from './slot'
 
 export interface InsertAction {
   type: 'insert'
@@ -76,19 +75,5 @@ export interface Operation {
 export interface State {
   [key: string]: any
 }
-
-//
-// export interface StateChange<T> {
-//   oldState: T
-//   newState: T
-//   record: boolean
-// }
-export type SharedConstant = boolean | string | number | Slot
-
-export type SharedArray<T extends SharedConstant | SharedMap<any> | SharedArray<T>> = Array<T>
-
-export type SharedMap<T extends SharedConstant | SharedArray<T> | SharedMap<T>> = Record<string, T>
-
-export type SharedType<T extends SharedArray<T> | SharedMap<T>> = SharedConstant | SharedArray<T> | SharedMap<T>
 
 export type DestroyCallbacks = Array<() => void>

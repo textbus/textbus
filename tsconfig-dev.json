@@ -9,7 +9,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "lib": ["esnext", "dom"],
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "downlevelIteration": true,
     "esModuleInterop": true,
     "noImplicitOverride": true,

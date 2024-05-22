@@ -94,7 +94,7 @@ export class ViewflyAdapter extends DomAdapter<JSXInternal.ViewNode, JSXInternal
           ...(Array.from(vNode.attrs).reduce((a, b) => {
             a[b[0]] = b[1]
             return a
-          }, {})),
+          }, {} as Record<string, any>)),
         }
         if (vNode.classes.size) {
           props.class = Array.from(vNode.classes).join(' ')
@@ -103,7 +103,7 @@ export class ViewflyAdapter extends DomAdapter<JSXInternal.ViewNode, JSXInternal
           props.style = Array.from(vNode.styles).reduce((a, b) => {
             a[b[0]] = b[1]
             return a
-          }, {})
+          }, {} as Record<string, any>)
         }
         if (children.length) {
           props.children = children

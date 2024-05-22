@@ -41,10 +41,10 @@ export class ChangeMarker {
     this.onForceChange = this.forceChangeEvent.asObservable()
   }
 
-  triggerPath(): Paths {
+  getPaths(): Paths {
     const path = this.getPathInParent()
     if (path !== null) {
-      const parentPaths = this.parentModel!.__changeMarker__.triggerPath()
+      const parentPaths = this.parentModel!.__changeMarker__.getPaths()
       return [...parentPaths, path]
     }
     return []

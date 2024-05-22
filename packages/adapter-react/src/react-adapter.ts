@@ -75,7 +75,7 @@ export class ReactAdapter extends DomAdapter<JSX.Element, JSX.Element> {
           ...(Array.from(vNode.attrs).reduce((a, b) => {
             a[b[0]] = b[1]
             return a
-          }, {}))
+          }, {} as Record<string, any>))
         }
         if (vNode.classes.size) {
           props.className = Array.from(vNode.classes).join(' ')
@@ -84,7 +84,7 @@ export class ReactAdapter extends DomAdapter<JSX.Element, JSX.Element> {
           props.style = Array.from(vNode.styles).reduce((a, b) => {
             a[b[0]] = b[1]
             return a
-          }, {})
+          }, {} as Record<string, any>)
         }
         return createElement(vNode.tagName, props, ...children)
       }
