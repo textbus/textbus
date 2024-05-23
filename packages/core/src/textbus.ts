@@ -1,4 +1,4 @@
-import { InjectFlags, Injector, normalizeProvider, NullInjector, Provider, ReflectiveInjector, Scope } from '@viewfly/core'
+import { Injector, normalizeProvider, NullInjector, Provider, ReflectiveInjector, Scope } from '@viewfly/core'
 import { Observable, Subject } from '@tanbo/stream'
 
 import { Attribute, Component, ComponentConstructor, ComponentLiteral, Formatter } from './model/_api'
@@ -215,7 +215,7 @@ export class Textbus extends ReflectiveInjector {
     this.beforeDestroyCallbacks.push(() => {
       subscription.unsubscribe()
     })
-    const focusManager = this.get(FocusManager, InjectFlags.Optional, null)
+    const focusManager = this.get(FocusManager, null)
 
     if (focusManager) {
       subscription.add(
