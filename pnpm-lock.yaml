@@ -58,11 +58,11 @@ importers:
         specifier: ^5.8.0
         version: 5.62.0(eslint@8.56.0)(typescript@5.4.5)
       '@viewfly/core':
-        specifier: ^1.0.0-alpha.2
-        version: 1.0.0-alpha.2
+        specifier: ^1.0.0-alpha.3
+        version: 1.0.0-alpha.3
       '@viewfly/platform-browser':
-        specifier: ^1.0.0-alpha.2
-        version: 1.0.0-alpha.2
+        specifier: ^1.0.0-alpha.3
+        version: 1.0.0-alpha.3
       add-assets-webpack-plugin:
         specifier: ^1.0.0
         version: 1.0.0
@@ -181,10 +181,10 @@ importers:
         specifier: ^1.2.3
         version: 1.2.3
       '@textbus/core':
-        specifier: ^4.0.0-alpha.43
+        specifier: ^4.0.0-alpha.46
         version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.0.0-alpha.43
+        specifier: ^4.0.0-alpha.46
         version: link:../platform-browser
       react:
         specifier: ^17.0.0 || ^18.0.0
@@ -215,14 +215,17 @@ importers:
         specifier: ^1.2.3
         version: 1.2.3
       '@textbus/core':
-        specifier: ^4.0.0-alpha.43
+        specifier: ^4.0.0-alpha.46
         version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.0.0-alpha.43
+        specifier: ^4.0.0-alpha.46
         version: link:../platform-browser
       '@viewfly/core':
-        specifier: ^1.0.0-alpha.2
-        version: 1.0.0-alpha.2
+        specifier: ^1.0.0-alpha.3
+        version: 1.0.0-alpha.3
+      '@viewfly/platform-browser':
+        specifier: ^1.0.0-alpha.3
+        version: 1.0.0-alpha.3
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^23.0.2
@@ -246,10 +249,10 @@ importers:
         specifier: ^1.2.3
         version: 1.2.3
       '@textbus/core':
-        specifier: ^4.0.0-alpha.43
+        specifier: ^4.0.0-alpha.46
         version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.0.0-alpha.43
+        specifier: ^4.0.0-alpha.46
         version: link:../platform-browser
       vue:
         specifier: ^3.3.4
@@ -277,11 +280,11 @@ importers:
         specifier: ^1.2.3
         version: 1.2.3
       '@textbus/core':
-        specifier: ^4.0.0-alpha.43
+        specifier: ^4.0.0-alpha.46
         version: link:../core
       '@viewfly/core':
-        specifier: ^1.0.0-alpha.2
-        version: 1.0.0-alpha.2
+        specifier: ^1.0.0-alpha.3
+        version: 1.0.0-alpha.3
       reflect-metadata:
         specifier: ^0.1.13
         version: 0.1.14
@@ -314,8 +317,8 @@ importers:
         specifier: ^1.2.3
         version: 1.2.3
       '@viewfly/core':
-        specifier: ^1.0.0-alpha.2
-        version: 1.0.0-alpha.2
+        specifier: ^1.0.0-alpha.3
+        version: 1.0.0-alpha.3
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^23.0.2
@@ -339,14 +342,14 @@ importers:
         specifier: ^1.2.3
         version: 1.2.3
       '@textbus/collaborate':
-        specifier: ^4.0.0-alpha.43
+        specifier: ^4.0.0-alpha.46
         version: link:../collaborate
       '@textbus/core':
-        specifier: ^4.0.0-alpha.43
+        specifier: ^4.0.0-alpha.46
         version: link:../core
       '@viewfly/core':
-        specifier: ^1.0.0-alpha.2
-        version: 1.0.0-alpha.2
+        specifier: ^1.0.0-alpha.3
+        version: 1.0.0-alpha.3
       reflect-metadata:
         specifier: ^0.1.13
         version: 0.1.14
@@ -373,11 +376,11 @@ importers:
         specifier: ^1.2.3
         version: 1.2.3
       '@textbus/core':
-        specifier: ^4.0.0-alpha.43
+        specifier: ^4.0.0-alpha.46
         version: link:../core
       '@viewfly/core':
-        specifier: ^1.0.0-alpha.2
-        version: 1.0.0-alpha.2
+        specifier: ^1.0.0-alpha.3
+        version: 1.0.0-alpha.3
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^23.0.2
@@ -3267,17 +3270,16 @@ packages:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
     dev: true
 
-  /@viewfly/core@1.0.0-alpha.2:
-    resolution: {integrity: sha512-edBs3fs+K5GcOsIyqUW8XirOF2FpWIOfgz+dhjE4pv4ADDXpSoIkV4M9n7u+nZ48QjQqQkRDEcFZ+/27pBedvA==}
+  /@viewfly/core@1.0.0-alpha.3:
+    resolution: {integrity: sha512-GaOpjXiHSlkUcJZ6aZj4jGEqStg1Fer2PFeeFDEQBOhB7DZmqf8jKs3XzCeFMkTsVSj7nnnbWea0cK/d4NGq5Q==}
     dependencies:
       reflect-metadata: 0.1.14
 
-  /@viewfly/platform-browser@1.0.0-alpha.2:
-    resolution: {integrity: sha512-NphkI4wJCEF3ireivyAwu3aK1Jiztxpw1FIdO6kcQFmRkN0p418J8s1/gMAXKG7YKFhdTTZo+BC5Rjl1ASQyCA==}
+  /@viewfly/platform-browser@1.0.0-alpha.3:
+    resolution: {integrity: sha512-t05gUQyvoqYQ7Ewn66cRVmZ8zvrIkr5MNnwQV0gEnIEnKwz0A2GoRaqzplUGJ2b27SeA7lz1Iqthu1PuzSWvyA==}
     dependencies:
-      '@viewfly/core': 1.0.0-alpha.2
+      '@viewfly/core': 1.0.0-alpha.3
       csstype: 3.1.3
-    dev: true
 
   /@vue/compiler-core@3.3.13:
     resolution: {integrity: sha512-bwi9HShGu7uaZLOErZgsH2+ojsEdsjerbf2cMXPwmvcgZfVPZ2BVZzCVnwZBxTAYd6Mzbmf6izcUNDkWnBBQ6A==}
