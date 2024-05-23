@@ -644,6 +644,9 @@ export class Selection {
         endIndex: this.startOffset!,
       }]
     }
+    if (this.customRanges) {
+      return this.customRanges
+    }
     return Selection.getSelectedScopes({
       startSlot: this.startSlot!,
       startOffset: this.startOffset!,
