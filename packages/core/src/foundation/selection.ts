@@ -644,15 +644,12 @@ export class Selection {
         endIndex: this.startOffset!,
       }]
     }
-    const scopes = this.getScopes(this.startSlot!, this.startOffset!, this.endSlot!, this.endOffset!, true)
-    if (decompose) {
-      const ranges: SlotRange[] = []
-      scopes.forEach(i => {
-        ranges.push(...this.decomposeSlotRange(i.slot, i.startIndex, i.endIndex))
-      })
-      return ranges
-    }
-    return scopes
+    return Selection.getSelectedScopes({
+      startSlot: this.startSlot!,
+      startOffset: this.startOffset!,
+      endSlot: this.endSlot!,
+      endOffset: this.endOffset!
+    }, decompose)
   }
 
   /**
@@ -960,7 +957,7 @@ export class Selection {
     const scopes = this.getGreedyRanges()
 
     scopes.forEach(i => {
-      blocks.push(...this.decomposeSlotRange(i.slot, i.startIndex, i.endIndex))
+      blocks.push(...Selection.decomposeSlotRange(i.slot, i.startIndex, i.endIndex))
     })
     return blocks
   }
@@ -1285,28 +1282,53 @@ export class Selection {
   /**
    * 根据指定的开始位置和结束位置，获取选区中片段
    * @param startSlot
-   * @param startIndex
+   * @param startOffset
    * @param endSlot
-   * @param endIndex
+   * @param endOffset
    * @param discardEmptyScope
    */
   getScopes(
     startSlot: Slot,
-    startIndex: number,
+    startOffset: number,
     endSlot: Slot,
-    endIndex: number,
+    endOffset: number,
     discardEmptyScope = false) {
+    if (this.customRanges) {
+      return this.customRanges
+    }
+    return Selection.getScopes({
+      startSlot,
+      startOffset,
+      endSlot,
+      endOffset,
+    }, discardEmptyScope)
+  }
+
+  static getScopes({ startSlot, startOffset, endSlot, endOffset }: Range, decompose = false) {
     const commonAncestorSlot = Selection.getCommonAncestorSlot(startSlot, endSlot)!
     const commonAncestorComponent = Selection.getCommonAncestorComponent(startSlot, endSlot)!
-    return this.getScopesByRange(
+
+    return Selection.getScopesByRange(
       startSlot,
-      startIndex,
+      startOffset,
       endSlot,
-      endIndex,
+      endOffset,
       commonAncestorSlot,
       commonAncestorComponent,
-      discardEmptyScope
+      decompose
     )
+  }
+
+  static getSelectedScopes(range: Range, decompose = false) {
+    const scopes = Selection.getScopes(range, true)
+    if (decompose) {
+      const ranges: SlotRange[] = []
+      scopes.forEach(i => {
+        ranges.push(...Selection.decomposeSlotRange(i.slot, i.startIndex, i.endIndex))
+      })
+      return ranges
+    }
+    return scopes
   }
 
   /**
@@ -1467,7 +1489,7 @@ export class Selection {
     return index
   }
 
-  private decomposeSlotRange(slot: Slot, startIndex: number, endIndex: number) {
+  private static decomposeSlotRange(slot: Slot, startIndex: number, endIndex: number) {
     const scopes: SlotRange[] = []
     if (startIndex >= endIndex) {
       return scopes
@@ -1480,7 +1502,7 @@ export class Selection {
       if (typeof c !== 'string' && c.type === ContentType.BlockComponent && c.__slots__.length !== 0) {
         newScope = null
         c.__slots__.forEach(s => {
-          scopes.push(...this.decomposeSlotRange(s, 0, s.length))
+          scopes.push(...Selection.decomposeSlotRange(s, 0, s.length))
         })
       } else if (!newScope) {
         newScope = {
@@ -1569,7 +1591,7 @@ export class Selection {
     } : null)
   }
 
-  private getScopesByRange(
+  private static getScopesByRange(
     startSlot: Slot,
     startIndex: number,
     endSlot: Slot,
@@ -1585,11 +1607,6 @@ export class Selection {
 
     let startSlotRefIndex: number | null = null
     let endSlotRefIndex: number | null = null
-
-    if (this.customRanges) {
-      return this.customRanges
-    }
-
 
     while (startSlot !== commonAncestorSlot) {
       start.push({
