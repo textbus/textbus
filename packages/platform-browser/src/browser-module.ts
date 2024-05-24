@@ -175,7 +175,7 @@ export class BrowserModule implements Module {
         bottom: 0,
         zIndex: 1,
         pointerEvents: 'none',
-        overflow: 'hidden'
+        // overflow: 'hidden'
       }
     })
     const wrapper = createElement('div', {
