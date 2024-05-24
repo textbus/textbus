@@ -665,7 +665,10 @@ export class Collaborate implements History {
             }
               break
             case 'delete':
-              sharedArray.delete(index, 1)
+              if (action.count <= 0) {
+                break
+              }
+              sharedArray.delete(index, action.count)
               break
             case 'setIndex':
               sharedArray.delete(action.index, 1)
