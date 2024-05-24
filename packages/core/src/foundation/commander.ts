@@ -58,7 +58,10 @@ function getNextInsertPosition(currentSlot: Slot,
   if (!parentComponent) {
     return null
   }
-  const parentSlot = parentComponent.parent!
+  const parentSlot = parentComponent.parent
+  if (!parentSlot) {
+    return null
+  }
   const parentIndex = parentSlot.indexOf(parentComponent)
   return getNextInsertPosition(parentSlot, content, parentIndex + 1, excludeSlots)
 }
@@ -377,7 +380,7 @@ export class Commander {
           return false
         }
       }
-      return !event.isPrevented
+      return true
     }
   }
 
@@ -638,18 +641,14 @@ export class Commander {
       while (delta.length) {
         const { insert, formats } = delta.shift()!
         const commonAncestorSlot = selection.commonAncestorSlot!
-        if (canInsert(insert, commonAncestorSlot)) {
-          this.insert(insert, formats)
+
+        if (this.insert(insert, formats)) {
           continue
         }
 
         afterDelta.push(...commonAncestorSlot.cut(selection.startOffset!).toDelta())
         const parentComponent = commonAncestorSlot.parent!
 
-        if (commonAncestorSlot === parentComponent.__slots__.last) {
-          this.insert(insert, formats)
-          continue
-        }
         if (parentComponent.separate) {
           const index = parentComponent.__slots__.indexOf(commonAncestorSlot)
           const nextSlot = parentComponent.__slots__.get(index + 1)
@@ -658,15 +657,15 @@ export class Commander {
             insert: nextComponent,
             formats: []
           })
-          this.insert(insert, formats)
-          continue
         }
-        if (typeof insert === 'string') {
+        const position = getNextInsertPosition(
+          this.selection.startSlot!,
+          insert,
+          this.selection.startOffset!,
+          [this.selection.startSlot!])
+        if (position) {
+          this.selection.setPosition(position.slot, position.offset)
           this.insert(insert, formats)
-          continue
-        }
-        for (const childSlot of insert.__slots__) {
-          delta.unshift(...childSlot.toDelta())
         }
       }
       const snapshot = this.selection.createSnapshot()
