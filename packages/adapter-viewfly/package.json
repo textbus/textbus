@@ -1,6 +1,6 @@
 {
   "name": "@textbus/adapter-viewfly",
-  "version": "4.0.0-alpha.51",
+  "version": "4.0.0-alpha.52",
   "description": "Textbus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
   "main": "./bundles/index.js",
   "module": "./bundles/index.esm.js",
@@ -26,8 +26,8 @@
   ],
   "dependencies": {
     "@tanbo/stream": "^1.2.4",
-    "@textbus/core": "^4.0.0-alpha.50",
-    "@textbus/platform-browser": "^4.0.0-alpha.51",
+    "@textbus/core": "^4.0.0-alpha.52",
+    "@textbus/platform-browser": "^4.0.0-alpha.52",
     "@viewfly/core": "^1.0.0-alpha.4",
     "@viewfly/platform-browser": "^1.0.0-alpha.4"
   },
