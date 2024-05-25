@@ -732,7 +732,7 @@ export class Collaborate implements History {
         for (const action of actions) {
           switch (action.type) {
             case 'propSet':
-              sharedObject.set(action.key, this.createSharedModelByLocalModel(action.value))
+              sharedObject.set(action.key, this.createSharedModelByLocalModel(action.ref))
               break
             case 'propDelete':
               sharedObject.delete(action.key)
