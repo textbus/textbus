@@ -524,12 +524,13 @@ export class Selection {
    * 设置选区为组件的第一个位置
    * @param componentInstance
    * @param isRestore
+   * @param deep
    */
-  selectFirstPosition(componentInstance: Component, isRestore = false) {
+  selectFirstPosition(componentInstance: Component, isRestore = false, deep = false) {
     const slots = componentInstance.__slots__
     if (slots.length) {
       const first = slots.first!
-      const { slot, offset } = this.findFirstPosition(first, false)
+      const { slot, offset } = this.findFirstPosition(first, deep)
       this.setBaseAndExtent(slot, offset, slot, offset)
     } else {
       this.selectComponentFront(componentInstance)
@@ -543,12 +544,13 @@ export class Selection {
    * 设置选区为组件的最后一个位置
    * @param componentInstance
    * @param isRestore
+   * @param deep
    */
-  selectLastPosition(componentInstance: Component, isRestore = false) {
+  selectLastPosition(componentInstance: Component, isRestore = false, deep = false) {
     const slots = componentInstance.__slots__
     if (slots.length) {
       const last = slots.last!
-      const { slot, offset } = this.findLastPosition(last, false)
+      const { slot, offset } = this.findLastPosition(last, deep)
       this.setBaseAndExtent(slot, offset, slot, offset)
     } else {
       this.selectComponentEnd(componentInstance)
