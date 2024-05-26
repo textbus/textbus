@@ -1,6 +1,6 @@
 {
   "name": "@textbus/core",
-  "version": "4.0.0-alpha.52",
+  "version": "4.0.0-alpha.53",
   "description": "Textbus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
   "main": "./bundles/index.js",
   "module": "./bundles/index.esm.js",
