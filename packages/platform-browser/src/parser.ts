@@ -1,13 +1,5 @@
 import { Inject, Injectable } from '@viewfly/core'
-import {
-  Attribute,
-  Component,
-  FormatItem,
-  Formatter,
-  FormatValue,
-  Slot,
-  Textbus
-} from '@textbus/core'
+import { Attribute, Component, ContentType, FormatItem, Formatter, FormatValue, Slot, Textbus } from '@textbus/core'
 
 import { EDITOR_OPTIONS } from './injection-tokens'
 import { ViewOptions } from './browser-module'
@@ -31,7 +23,8 @@ export interface SlotParser {
  */
 export interface ComponentLoader {
   /** 识别组件的匹配方法 */
-  match(element: HTMLElement): boolean
+  match(element: HTMLElement,
+        returnableContentTypes: ContentType[]): boolean
 
   /** 读取组件内容的方法 */
   read(element: HTMLElement, textbus: Textbus, slotParser: SlotParser): Component | Slot | void
@@ -94,7 +87,7 @@ export class Parser {
   formatLoaders: FormatLoader<any>[]
   attributeLoaders: AttributeLoader<any>[]
 
-  constructor(@Inject(EDITOR_OPTIONS) private options: ViewOptions,
+  constructor(@Inject(EDITOR_OPTIONS) options: ViewOptions,
               private textbus: Textbus) {
     const componentLoaders = [
       ...(options.componentLoaders || [])
@@ -146,8 +139,9 @@ export class Parser {
         slot.insert('\n')
         return
       }
+      const schema = [...slot.schema]
       for (const t of this.componentLoaders) {
-        if (t.match(el as HTMLElement)) {
+        if (t.match(el as HTMLElement, schema)) {
           const result = t.read(
             el as HTMLElement,
             this.textbus,
