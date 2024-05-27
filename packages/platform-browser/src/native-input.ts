@@ -18,13 +18,12 @@ import {
   Event,
   invokeListener,
   Keyboard,
-  Scheduler,
   Selection,
   Slot,
   Textbus
 } from '@textbus/core'
 
-import { Caret, CaretPosition, Input, Scroller } from './types'
+import { Caret, CaretPosition, Input } from './types'
 import { VIEW_DOCUMENT } from './injection-tokens'
 import { isSafari, isMac, isMobileBrowser, isFirefox } from './_utils/env'
 import { Parser } from './parser'
@@ -68,77 +67,17 @@ class NativeCaret implements Caret {
     }
   }
 
-  private oldPosition: CaretPosition | null = null
   private _nativeRange: Range | null = null
   private subs: Subscription[] = []
 
   private positionChangeEvent = new Subject<CaretPosition | null>()
 
-  constructor(private scheduler: Scheduler) {
+  constructor() {
     this.onPositionChange = this.positionChangeEvent.pipe(distinctUntilChanged())
   }
 
   refresh() {
     //
-  }
-
-  correctScrollTop(scroller: Scroller): void {
-    this.destroy()
-    const scheduler = this.scheduler
-    let docIsChanged = true
-
-    function limitPosition(position: CaretPosition) {
-      const { top, bottom } = scroller.getLimit()
-      const caretTop = position.top
-      if (caretTop + position.height > bottom) {
-        const offset = caretTop - bottom + position.height
-        scroller.setOffset(offset)
-      } else if (position.top < top) {
-        scroller.setOffset(-(top - position.top))
-      }
-    }
-
-    let isPressed = false
-
-    this.subs.push(
-      scroller.onScroll.subscribe(() => {
-        if (this.oldPosition) {
-          const rect = this.rect
-          this.oldPosition.top = rect.top
-          this.oldPosition.left = rect.left
-          this.oldPosition.height = rect.height
-        }
-      }),
-      fromEvent(document, 'mousedown', true).subscribe(() => {
-        isPressed = true
-      }),
-      fromEvent(document, 'mouseup', true).subscribe(() => {
-        isPressed = false
-      }),
-      scheduler.onDocChange.subscribe(() => {
-        docIsChanged = true
-      }),
-      this.onPositionChange.subscribe(position => {
-        if (position) {
-          if (docIsChanged) {
-            if (scheduler.lastChangesHasLocalUpdate) {
-              limitPosition(position)
-            } else if (this.oldPosition) {
-              const offset = Math.floor(position.top - this.oldPosition.top)
-              scroller.setOffset(offset)
-            }
-          } else if (!isPressed) {
-            if (this.oldPosition) {
-              const offset = Math.floor(position.top - this.oldPosition.top)
-              scroller.setOffset(offset)
-            } else {
-              limitPosition(position)
-            }
-          }
-        }
-        docIsChanged = false
-      })
-    )
   }
 
   destroy() {
@@ -149,7 +88,7 @@ class NativeCaret implements Caret {
 
 @Injectable()
 export class NativeInput extends Input {
-  caret = new NativeCaret(this.scheduler)
+  caret = new NativeCaret()
 
   composition = false
   // compositionState: CompositionState | null = null
@@ -184,7 +123,6 @@ export class NativeInput extends Input {
 
   constructor(textbus: Textbus,
               private parser: Parser,
-              private scheduler: Scheduler,
               private selection: Selection,
               private keyboard: Keyboard,
               private domAdapter: DomAdapter,

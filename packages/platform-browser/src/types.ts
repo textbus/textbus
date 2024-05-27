@@ -7,14 +7,6 @@ export interface CaretLimit {
   bottom: number
 }
 
-export interface Scroller {
-  onScroll: Observable<any>
-
-  getLimit(): CaretLimit
-
-  setOffset(offsetScrollTop: number): void
-}
-
 export interface CaretPosition {
   left: number
   top: number
@@ -25,9 +17,7 @@ export interface Caret {
   onPositionChange: Observable<CaretPosition | null>
   readonly rect: Rect
 
-  refresh(isFixedCaret: boolean): void
-
-  correctScrollTop(scroller: Scroller): void
+  refresh(): void
 }
 
 export abstract class Input {
