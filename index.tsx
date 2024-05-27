@@ -176,7 +176,7 @@ async function createEditor() {
 
   htmlRenderer.onViewUpdated.subscribe(() => {
     // console.log(rootModel)
-    console.log(t.transform(htmlRenderer.host))
+    // console.log(t.transform(htmlRenderer.host))
   })
   // rootModel.changeMarker.onChange.subscribe(op => {
   //   console.log(op)
@@ -201,7 +201,7 @@ async function createEditor() {
       }
     })
     const adapter = inject(Adapter)
-    console.log(adapter, '=====')
+    // console.log(adapter, '=====')
     return () => {
       return adapter.slotRender(props.slot, children => {
         return createVNode('div', {
@@ -215,7 +215,7 @@ async function createEditor() {
     const { slot } = props.component.state
 
     return () => {
-      console.log('rootComponent')
+      // console.log('rootComponent')
       return (
         <div ref={props.rootRef}>
           <SlotRender slot={slot}/>
@@ -228,7 +228,7 @@ async function createEditor() {
     const slot = props.component.state.slot
     const adapter = inject(Adapter)
     return () => {
-      console.log('paragraphComponent')
+      // console.log('paragraphComponent')
       return (
         adapter.slotRender(slot, children => {
           return createVNode('p', { ref: props.rootRef }, children)
