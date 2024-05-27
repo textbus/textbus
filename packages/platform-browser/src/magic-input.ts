@@ -18,7 +18,7 @@ import { createElement, getLayoutRectByRange } from './_utils/uikit'
 import { Parser } from './parser'
 import { isFirefox, isMac, isSafari, isWindows } from './_utils/env'
 import { VIEW_MASK } from './injection-tokens'
-import { Caret, CaretPosition, Input, Scroller } from './types'
+import { Caret, CaretLimit, CaretPosition, Input } from './types'
 import { DomAdapter } from './dom-adapter'
 
 const iframeHTML = `
@@ -51,6 +51,14 @@ class ExperimentalCaret implements Caret {
   onPositionChange: Observable<CaretPosition | null>
   onStyleChange: Observable<CaretStyle>
   elementRef: HTMLElement
+  changeFromSelf = false
+
+  getLimit = function (): CaretLimit {
+    return {
+      top: 0,
+      bottom: document.documentElement.clientHeight
+    }
+  }
 
   get rect() {
     return this.caret.getBoundingClientRect()
@@ -58,7 +66,6 @@ class ExperimentalCaret implements Caret {
 
   private timer: any = null
   private caret: HTMLElement
-  private oldPosition: CaretPosition | null = null
 
   private set display(v: boolean) {
     this._display = v
@@ -72,14 +79,11 @@ class ExperimentalCaret implements Caret {
   private _display = true
   private flashing = true
 
-  private subs: Subscription[] = []
   private subscription = new Subscription()
 
   private positionChangeEvent = new Subject<CaretPosition | null>()
   private styleChangeEvent = new Subject<CaretStyle>()
   private oldRange: Range | null = null
-
-  private isFixed = false
 
   constructor(
     private domRenderer: DomAdapter,
@@ -117,21 +121,13 @@ class ExperimentalCaret implements Caret {
     this.editorMask.appendChild(this.elementRef)
   }
 
-  refresh(isFixedCaret = false) {
-    this.isFixed = isFixedCaret
+  refresh() {
     if (this.oldRange) {
       this.show(this.oldRange, false)
     }
-    this.isFixed = false
   }
 
   show(range: Range, restart: boolean) {
-    const oldRect = this.elementRef.getBoundingClientRect()
-    this.oldPosition = {
-      top: oldRect.top,
-      left: oldRect.left,
-      height: oldRect.height
-    }
     this.oldRange = range
     if (restart || this.scheduler.lastChangesHasLocalUpdate) {
       clearTimeout(this.timer)
@@ -162,67 +158,6 @@ class ExperimentalCaret implements Caret {
   destroy() {
     clearTimeout(this.timer)
     this.subscription.unsubscribe()
-    this.subs.forEach(i => i.unsubscribe())
-  }
-
-  correctScrollTop(scroller: Scroller) {
-    this.subs.forEach(i => i.unsubscribe())
-    this.subs = []
-    const scheduler = this.scheduler
-    let docIsChanged = true
-
-    function limitPosition(position: CaretPosition) {
-      const { top, bottom } = scroller.getLimit()
-      const caretTop = position.top
-      if (caretTop + position.height > bottom) {
-        const offset = caretTop - bottom + position.height
-        scroller.setOffset(offset)
-      } else if (position.top < top) {
-        scroller.setOffset(-(top - position.top))
-      }
-    }
-
-    let isPressed = false
-
-    this.subs.push(
-      scroller.onScroll.subscribe(() => {
-        if (this.oldPosition) {
-          const rect = this.rect
-          this.oldPosition.top = rect.top
-          this.oldPosition.left = rect.left
-          this.oldPosition.height = rect.height
-        }
-      }),
-      fromEvent(document, 'mousedown', true).subscribe(() => {
-        isPressed = true
-      }),
-      fromEvent(document, 'mouseup', true).subscribe(() => {
-        isPressed = false
-      }),
-      scheduler.onDocChange.subscribe(() => {
-        docIsChanged = true
-      }),
-      this.onPositionChange.subscribe(position => {
-        if (position) {
-          if (docIsChanged) {
-            if (scheduler.lastChangesHasLocalUpdate) {
-              limitPosition(position)
-            } else if (this.oldPosition) {
-              const offset = Math.floor(position.top - this.oldPosition.top)
-              scroller.setOffset(offset)
-            }
-          } else if (!isPressed) {
-            if (this.isFixed && this.oldPosition) {
-              const offset = Math.floor(position.top - this.oldPosition.top)
-              scroller.setOffset(offset)
-            } else {
-              limitPosition(position)
-            }
-          }
-        }
-        docIsChanged = false
-      })
-    )
   }
 
   private updateCursorPosition(nativeRange: Range) {
@@ -288,6 +223,21 @@ class ExperimentalCaret implements Caret {
       top: rectTop,
       height: boxHeight
     })
+
+    if (this.changeFromSelf) {
+      this.changeFromSelf = false
+      const selfRect = this.elementRef.getBoundingClientRect()
+      const limit = this.getLimit()
+      if (selfRect.top < limit.top) {
+        this.elementRef.scrollIntoView({
+          block: 'start'
+        })
+      } else if (selfRect.bottom > limit.bottom) {
+        this.elementRef.scrollIntoView({
+          block: 'end'
+        })
+      }
+    }
   }
 }
 
@@ -543,6 +493,7 @@ export class MagicInput extends Input {
           key = keys.charAt(+ev.code.substring(5))
           ev.preventDefault()
         }
+        this.caret.changeFromSelf = true
         const is = this.keyboard.execShortcut({
           key: key,
           altKey: ev.altKey,
@@ -552,6 +503,8 @@ export class MagicInput extends Input {
         if (is) {
           this.ignoreComposition = true
           ev.preventDefault()
+        } else {
+          this.caret.changeFromSelf = false
         }
       })
     )
@@ -564,6 +517,7 @@ export class MagicInput extends Input {
         return !this.ignoreComposition
       })).subscribe(() => {
         if (!this.selection.isCollapsed) {
+          this.caret.changeFromSelf = true
           this.commander.delete()
         }
         this.composition = true
@@ -591,7 +545,8 @@ export class MagicInput extends Input {
           index: startIndex
         }
 
-        this.caret.refresh(true)
+        this.caret.changeFromSelf = true
+        this.caret.refresh()
         const event = new Event(startSlot, {
           index: startIndex,
           data: ev.data
@@ -635,6 +590,7 @@ export class MagicInput extends Input {
         this.composition = false
         this.domAdapter.composition = null
         if (text) {
+          this.caret.changeFromSelf = true
           this.commander.write(text)
         } else {
           this.selection.startSlot?.__changeMarker__.forceMarkDirtied()
