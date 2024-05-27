@@ -413,6 +413,11 @@ export class Commander {
     let isDeleteRanges = true
     if (selection.isCollapsed) {
       if (deleteBefore) {
+        const beforeContent = startSlot.getContentAtIndex(startOffset - 1)
+        if (beforeContent instanceof Component && beforeContent.type === ContentType.BlockComponent) {
+          this.removeComponent(beforeContent)
+          return true
+        }
         if (startOffset === 0) {
           isDeleteRanges = false
         }
@@ -420,6 +425,11 @@ export class Commander {
         startSlot = prevPosition.slot
         startOffset = prevPosition.offset
       } else {
+        const content = startSlot.getContentAtIndex(startOffset)
+        if (content instanceof Component && content.type === ContentType.BlockComponent) {
+          this.removeComponent(content)
+          return true
+        }
         const nextPosition = selection.getNextPosition()!
         endSlot = nextPosition.slot
         endOffset = nextPosition.offset

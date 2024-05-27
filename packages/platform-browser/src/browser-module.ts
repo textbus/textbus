@@ -173,10 +173,23 @@ export class BrowserModule implements Module {
         right: 0,
         top: 0,
         bottom: 0,
-        zIndex: 1,
         pointerEvents: 'none',
         // overflow: 'hidden'
       }
+    })
+    const maskWrapper = createElement('div', {
+      styles: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+        margin: '0 -2px',
+        zIndex: 1,
+        pointerEvents: 'none',
+        overflow: 'hidden'
+      },
+      children: [mask]
     })
     const wrapper = createElement('div', {
       attrs: {
@@ -188,7 +201,7 @@ export class BrowserModule implements Module {
         position: 'relative',
         flexDirection: 'column'
       },
-      children: [mask]
+      children: [maskWrapper]
     })
     return {
       wrapper,
