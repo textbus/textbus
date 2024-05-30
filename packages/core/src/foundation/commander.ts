@@ -78,14 +78,7 @@ function deleteUpBySlot(selection: Selection,
       offset
     }
   }
-  const parentSlot = parentComponent.parent!
-  if (!parentSlot) {
-    return {
-      slot,
-      offset
-    }
-  }
-  const index = parentSlot.indexOf(parentComponent)
+  const parentSlot = parentComponent.parent
 
   // 单插槽组件
   if (parentComponent.__slots__.length === 1) {
@@ -95,7 +88,13 @@ function deleteUpBySlot(selection: Selection,
         offset
       }
     }
-
+    if (!parentSlot) {
+      return {
+        slot,
+        offset
+      }
+    }
+    const index = parentSlot.indexOf(parentComponent)
     const event = new Event<Slot, DeleteEventData>(parentSlot, {
       index,
       count: 1,
@@ -120,17 +119,29 @@ function deleteUpBySlot(selection: Selection,
       offset: parentSlot.index
     }
   }
-  // 多插槽组件
-  const slotIndex = parentComponent.__slots__.indexOf(slot)
-  const position: SelectionPosition = slotIndex === 0 ? {
-    slot: parentSlot,
-    offset: index
-  } : selection.findLastPosition(parentComponent.__slots__.get(slotIndex - 1)!, true)
 
+
+  const slotIndex = parentComponent.__slots__.indexOf(slot)
+
+  if (slotIndex === 0) {
+    if (parentSlot) {
+      const index = parentSlot.indexOf(parentComponent)
+      return {
+        slot: parentSlot,
+        offset: index,
+      }
+    }
+    return {
+      slot,
+      offset
+    }
+  }
+  const position = selection.findLastPosition(parentComponent.__slots__.get(slotIndex - 1)!, true)
   if (parentComponent.removeSlot?.(slot)) {
     parentComponent.__slots__.splice(slotIndex, 1)
     return position
   }
+
   return {
     slot,
     offset
