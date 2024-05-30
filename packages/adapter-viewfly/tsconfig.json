@@ -24,6 +24,9 @@
       ],
       "@textbus/platform-browser": [
         "../platform-browser/src/public-api.ts"
+      ],
+      "@textbus/platform-node": [
+        "../platform-node/src/public-api.ts"
       ]
     }
   },

@@ -1,2 +1,7 @@
+import { NodeViewAdapter as ViewflyVDomAdapter } from '@textbus/platform-node'
+
 export * from './viewfly-adapter'
-export * from './viewfly-v-dom-adapter'
+
+export {
+  ViewflyVDomAdapter
+}
