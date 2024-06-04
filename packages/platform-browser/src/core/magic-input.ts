@@ -506,6 +506,7 @@ export class MagicInput extends Input {
         isWriting = false
       }),
       fromEvent<InputEvent>(textarea, 'beforeinput').subscribe(ev => {
+        this.ignoreComposition = false
         if (this.isSafari) {
           if (ev.inputType === 'insertFromComposition') {
             isIgnore = true
