@@ -4,7 +4,7 @@ import { Slot } from './slot'
 /**
  * 格式或属性的值，必须为可被 JSON 序列化的字面量
  */
-export type FormatValue = string | number | boolean | null | Record<string, string | number | boolean>
+export type FormatValue = any
 
 /**
  * 一组格式
