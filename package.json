@@ -1,10 +1,11 @@
 {
-  "name": "@textbus/textbus",
-  "version": "4.0.0-dev",
-  "description": "A rich text editor",
-  "main": "./bundles/public-api.js",
-  "module": "./bundles/public-api.js",
-  "typings": "./bundles/public-api.d.ts",
+  "name": "@textbus/monorepo",
+  "version": "4.0.0",
+  "description": "A rich text editor framework.",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "start": "webpack-dev-server",
     "build:lib": "lerna run build:lib",
@@ -16,16 +17,25 @@
     "prepare": "husky install"
   },
   "lint-staged": {
-    "packages/core/src/**/*.(ts,tsx)": [
+    "packages/adapter-react/src/**/*.(ts,tsx)": [
       "eslint --ext .ts,.tsx --max-warnings 0"
     ],
-    "packages/browser/src/**/*.(ts,tsx)": [
+    "packages/adapter-viewfly/src/**/*.(ts,tsx)": [
       "eslint --ext .ts,.tsx --max-warnings 0"
     ],
-    "packages/editor/src/**/*.(ts,tsx)": [
+    "packages/adapter-vue/src/**/*.(ts,tsx)": [
       "eslint --ext .ts,.tsx --max-warnings 0"
     ],
     "packages/collaborate/src/**/*.(ts,tsx)": [
+      "eslint --ext .ts,.tsx --max-warnings 0"
+    ],
+    "packages/core/src/**/*.(ts,tsx)": [
+      "eslint --ext .ts,.tsx --max-warnings 0"
+    ],
+    "packages/platform-browser/src/**/*.(ts,tsx)": [
+      "eslint --ext .ts,.tsx --max-warnings 0"
+    ],
+    "packages/platform-node/src/**/*.(ts,tsx)": [
       "eslint --ext .ts,.tsx --max-warnings 0"
     ]
   },
@@ -63,8 +73,8 @@
     "@types/prismjs": "^1.16.6",
     "@typescript-eslint/eslint-plugin": "^5.8.0",
     "@typescript-eslint/parser": "^5.8.0",
-    "@viewfly/core": "^1.0.0-alpha.6",
-    "@viewfly/platform-browser": "^1.0.0-alpha.6",
+    "@viewfly/core": "^1.0.0-alpha.9",
+    "@viewfly/platform-browser": "^1.0.0-alpha.9",
     "add-assets-webpack-plugin": "^1.0.0",
     "autoprefixer": "^10.4.0",
     "babel-jest": "^29.7.0",
