@@ -606,7 +606,11 @@ export class Slot {
    * @param startIndex
    * @param endIndex
    */
-  getFormatRangesByFormatter<U extends FormatValue>(formatter: Formatter<U>, startIndex: number, endIndex: number): FormatRange<U>[] {
+  getFormatRangesByFormatter<T extends Formatter<any>,
+    U = T extends Formatter<infer V> ? V : never>(
+    formatter: T,
+    startIndex: number,
+    endIndex: number): FormatRange<U>[] {
     return this.format.extractFormatRangesByFormatter(startIndex, endIndex, formatter)
   }
 
@@ -825,7 +829,7 @@ export class Slot {
     children: Array<VElement | VTextNode | Component>,
     renderEnv: any
   ): VElement {
-    const hostBindings: Array<{ render: FormatHostBindingRender, item: FormatItem<any> }> = []
+    const hostBindings: Array<{render: FormatHostBindingRender, item: FormatItem<any>}> = []
     let host: VElement | null = null
     for (let i = formats.length - 1; i > -1; i--) {
       const item = formats[i]
@@ -849,7 +853,7 @@ export class Slot {
       children = [next]
     }
     for (const binding of hostBindings) {
-      const {render, item} = binding
+      const { render, item } = binding
       if (!host) {
         host = new VElement(render.fallbackTagName)
         host.location = {
