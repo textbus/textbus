@@ -268,10 +268,10 @@ export class SelectionBridge implements NativeSelectionBridge {
         }
         minLeft = rect2.left
         minTop = rect2.top
-        oldPosition = position
+        // oldPosition = position
       }
       if (isToPrevLine) {
-        if (rect2.left < startLeft) {
+        if (rect2.left <= startLeft) {
           return position
         }
         if (oldPosition) {
