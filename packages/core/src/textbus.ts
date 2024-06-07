@@ -77,7 +77,7 @@ export interface Module {
   /**
    * 当 Textbus 销毁时触发
    */
-  onDestroy?(): void
+  onDestroy?(textbus: Textbus): void
 }
 
 /**
@@ -296,6 +296,9 @@ export class Textbus extends ReflectiveInjector {
   destroy() {
     this.isDestroyed = true
     this.plugins.forEach(i => i.onDestroy?.())
+    this.config.imports?.forEach(module => {
+      module.onDestroy?.(this)
+    })
     this.beforeDestroyCallbacks.forEach(i => {
       i()
     })

@@ -1,5 +1,6 @@
-@import "./packages/editor/assets/icons/style.css";
-@import "./packages/editor/assets/index";
+#editor {
+  border: 1px solid #ccc;
+}
 
 .right {
   display: flex;

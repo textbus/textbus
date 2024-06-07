@@ -54,6 +54,8 @@ export class BrowserModule implements Module {
 
   private workbench!: HTMLElement
 
+  private textbus?: Textbus
+
   constructor(public config: ViewOptions) {
     const { mask, wrapper } = BrowserModule.createLayout()
     wrapper.prepend(config.adapter.host)
@@ -141,6 +143,7 @@ export class BrowserModule implements Module {
   }
 
   setup(textbus: Textbus) {
+    this.textbus = textbus
     const host = this.config.renderTo()
     if (!(host instanceof HTMLElement)) {
       throw browserErrorFn('view container is not a HTMLElement')
@@ -160,6 +163,12 @@ export class BrowserModule implements Module {
     if (this.config.autoFocus) {
       textbus.focus()
     }
+  }
+
+  onDestroy(textbus: Textbus) {
+    textbus.get(Input).destroy()
+    textbus.get(SelectionBridge).destroy()
+    textbus.get(CollaborateCursor).destroy()
   }
 
   private static createLayout() {

@@ -21,7 +21,9 @@ import {
 import { ViewflyAdapter, ViewflyVDomAdapter, ViewComponentProps } from '@textbus/adapter-viewfly'
 import { createApp, HTMLRenderer, OutputTranslator } from '@viewfly/platform-browser'
 import { getCurrentInstance, inject } from '@viewfly/core'
-import { merge } from '@tanbo/stream'
+import { fromEvent, merge } from '@tanbo/stream'
+
+import './index.scss'
 
 interface SingleSlot {
   slot: Slot
@@ -144,13 +146,13 @@ async function createEditor() {
     imports: [
       browserModule
     ],
-    plugins: [{
-      setup(textbus) {
-        const adapter = textbus.get(DomAdapter)
-        const a = adapter.getNativeNodeBySlot(rootModel.state.slot)
-        console.log(a)
-      },
-    }]
+    // plugins: [{
+    //   setup(textbus) {
+    //     const adapter = textbus.get(DomAdapter)
+    //     const a = adapter.getNativeNodeBySlot(rootModel.state.slot)
+    //     console.log(a)
+    //   },
+    // }]
   })
 
   const fontSizeFormatter = new Formatter<string>('fontSize', {
@@ -187,7 +189,7 @@ async function createEditor() {
   //   console.log(selection.startSlot, selection.startOffset)
   // })
 
-  textbus.render(rootModel)
+  await textbus.render(rootModel)
   // 从这里开始创建编辑器
 
 // textbus.render(rootModel)
@@ -236,6 +238,45 @@ async function createEditor() {
       )
     }
   }
+
+  return textbus
 }
 
-createEditor()
+const header = document.getElementById('avatar')!
+const btns = document.querySelectorAll('button')
+const textarea = document.getElementById('textarea')! as HTMLTextAreaElement
+createEditor().then(editor => {
+  fromEvent(btns[0], 'click').subscribe(() => {
+    const paths = editor.get(Selection).getPaths()
+    textarea.value = JSON.stringify(paths)
+  })
+  fromEvent(btns[1], 'click').subscribe(() => {
+    const json = editor.getJSON()
+    textarea.value = JSON.stringify(json)
+  })
+  fromEvent(btns[2], 'click').subscribe(() => {
+    // const contents = editor.getHTML()
+    // textarea.value = contents
+  })
+  fromEvent(btns[3], 'click').subscribe(() => {
+    textarea.select()
+    document.execCommand('copy')
+  })
+  fromEvent(btns[4], 'click').subscribe(() => {
+    // const json = parser.parse(textarea.value)
+    // editor.replaceContent(json)
+  })
+  fromEvent(btns[5], 'click').subscribe(() => {
+    // const html = textarea.value
+    // editor.replaceContent(html)
+  })
+  fromEvent(btns[6], 'click').subscribe(() => {
+    // const paths = parser.parse(textarea.value)
+    // const selection = editor.get(Selection)
+    // selection.usePaths(paths)
+    // selection.restore()
+  })
+  fromEvent(btns[7], 'click').subscribe(() => {
+    editor.destroy()
+  })
+})
