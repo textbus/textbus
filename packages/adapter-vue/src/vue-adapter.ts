@@ -103,7 +103,7 @@ export class VueAdapter extends DomAdapter<VNode, VNode> {
       const vueComponent = components[key]
       const setup = vueComponent.setup!
       const self = this
-      vueComponent.setup = function (props: ViewComponentProps<Component>) {
+      vueComponent.setup = function (props: ViewComponentProps<Component>, context, ...args: any[]) {
         const component = props.component
         const vueInstance = getCurrentInstance()!
         const sub = component.changeMarker.onChange.subscribe(() => {
@@ -134,7 +134,7 @@ export class VueAdapter extends DomAdapter<VNode, VNode> {
         onUnmounted(() => {
           sub.unsubscribe()
         })
-        const result = (setup as any)(props)
+        const result = (setup as any)(props, context, ...args)
         if (typeof result === 'function') {
           return function () {
             component.__slots__.forEach(i => self.renderedSlotCache.delete(i))
