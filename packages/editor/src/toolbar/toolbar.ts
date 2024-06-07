@@ -113,6 +113,7 @@ export class Toolbar implements Plugin {
   }
 
   onDestroy() {
+    this.tools.flat().forEach(i => i.onDestroy?.())
     this.subs.forEach(i => i.unsubscribe())
   }
 

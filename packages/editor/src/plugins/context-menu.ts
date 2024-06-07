@@ -72,7 +72,7 @@ export class ContextMenu implements Plugin {
           label: i18n.get('editor.paste'),
           // disabled: true,
           onClick: () => {
-            navigator.permissions.query({ name: 'clipboard-write' } as any).then((result) => {
+            navigator.permissions.query({name: 'clipboard-write'} as any).then((result) => {
               if (result.state === 'granted') {
                 (navigator.clipboard as any).read().then((items: any[]) => {
                   const item = items[0]
@@ -148,7 +148,7 @@ export class ContextMenu implements Plugin {
     )
   }
 
-  destroy() {
+  onDestroy() {
     this.hide()
     this.subs.forEach(i => i.unsubscribe())
     this.subs = []
@@ -264,7 +264,7 @@ export class ContextMenu implements Plugin {
             item
           }
         }).map(i => {
-          const { wrapper, btn, item } = i
+          const {wrapper, btn, item} = i
           wrappers.push(wrapper)
           subs.push(
             fromEvent(btn, 'mouseenter').subscribe(() => {

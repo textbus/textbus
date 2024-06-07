@@ -164,6 +164,7 @@ class ExperimentalCaret implements Caret {
 
   destroy() {
     clearTimeout(this.timer)
+    // this.caret.
     this.subscription.unsubscribe()
     this.subs.forEach(i => i.unsubscribe())
   }

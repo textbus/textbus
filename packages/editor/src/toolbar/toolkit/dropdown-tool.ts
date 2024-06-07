@@ -107,6 +107,7 @@ export class DropdownTool implements Tool {
   }
 
   onDestroy() {
+    this.viewer.destroy()
     this.subs.forEach(i => i.unsubscribe())
     this.config.onDestroy?.()
   }

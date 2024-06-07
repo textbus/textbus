@@ -124,6 +124,10 @@ export class GroupTool implements Tool {
     //
   }
 
+  onDestroy() {
+    this.uiDropdown.destroy()
+  }
+
   private createDialog(config: DialogToolConfig, keyboard: Keyboard, dialog: Dialog) {
     const item = this._createItem({
       ...config,

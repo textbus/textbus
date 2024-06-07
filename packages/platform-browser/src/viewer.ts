@@ -94,7 +94,7 @@ export class Viewer extends Starter {
               public rootComponentLoader: ComponentLoader,
               public options: ViewOptions = {}) {
     const id = 'textbus-' + Number((Math.random() + '').substring(2)).toString(16)
-    const { doc, mask, wrapper } = Viewer.createLayout(id, options.minHeight)
+    const {doc, mask, wrapper} = Viewer.createLayout(id, options.minHeight)
     const staticProviders: Provider[] = [{
       provide: EDITOR_OPTIONS,
       useValue: options
@@ -288,12 +288,9 @@ export class Viewer extends Starter {
     }
     this.destroyed = true
     this.subs.forEach(i => i.unsubscribe())
-    const types = [
-      Input
-    ]
-    types.forEach(i => {
-      this.get(i).destroy()
-    })
+    this.get(Input).destroy()
+    this.get(SelectionBridge).destroy()
+    this.get(CollaborateCursor).destroy()
     super.destroy()
     this.workbench.parentNode?.removeChild(this.workbench)
     this.resourceNodes.forEach(node => {

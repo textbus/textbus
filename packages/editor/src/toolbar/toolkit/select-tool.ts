@@ -125,6 +125,7 @@ export class SelectTool implements Tool {
   }
 
   onDestroy() {
+    this.viewer.destroy()
     this.config.onDestroy?.()
   }
 }

@@ -188,6 +188,7 @@ export class SelectionBridge implements NativeSelectionBridge {
   }
 
   destroy() {
+    this.subs.forEach(i => i.unsubscribe())
     this.sub.unsubscribe()
   }
 

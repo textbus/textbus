@@ -118,6 +118,7 @@ export class SegmentDropdownTool implements Tool {
   }
 
   onDestroy() {
+    this.viewer.destroy()
     this.subs.forEach(i => i.unsubscribe())
     this.config.onDestroy?.()
   }
