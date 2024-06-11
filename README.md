@@ -12,7 +12,11 @@
 
 [Textbus 官方文档](https://textbus.io)
 
-[在线演示](https://textbus.io/playground)
+### XNote 编辑器
+
+XNote 是 Textbus 官方基于最新 4.0 版本开发的一个无头的、高性能的开源富文本编辑器。提供了开箱即用的大多数功能。也为需要自己开发编辑器的开发者提供了第一手的参考资料，仓库地址： [https://github.com/textbus/xnote](https://github.com/textbus/xnote)。
+
+你也可以直接查看在线演示：[在线演示](https://textbus.io/playground)
 
 介绍
 -------------------------------------------------------------
