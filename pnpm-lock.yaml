@@ -16,13 +16,13 @@ importers:
         version: 0.2.2
       y-webrtc:
         specifier: ^10.0.4
-        version: 10.2.6(yjs@13.6.10)
+        version: 10.2.6(yjs@13.6.14)
       y-websocket:
         specifier: ^1.4.3
-        version: 1.5.1(yjs@13.6.10)
+        version: 1.5.1(yjs@13.6.14)
       yjs:
-        specifier: ^13.6.7
-        version: 13.6.10
+        specifier: ^13.6.14
+        version: 13.6.14
     devDependencies:
       '@babel/core':
         specifier: ^7.16.5
@@ -32,7 +32,7 @@ importers:
         version: 7.23.6(@babel/core@7.23.6)
       '@hocuspocus/server':
         specifier: ^2.13.6
-        version: 2.13.6(y-protocols@1.0.6(yjs@13.6.10))(yjs@13.6.10)
+        version: 2.13.6(y-protocols@1.0.6(yjs@13.6.14))(yjs@13.6.14)
       '@tanbo/json-parser':
         specifier: ^0.0.2
         version: 0.0.2
@@ -207,9 +207,6 @@ importers:
       katex:
         specifier: ^0.16.10
         version: 0.16.11
-      yjs:
-        specifier: ^13.6.14
-        version: 13.6.14
     devDependencies:
       '@babel/core':
         specifier: ^7.16.5
@@ -323,10 +320,10 @@ importers:
         specifier: ^1.2.5
         version: 1.2.5
       '@textbus/core':
-        specifier: ^4.0.0-alpha.74
+        specifier: ^4.0.1
         version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.0.0-alpha.74
+        specifier: ^4.0.2
         version: link:../platform-browser
       react:
         specifier: ^17.0.0 || ^18.0.0
@@ -357,13 +354,13 @@ importers:
         specifier: ^1.2.5
         version: 1.2.5
       '@textbus/core':
-        specifier: ^4.0.0-alpha.74
+        specifier: ^4.0.1
         version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.0.0-alpha.74
+        specifier: ^4.0.2
         version: link:../platform-browser
       '@textbus/platform-node':
-        specifier: ^4.0.0-alpha.74
+        specifier: ^4.0.1
         version: link:../platform-node
       '@viewfly/core':
         specifier: ^1.0.0-alpha.22
@@ -394,10 +391,10 @@ importers:
         specifier: ^1.2.5
         version: 1.2.5
       '@textbus/core':
-        specifier: ^4.0.0-alpha.74
+        specifier: ^4.0.1
         version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.0.0-alpha.74
+        specifier: ^4.0.2
         version: link:../platform-browser
       vue:
         specifier: ^3.4.28
@@ -428,7 +425,7 @@ importers:
         specifier: ^1.2.5
         version: 1.2.5
       '@textbus/core':
-        specifier: ^4.0.0-alpha.74
+        specifier: ^4.0.1
         version: link:../core
       '@viewfly/core':
         specifier: ^1.0.0-alpha.22
@@ -486,11 +483,8 @@ importers:
       '@tanbo/stream':
         specifier: ^1.2.5
         version: 1.2.5
-      '@textbus/collaborate':
-        specifier: ^4.0.0-alpha.74
-        version: link:../collaborate
       '@textbus/core':
-        specifier: ^4.0.0-alpha.74
+        specifier: ^4.0.1
         version: link:../core
       '@viewfly/core':
         specifier: ^1.0.0-alpha.22
@@ -518,7 +512,7 @@ importers:
         specifier: ^1.2.5
         version: 1.2.5
       '@textbus/core':
-        specifier: ^4.0.0-alpha.74
+        specifier: ^4.0.1
         version: link:../core
       '@viewfly/core':
         specifier: ^1.0.0-alpha.22
@@ -4353,7 +4347,7 @@ packages:
     resolution: {integrity: sha512-oWb1Z6mkHIskLzEJ/XWX0srkpkTQ7vaopMQkyaEIoq0fmtFVxOthb8cCxeT+p3ynTdkk/RZwbgG4brR5BeWECw==}
     engines: {node: '>= 4.0'}
     os: [darwin]
-    deprecated: The v1 package contains DANGEROUS / INSECURE binaries. Upgrade to safe fsevents v2
+    deprecated: Upgrade to fsevents v2 to mitigate potential security issues
 
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
@@ -8606,10 +8600,6 @@ packages:
   yargs@7.1.2:
     resolution: {integrity: sha512-ZEjj/dQYQy0Zx0lgLMLR8QuaqTihnxirir7EwUHp1Axq4e3+k8jXU5K0VLbNvedv1f4EWtBonDIZm0NUr+jCcA==}
 
-  yjs@13.6.10:
-    resolution: {integrity: sha512-1JcyQek1vaMyrDm7Fqfa+pvHg/DURSbVo4VmeN7wjnTKB/lZrfIPhdCj7d8sboK6zLfRBJXegTjc9JlaDd8/Zw==}
-    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
-
   yjs@13.6.14:
     resolution: {integrity: sha512-D+7KcUr0j+vBCUSKXXEWfA+bG4UQBviAwP3gYBhkstkgwy5+8diOPMx0iqLIOxNo/HxaREUimZRxqHGAHCL2BQ==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
@@ -10287,7 +10277,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@hocuspocus/server@2.13.6(y-protocols@1.0.6(yjs@13.6.10))(yjs@13.6.10)':
+  '@hocuspocus/server@2.13.6(y-protocols@1.0.6(yjs@13.6.14))(yjs@13.6.14)':
     dependencies:
       '@hocuspocus/common': 2.13.6
       async-lock: 1.4.1
@@ -10295,8 +10285,8 @@ snapshots:
       lib0: 0.2.88
       uuid: 10.0.0
       ws: 8.18.0
-      y-protocols: 1.0.6(yjs@13.6.10)
-      yjs: 13.6.10
+      y-protocols: 1.0.6(yjs@13.6.14)
+      yjs: 13.6.14
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -18989,13 +18979,6 @@ snapshots:
 
   xtend@4.0.2: {}
 
-  y-leveldb@0.1.2(yjs@13.6.10):
-    dependencies:
-      level: 6.0.1
-      lib0: 0.2.88
-      yjs: 13.6.10
-    optional: true
-
   y-leveldb@0.1.2(yjs@13.6.14):
     dependencies:
       level: 6.0.1
@@ -19003,40 +18986,22 @@ snapshots:
       yjs: 13.6.14
     optional: true
 
-  y-protocols@1.0.6(yjs@13.6.10):
-    dependencies:
-      lib0: 0.2.88
-      yjs: 13.6.10
-
   y-protocols@1.0.6(yjs@13.6.14):
     dependencies:
       lib0: 0.2.88
       yjs: 13.6.14
 
-  y-webrtc@10.2.6(yjs@13.6.10):
+  y-webrtc@10.2.6(yjs@13.6.14):
     dependencies:
       lib0: 0.2.88
       simple-peer: 9.11.1
-      y-protocols: 1.0.6(yjs@13.6.10)
-      yjs: 13.6.10
+      y-protocols: 1.0.6(yjs@13.6.14)
+      yjs: 13.6.14
     optionalDependencies:
       ws: 8.15.1
     transitivePeerDependencies:
       - bufferutil
       - supports-color
-      - utf-8-validate
-
-  y-websocket@1.5.1(yjs@13.6.10):
-    dependencies:
-      lib0: 0.2.88
-      lodash.debounce: 4.0.8
-      y-protocols: 1.0.6(yjs@13.6.10)
-      yjs: 13.6.10
-    optionalDependencies:
-      ws: 6.2.2
-      y-leveldb: 0.1.2(yjs@13.6.10)
-    transitivePeerDependencies:
-      - bufferutil
       - utf-8-validate
 
   y-websocket@1.5.1(yjs@13.6.14):
@@ -19110,10 +19075,6 @@ snapshots:
       which-module: 1.0.0
       y18n: 3.2.2
       yargs-parser: 5.0.1
-
-  yjs@13.6.10:
-    dependencies:
-      lib0: 0.2.88
 
   yjs@13.6.14:
     dependencies:

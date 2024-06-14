@@ -1,29 +1,49 @@
 /* eslint-disable */
+
+import { CollaborateModule, SyncConnector, YWebsocketConnector } from '@textbus/collaborate'
+
+HTMLElement.prototype.prepend = HTMLElement.prototype.prepend || function (this: HTMLElement, el: HTMLElement) {
+  if (this.childNodes.length === 0) {
+    this.appendChild(el)
+  } else {
+    const firstChild = this.firstChild
+    this.insertBefore(el, firstChild)
+  }
+}
+
+HTMLElement.prototype.append = HTMLElement.prototype.append || function (this: HTMLElement, el: HTMLElement) {
+  this.appendChild(el)
+}
+
 import 'reflect-metadata'
-import { BrowserModule, DomAdapter } from '@textbus/platform-browser'
+import 'core-js'
+import { BrowserModule, Input, NativeMutationInput } from '@textbus/platform-browser'
 import {
+  Adapter,
   Commander,
   Component,
-  ContentType, createArrayProxy,
+  ContentType,
   createVNode,
   FormatHostBindingRender,
-  Formatter,
+  Formatter, Keyboard,
   onBreak,
-  onContentInsert, Registry,
+  onContentInsert,
+  Registry,
   Selection,
   Slot,
   Textbus,
   useContext,
   useSelf,
-  VElement, Adapter,
+  VElement,
   VTextNode,
 } from '@textbus/core'
-import { ViewflyAdapter, ViewflyVDomAdapter, ViewComponentProps } from '@textbus/adapter-viewfly'
+import { ViewComponentProps, ViewflyAdapter, ViewflyVDomAdapter } from '@textbus/adapter-viewfly'
 import { createApp, HTMLRenderer, OutputTranslator } from '@viewfly/platform-browser'
 import { createRef, getCurrentInstance, inject } from '@viewfly/core'
 import { fromEvent, merge } from '@tanbo/stream'
 
 import './index.scss'
+import { Doc } from 'yjs'
 
 interface SingleSlot {
   slot: Slot
@@ -104,7 +124,6 @@ class ParagraphComponent extends Component<SingleSlot> {
   }
 }
 
-
 const adapter = new ViewflyAdapter({
   [RootComponent.componentName]: App,
   [ParagraphComponent.componentName]: Paragraph
@@ -122,7 +141,7 @@ const browserModule = new BrowserModule({
   renderTo() {
     return document.getElementById('editor')!
   },
-  // useContentEditable: true
+  useContentEditable: true
 })
 
 const htmlRenderer = new ViewflyVDomAdapter({
@@ -139,6 +158,17 @@ const htmlRenderer = new ViewflyVDomAdapter({
   }
 })
 
+// const collabModule = new CollaborateModule({
+//   userinfo: {
+//     username: Math.random().toString(),
+//     color: '#ff0000',
+//     id: Math.random().toString()
+//   },
+//   createConnector(yDoc: Doc): SyncConnector {
+//     return new YWebsocketConnector('ws://localhost:1234', 'test', yDoc)
+//   }
+// })
+
 const textbus = new Textbus({
   additionalAdapters: [htmlRenderer],
   components: [
@@ -146,8 +176,13 @@ const textbus = new Textbus({
     ParagraphComponent
   ],
   imports: [
-    browserModule
+    browserModule,
+    // collabModule
   ],
+  providers: [{
+    provide: Input,
+    useClass: NativeMutationInput
+  }]
   // plugins: [{
   //   setup(textbus) {
   //     const adapter = textbus.get(DomAdapter)
@@ -175,6 +210,14 @@ const rootModel = new RootComponent(textbus, {
     ContentType.BlockComponent
   ]),
 })
+const p = new ParagraphComponent(textbus, {
+  slot: new Slot([
+    ContentType.InlineComponent,
+    ContentType.Text
+  ])
+})
+p.state.slot.insert('abcdefg')
+rootModel.state.slot.insert(p)
 
 const t = new OutputTranslator()
 
@@ -182,9 +225,9 @@ htmlRenderer.onViewUpdated.subscribe(() => {
   // console.log(rootModel)
   // console.log(t.transform(htmlRenderer.host))
 })
-// rootModel.changeMarker.onChange.subscribe(op => {
-//   console.log(op)
-// })
+rootModel.changeMarker.onChange.subscribe(op => {
+  // console.log(JSON.stringify(op.apply))
+})
 
 // const selection = textbus.get(Selection)
 // selection.onChange.subscribe(() => {
@@ -193,6 +236,20 @@ htmlRenderer.onViewUpdated.subscribe(() => {
 
 textbus.render(rootModel)
 // 从这里开始创建编辑器
+
+textbus.get(Keyboard).addShortcut({
+  keymap: {
+    key: 'b',
+    ctrlKey: true,
+  },
+  action(key: string): boolean | void {
+    console.log(key)
+  }
+})
+
+// textbus.onChange.subscribe(() => {
+//   console.log(textbus.getJSON())
+// })
 
 // textbus.render(rootModel)
 
@@ -235,7 +292,7 @@ function Paragraph(props: ViewComponentProps<ParagraphComponent>) {
     // console.log('paragraphComponent')
     return (
       adapter.slotRender(slot, children => {
-        return createVNode('p', { ref: props.rootRef }, children)
+        return createVNode('p', { ref: props.rootRef, class: 'test' }, children)
       })
     )
   }

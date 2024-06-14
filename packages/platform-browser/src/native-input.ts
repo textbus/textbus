@@ -122,12 +122,12 @@ export class NativeInput extends Input {
   private ignoreComposition = false // 有 bug 版本搜狗拼音
 
   constructor(textbus: Textbus,
-              private parser: Parser,
-              private selection: Selection,
-              private keyboard: Keyboard,
-              private domAdapter: DomAdapter,
-              private commander: Commander,
-              private controller: Controller) {
+              protected parser: Parser,
+              protected selection: Selection,
+              protected keyboard: Keyboard,
+              protected domAdapter: DomAdapter,
+              protected commander: Commander,
+              protected controller: Controller) {
     super()
     this.documentView = textbus.get(VIEW_DOCUMENT)
     if (!controller.readonly) {
@@ -264,7 +264,7 @@ export class NativeInput extends Input {
         return !isWriting // || !this.textarea.value
       })).subscribe(ev => {
         this.ignoreComposition = false
-        let key = ev.key
+        let key = ev.key || ''
         const keys = ')!@#$%^Z&*('
         const b = key === 'Process' && /Digit\d/.test(ev.code) && ev.shiftKey
         if (b) {
@@ -285,7 +285,7 @@ export class NativeInput extends Input {
     )
   }
 
-  private handleInput(input: HTMLElement) {
+  protected handleInput(input: HTMLElement) {
     if (this.isMobileBrowser) {
       this.handleMobileInput(input)
     } else {
