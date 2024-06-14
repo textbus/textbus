@@ -1,24 +1,26 @@
 /* eslint-disable */
 import 'reflect-metadata'
-import { BrowserModule, DomAdapter } from '@textbus/platform-browser'
+import { BrowserModule } from '@textbus/platform-browser'
 import {
+  Adapter,
   Commander,
   Component,
-  ContentType, createArrayProxy,
+  ContentType,
   createVNode,
   FormatHostBindingRender,
   Formatter,
   onBreak,
-  onContentInsert, Registry,
+  onContentInsert,
+  Registry,
   Selection,
   Slot,
   Textbus,
   useContext,
   useSelf,
-  VElement, Adapter,
+  VElement,
   VTextNode,
 } from '@textbus/core'
-import { ViewflyAdapter, ViewflyVDomAdapter, ViewComponentProps } from '@textbus/adapter-viewfly'
+import { ViewComponentProps, ViewflyAdapter, ViewflyVDomAdapter } from '@textbus/adapter-viewfly'
 import { createApp, HTMLRenderer, OutputTranslator } from '@viewfly/platform-browser'
 import { getCurrentInstance, inject } from '@viewfly/core'
 import { fromEvent, merge } from '@tanbo/stream'
@@ -120,7 +122,7 @@ async function createEditor() {
     renderTo() {
       return document.getElementById('editor')!
     },
-    // useContentEditable: true
+    useContentEditable: true
   })
 
   const htmlRenderer = new ViewflyVDomAdapter({
@@ -173,6 +175,14 @@ async function createEditor() {
       ContentType.BlockComponent
     ]),
   })
+  const p = new ParagraphComponent(textbus, {
+    slot: new Slot([
+      ContentType.InlineComponent,
+      ContentType.Text
+    ])
+  })
+  p.state.slot.insert('______')
+  rootModel.state.slot.insert(p)
 
   const t = new OutputTranslator()
 

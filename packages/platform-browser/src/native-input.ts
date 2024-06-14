@@ -138,9 +138,46 @@ export class NativeInput extends Input {
         this.documentView.contentEditable = controller.readonly ? 'false' : 'true'
       })
     )
-    this.handleShortcut(this.documentView)
-    this.handleInput(this.documentView)
-    this.handleDefaultActions(this.documentView)
+    this.handleInputByObserver(this.documentView)
+    // this.handleShortcut(this.documentView)
+    // this.handleInput(this.documentView)
+    // this.handleDefaultActions(this.documentView)
+  }
+
+  handleInputByObserver(view: HTMLElement) {
+    let isStart = false
+    let isEnd = false
+    let startValue = ''
+    fromEvent(view, 'compositionstart').subscribe(() => {
+      isStart = true
+    }).add(
+      fromEvent(view, 'compositionend').subscribe(() => {
+        isEnd = true
+      })
+    )
+    const observer = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        if (mutation.type === 'characterData') {
+          if (isStart) {
+            isStart = false
+            startValue = mutation.oldValue || ''
+            return
+          }
+          if (isEnd) {
+            const location = this.domAdapter.getLocationByNativeNode(mutation.target)
+            console.log(location, startValue, mutation.target.nodeValue)
+            startValue = ''
+          }
+        }
+      })
+      isEnd = false
+    })
+
+    observer.observe(view, {
+      subtree: true,
+      characterData: true,
+      characterDataOldValue: true
+    })
   }
 
   focus(nativeRange: Range) {
