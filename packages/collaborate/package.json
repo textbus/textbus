@@ -25,9 +25,9 @@
     "typescript editor"
   ],
   "dependencies": {
-    "@tanbo/stream": "^1.2.4",
+    "@tanbo/stream": "^1.2.5",
     "@textbus/core": "^4.0.0-alpha.60",
-    "@viewfly/core": "^1.0.0-alpha.10",
+    "@viewfly/core": "^1.0.0-alpha.11",
     "y-websocket": "^1.4.3",
     "yjs": "^13.6.14"
   },

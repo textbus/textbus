@@ -25,7 +25,7 @@
     "typescript editor"
   ],
   "dependencies": {
-    "@tanbo/stream": "^1.2.4",
+    "@tanbo/stream": "^1.2.5",
     "@textbus/core": "^4.0.0-alpha.60",
     "@textbus/platform-browser": "^4.0.0-alpha.60",
     "vue": "^3.4.28"

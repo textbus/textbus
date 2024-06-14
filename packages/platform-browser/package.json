@@ -25,10 +25,10 @@
     "typescript editor"
   ],
   "dependencies": {
-    "@tanbo/stream": "^1.2.4",
+    "@tanbo/stream": "^1.2.5",
     "@textbus/collaborate": "^4.0.0-alpha.60",
     "@textbus/core": "^4.0.0-alpha.60",
-    "@viewfly/core": "^1.0.0-alpha.10"
+    "@viewfly/core": "^1.0.0-alpha.11"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^23.0.2",

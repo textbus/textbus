@@ -73,8 +73,8 @@
     "@types/prismjs": "^1.16.6",
     "@typescript-eslint/eslint-plugin": "^5.8.0",
     "@typescript-eslint/parser": "^5.8.0",
-    "@viewfly/core": "^1.0.0-alpha.10",
-    "@viewfly/platform-browser": "^1.0.0-alpha.10",
+    "@viewfly/core": "^1.0.0-alpha.11",
+    "@viewfly/platform-browser": "^1.0.0-alpha.11",
     "add-assets-webpack-plugin": "^1.0.0",
     "autoprefixer": "^10.4.0",
     "babel-jest": "^29.7.0",
@@ -114,11 +114,8 @@
     "webpack-dev-server": "^4.7.1"
   },
   "dependencies": {
-    "@tanbo/stream": "^1.2.4",
-    "immer": "^9.0.12",
-    "katex": "^0.16.0",
-    "prismjs": "^1.23.0",
-    "reflect-metadata": "^0.1.13",
+    "@tanbo/stream": "^1.2.5",
+    "reflect-metadata": "^0.2.2",
     "y-webrtc": "^10.0.4",
     "y-websocket": "^1.4.3",
     "yjs": "^13.6.7"
