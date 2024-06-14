@@ -487,6 +487,10 @@ export class NativeInput extends Input {
       ).subscribe(text => {
         this.composition = false
         if (text) {
+          const startContainer = this.nativeSelection.focusNode
+          if (startContainer instanceof Text && startContainer.textContent === text) {
+            startContainer.remove()
+          }
           this.commander.write(text)
         }
         if (isCompositionEnd) {
