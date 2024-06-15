@@ -335,6 +335,10 @@ export class NativeInput extends Input {
       }),
       fromEvent<CompositionEvent>(input, 'compositionend').subscribe(ev => {
         compositionEnd(ev.data)
+        const startContainer = this.nativeSelection.focusNode
+        if (startContainer instanceof Text && startContainer.textContent === ev.data) {
+          startContainer.remove()
+        }
       }),
       fromEvent<InputEvent>(input, 'beforeinput').subscribe(ev => {
         switch (ev.inputType) {
