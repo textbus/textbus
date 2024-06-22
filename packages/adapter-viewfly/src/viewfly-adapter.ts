@@ -1,5 +1,5 @@
 import { Component, CompositionState, makeError, VElement, ViewMount, VTextNode, merge } from '@textbus/core'
-import { createDynamicRef, DynamicRef, getCurrentInstance, jsx, onUpdated, withAnnotation } from '@viewfly/core'
+import { ComponentSetup, createDynamicRef, DynamicRef, getCurrentInstance, jsx, JSXNode, onUpdated, withAnnotation } from '@viewfly/core'
 import { DomAdapter } from '@textbus/platform-browser'
 
 const adapterError = makeError('ViewflyDOMRenderer')
@@ -10,16 +10,16 @@ export interface ViewComponentProps<T extends Component> {
 }
 
 export interface ViewflyAdapterComponents {
-  [key: string]: JSXInternal.ComponentSetup<ViewComponentProps<any>>
+  [key: string]: ComponentSetup<ViewComponentProps<any>>
 }
 
-export class ViewflyAdapter extends DomAdapter<JSXInternal.ViewNode, JSXInternal.Element> {
+export class ViewflyAdapter extends DomAdapter<JSXNode, Element> {
   private components: ViewflyAdapterComponents = {}
 
   private componentRefs = new WeakMap<Component, DynamicRef<HTMLElement>>()
 
   constructor(components: ViewflyAdapterComponents,
-              mount: ViewMount<JSXInternal.ViewNode, HTMLElement>
+              mount: ViewMount<JSXNode, HTMLElement>
   ) {
     super({
       createCompositionNode(compositionState: CompositionState,
@@ -67,7 +67,7 @@ export class ViewflyAdapter extends DomAdapter<JSXInternal.ViewNode, JSXInternal
           vEle.attrs.set('ref', ref)
         }
       },
-      componentRender: (component: Component<any>): JSXInternal.ViewNode => {
+      componentRender: (component: Component<any>): JSXNode => {
         const comp = this.components[component.name] || this.components['*']
         if (comp) {
           let ref = this.componentRefs.get(component)
@@ -87,7 +87,7 @@ export class ViewflyAdapter extends DomAdapter<JSXInternal.ViewNode, JSXInternal
         }
         throw adapterError(`cannot found view component \`${component.name}\`!`)
       },
-      vElementToViewElement(vNode: VElement, children: Array<string | JSXInternal.ViewNode>): JSXInternal.ViewNode {
+      vElementToViewElement(vNode: VElement, children: Array<JSXNode>): JSXNode {
         const key = vNode.attrs.get('key')
         vNode.attrs.delete('key')
         const props: any = {
@@ -155,7 +155,7 @@ export class ViewflyAdapter extends DomAdapter<JSXInternal.ViewNode, JSXInternal
         const self = this
         return {
           ...instance,
-          $render(): JSXInternal.ViewNode {
+          $render(): JSXNode {
             component.__slots__.forEach(i => self.renderedSlotCache.delete(i))
             component.__slots__.length = 0
             self.componentRendingStack.push(component)
