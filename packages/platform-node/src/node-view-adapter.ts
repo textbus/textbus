@@ -1,6 +1,16 @@
 import { Component, CompositionState, makeError, VElement, ViewMount, Adapter, VTextNode, merge, Subject } from '@textbus/core'
 import { VDOMElement, VDOMText } from '@viewfly/platform-browser'
-import { createDynamicRef, DynamicRef, getCurrentInstance, jsx, onUpdated, withAnnotation } from '@viewfly/core'
+import {
+  ComponentSetup,
+  createDynamicRef,
+  DynamicRef,
+  getCurrentInstance,
+  jsx,
+  JSX,
+  JSXNode,
+  onUpdated,
+  withAnnotation
+} from '@viewfly/core'
 
 export interface ViewVDomComponentProps<T extends Component> {
   component: T
@@ -8,12 +18,12 @@ export interface ViewVDomComponentProps<T extends Component> {
 }
 
 export interface ViewflyVDomAdapterComponents {
-  [key: string]: JSXInternal.ComponentSetup<ViewVDomComponentProps<any>>
+  [key: string]: ComponentSetup<ViewVDomComponentProps<any>>
 }
 
 const adapterError = makeError('ViewflyHTMLRenderer')
 
-export class NodeViewAdapter extends Adapter<VDOMElement, VDOMText, JSXInternal.ViewNode, JSXInternal.Element> {
+export class NodeViewAdapter extends Adapter<VDOMElement, VDOMText, JSXNode, JSX.Element> {
   onViewUpdated = new Subject<void>()
   host = new VDOMElement('body')
   private components: ViewflyVDomAdapterComponents = {}
@@ -21,7 +31,7 @@ export class NodeViewAdapter extends Adapter<VDOMElement, VDOMText, JSXInternal.
   private componentRefs = new WeakMap<Component, DynamicRef<VDOMElement>>()
 
   constructor(components: ViewflyVDomAdapterComponents,
-              mount: ViewMount<JSXInternal.ViewNode, VDOMElement>
+              mount: ViewMount<JSXNode, VDOMElement>
   ) {
     super({
       createCompositionNode(compositionState: CompositionState,
@@ -69,7 +79,7 @@ export class NodeViewAdapter extends Adapter<VDOMElement, VDOMText, JSXInternal.
           vEle.attrs.set('ref', ref)
         }
       },
-      componentRender: (component: Component<any>): JSXInternal.ViewNode => {
+      componentRender: (component: Component<any>): JSXNode => {
         const comp = this.components[component.name] || this.components['*']
         if (comp) {
           let ref = this.componentRefs.get(component)
@@ -89,7 +99,7 @@ export class NodeViewAdapter extends Adapter<VDOMElement, VDOMText, JSXInternal.
         }
         throw adapterError(`cannot found view component \`${component.name}\`!`)
       },
-      vElementToViewElement(vNode: VElement, children: Array<string | JSXInternal.ViewNode>): JSXInternal.ViewNode {
+      vElementToViewElement(vNode: VElement, children: Array<JSXNode>): JSXNode {
         const key = vNode.attrs.get('key')
         vNode.attrs.delete('key')
         const props: any = {
@@ -157,7 +167,7 @@ export class NodeViewAdapter extends Adapter<VDOMElement, VDOMText, JSXInternal.
         const self = this
         return {
           ...instance,
-          $render(): JSXInternal.ViewNode {
+          $render(): JSXNode {
             component.__slots__.forEach(i => self.renderedSlotCache.delete(i))
             component.__slots__.length = 0
             self.componentRendingStack.push(component)

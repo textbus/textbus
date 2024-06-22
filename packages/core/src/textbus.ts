@@ -149,8 +149,7 @@ export class Textbus extends ReflectiveInjector {
     super(new NullInjector(), [], Textbus.diScope)
     const { plugins, providers } = this.mergeModules(config)
     this.plugins = plugins
-    this.staticProviders = providers
-    this.normalizedProviders = this.staticProviders.map(i => normalizeProvider(i))
+    this.normalizedProviders = providers.map(i => normalizeProvider(i))
 
     this.onChange = this.changeEvent.asObservable()
     this.onFocus = this.focusEvent.asObservable()

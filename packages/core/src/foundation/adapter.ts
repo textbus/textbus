@@ -1,5 +1,5 @@
 import { Observable } from '@tanbo/stream'
-import { Injector } from '@viewfly/core'
+import { Injector, JSXNode } from '@viewfly/core'
 
 import { Component, invokeListener } from '../model/component'
 import { Slot } from '../model/slot'
@@ -99,7 +99,7 @@ export abstract class Adapter<
     this.slotRootVElementCaches.set(slot, vElement)
 
     const vNodeToJSX = (vNode: VElement) => {
-      const children: JSXInternal.ViewNode[] = []
+      const children: JSXNode[] = []
       const composition = this.composition
       if (composition && composition.slot === slot) {
         this.insertCompositionByIndex(slot, vNode, composition, () => {
