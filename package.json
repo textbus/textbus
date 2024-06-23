@@ -93,6 +93,7 @@
     "ip": "^2.0.1",
     "jest": "^29.7.0",
     "jest-canvas-mock": "^2.4.0",
+    "jest-environment-jsdom": "^29.7.0",
     "lerna": "^8.0.0",
     "lint-staged": "^13.0.2",
     "loader-utils": "^3.2.0",

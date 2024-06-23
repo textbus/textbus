@@ -213,7 +213,7 @@ export class Slot {
    * @param formats
    */
   write(content: string | Component, formats?: Formats): boolean
-  write(content: string | Component, formatter?: Formatter<any>, value?: FormatValue): boolean
+  write<T>(content: string | Component, formatter?: Formatter<T>, value?: T): boolean
   write(content: string | Component, formatter?: Formatter<any> | Formats, value?: FormatValue): boolean {
     const index = this.index
     const expandFormat = (this.isEmpty || index === 0) ? this.format.extract(0, 1) : this.format.extract(index - 1, index)
@@ -240,7 +240,7 @@ export class Slot {
    * @param formats
    */
   insert(content: string | Component, formats?: Formats): boolean
-  insert(content: string | Component, formatter?: Formatter<any>, value?: FormatValue): boolean
+  insert<T>(content: string | Component, formatter?: Formatter<T>, value?: T): boolean
   insert(content: string | Component, formatter?: Formatter<any> | Formats, value?: FormatValue): boolean {
     const contentType = typeof content === 'string' ? ContentType.Text : content.type
     if (!this.schema.includes(contentType)) {
@@ -333,7 +333,7 @@ export class Slot {
    */
   retain(offset: number): boolean
   retain(offset: number, formats: Formats): boolean
-  retain(offset: number, formatter: Formatter<any>, value: FormatValue | null): boolean
+  retain<T>(offset: number, formatter: Formatter<T>, value: T | null): boolean
   retain(offset: number, formatter?: Formatter<any> | Formats, value?: FormatValue | null): boolean {
     let formats: Formats = []
     if (formatter) {

@@ -1,165 +1,443 @@
-import { ContentType, defineComponent, jsx, Slot } from '@textbus/core'
-import { NullInjector, ReflectiveInjector } from '@tanbo/di'
-import { boldFormatter } from '@textbus/editor'
+import { Component, ContentType, createVNode, FormatHostBindingRender, Formatter, Slot, Textbus, VElement, VTextNode } from '@textbus/core'
+import { NodeModule, NodeViewAdapter } from '@textbus/platform-node'
 
-describe('Slot 基本特性数据验证', () => {
-  const injector = new ReflectiveInjector(new NullInjector(), [])
-  const inlineComponent = defineComponent({
-    type: ContentType.InlineComponent,
-    name: 'Inline',
-    setup() {
-      return {
-        render() {
-          return jsx('div')
-        }
-      }
-    }
-  })
-  const blockComponent = defineComponent({
-    type: ContentType.BlockComponent,
-    name: 'Block',
-    setup() {
-      return {
-        render() {
-          return jsx('div')
-        }
-      }
-    }
-  })
-  test('静态属性', () => {
-    expect(Slot.placeholder).toBe('\u200b')
-    expect(Slot.emptyPlaceholder).toBe('\n')
-  })
-  test('初始值', () => {
-    const slot = new Slot([])
-    expect(slot.length).toBe(1)
-    expect(slot.isEmpty).toBeTruthy()
-    expect(slot.index).toBe(0)
-  })
-  test('插入拦截', () => {
-    const slot = new Slot([])
-    expect(slot.insert('xxx')).toBeFalsy()
-    expect(slot.length).toBe(1)
-    expect(slot.index).toBe(0)
-    expect(slot.isEmpty).toBeTruthy()
+let textbus: Textbus
 
-    expect(slot.insert(inlineComponent.createInstance(injector)))
-    expect(slot.length).toBe(1)
-    expect(slot.index).toBe(0)
-    expect(slot.isEmpty).toBeTruthy()
-
-    expect(slot.insert(blockComponent.createInstance(injector)))
-    expect(slot.length).toBe(1)
-    expect(slot.index).toBe(0)
-    expect(slot.isEmpty).toBeTruthy()
+beforeAll(() => {
+  textbus = new Textbus({
+    imports: [
+      new NodeModule(new NodeViewAdapter({}, () => {
+        //
+      }))
+    ]
   })
 })
 
-describe('Slot 数据变更', () => {
-  const blockComponent = defineComponent({
-    type: ContentType.BlockComponent,
-    name: 'Block',
-    setup() {
-      return {
-        render() {
-          return jsx('div')
-        }
-      }
-    }
+afterAll(() => {
+  textbus.destroy()
+})
+
+describe('slot 数据限制', () => {
+  class Inline extends Component {
+    static type = ContentType.InlineComponent
+    static componentName = 'Inline'
+  }
+
+  class Block extends Component {
+    static type = ContentType.BlockComponent
+    static componentName = 'Block'
+  }
+
+  test('不能插入任何内容', () => {
+    const slot = new Slot([])
+    slot.insert('x')
+    const inline = new Inline(textbus, {})
+    const block = new Block(textbus, {})
+    slot.insert(inline)
+    slot.insert(block)
+
+    expect(slot.length).toBe(1)
+    expect(slot.isEmpty).toBeTruthy()
   })
-  const componentInstance = blockComponent.createInstance({} as any)
-  let slot: Slot
-  beforeEach(() => {
-    slot = new Slot([
+  test('可插入预期内容', () => {
+    const slot = new Slot([
       ContentType.BlockComponent,
       ContentType.InlineComponent,
       ContentType.Text
     ])
-  })
-  test('插入字符时，自动更新 index 和 length', () => {
-    slot.insert('1')
-    expect(slot.length).toBe(1)
-    expect(slot.index).toBe(1)
-    slot.insert('2')
-    expect(slot.length).toBe(2)
-    expect(slot.index).toBe(2)
+    slot.insert('x')
+    const inline = new Inline(textbus, {})
+    const block = new Block(textbus, {})
+    slot.insert(inline)
+    slot.insert(block)
 
-    slot.insert('34')
+    expect(slot.length).toBe(3)
+    expect(slot.sliceContent()).toEqual(['x', inline, block])
+  })
+})
+
+describe('字符串支持', () => {
+  test('合并字符器', () => {
+    const slot = new Slot([
+      ContentType.Text
+    ])
+    slot.insert('1234')
+    slot.insert('1234')
+    expect(slot.sliceContent()).toEqual(['12341234'])
+  })
+  test('支持 emoji', () => {
+    const slot = new Slot([
+      ContentType.Text
+    ])
+
+    slot.insert('❤️❤️')
     expect(slot.length).toBe(4)
-    expect(slot.index).toBe(4)
-
-    slot.insert(componentInstance)
-
-    expect(slot.length).toBe(5)
-    expect(slot.index).toBe(5)
+    slot.retain(1)
+    slot.insert('x')
+    expect(slot.sliceContent()).toEqual(['x❤️❤️'])
   })
+  test('支持 emoji', () => {
+    // eslint-disable-next-line max-len
+    const str = '🇦🇱🇩🇿🇦🇫🇦🇷🇦🇪🇦🇼🇴🇲🇦🇿🇪🇬🇪🇹🇮🇪🇪🇪🇦🇩🇦🇴🇦🇮🇦🇬🇦🇹🇦🇽🇦🇺🇧🇧🇵🇬🇧🇸🇵🇰🇵🇾🇵🇸🇧🇭🇵🇦🇧🇷🇧🇾🇧🇲🇧🇬🇲🇵🇧🇯🇧🇪🇮🇸🇵🇷🇵🇱🇧🇦🇧🇴🇧🇿🇧🇼🇧🇹🇧🇫🇧🇮🇰🇵🇬🇶🇩🇰🇩🇪🇹🇱🇹🇬🇩🇴🇩🇲🇷🇺🇪🇨🇪🇷🇫🇷🇫🇴🇵🇫🇬🇫🇹🇫🇻🇦🇵🇭🇫🇯🇫🇮🇨🇻🇫🇰🇬🇲🇨🇬🇨🇩🇨🇴🇨🇷🇬🇩🇬🇱🇬🇪🇬🇬🇨🇺🇬🇵🇬🇺🇬🇾🇰🇿🇭🇹🇰🇷🇳🇱🇧🇶🇸🇽🇲🇪🇭🇳🇰🇮🇩🇯🇰🇬🇬🇳🇬🇼🇨🇦🇬🇭🇮🇨🇬🇦🇰🇭🇨🇿🇿🇼🇨🇲🇶🇦🇰🇾🇨🇨🇰🇲🇽🇰🇨🇮🇰🇼🇭🇷🇰🇪🇨🇰🇨🇼🇱🇻🇱🇸🇱🇦🇱🇧🇱🇹🇱🇷🇱🇾🇱🇮🇷🇪🇱🇺🇷🇼🇷🇴🇲🇬🇲🇻🇲🇹🇲🇼🇲🇾🇲🇱🇲🇰🇲🇭🇲🇶🇾🇹🇮🇲🇲🇺🇲🇷🇺🇸🇦🇸🇻🇮🇲🇳🇲🇸🇧🇩🇵🇪🇫🇲🇲🇲🇲🇩🇲🇦🇲🇨🇲🇿🇲🇽🇳🇦🇿🇦🇦🇶🇬🇸🇸🇸🇳🇷🇳🇮🇳🇵🇳🇪🇳🇬🇳🇺🇳🇴🇳🇫🇪🇺🇵🇼🇵🇳🇵🇹🇯🇵🇸🇪🇨🇭🇸🇻🇼🇸🇷🇸🇸🇱🇸🇳🇨🇾🇸🇨🇸🇦🇧🇱🇨🇽🇸🇹🇸🇭🇰🇳🇱🇨🇸🇲🇵🇲🇻🇨🇱🇰🇸🇰🇸🇮🇸🇿🇸🇩🇸🇷🇸🇧🇸🇴🇹🇯🇹🇭🇹🇿🇹🇴🇹🇨🇹🇹🇹🇳🇹🇻🇹🇷🇹🇲🇹🇰🇼🇫🇻🇺🇬🇹🇻🇪🇧🇳🇺🇬🇺🇦🇺🇾🇺🇿🇬🇷🇪🇸🇪🇭🇸🇬🇳🇨🇳🇿🇭🇺🇸🇾🇯🇲🇦🇲🇾🇪🇮🇶🇮🇷🇮🇱🇮🇹🇮🇳🇮🇩🇬🇧🇻🇬🇮🇴🇯🇴🇻🇳🇿🇲🇯🇪🇹🇩🇬🇮🇨🇱🇨🇫🇲🇴🇭🇰🇨🇳'
 
-  test('从指定位置插入内容', () => {
-    slot.insert('1234')
-    slot.retain(2)
-    slot.insert('xx')
-    expect(slot.toString()).toBe('12xx34')
-    slot.insert(componentInstance)
-    expect(slot.sliceContent()).toEqual([
-      '12xx', componentInstance, '34'
+    const slot = new Slot([
+      ContentType.Text
     ])
-  })
 
-  test('不能插入重复的组件', () => {
-    slot.insert('1')
-    slot.insert(componentInstance)
-    slot.insert('2345')
-    slot.retain(3)
-    slot.insert(componentInstance)
-    expect(slot.sliceContent()).toEqual([
-      '123', componentInstance, '45'
-    ])
-  })
+    slot.insert(str)
 
-  test('删除内容', () => {
-    slot.insert('1234')
-    slot.delete(20)
-    expect(slot.toString()).toBe('1234')
-
-    slot.retain(2)
-    slot.delete(20)
-    expect(slot.toString()).toBe('12')
-
-    slot.retain(0)
-    slot.delete(20)
-    expect(slot.toString()).toBe('\n')
-    expect(slot.isEmpty).toBeTruthy()
-    expect(slot.length).toBe(1)
+    for (let i = 0; i < str.length; i++) {
+      slot.retain(i)
+      expect(slot.index % 4).toEqual(0)
+    }
   })
 })
 
-describe('Slot 格式应用', () => {
-  const blockComponent = defineComponent({
-    type: ContentType.BlockComponent,
-    name: 'Block',
-    setup() {
-      return {
-        render() {
-          return jsx('div')
-        }
+describe('slot 行内样式', () => {
+  class Inline extends Component {
+    static type = ContentType.InlineComponent
+    static componentName = 'Inline'
+  }
+
+  class Block extends Component {
+    static type = ContentType.BlockComponent
+    static componentName = 'Block'
+  }
+
+  test('合并/拆分常量样式', () => {
+    const formatter = new Formatter<string>('format', {
+      render(children: Array<VElement | VTextNode | Component>, formatValue: string): VElement | FormatHostBindingRender {
+        return createVNode('span', { test: formatValue }, children)
       }
-    }
-  })
-  const componentInstance = blockComponent.createInstance({} as any)
-  let slot: Slot
-  beforeEach(() => {
-    slot = new Slot([
-      ContentType.BlockComponent,
-      ContentType.InlineComponent,
-      ContentType.Text
+    })
+    const slot = new Slot([
+      ContentType.Text,
+      ContentType.InlineComponent
     ])
+
+    slot.insert('123456789')
+    slot.retain(2)
+    slot.retain(2, formatter, 'xxx')
+    slot.retain(4)
+    slot.retain(2, formatter, 'xxx')
+    expect(slot.getFormats().length).toBe(1)
+    expect(slot.getFormats()[0]).toEqual({
+      startIndex: 2,
+      endIndex: 6,
+      value: 'xxx',
+      formatter
+    })
+    slot.retain(4)
+    slot.insert(new Inline(textbus, {}))
+    expect(slot.getFormats().length).toBe(2)
+    expect(slot.getFormats()).toEqual([{
+      startIndex: 2,
+      endIndex: 4,
+      value: 'xxx',
+      formatter
+    }, {
+      startIndex: 5,
+      endIndex: 7,
+      value: 'xxx',
+      formatter
+    }])
   })
-  test('带格式的文本', () => {
-    slot.insert('123', boldFormatter, true)
-    expect(slot.getFormatRangesByFormatter(boldFormatter, 0, 3)).toEqual([{
+  test('合并/拆分复杂样式', () => {
+    interface TestFormatValue {
+      a: string
+      b: number
+      c: number
+    }
+
+    const formatter = new Formatter<TestFormatValue>('format', {
+      render(children: Array<VElement | VTextNode | Component>, formatValue: TestFormatValue): VElement | FormatHostBindingRender {
+        return createVNode('span', { test: formatValue }, children)
+      }
+    })
+    const slot = new Slot([
+      ContentType.Text,
+      ContentType.InlineComponent
+    ])
+
+    slot.insert('123456789')
+    slot.retain(2)
+    slot.retain(2, formatter, {
+      a: 'a',
+      b: 1,
+      c: 2
+    })
+    slot.retain(4)
+    slot.retain(2, formatter, {
+      a: 'a',
+      b: 1,
+      c: 2
+    })
+    expect(slot.getFormats().length).toBe(1)
+    expect(slot.getFormats()[0]).toEqual({
+      startIndex: 2,
+      endIndex: 6,
+      value: {
+        a: 'a',
+        b: 1,
+        c: 2
+      },
+      formatter
+    })
+    slot.retain(4)
+    slot.insert(new Inline(textbus, {}))
+    expect(slot.getFormats().length).toBe(2)
+    expect(slot.getFormats()).toEqual([{
+      startIndex: 2,
+      endIndex: 4,
+      value: {
+        a: 'a',
+        b: 1,
+        c: 2
+      },
+      formatter
+    }, {
+      startIndex: 5,
+      endIndex: 7,
+      value: {
+        a: 'a',
+        b: 1,
+        c: 2
+      },
+      formatter
+    }])
+  })
+  test('行内组件可应用样式', () => {
+    const slot = new Slot([
+      ContentType.Text,
+      ContentType.InlineComponent
+    ])
+    const formatter = new Formatter<string>('format', {
+      render(children: Array<VElement | VTextNode | Component>, formatValue: string): VElement | FormatHostBindingRender {
+        return createVNode('span', { test: formatValue }, children)
+      }
+    })
+    const inline = new Inline(textbus, {})
+    slot.insert('1234')
+    slot.insert(inline)
+    slot.insert('5678')
+    slot.applyFormat(formatter, {
       startIndex: 0,
-      endIndex: 3,
-      value: true
+      endIndex: 8,
+      value: 'xxx'
+    })
+
+    expect(slot.getFormats().length).toBe(1)
+  })
+  test('块级组件不可应用样式', () => {
+    const slot = new Slot([
+      ContentType.Text,
+      ContentType.BlockComponent
+    ])
+    const formatter = new Formatter<string>('format', {
+      render(children: Array<VElement | VTextNode | Component>, formatValue: string): VElement | FormatHostBindingRender {
+        return createVNode('span', { test: formatValue }, children)
+      }
+    })
+    const block = new Block(textbus, { slot: new Slot([ContentType.Text]) })
+    slot.insert('1234')
+    slot.insert(block)
+    slot.insert('5678')
+    block.__slots__.push(block.state.slot)
+    slot.applyFormat(formatter, {
+      startIndex: 0,
+      endIndex: 8,
+      value: 'xxx'
+    })
+
+    expect(slot.getFormats().length).toBe(2)
+    expect(slot.getFormats()).toEqual([
+      {
+        startIndex: 0,
+        endIndex: 4,
+        value: 'xxx',
+        formatter
+      },
+      {
+        startIndex: 5,
+        endIndex: 8,
+        value: 'xxx',
+        formatter
+      }
+    ])
+    expect(block.state.slot.getFormats()).toEqual([{
+      startIndex: 0,
+      endIndex: 1,
+      value: 'xxx',
+      formatter
     }])
   })
 })
+
+describe('样式范围自动更新', () => {
+  class Inline extends Component {
+    static type = ContentType.InlineComponent
+    static componentName = 'Inline'
+  }
+
+  test('样式跟随内容', () => {
+    const formatter = new Formatter<string>('format', {
+      render(children: Array<VElement | VTextNode | Component>, formatValue: string): VElement | FormatHostBindingRender {
+        return createVNode('span', { test: formatValue }, children)
+      }
+    })
+    const slot = new Slot([
+      ContentType.Text,
+      ContentType.InlineComponent
+    ])
+    slot.insert('12345', [
+      [formatter, 'xxx']
+    ])
+
+    expect(slot.getFormats()).toEqual([{
+      startIndex: 0,
+      endIndex: 5,
+      formatter,
+      value: 'xxx'
+    }])
+
+    slot.retain(3)
+    slot.delete(1)
+    expect(slot.getFormats()).toEqual([{
+      startIndex: 0,
+      endIndex: 4,
+      formatter,
+      value: 'xxx'
+    }])
+  })
+  test('组件删除样式合并', () => {
+    const formatter = new Formatter<string>('format', {
+      render(children: Array<VElement | VTextNode | Component>, formatValue: string): VElement | FormatHostBindingRender {
+        return createVNode('span', { test: formatValue }, children)
+      }
+    })
+    const inline = new Inline(textbus, {})
+    const slot = new Slot([
+      ContentType.Text,
+      ContentType.InlineComponent
+    ])
+    slot.insert('12345', [
+      [formatter, 'xxx']
+    ])
+    slot.insert(inline)
+
+    slot.insert('678', formatter, 'xxx')
+
+    expect(slot.getFormats().length).toBe(2)
+
+    slot.retain(5)
+    slot.delete(1)
+    expect(slot.getFormats()).toEqual([{
+      startIndex: 0,
+      endIndex: 8,
+      formatter,
+      value: 'xxx'
+    }])
+  })
+  test('写入内容自动扩展样式', () => {
+    const formatter = new Formatter<string>('format', {
+      render(children: Array<VElement | VTextNode | Component>, formatValue: string): VElement | FormatHostBindingRender {
+        return createVNode('span', { test: formatValue }, children)
+      }
+    })
+    const slot = new Slot([
+      ContentType.Text,
+      ContentType.InlineComponent
+    ])
+    slot.insert('12345', [
+      [formatter, 'xxx']
+    ])
+    slot.write('6')
+    expect(slot.getFormats()).toEqual([{
+      startIndex: 0,
+      endIndex: 6,
+      formatter,
+      value: 'xxx'
+    }])
+  })
+})
+
+describe('根据内容生成渲染树', () => {
+  const bold = new Formatter<boolean>('strong', {
+    render(children: Array<VElement | VTextNode | Component>): VElement | FormatHostBindingRender {
+      return createVNode('strong', null, children)
+    }
+  })
+  const fontSize = new Formatter<string>('strong', {
+    render(children: Array<VElement | VTextNode | Component>, formatValue: string): VElement | FormatHostBindingRender {
+      return {
+        fallbackTagName: 'span',
+        attach(host: VElement) {
+          host.styles.set('fontSize', formatValue)
+        }
+      }
+    }
+  })
+
+  test('可正确嵌套', () => {
+    const slot = new Slot([
+      ContentType.Text
+    ])
+
+    slot.insert('123456')
+    slot.applyFormat(bold, {
+      startIndex: 1,
+      endIndex: 5,
+      value: true
+    })
+    slot.applyFormat(fontSize, {
+      startIndex: 2,
+      endIndex: 4,
+      value: '12px'
+    })
+    const tree = slot.toTree(children => {
+      return createVNode('div', null, children)
+    })
+    expect(tree.children.length).toBe(3)
+    expect(tree.children[0]).toHaveProperty('textContent', '1')
+    expect(tree.children[1]).toHaveProperty('tagName', 'strong')
+    expect(tree.children[2]).toHaveProperty('textContent', '6')
+
+    const strong = tree.children[1] as VElement
+
+    expect(strong.children[0]).toHaveProperty('textContent', '2')
+    expect(strong.children[1]).toHaveProperty('tagName', 'span')
+    expect((strong.children[1] as VElement).styles.get('fontSize')).toBe('12px')
+    expect(strong.children[2]).toHaveProperty('textContent', '5')
+  })
+
+  test('复用标签', () => {
+    const slot = new Slot([
+      ContentType.Text
+    ])
+
+    slot.insert('123456')
+    slot.applyFormat(bold, {
+      startIndex: 1,
+      endIndex: 5,
+      value: true
+    })
+    slot.applyFormat(fontSize, {
+      startIndex: 1,
+      endIndex: 5,
+      value: '12px'
+    })
+    const tree = slot.toTree(children => {
+      return createVNode('div', null, children)
+    })
+    expect(tree.children.length).toBe(3)
+    expect(tree.children[0]).toHaveProperty('textContent', '1')
+    expect(tree.children[1]).toHaveProperty('tagName', 'strong')
+    expect((tree.children[1] as VElement).styles.get('fontSize')).toBe('12px')
+    expect(tree.children[2]).toHaveProperty('textContent', '6')
+
+    const strong = tree.children[1] as VElement
+
+    expect(strong.children[0]).toHaveProperty('textContent', '2345')
+  })
+})
+
