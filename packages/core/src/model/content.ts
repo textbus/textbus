@@ -29,7 +29,7 @@ export class Content {
    * @param toEnd 当需要变更 index 时，是向后还是向前移动
    */
   correctIndex(index: number, toEnd: boolean) {
-    if (index === 0 || index === this.length) {
+    if (index <= 0 || index >= this.length) {
       return index
     }
     let i = 0
@@ -37,24 +37,24 @@ export class Content {
       const itemLength = item.length
       if (typeof item === 'string') {
         if (index > i && index < i + itemLength) {
-          const offsetIndex = index - i
-          const startIndex = Math.max(0, offsetIndex - 15)
-          const endIndex = Math.min(startIndex + 30, item.length)
+          const segments = Content.segmenter.segment(item)
+          let offsetIndex = 0
 
-          const fragment = item.slice(startIndex, endIndex)
-          const segments = Content.segmenter.segment(fragment)
-
-          let offset = startIndex
-          for (const p of segments) {
-            const segmentLength = p.segment.length
-            if (index > i + offset && index < i + offset + segmentLength) {
-              return toEnd ? i + offset + segmentLength : i + offset
+          for (const item of segments) {
+            const length = item.segment.length
+            const nextOffset = offsetIndex + length
+            if (nextOffset === index) {
+              return index
             }
-            offset += segmentLength
-            if (i + offset >= index) {
-              break
+            if (nextOffset > index) {
+              if (toEnd) {
+                return nextOffset + i
+              }
+              return offsetIndex + i
             }
+            offsetIndex = nextOffset
           }
+
           return index
         }
       }
