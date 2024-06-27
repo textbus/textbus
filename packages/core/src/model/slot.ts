@@ -273,7 +273,8 @@ export class Slot {
       content.changeMarker.parentModel = this
     }
     let formats: Formats = []
-    if (formatter) {
+    const isBlockContent = content instanceof Component && content.type === ContentType.BlockComponent
+    if (formatter && !isBlockContent) {
       if (Array.isArray(formatter)) {
         formats = formatter
       } else {
