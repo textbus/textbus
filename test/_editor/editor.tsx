@@ -7,6 +7,9 @@ import { ReflectiveInjector } from '@viewfly/core'
 import { RootComponent, RootComponentView } from './components/root.component'
 import { ParagraphComponent, ParagraphComponentView } from './components/paragraph.component'
 import { InlineComponent, InlineComponentView } from './components/inline.component'
+import { boldFormatter } from './formatters/bold.formatter'
+import { fontSizeFormatter } from './formatters/font-size.formatter'
+import { textAlignAttribute } from './attributes/text-align.attribute'
 
 export class Editor extends Textbus {
   translator = new OutputTranslator()
@@ -59,7 +62,19 @@ export class Editor extends Textbus {
       imports: [
         browserModule
       ],
-      additionalAdapters: [vDomAdapter]
+      additionalAdapters: [vDomAdapter],
+      components: [
+        RootComponent,
+        ParagraphComponent,
+        InlineComponent
+      ],
+      formatters: [
+        boldFormatter,
+        fontSizeFormatter,
+      ],
+      attributes: [
+        textAlignAttribute
+      ]
     })
 
     this.vDomAdapter = vDomAdapter

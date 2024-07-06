@@ -188,4 +188,25 @@ describe('组件查询', () => {
     expect(query.queryComponent(ParagraphComponent).state).toBe(QueryStateType.Normal)
     expect(query.queryComponent(ParagraphComponent).value).toBe(null)
   })
+
+  test('和 Range 重叠返回 true', () => {
+    const selection = editor.get(Selection)
+    const query = editor.get(Query)
+
+    selection.selectComponent(paragraph)
+
+    expect(query.queryWrappedComponent(ParagraphComponent).state).toBe(QueryStateType.Enabled)
+    expect(query.queryWrappedComponent(ParagraphComponent).value).toBe(paragraph)
+  })
+
+  test('和 Range 不重叠返回 false', () => {
+    const selection = editor.get(Selection)
+    const query = editor.get(Query)
+
+    selection.selectComponent(paragraph)
+    selection.wrapToBefore()
+
+    expect(query.queryWrappedComponent(ParagraphComponent).state).toBe(QueryStateType.Normal)
+    expect(query.queryWrappedComponent(ParagraphComponent).value).toBe(null)
+  })
 })
