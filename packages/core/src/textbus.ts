@@ -19,7 +19,7 @@ import {
   Registry,
   RootComponentRef,
   Scheduler,
-  Selection,
+  Selection, SelectionSnapshot,
   ZEN_CODING_DETECT,
 } from './foundation/_api'
 import { makeError } from './_utils/make-error'
@@ -144,6 +144,7 @@ export class Textbus extends ReflectiveInjector {
   private blurEvent = new Subject<void>()
   private saveEvent = new Subject<void>()
   private readyEvent = new Subject<void>()
+  private beforeSelection: SelectionSnapshot | null = null
 
   constructor(public config: TextbusConfig) {
     super(new NullInjector(), [], Textbus.diScope)
@@ -252,15 +253,18 @@ export class Textbus extends ReflectiveInjector {
    */
   focus() {
     this.guardReady()
+    if (this.beforeSelection) {
+      this.beforeSelection.restore(true)
+      this.beforeSelection = null
+      return
+    }
     const selection = this.get(Selection)
     const rootComponentRef = this.get(RootComponentRef)
     if (selection.commonAncestorSlot) {
       selection.restore()
       return
     }
-    const location = selection.findFirstPosition(rootComponentRef.component.__slots__.get(0)!)
-    selection.setPosition(location.slot, location.offset)
-    selection.restore()
+    selection.selectLastPosition(rootComponentRef.component, true)
   }
 
   /**
@@ -269,6 +273,7 @@ export class Textbus extends ReflectiveInjector {
   blur() {
     if (this.isReady) {
       const selection = this.get(Selection)
+      this.beforeSelection = selection.createSnapshot()
       selection.unSelect()
       selection.restore()
     }
