@@ -1,0 +1,86 @@
+{
+  "name": "@textbus/viewfly-test",
+  "version": "0.0.1",
+  "description": "A high-performance rich text editor that supports multiplayer online collaboration.",
+  "main": "./bundles/index.js",
+  "module": "./bundles/index.esm.js",
+  "types": "./bundles/public-api.d.ts",
+  "keywords": [
+    "textbus",
+    "xnote",
+    "富文本编辑器",
+    "wysiwyg",
+    "wysiwyg editor",
+    "rich text editor",
+    "editor",
+    "html editor",
+    "web editor",
+    "collaborate"
+  ],
+  "scripts": {
+    "start": "webpack-dev-server",
+    "serve": "npx y-websocket HOST=localhost PORT=1234 ",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@tanbo/color": "^0.1.1",
+    "@textbus/adapter-viewfly": "^4.0.0-alpha.64",
+    "@textbus/collaborate": "^4.0.0-alpha.64",
+    "@textbus/core": "^4.0.0-alpha.64",
+    "@textbus/platform-browser": "^4.0.0-alpha.64",
+    "@viewfly/core": "^1.0.0-alpha.16",
+    "@viewfly/hooks": "^1.0.0-alpha.16",
+    "@viewfly/platform-browser": "^1.0.0-alpha.16",
+    "@viewfly/scoped-css": "^1.0.0-alpha.16",
+    "highlight.js": "^11.9.0",
+    "katex": "^0.16.10"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.16.5",
+    "@babel/preset-env": "^7.16.5",
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@types/jest": "^29.5.2",
+    "@typescript-eslint/eslint-plugin": "^5.8.0",
+    "@typescript-eslint/parser": "^5.8.0",
+    "@viewfly/devtools": "^0.7.2",
+    "autoprefixer": "^10.4.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+    "core-js": "^3.20.1",
+    "cross-env": "^7.0.3",
+    "css-loader": "^6.8.1",
+    "eslint": "^8.5.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-webpack-plugin": "^3.1.1",
+    "extract-loader": "^5.1.0",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.5.0",
+    "ip": "^2.0.1",
+    "less": "^4.1.3",
+    "less-loader": "^11.1.3",
+    "mini-css-extract-plugin": "^2.4.5",
+    "postcss": "^8.4.38",
+    "postcss-loader": "^7.3.3",
+    "postcss-preset-env": "^8.5.0",
+    "postcss-selector-parser": "^6.0.16",
+    "rimraf": "^5.0.1",
+    "sass": "^1.63.4",
+    "sass-loader": "^10.4.1",
+    "style-loader": "^3.3.3",
+    "ts-loader": "^9.4.4",
+    "typescript": "^5.1.6",
+    "webpack": "^5.65.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-dev-server": "^4.7.1"
+  },
+  "author": {
+    "name": "Tanbo",
+    "email": "tanbohb@qq.com"
+  },
+  "bugs": {
+    "url": "https://github.com/textbus/xnote.git/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/textbus/xnote.git"
+  }
+}

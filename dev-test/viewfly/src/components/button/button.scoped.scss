@@ -1,0 +1,42 @@
+.btn {
+  border: none;
+  background: none;
+  outline: none;
+  padding: 6px 5px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all .2s;
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  font-size: inherit;
+  box-sizing: border-box;
+
+  > span {
+    white-space: nowrap;
+  }
+
+  &:hover {
+    background: rgba(0, 0, 0, .1);
+  }
+
+  &-arrow {
+    position: relative;
+    width: 1em;
+    transform: rotate(0);
+    transform-origin: 50%;
+  }
+
+  &.active {
+    background: rgba(0, 0, 0, .1);
+
+    .btn-arrow {
+      transform: rotate(180deg);
+    }
+  }
+
+  &.highlight {
+    color: #296eff;
+    background-color: #296eff10;
+  }
+}

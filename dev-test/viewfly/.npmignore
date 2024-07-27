@@ -1,0 +1,17 @@
+.DS_Store
+.idea/
+.vscode/
+node_modules/
+dist/
+public/
+src/
+.browserslistrc
+.eslintrc
+.gitignore
+.npmignore
+index.ts
+package-lock.json
+rollup.config.js
+tsconfig.json
+types.d.ts
+webpack.config.js

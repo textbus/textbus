@@ -1,0 +1,42 @@
+@import "../../../../assets/scroll";
+
+.scroll-container {
+  overflow-y: auto;
+  @include scroll();
+
+  &:before {
+    pointer-events: none;
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 6px;
+    left: 0;
+    width: 12px;
+    border-left: 1px solid #ddd;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, .1), rgba(0, 0, 0, 0));
+  }
+
+  &:after {
+    pointer-events: none;
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 6px;
+    right: 0;
+    width: 12px;
+    border-right: 1px solid #ddd;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, .1));
+  }
+
+  &.left-end {
+    &:before {
+      display: none;
+    }
+  }
+
+  &.right-end {
+    &:after {
+      display: none;
+    }
+  }
+}

@@ -1,0 +1,20 @@
+.drag-line {
+  box-sizing: content-box;
+  position: absolute;
+  width: 2px;
+  top: 0;
+  bottom: 0;
+  border-width: 0 5px;
+  border-style: solid;
+  margin-left: -5px;
+  border-color: transparent;
+  display: none;
+  cursor: col-resize;
+
+  &:before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #296eff;
+  }
+}

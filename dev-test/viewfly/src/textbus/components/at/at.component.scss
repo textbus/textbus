@@ -1,0 +1,81 @@
+.xnote-at {
+  color: #296eff;
+  display: inline-block;
+  line-height: 1em;
+
+  &-complete {
+    background-color: #296eff;
+    color: #fff;
+    border-radius: 1em;
+    padding: 4px 6px;
+    font-size: .9em;
+    margin-left: 2px;
+    margin-right: 2px;
+  }
+
+
+  &-input {
+    display: inline-block;
+    min-width: 2em;
+  }
+
+  &-menu {
+    user-select: none;
+  }
+
+  &-member {
+    display: flex;
+    border-radius: 4px;
+    height: 50px;
+    padding: 5px;
+    margin: 4px 0;
+    transition: background-color .2s;
+    cursor: pointer;
+    width: 100%;
+    overflow: hidden;
+
+    &:hover, &.selected {
+      background: #eee;
+    }
+
+    &-avatar {
+      width: 40px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+
+      img, &-bg {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        line-height: 36px;
+        background: #eee;
+        font-size: .9em;
+        display: inline-block;
+        overflow: hidden;
+      }
+    }
+
+    &-info {
+      flex: 1;
+      padding-left: 10px;
+      font-size: 14px;
+      width: 156px;
+    }
+
+    &-name {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    &-desc {
+      font-size: 12px;
+      opacity: .7;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+  }
+}

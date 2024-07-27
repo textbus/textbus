@@ -1,0 +1,59 @@
+.xnote-table {
+  margin-top: 16px;
+  margin-bottom: 16px;
+
+  &-inner {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+  }
+}
+
+
+.xnote-table-content {
+  border-spacing: 0;
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 0;
+  background: rgba(255, 255, 255, .8);
+
+  &.hide-selection {
+    * ::selection {
+      background: none;
+    }
+  }
+
+  td {
+    border: 1px solid #ddd;
+    padding: 0 10px;
+    box-sizing: content-box;
+  }
+}
+
+.xnote-table-bar {
+
+}
+
+.xnote-table-wrapper {
+  position: relative;
+}
+
+
+.xnote-table-container {
+  position: relative;
+}
+
+.xnote-table-delete-btn {
+  background: #eee;
+  border-radius: 4px;
+  width: 24px;
+  height: 30px;
+  line-height: 30px;
+  color: #5c6370;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    color: #333;
+  }
+}

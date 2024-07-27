@@ -1,0 +1,36 @@
+.left-toolbar {
+  position: absolute;
+  left: -10px;
+  top: 0;
+  z-index: 10;
+  font-size: 15px;
+}
+
+.left-toolbar-btn-wrap {
+  position: absolute;
+  transition: all .2s;
+}
+
+.left-toolbar-btn {
+  border-radius: 5px;
+  background: #fff;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  height: 26px;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+.btn-group {
+  padding: 5px 0;
+  font-size: 15px;
+  text-align: center;
+
+  button {
+    margin: 2px 5px
+  }
+}
+

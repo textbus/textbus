@@ -1,0 +1,31 @@
+.component-toolbar {
+  position: relative;
+  z-index: 3;
+}
+
+.toolbar {
+  position: absolute;
+  background: #fff;
+  border-radius: 5px;
+  padding: 0 6px;
+  height: 36px;
+  box-sizing: border-box;
+  border: 1px solid #dee0e3;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, .08);
+  display: flex;
+  font-size: 14px;
+  text-align: left;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(10px);
+  bottom: 10px;
+
+  &.active {
+    transition-property: all;
+    transition-duration: 0.2s;
+    transition-timing-function: ease;
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+}

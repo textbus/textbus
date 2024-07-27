@@ -1,0 +1,13 @@
+.xnote-blockquote {
+  padding: 0 15px;
+  border-left: 2px solid #296eff;
+  margin: 1em 0;
+}
+
+.xnote-blockquote > *:first-child {
+  margin-top: 0
+}
+
+.xnote-blockquote > *:last-child {
+  margin-bottom: 0
+}

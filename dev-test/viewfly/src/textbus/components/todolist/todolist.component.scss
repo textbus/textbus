@@ -1,0 +1,23 @@
+.xnote-todolist {
+  display: flex;
+  margin: 8px 0;
+  align-items: center;
+
+  &-icon {
+    margin-right: 6px;
+    cursor: pointer;
+    color: #296eff;
+  }
+
+  &-content {
+    min-width: 2em;
+    //flex: 1;
+    &[style*=text-indent] {
+      text-indent: 0 !important;
+    }
+
+    &[style*=text-align] {
+      text-align: left !important;
+    }
+  }
+}

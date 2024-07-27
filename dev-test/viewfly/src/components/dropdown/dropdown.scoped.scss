@@ -1,0 +1,17 @@
+.dropdown {
+  position: relative;
+  display: inline-block;
+
+  &:hover {
+    z-index: 1;
+  }
+
+  &-btn {
+    display: flex;
+    width: 100%;
+
+    &-inner {
+      flex: 1;
+    }
+  }
+}

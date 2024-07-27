@@ -1,0 +1,75 @@
+// 基础颜色
+$color-darker: #1c2838 !default; // 标题颜色
+$color-dark: #495060 !default; // 正文颜色
+$color-gray-dark: #80848f !default; // 图标、icon颜色
+$color-gray: #bbbec4 !default; // 表单边框颜色
+$color-gray-light: #dddee1 !default; // 内边线颜色
+$color-light: #e9eaec !default; // 布局边框颜色
+$color-lighter: #f8f8f9 !default; // 背景颜色
+
+@mixin scrollChild() {
+  /*---滚动条默认显示样式--*/
+  ::-webkit-scrollbar-thumb {
+    background-color: $color-gray-dark;
+    height: 50px;
+    outline-offset: 0;
+    outline: 0;
+    border-radius: 4px;
+    border: 0;
+  }
+
+  /*---鼠标点击滚动条显示样式--*/
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: $color-dark;
+    height: 50px;
+    //-webkit-border-radius: 4px;
+  }
+
+  /*---滚动条大小--*/
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  /*---滚动框背景样式--*/
+  ::-webkit-scrollbar-track-piece {
+    //background-color: $color-gray;
+    //-webkit-border-radius: 0;
+  }
+}
+
+@mixin scroll() {
+  &:hover {
+    &::-webkit-scrollbar-thumb {
+      background-color: $color-gray-dark;
+    }
+  }
+  /*---滚动条默认显示样式--*/
+  &::-webkit-scrollbar-thumb {
+    //background-color: $color-gray-dark;
+    height: 50px;
+    outline-offset: 0;
+    outline: 0;
+    border-radius: 4px;
+    border: 0;
+  }
+
+  /*---鼠标点击滚动条显示样式--*/
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: $color-dark;
+    height: 50px;
+  }
+
+  /*---滚动条大小--*/
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+    border-radius: 3px;
+  }
+
+  /*---滚动框背景样式--*/
+  &::-webkit-scrollbar-track-piece {
+    //background-color: $color-gray;
+    //-webkit-border-radius: 0;
+  }
+}

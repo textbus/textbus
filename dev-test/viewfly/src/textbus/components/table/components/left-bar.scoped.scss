@@ -1,0 +1,123 @@
+.left-bar {
+  width: 30px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: none;
+  margin-left: -30px;
+
+  &.active {
+    display: flex;
+  }
+}
+
+.toolbar-item {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+}
+
+.insert-bar {
+  width: 18px;
+
+  table {
+    border-spacing: 0;
+    border-collapse: collapse;
+    table-layout: fixed;
+
+    td {
+      border: 1px solid transparent;
+      position: relative;
+    }
+
+    .insert-btn-wrap {
+      width: 21px;
+      height: 21px;
+      position: absolute;
+      left: 0;
+      bottom: -8px;
+      z-index: 1;
+      cursor: pointer;
+
+      .insert-btn {
+        cursor: inherit;
+        background: #ccc;
+        border-radius: 50%;
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        border: none;
+        color: #fff;
+        font-size: 16px;
+        text-align: center;
+        line-height: 20px;
+        position: relative;
+        box-shadow: none;
+        transform: scale(0.2);
+        transition: transform .15s;
+
+        &:after {
+          position: absolute;
+          width: 10px;
+          height: 10px;
+          background: inherit;
+          content: "";
+          transform: rotateZ(45deg);
+          top: 5.5px;
+          left: 11px;
+          z-index: -1;
+        }
+      }
+
+      &:hover {
+        .insert-btn {
+          background: #296eff;
+          transform: scale(1);
+        }
+      }
+    }
+  }
+}
+
+.action-bar {
+  width: 12px;
+
+  table {
+    width: 13px;
+    border-spacing: 0;
+    border-collapse: collapse;
+    table-layout: fixed;
+    border-radius: 4px 0 0 4px;
+    overflow: hidden;
+
+    td {
+      box-sizing: border-box;
+      border: 1px solid #eee;
+      background: #eee;
+      cursor: pointer;
+      position: relative;
+      height: 12px;
+
+      &:hover {
+        background: #dedede;
+      }
+
+      &.active {
+        background: #296eff;
+        border-color: #2358c9;
+
+        &:before {
+          content: "";
+          position: absolute;
+          top: -1px;
+          border-width: 1px 0 0 0;
+          border-style: solid;
+          border-color: inherit;
+          left: -1px;
+          right: -1px;
+        }
+      }
+    }
+  }
+}
