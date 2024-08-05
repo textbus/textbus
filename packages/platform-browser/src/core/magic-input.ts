@@ -176,7 +176,7 @@ class ExperimentalCaret implements Caret {
     let docIsChanged = true
 
     function limitPosition(position: CaretPosition) {
-      const { top, bottom } = scroller.getLimit()
+      const {top, bottom} = scroller.getLimit()
       const caretTop = position.top
       if (caretTop + position.height > bottom) {
         const offset = caretTop - bottom + position.height
@@ -246,7 +246,7 @@ class ExperimentalCaret implements Caret {
       nativeRange.collapse()
     }
     const rect = getLayoutRectByRange(nativeRange)
-    const { fontSize, lineHeight, color } = getComputedStyle(node)
+    const {fontSize, lineHeight, color} = getComputedStyle(node)
 
     let height: number
     if (isNaN(+lineHeight)) {
@@ -623,8 +623,11 @@ export class MagicInput extends Input {
         if (text) {
           this.commander.write(text)
         }
+        const startSlot = this.selection.startSlot
+        if (startSlot) {
+          startSlot.changeMarker.forceMarkDirtied()
+        }
         if (isCompositionEnd) {
-          const startSlot = this.selection.startSlot
           if (startSlot) {
             const event = new Event<Slot>(startSlot, null)
             invokeListener(startSlot.parent!, 'onCompositionEnd', event)
