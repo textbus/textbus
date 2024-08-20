@@ -158,7 +158,6 @@ export class NodeViewAdapter extends Adapter<VDOMElement, VDOMText, JSXNode, JSX
         const instance = viewFlyComponent(props)
         if (typeof instance === 'function') {
           return () => {
-            component.__slots__.forEach(i => this.renderedSlotCache.delete(i))
             component.__slots__.length = 0
             this.componentRendingStack.push(component)
             return instance()
@@ -168,7 +167,6 @@ export class NodeViewAdapter extends Adapter<VDOMElement, VDOMText, JSXNode, JSX
         return {
           ...instance,
           $render(): JSXNode {
-            component.__slots__.forEach(i => self.renderedSlotCache.delete(i))
             component.__slots__.length = 0
             self.componentRendingStack.push(component)
             return instance.$render()
