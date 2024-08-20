@@ -1,13 +1,10 @@
 import { Observable } from '@tanbo/stream'
-import { Injector, JSXNode } from '@viewfly/core'
+import { Injector } from '@viewfly/core'
 
 import { Component, invokeListener } from '../model/component'
 import { Slot } from '../model/slot'
 import { NodeLocation, VElement, VTextNode } from '../model/element'
-import { makeError } from '../_utils/make-error'
 import { createBidirectionalMapping, replaceEmpty } from '../_utils/tools'
-
-const adapterError = makeError('TextbusAdapter')
 
 export interface ViewMount<ViewComponent, NativeElement> {
   (host: NativeElement, viewComponent: ViewComponent, injector: Injector): (void | (() => void))
@@ -58,7 +55,6 @@ export abstract class Adapter<
   protected firstRending = true
 
   protected componentRendingStack: Component[] = []
-  protected renderedSlotCache = new WeakMap<Slot, true>()
   protected slotRootVElementCaches = new WeakMap<Slot, VElement>()
   protected slotRootNativeElementCaches = createBidirectionalMapping<Slot, NativeElement>(a => {
     return a instanceof Slot
@@ -90,16 +86,13 @@ export abstract class Adapter<
     const context = this.componentRendingStack[this.componentRendingStack.length - 1]!
     if (context) {
       context.__slots__.push(slot)
-    } else if (!this.renderedSlotCache.has(slot)) {
-      throw adapterError(`Unrendered slots must be rendered together with the corresponding "${slot.parent?.name || 'unknown'}" component`)
     }
-    this.renderedSlotCache.set(slot, true)
 
     const vElement = slot.toTree(slotHostRender, renderEnv)
     this.slotRootVElementCaches.set(slot, vElement)
 
     const vNodeToJSX = (vNode: VElement) => {
-      const children: JSXNode[] = []
+      const children: any[] = []
       const composition = this.composition
       if (composition && composition.slot === slot) {
         this.insertCompositionByIndex(slot, vNode, composition, () => {

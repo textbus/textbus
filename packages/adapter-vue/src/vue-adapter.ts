@@ -137,7 +137,6 @@ export class VueAdapter extends DomAdapter<VNode, VNode> {
         const result = (setup as any)(props, context, ...args)
         if (typeof result === 'function') {
           return function (this: any, ...args: any[]) {
-            component.__slots__.forEach(i => self.renderedSlotCache.delete(i))
             component.__slots__.length = 0
             self.componentRendingStack.push(component)
             return result.apply(this, args)
