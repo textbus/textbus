@@ -8,6 +8,7 @@ import { State } from './types'
 import { Textbus } from '../textbus'
 import { Slots } from './slots'
 import { createObjectProxy, objectToJSON } from './proxy'
+import { Attribute, Formatter } from './attribute'
 
 const componentErrorFn = makeError('Component')
 
@@ -248,6 +249,22 @@ export interface CompositionUpdateEventData {
 }
 
 /**
+ * 组件插槽设置属性事件对象
+ */
+export interface SlotSetAttributeEventData<T = any> {
+  attribute: Attribute<T>
+  value: T
+}
+
+/**
+ * 组件插槽应用格式事件对象
+ */
+export interface SlotApplyFormatEventData<T = any> {
+  formatter: Formatter<T>
+  value: T
+}
+
+/**
  * 上下文本菜单配置项
  */
 export interface ContextMenuItem {
@@ -313,6 +330,9 @@ export interface EventTypes {
   onCompositionStart: (event: Event<Slot, CompositionStartEventData>) => void
   onCompositionUpdate: (event: Event<Slot, CompositionUpdateEventData>) => void
   onCompositionEnd: (event: Event<Slot>) => void
+
+  onSlotSetAttribute: (event: Event<Slot, SlotSetAttributeEventData>) => void
+  onSlotApplyFormat: (event: Event<Slot, SlotApplyFormatEventData>) => void
 }
 
 class EventCache<T, K extends keyof T = keyof T> {
@@ -453,6 +473,8 @@ export function invokeListener(target: Component, eventType: 'onGetRanges', even
 export function invokeListener(target: Component, eventType: 'onCompositionStart', event: Event<Slot, CompositionStartEventData>): void
 // eslint-disable-next-line max-len
 export function invokeListener(target: Component, eventType: 'onCompositionUpdate', event: Event<Slot, CompositionUpdateEventData>): void
+export function invokeListener(target: Component, eventType: 'onSlotSetAttribute', event: Event<Slot, SlotSetAttributeEventData>): void
+export function invokeListener(target: Component, eventType: 'onSlotApplyFormat', event: Event<Slot, SlotApplyFormatEventData>): void
 export function invokeListener(target: Component, eventType: 'onCompositionEnd', event: Event<Slot>): void
 export function invokeListener(target: Component, eventType: 'onSelected'): void
 export function invokeListener(target: Component, eventType: 'onUnselect'): void
@@ -613,3 +635,11 @@ export const onCompositionEnd = makeEventHook('onCompositionEnd')
  * 当组件的父插槽数据发生更新后触发
  */
 export const onParentSlotUpdated = makeEventHook('onParentSlotUpdated')
+/**
+ * 当组件插槽设置属性时触发
+ */
+export const onSlotSetAttribute = makeEventHook('onSlotSetAttribute')
+/**
+ * 当组件插槽应用格式时触发
+ */
+export const onSlotApplyFormat = makeEventHook('onSlotApplyFormat')
