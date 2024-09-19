@@ -446,7 +446,7 @@ export class Selection {
   }
 
   /**
-   * 获取选区内的选择范围，一般情况下为一个。组件可以 onGetRanges 勾子函数中定制范围个数，如表格中可能为多个
+   * 获取选区内的选择范围，一般情况下为一个。组件可以通过 onGetRanges 勾子函数中定制范围个数，如表格中可能为多个
    */
   getRanges(): Range[] {
     if (this.customRanges) {

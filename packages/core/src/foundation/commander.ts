@@ -731,37 +731,31 @@ export class Commander {
    * @param value 当前格式要应用的值
    */
   applyFormat<T extends FormatValue>(formatter: Formatter<T>, value: T) {
-    function canApplyFormat(slot: Slot, component: Component<any>) {
+    function canApplyFormat(slot: Slot, formatter: Formatter<T>, value: any) {
       const event = new Event<Slot, SlotApplyFormatEventData>(slot, {
         formatter,
         value
       })
-      invokeListener(component, 'onSlotApplyFormat', event)
+      invokeListener(slot.parent!, 'onSlotApplyFormat', event)
       return !event.isPrevented
     }
 
     if (this.selection.isCollapsed) {
       const slot = this.selection.commonAncestorSlot!
       if (slot.isEmpty) {
-        if (canApplyFormat(slot, slot.parent!)) {
-          slot.retain(0)
-          slot.retain(slot.length, formatter, value)
-        }
+        slot.retain(0)
+        slot.retain(slot.length, formatter, value, canApplyFormat)
       } else {
         this.write(Slot.placeholder)
-        if (canApplyFormat(slot, slot.parent!)) {
-          const startOffset = this.selection.startOffset!
-          slot.retain(startOffset - 1)
-          slot.retain(1, formatter, value)
-        }
+        const startOffset = this.selection.startOffset!
+        slot.retain(startOffset - 1)
+        slot.retain(1, formatter, value, canApplyFormat)
       }
       return
     }
     this.selection.getSelectedScopes().forEach(i => {
-      if (canApplyFormat(i.slot, i.slot.parent!)) {
-        i.slot.retain(i.startIndex)
-        i.slot.retain(i.endIndex - i.startIndex, formatter, value)
-      }
+      i.slot.retain(i.startIndex)
+      i.slot.retain(i.endIndex - i.startIndex, formatter, value, canApplyFormat)
     })
   }
 
@@ -801,20 +795,18 @@ export class Commander {
    * @param value
    */
   applyAttribute<T extends FormatValue>(attribute: Attribute<T>, value: T) {
-    function canApplyAttr(slot: Slot, component: Component<any>) {
+    function canApplyAttr(slot: Slot, attr: Attribute, value: any) {
       const event = new Event<Slot, SlotSetAttributeEventData>(slot, {
         attribute,
         value
       })
-      invokeListener(component, 'onSlotSetAttribute', event)
+      invokeListener(slot.parent!, 'onSlotSetAttribute', event)
       return !event.isPrevented
     }
 
     if (this.selection.isCollapsed) {
       const slot = this.selection.commonAncestorSlot!
-      if (canApplyAttr(slot, slot.parent!)) {
-        slot.setAttribute(attribute, value)
-      }
+      slot.setAttribute(attribute, value, canApplyAttr)
       return
     }
     this.selection.getSelectedScopes().forEach(i => {
@@ -829,15 +821,11 @@ export class Commander {
         }
       })
       if (hasInlineContent) {
-        if (canApplyAttr(i.slot, i.slot.parent!)) {
-          i.slot.setAttribute(attribute, value)
-        }
+        i.slot.setAttribute(attribute, value, canApplyAttr)
       } else {
         childComponents.forEach(i => {
           i.__slots__.forEach(slot => {
-            if (canApplyAttr(slot, i)) {
-              slot.setAttribute(attribute, value)
-            }
+            slot.setAttribute(attribute, value, canApplyAttr)
           })
         })
       }

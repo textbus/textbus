@@ -116,8 +116,12 @@ export class Slot {
    * 设置属性
    * @param attribute
    * @param value
+   * @param canSet
    */
-  setAttribute(attribute: Attribute<any>, value: FormatValue) {
+  setAttribute(attribute: Attribute<any>, value: FormatValue, canSet?: (slot: Slot, attr: Attribute, value: any) => boolean) {
+    if (typeof canSet === 'function' && !canSet(this, attribute, value)) {
+      return
+    }
     const has = this.attributes.has(attribute)
     const v = this.attributes.get(attribute)
 
@@ -238,10 +242,14 @@ export class Slot {
    * 向插槽内写入内容，并可同时应用格式
    * @param content
    * @param formats
+   * @param canApply
    */
-  insert(content: string | Component, formats?: Formats): boolean
-  insert<T>(content: string | Component, formatter?: Formatter<T>, value?: T): boolean
-  insert(content: string | Component, formatter?: Formatter<any> | Formats, value?: FormatValue): boolean {
+  insert(content: string | Component, formats?: Formats,
+         canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean
+  insert<T>(content: string | Component, formatter?: Formatter<T>, value?: T,
+            canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean
+  insert(content: string | Component, formatter?: Formatter<any> | Formats, value?: FormatValue,
+         canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean {
     const contentType = typeof content === 'string' ? ContentType.Text : content.type
     if (!this.schema.includes(contentType)) {
       return false
@@ -284,7 +292,7 @@ export class Slot {
     this.format.split(startIndex, length)
 
     this.content.insert(startIndex, content)
-    this.applyFormats(formats, startIndex, length, false)
+    this.applyFormats(formats, startIndex, length, false, canApply || (() => true))
 
     if (isEmpty) {
       const len = this.length - 1
@@ -332,9 +340,12 @@ export class Slot {
    * @param offset
    */
   retain(offset: number): boolean
-  retain(offset: number, formats: Formats): boolean
-  retain<T>(offset: number, formatter: Formatter<T>, value: T | null): boolean
-  retain(offset: number, formatter?: Formatter<any> | Formats, value?: FormatValue | null): boolean {
+  retain(offset: number, formats: Formats,
+         canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean
+  retain<T>(offset: number, formatter: Formatter<T>, value: T | null,
+            canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean
+  retain(offset: number, formatter?: Formatter<any> | Formats, value?: FormatValue | null,
+         canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean {
     let formats: Formats = []
     if (formatter) {
       if (Array.isArray(formatter)) {
@@ -380,7 +391,7 @@ export class Slot {
       const offset = content.length
       if (typeof content === 'string' || content.type !== ContentType.BlockComponent) {
         const deletedFormat = this.format.extract(index, index + offset)
-        this.applyFormats(formats, index, offset, this.applyFormatCoverChild)
+        this.applyFormats(formats, index, offset, this.applyFormatCoverChild, canApply || (() => true))
         applyActions.push({
           type: 'retain',
           offset: index
@@ -784,16 +795,22 @@ export class Slot {
     return root
   }
 
-  private applyFormats(formats: Formats, startIndex: number, offset: number, background: boolean) {
+  private applyFormats(formats: Formats,
+                       startIndex: number,
+                       offset: number,
+                       background: boolean,
+                       canApply: (slot: Slot, formatter: Formatter<any>, value: any) => boolean) {
     formats.forEach(keyValue => {
       const key = keyValue[0]
       const value = keyValue[1]
 
-      this.format.merge(key, {
-        startIndex,
-        endIndex: startIndex + offset,
-        value
-      }, background)
+      if (canApply(this, key, value)) {
+        this.format.merge(key, {
+          startIndex,
+          endIndex: startIndex + offset,
+          value
+        }, background)
+      }
     })
   }
 
