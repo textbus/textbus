@@ -8,7 +8,7 @@ import {
   Slot,
   Subject,
   Textbus,
-  Registry,
+  Registry, onSlotSetAttribute, onSlotApplyFormat,
 } from '@textbus/core'
 import { ComponentLoader, SlotParser } from '@textbus/platform-browser'
 import { createDynamicRef, onUpdated } from '@viewfly/core'
@@ -45,6 +45,12 @@ export class RootComponent extends Component<RootComponentState> {
 
     onCompositionStart(ev => {
       this.onCompositionStart.next(ev)
+    })
+    onSlotSetAttribute(ev => {
+      ev.preventDefault()
+    })
+    onSlotApplyFormat(ev => {
+      ev.preventDefault()
     })
   }
 

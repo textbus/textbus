@@ -55,9 +55,9 @@ export function SelectionMask(props: SelectionMaskProps) {
       updateStyles(draft => {
         draft.visible = true
         draft.left = sum(state.layoutWidth.slice(0, selection.startColumn))
-        draft.top = sum(trs.slice(0, selection.startRow).map(i => i.offsetHeight)) + topCompensation
+        draft.top = trs[selection.startRow].offsetTop + topCompensation
         draft.width = sum(state.layoutWidth.slice(selection.startColumn, selection.endColumn)) - 1 + 'px'
-        draft.height = sum(trs.slice(selection.startRow, selection.endRow).map(i => i.offsetHeight)) + heightCompensation + 'px'
+        draft.height = trs[selection.endRow - 1].offsetTop + trs[selection.endRow - 1].offsetHeight + heightCompensation - draft.top + 'px'
       })
     } else {
       updateStyles(draft => {

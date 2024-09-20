@@ -32,7 +32,7 @@ export function DragResize(props: DragResizeProps) {
     isShow.set(true)
     const width = ref.current!.offsetWidth
     const height = ref.current!.offsetHeight
-    mask.current!.innerText = `${Math.round(width)}px * ${Math.round(height)}px`
+    sizeText.set(`${Math.round(width)}px * ${Math.round(height)}px`)
   })
 
   function selectComponent() {
@@ -122,7 +122,7 @@ export function DragResize(props: DragResizeProps) {
       ele.style.width = endWidth + 'px'
       ele.style.height = endHeight + 'px'
 
-      mask.current!.innerText = `${Math.round(endWidth)}px * ${Math.round(endHeight)}px`
+      sizeText.set(`${Math.round(endWidth)}px * ${Math.round(endHeight)}px`)
     })
 
     const unUp = fromEvent(document, 'mouseup').subscribe(() => {
@@ -134,6 +134,8 @@ export function DragResize(props: DragResizeProps) {
     })
   }
 
+  const sizeText = createSignal(`${component.state.width}*${component.state.height}`)
+
   return withScopedCSS(style, () => {
     return (
       <div class="drag-resize" onClick={selectComponent}>
@@ -143,7 +145,7 @@ export function DragResize(props: DragResizeProps) {
         <div class={['resize-tool', {
           active: isShow()
         }]}>
-          <div class="mask" ref={mask}>{component.state.width}*{component.state.height}</div>
+          <div class="mask" ref={mask}>{sizeText()}</div>
           <div class="btn-group" ref={btnGroup} onMousedown={drag}>
             <button type="button"></button>
             <button type="button"></button>

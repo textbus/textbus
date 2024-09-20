@@ -26,5 +26,5 @@
     "jsx": "react-jsx",
     "jsxImportSource": "@viewfly/core"
   },
-  "exclude": ["packages", "_docs", "helper"]
+  "exclude": ["packages", "dev-test", "helper"]
 }

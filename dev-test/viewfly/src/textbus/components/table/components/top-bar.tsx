@@ -1,5 +1,5 @@
 import { withScopedCSS } from '@viewfly/scoped-css'
-import { createSignal, getCurrentInstance, inject, onMounted, onUnmounted, Signal, StaticRef } from '@viewfly/core'
+import { createSignal, getCurrentInstance, inject, onMounted, onUnmounted, Signal } from '@viewfly/core'
 import { Slot, Selection, Textbus, fromEvent } from '@textbus/core'
 
 import css from './top-bar.scoped.scss'
@@ -13,7 +13,6 @@ import { TableService } from '../table.service'
 export interface TopBarProps {
   isFocus: Signal<boolean>
   component: TableComponent
-  scrollRef: StaticRef<HTMLDivElement>
   layoutWidth: Signal<number[]>
 }
 

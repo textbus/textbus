@@ -91,7 +91,8 @@ module.exports = {
     new EslintWebpackPlugin({
       extensions: ['.ts', '.tsx'],
       exclude: [
-        './test'
+        './test',
+        './dev-test'
       ]
     }),
     new HtmlWebpackPlugin({

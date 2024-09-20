@@ -37,7 +37,6 @@ export const TableComponentView = withAnnotation({
   })
 
   const tableRef = createRef<HTMLTableElement>()
-  const scrollRef = createRef<HTMLDivElement>()
 
   const isResizeColumn = createSignal(false)
 
@@ -106,12 +105,12 @@ export const TableComponentView = withAnnotation({
             isFocus={isFocus}
             layoutWidth={layoutWidth}
             component={props.component}
-            scrollRef={scrollRef}/>
+          />
           <LeftBar
             tableRef={tableRef}
             isFocus={isFocus}
             component={props.component}/>
-          <Scroll scrollRef={scrollRef} isFocus={isFocus}>
+          <Scroll isFocus={isFocus}>
             <div class="xnote-table-container">
               <table ref={tableRef} class={[
                 'xnote-table-content',

@@ -8,7 +8,7 @@ import {
   onBlur,
   onBreak,
   onFocus,
-  onPaste,
+  onPaste, onSlotApplyFormat, onSlotSetAttribute,
   Registry,
   Selection,
   Slot,
@@ -275,6 +275,13 @@ export class SourceCodeComponent extends Component<SourceCodeComponentState> {
       textbus.nextTick(() => {
         selection.setPosition(nextSlot, 0)
       })
+      ev.preventDefault()
+    })
+
+    onSlotApplyFormat(ev => {
+      ev.preventDefault()
+    })
+    onSlotSetAttribute(ev => {
       ev.preventDefault()
     })
 

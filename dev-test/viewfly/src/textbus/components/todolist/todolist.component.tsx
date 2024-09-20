@@ -152,7 +152,7 @@ export function TodolistView(props: ViewComponentProps<TodolistComponent>) {
     return (
       <div data-component={TodolistComponent.componentName} ref={props.rootRef} class="xnote-todolist" style={{
         marginLeft: indent * 24 + 'px',
-        justifyContent: align[component.state.slot.getAttribute(textAlignAttr)!],
+        justifyContent: align[component.state.slot.getAttribute(textAlignAttr)!] as any,
         textAlign: component.state.slot.getAttribute(textAlignAttr) === 'justify' ? 'justify' : void 0
       }}>
         <div class="xnote-todolist-icon" onClick={toggle}>
