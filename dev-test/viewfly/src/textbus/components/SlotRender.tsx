@@ -2,6 +2,7 @@ import { Slot, createVNode } from '@textbus/core'
 import { DomAdapter } from '@textbus/platform-browser'
 import { DynamicRef, getCurrentInstance, inject, onUnmounted } from '@viewfly/core'
 import { HTMLAttributes } from '@viewfly/platform-browser'
+import { merge } from '@tanbo/stream'
 
 
 interface Props extends HTMLAttributes<unknown> {
@@ -15,11 +16,14 @@ interface Props extends HTMLAttributes<unknown> {
 }
 
 export function SlotRender(props: Props) {
-  const adaper = inject(DomAdapter)
+  const adapter = inject(DomAdapter)
 
   const instance = getCurrentInstance()
-  const sub = props.slot.__changeMarker__.onChange.subscribe(() => {
-    instance.markAsDirtied()
+  const slot = props.slot
+  const sub = merge(slot.__changeMarker__.onChange, slot.__changeMarker__.onForceChange).subscribe(() => {
+    if (props.slot.__changeMarker__.dirty) {
+      instance.markAsDirtied()
+    }
   })
 
   onUnmounted(() => {
@@ -28,7 +32,7 @@ export function SlotRender(props: Props) {
 
   return () => {
     const { slot, tag = 'div', renderEnv = false, elRef, elKey, ...rest } = props
-    return adaper.slotRender(slot, children => {
+    return adapter.slotRender(slot, children => {
       return createVNode(tag, { ref: elRef, key: elKey, ...rest }, children)
     }, renderEnv)
   }

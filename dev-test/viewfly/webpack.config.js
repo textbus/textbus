@@ -87,10 +87,10 @@ module.exports = {
     }]
   },
   plugins: [
-    new EslintWebpackPlugin({
-      context: __dirname,
-      extensions: ['.ts', '.tsx']
-    }),
+    // new EslintWebpackPlugin({
+    //   context: __dirname,
+    //   extensions: ['.ts', '.tsx']
+    // }),
     new HtmlWebpackPlugin({
       template: './public/index.html',
       publicPath: '/',

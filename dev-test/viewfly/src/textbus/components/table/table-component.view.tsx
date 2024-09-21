@@ -99,7 +99,8 @@ export const TableComponentView = withAnnotation({
       )
     }
     return (
-      <div class="xnote-table" data-component={props.component.name} data-layout-width={state.layoutWidth}>
+      <div class="xnote-table" data-component={props.component.name}
+           data-layout-width={`[${state.layoutWidth.join(',')}]`}>
         <div class="xnote-table-inner" ref={props.rootRef}>
           <TopBar
             isFocus={isFocus}
@@ -167,10 +168,11 @@ export const tableComponentLoader: ComponentLoader = {
     return element.dataset.component === TableComponent.componentName || element.tagName === 'TABLE'
   },
   read(element: HTMLElement, textbus: Textbus, slotParser: SlotParser): TableComponent | Slot | void {
+    let content: HTMLElement = element
     if (element.tagName === 'DIV') {
-      element = element.querySelector('.xnote-table-content') as HTMLTableElement
+      content = element.querySelector('.xnote-table-content') as HTMLTableElement
     }
-    const { tHead, tBodies, tFoot } = element as HTMLTableElement
+    const { tHead, tBodies, tFoot } = content as HTMLTableElement
     const headers: TableCellConfig[][] = []
     const bodies: TableCellConfig[][] = []
     if (tHead) {
