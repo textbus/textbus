@@ -1,6 +1,6 @@
 {
   "name": "@textbus/adapter-react",
-  "version": "4.0.0-alpha.69",
+  "version": "4.0.0-alpha.70",
   "description": "Textbus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
   "main": "./bundles/index.js",
   "module": "./bundles/index.esm.js",
@@ -26,8 +26,8 @@
   ],
   "dependencies": {
     "@tanbo/stream": "^1.2.5",
-    "@textbus/core": "^4.0.0-alpha.69",
-    "@textbus/platform-browser": "^4.0.0-alpha.69",
+    "@textbus/core": "^4.0.0-alpha.70",
+    "@textbus/platform-browser": "^4.0.0-alpha.70",
     "react": "^17.0.0 || ^18.0.0"
   },
   "devDependencies": {
