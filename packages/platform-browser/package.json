@@ -1,6 +1,6 @@
 {
   "name": "@textbus/platform-browser",
-  "version": "4.0.0-alpha.70",
+  "version": "4.0.0-alpha.71",
   "description": "Textbus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
   "main": "./bundles/index.js",
   "module": "./bundles/index.esm.js",
@@ -26,8 +26,8 @@
   ],
   "dependencies": {
     "@tanbo/stream": "^1.2.5",
-    "@textbus/collaborate": "^4.0.0-alpha.70",
-    "@textbus/core": "^4.0.0-alpha.70",
+    "@textbus/collaborate": "^4.0.0-alpha.71",
+    "@textbus/core": "^4.0.0-alpha.71",
     "@viewfly/core": "^1.0.0-alpha.17"
   },
   "devDependencies": {
