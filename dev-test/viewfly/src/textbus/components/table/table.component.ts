@@ -88,6 +88,12 @@ export class TableComponent extends Component<TableComponentState> {
   focus = new Subject<boolean>()
   tableSelection = createSignal<TableSelection | null>(null)
 
+  override getSlots(): Slot[] {
+    return this.state.rows.map(i => {
+      return i.cells.map(j => j.slot)
+    }).flat()
+  }
+
   override setup() {
     const selection = useContext(Selection)
     onFocusIn(() => {

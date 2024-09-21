@@ -69,6 +69,10 @@ export class TodolistComponent extends Component<TodolistComponentState> {
     })
   }
 
+  override getSlots(): Slot[] {
+    return [this.state.slot]
+  }
+
   override setup() {
     const textbus = useContext()
     const commander = useContext(Commander)

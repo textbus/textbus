@@ -54,7 +54,6 @@ export abstract class Adapter<
 
   protected firstRending = true
 
-  protected componentRendingStack: Component[] = []
   protected slotRootVElementCaches = new WeakMap<Slot, VElement>()
   protected slotRootNativeElementCaches = createBidirectionalMapping<Slot, NativeElement>(a => {
     return a instanceof Slot
@@ -83,11 +82,6 @@ export abstract class Adapter<
   slotRender(slot: Slot,
              slotHostRender: (children: Array<VElement | VTextNode | Component>) => VElement,
              renderEnv?: any): ViewElement {
-    const context = this.componentRendingStack[this.componentRendingStack.length - 1]!
-    if (context) {
-      context.__slots__.push(slot)
-    }
-
     const vElement = slot.toTree(slotHostRender, renderEnv)
     this.slotRootVElementCaches.set(slot, vElement)
 

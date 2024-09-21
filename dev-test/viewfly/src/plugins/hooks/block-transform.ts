@@ -136,7 +136,7 @@ export function useBlockTransform() {
 
           commander.removeComponent(current)
 
-          current.__slots__.get(0)!.sliceContent().forEach(i => {
+          current.slots.at(0)!.sliceContent().forEach(i => {
             parent.insert(i)
           })
         } else {

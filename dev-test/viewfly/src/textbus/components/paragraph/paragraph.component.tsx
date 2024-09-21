@@ -46,6 +46,10 @@ export class ParagraphComponent extends Component<ParagraphComponentState> {
     super(textbus, state)
   }
 
+  override getSlots(): Slot[] {
+    return [this.state.slot]
+  }
+
   override setup() {
     const injector = useContext()
     const commander = injector.get(Commander)

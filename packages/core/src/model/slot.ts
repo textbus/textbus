@@ -133,7 +133,7 @@ export class Slot {
     }]
     this.sliceContent().forEach(item => {
       if (typeof item !== 'string') {
-        item.__slots__.forEach(slot => {
+        item.slots.forEach(slot => {
           slot.setAttribute(attribute, value)
         })
       }
@@ -175,7 +175,7 @@ export class Slot {
   removeAttribute(attribute: Attribute<any>) {
     this.sliceContent().forEach(item => {
       if (typeof item !== 'string') {
-        item.__slots__.forEach(slot => {
+        item.slots.forEach(slot => {
           slot.removeAttribute(attribute)
         })
       }
@@ -411,7 +411,7 @@ export class Slot {
           formats: resetFormatObj
         }, ...Slot.createActionByFormat(deletedFormat))
       } else {
-        content.__slots__.forEach(slot => {
+        content.slots.forEach(slot => {
           if (this.applyFormatCoverChild) {
             slot.background(() => {
               slot.retain(0)
@@ -733,7 +733,7 @@ export class Slot {
     } else {
       this.sliceContent(startIndex, endIndex).forEach(item => {
         if (typeof item !== 'string') {
-          item.__slots__.forEach(slot => {
+          item.slots.forEach(slot => {
             slot.cleanFormats(excludeFormats)
           })
         }
@@ -764,7 +764,7 @@ export class Slot {
     })
     this.sliceContent().forEach(item => {
       if (typeof item !== 'string') {
-        item.__slots__.forEach(slot => {
+        item.slots.forEach(slot => {
           slot.cleanAttributes(excludeAttributes)
         })
       }

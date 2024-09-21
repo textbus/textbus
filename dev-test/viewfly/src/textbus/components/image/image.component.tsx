@@ -23,6 +23,10 @@ export class ImageComponent extends Component<ImageComponentState> {
       ...json
     })
   }
+
+  override getSlots(): Slot[] {
+    return []
+  }
 }
 
 export function ImageView(props: ViewComponentProps<ImageComponent>) {

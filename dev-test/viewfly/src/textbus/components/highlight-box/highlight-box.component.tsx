@@ -37,6 +37,10 @@ export class HighlightBoxComponent extends Component<HighlightBoxComponentState>
     super(textbus, state)
   }
 
+  override getSlots(): Slot[] {
+    return [this.state.slot]
+  }
+
   override setup() {
     useBlockContent(this.state.slot)
   }

@@ -188,7 +188,7 @@ export class Keyboard {
           commander.insert(newInstance)
         } else {
           const parentComponent = commonAncestorSlot.parent
-          if (parentComponent && parentComponent.__slots__.length > 1) {
+          if (parentComponent && parentComponent.slots.length > 1) {
             return false
           }
           const parentSlot = parentComponent?.parent
@@ -200,7 +200,7 @@ export class Keyboard {
           commander.insert(newInstance)
         }
         this.scheduler.addUpdatedTask(() => {
-          const newSlot = newInstance.__slots__.first
+          const newSlot = newInstance.slots.at(0)
           if (newSlot) {
             selection.setPosition(newSlot, 0)
           } else if (newInstance.parent) {

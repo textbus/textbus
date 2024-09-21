@@ -40,6 +40,10 @@ export class RootComponent extends Component<RootComponentState> {
 
   onCompositionStart = new Subject<Event<Slot, CompositionStartEventData>>()
 
+  override getSlots(): Slot[] {
+    return [this.state.content]
+  }
+
   override setup() {
     useBlockContent((slot) => slot === this.state.content)
 

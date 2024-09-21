@@ -95,13 +95,15 @@ export abstract class Component<T extends State = State> {
     return this.parent?.parent || null
   }
 
-  /** 组件长度，固定为 1 */
-  readonly length = 1
   /**
    * 组件的子插槽集合
-   * @internal
    */
-  readonly __slots__ = new Slots()
+  get slots() {
+    return this.getSlots()
+  }
+
+  /** 组件长度，固定为 1 */
+  readonly length = 1
   /** 组件动态上下文菜单注册表 */
   readonly shortcutList: Shortcut[] = []
   /** 组件名 */
@@ -142,6 +144,11 @@ export abstract class Component<T extends State = State> {
   }
 
   /**
+   * 获取组件数据模型上插槽的集合，需要按渲染顺序返回一个数组
+   */
+  abstract getSlots(): Slot[]
+
+  /**
    * 组件转为 JSON 数据的方法
    */
   toJSON(): ComponentLiteral<State> {
@@ -155,7 +162,9 @@ export abstract class Component<T extends State = State> {
    * 将组件转换为 string
    */
   toString(): string {
-    return this.__slots__.toString()
+    return this.getSlots().map(i => {
+      return i.toString()
+    }).join('')
   }
 }
 

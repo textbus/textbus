@@ -229,6 +229,10 @@ export class SourceCodeComponent extends Component<SourceCodeComponentState> {
 
   focus = new BehaviorSubject<boolean>(false)
 
+  override getSlots(): Slot[] {
+    return this.state.slots.map(i => i.slot)
+  }
+
   override setup() {
     const textbus = useContext()
 

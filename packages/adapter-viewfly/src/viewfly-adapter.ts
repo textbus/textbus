@@ -132,34 +132,13 @@ export class ViewflyAdapter extends DomAdapter<JSXNode, Element> {
           isRoot = false
         }
         onUpdated(() => {
-          const context = this.componentRendingStack[this.componentRendingStack.length - 1]!
-          if (context === component) {
-            this.componentRendingStack.pop()
-          }
           textbusComponent.changeMarker.rendered()
           if (!this.componentRootElementCaches.get(textbusComponent)) {
             // eslint-disable-next-line max-len
             throw adapterError(`Component \`${textbusComponent.name}\` is not bound to rootRef, you must bind rootRef to the root element node of the component view.`)
           }
         })
-        const component = props.component
-        const instance = viewFlyComponent(props)
-        if (typeof instance === 'function') {
-          return () => {
-            component.__slots__.length = 0
-            this.componentRendingStack.push(component)
-            return instance()
-          }
-        }
-        const self = this
-        return {
-          ...instance,
-          $render(): JSXNode {
-            component.__slots__.length = 0
-            self.componentRendingStack.push(component)
-            return instance.$render()
-          }
-        }
+        return viewFlyComponent(props)
       })
     })
   }

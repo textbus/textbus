@@ -119,10 +119,6 @@ export class VueAdapter extends DomAdapter<VNode, VNode> {
           }
         })
         onUpdated(() => {
-          const context = self.componentRendingStack[self.componentRendingStack.length - 1]!
-          if (context === component) {
-            self.componentRendingStack.pop()
-          }
           component.changeMarker.rendered()
           self.onViewUpdated.next()
 
@@ -134,25 +130,7 @@ export class VueAdapter extends DomAdapter<VNode, VNode> {
         onUnmounted(() => {
           sub.unsubscribe()
         })
-        const result = (setup as any)(props, context, ...args)
-        if (typeof result === 'function') {
-          return function (this: any, ...args: any[]) {
-            component.__slots__.length = 0
-            self.componentRendingStack.push(component)
-            return result.apply(this, args)
-          }
-        }
-        return result
-      }
-
-      if (vueComponent.render) {
-        const oldRender = vueComponent.render
-        vueComponent.render = function (context: any, ...args: any[]) {
-          context.component.__slots__.length = 0
-          self.componentRendingStack.push(context.component)
-
-          return oldRender.apply(this, [context, ...args])
-        }
+        return (setup as any)(props, context, ...args)
       }
       this.components[key] = vueComponent
     })

@@ -201,7 +201,7 @@ export class Query {
     let index = startIndex
 
     for (const child of childContents) {
-      if (typeof child === 'string' || child.__slots__.length === 0) {
+      if (typeof child === 'string' || child.slots.length === 0) {
         const formats = slot.getFormatRangesByFormatter(formatter, index, index + child.length)
         let s = index
         for (const f of formats) {
@@ -226,7 +226,7 @@ export class Query {
           }
         }
       } else {
-        child.__slots__.forEach(i => {
+        child.slots.forEach(i => {
           states.push(this.getStatesByRange(i, formatter, 0, i.length))
         })
       }
@@ -339,7 +339,7 @@ export class Query {
       }
       const states: QueryState<any>[] = []
       for (const component of childComponents) {
-        const slots = component.__slots__
+        const slots = component.slots
         if (slots.length === 0) {
           if (i.slot.hasAttribute(attribute)) {
             states.push({

@@ -24,8 +24,8 @@ export class VideoComponent extends Component<VideoComponentState> {
     })
   }
 
-  override setup() {
-    //
+  override getSlots(): Slot[] {
+    return []
   }
 }
 

@@ -111,6 +111,10 @@ export class ListComponent extends Component<ListComponentState> {
     })
   }
 
+  override getSlots(): Slot[] {
+    return [this.state.slot]
+  }
+
   override setup() {
     const textbus = useContext()
     const commander = useContext(Commander)

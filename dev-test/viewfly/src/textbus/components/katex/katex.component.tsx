@@ -38,6 +38,10 @@ export class KatexComponent extends Component<KatexComponentState> {
   }) {
     super(textbus, state)
   }
+
+  override getSlots(): Slot[] {
+    return []
+  }
 }
 
 function domToVDom(el: HTMLElement): JSXNode {

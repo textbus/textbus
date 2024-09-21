@@ -107,8 +107,7 @@ export class ReactAdapter extends DomAdapter<JSX.Element, JSX.Element> {
         useEffect(() => {
           this.onViewUpdated.next()
         }, [updateKey])
-        component.__slots__.length = 0
-        this.componentRendingStack.push(component)
+        component.state.length = 0
         const vNode = components[key]({
           component,
           rootRef: (rootNode: HTMLElement) => {
@@ -120,11 +119,6 @@ export class ReactAdapter extends DomAdapter<JSX.Element, JSX.Element> {
           }
         })
         useEffect(() => {
-          const context = this.componentRendingStack[this.componentRendingStack.length - 1]!
-          if (context === component) {
-            this.componentRendingStack.pop()
-          }
-
           if (!this.componentRootElementCaches.get(component)) {
             // eslint-disable-next-line max-len
             throw adapterError(`Component \`${component.name}\` is not bound to rootRef, you must bind rootRef to the root element node of the component view.`)

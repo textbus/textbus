@@ -93,6 +93,13 @@ export class AtComponent extends Component<AtComponentState> {
     super(textbus, state)
   }
 
+  override getSlots(): Slot[] {
+    if (this.state.slot) {
+      return [this.state.slot]
+    }
+    return []
+  }
+
   override setup() {
     let isFocus = false
     onFocus(() => {

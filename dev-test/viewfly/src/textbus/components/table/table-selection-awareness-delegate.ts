@@ -6,7 +6,7 @@ import { TableComponent } from './table.component'
 
 export function findFocusCell(table: TableComponent, slot: Slot): Slot | null {
   while (slot) {
-    if (table.__slots__.includes(slot)) {
+    if (table.slots.includes(slot)) {
       return slot
     }
     slot = slot.parent?.parent as Slot

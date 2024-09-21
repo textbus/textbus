@@ -45,9 +45,9 @@ function getNextInsertPosition(currentSlot: Slot,
 
   while (afterSiblingComponents.length) {
     const firstComponent = afterSiblingComponents.shift()
-    if (firstComponent && firstComponent.__slots__.length) {
+    if (firstComponent && firstComponent.slots.length) {
       return {
-        slot: firstComponent.__slots__.first,
+        slot: firstComponent.slots.at(0)!,
         offset: 0
       }
     }
@@ -81,7 +81,7 @@ function deleteUpBySlot(selection: Selection,
   const parentSlot = parentComponent.parent
 
   // 单插槽组件
-  if (parentComponent.__slots__.length === 1) {
+  if (parentComponent.slots.length === 1) {
     if (parentComponent === rootComponent) {
       return {
         slot,
@@ -121,7 +121,7 @@ function deleteUpBySlot(selection: Selection,
   }
 
 
-  const slotIndex = parentComponent.__slots__.indexOf(slot)
+  const slotIndex = parentComponent.slots.indexOf(slot)
 
   if (slotIndex === 0) {
     if (parentSlot) {
@@ -136,9 +136,9 @@ function deleteUpBySlot(selection: Selection,
       offset
     }
   }
-  const position = selection.findLastPosition(parentComponent.__slots__.get(slotIndex - 1)!, true)
+  const position = selection.findLastPosition(parentComponent.slots.at(slotIndex - 1)!, true)
   if (parentComponent.removeSlot?.(slot)) {
-    parentComponent.__slots__.splice(slotIndex, 1)
+    parentComponent.slots.splice(slotIndex, 1)
     return position
   }
 
@@ -209,7 +209,7 @@ function deltaToSlots(selection: Selection,
       abstractSelection.focusOffset -= index
     }
     if (typeof insert !== 'string') {
-      const slots = insert.__slots__.map(childSlot => {
+      const slots = insert.slots.map(childSlot => {
         return deltaToSlots(selection, source, childSlot.toDelta(), rule, abstractSelection, offset)
       }).flat()
       newSlots.push(...slots)
@@ -671,8 +671,8 @@ export class Commander {
         const parentComponent = commonAncestorSlot.parent!
 
         if (parentComponent.separate) {
-          const index = parentComponent.__slots__.indexOf(commonAncestorSlot)
-          const nextSlot = parentComponent.__slots__.get(index + 1)
+          const index = parentComponent.slots.indexOf(commonAncestorSlot)
+          const nextSlot = parentComponent.slots.at(index + 1)
           const nextComponent = parentComponent.separate(nextSlot)
           afterDelta.push({
             insert: nextComponent,
@@ -699,7 +699,7 @@ export class Commander {
       if (currentContent &&
         typeof currentContent !== 'string' &&
         currentContent.type === ContentType.BlockComponent &&
-        currentContent.__slots__.length > 0) {
+        currentContent.slots.length > 0) {
         selection.toNext()
       }
     }
@@ -824,7 +824,7 @@ export class Commander {
         i.slot.setAttribute(attribute, value, canApplyAttr)
       } else {
         childComponents.forEach(i => {
-          i.__slots__.forEach(slot => {
+          i.slots.forEach(slot => {
             slot.setAttribute(attribute, value, canApplyAttr)
           })
         })
@@ -857,7 +857,7 @@ export class Commander {
         i.slot.removeAttribute(attribute)
       } else {
         childComponents.forEach(i => {
-          i.__slots__.forEach(slot => {
+          i.slots.forEach(slot => {
             slot.removeAttribute(attribute)
           })
         })
@@ -884,7 +884,7 @@ export class Commander {
         i.slot.cleanAttributes(excludeAttributes)
       } else {
         childComponents.forEach(i => {
-          i.__slots__.forEach(slot => {
+          i.slots.forEach(slot => {
             slot.cleanAttributes(excludeAttributes)
           })
         })
@@ -934,10 +934,10 @@ export class Commander {
 
     const parentComponent = startScope.slot.parent!
     if (parentComponent.separate) {
-      if (startScope.slot !== parentComponent.__slots__.last) {
-        const slotIndex = parentComponent.__slots__.indexOf(startScope.slot)
-        const count = parentComponent.__slots__.length - slotIndex
-        const deletedSlots = parentComponent.__slots__.splice(slotIndex + 1, slotIndex + count)
+      if (startScope.slot !== parentComponent.slots.at(-1)) {
+        const slotIndex = parentComponent.slots.indexOf(startScope.slot)
+        const count = parentComponent.slots.length - slotIndex
+        const deletedSlots = parentComponent.slots.splice(slotIndex + 1, slotIndex + count)
         const afterComponent = parentComponent.separate(deletedSlots[0], deletedSlots[deletedSlots.length - 1])
         this.insertAfter(afterComponent!, parentComponent)
       }
@@ -968,7 +968,7 @@ export class Commander {
       const { slot, startIndex, endIndex } = scope
       const parentComponent = slot.parent!
 
-      if (!parentComponent.separate && parentComponent.__slots__.length > 1 && !slot.schema.includes(rule.targetType)) {
+      if (!parentComponent.separate && parentComponent.slots.length > 1 && !slot.schema.includes(rule.targetType)) {
         // 无法转换的情况
         const componentInstances = slotsToComponents(this.textbus, slots, rule)
         componentInstances.forEach(instance => {
@@ -988,7 +988,7 @@ export class Commander {
           }
           break
         }
-        if (parentComponent.separate || parentComponent.__slots__.length === 1) {
+        if (parentComponent.separate || parentComponent.slots.length === 1) {
           const delta = slot.toDelta()
           slots.unshift(...deltaToSlots(selection, slot, delta, rule, abstractSelection, 0))
           position = deleteUpBySlot(selection, slot, 0, stoppedComponent, false)
@@ -1018,7 +1018,7 @@ export class Commander {
           continue
         }
         this.delete(deletedSlot => {
-          if (parentComponent.separate || parentComponent.__slots__.length === 1) {
+          if (parentComponent.separate || parentComponent.slots.length === 1) {
             const delta = deletedSlot.toDelta()
             slots.unshift(...deltaToSlots(selection, slot, delta, rule, abstractSelection, startIndex))
             if (startIndex > 0) {

@@ -68,6 +68,10 @@ export class BlockquoteComponent extends Component<BlockquoteComponentState> {
     super(textbus, state)
   }
 
+  override getSlots(): Slot[] {
+    return [this.state.slot]
+  }
+
   override setup() {
     useBlockContent(this.state.slot)
   }
@@ -90,7 +94,7 @@ export function toBlockquote(textbus: Textbus) {
 
     commander.removeComponent(current)
 
-    current.__slots__.get(0)!.sliceContent().forEach(i => {
+    current.slots.at(0)!.sliceContent().forEach(i => {
       parent.insert(i)
     })
   } else {
