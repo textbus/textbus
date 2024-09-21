@@ -6,7 +6,6 @@ import { Formats } from './format'
 import { ChangeMarker } from './change-marker'
 import { State } from './types'
 import { Textbus } from '../textbus'
-import { Slots } from './slots'
 import { createObjectProxy, objectToJSON } from './proxy'
 import { Attribute, Formatter } from './attribute'
 
@@ -71,6 +70,11 @@ export interface Component<T extends State> {
    * @param slot
    */
   removeSlot?(slot: Slot): boolean
+
+  /**
+   * 获取组件数据模型上插槽的集合，需要按渲染顺序返回一个数组
+   */
+  getSlots?(): Slot[]
 }
 
 /**
@@ -99,7 +103,10 @@ export abstract class Component<T extends State = State> {
    * 组件的子插槽集合
    */
   get slots() {
-    return this.getSlots()
+    if (typeof this.getSlots === 'function') {
+      return this.getSlots()
+    }
+    return []
   }
 
   /** 组件长度，固定为 1 */
@@ -144,11 +151,6 @@ export abstract class Component<T extends State = State> {
   }
 
   /**
-   * 获取组件数据模型上插槽的集合，需要按渲染顺序返回一个数组
-   */
-  abstract getSlots(): Slot[]
-
-  /**
    * 组件转为 JSON 数据的方法
    */
   toJSON(): ComponentLiteral<State> {
@@ -162,7 +164,7 @@ export abstract class Component<T extends State = State> {
    * 将组件转换为 string
    */
   toString(): string {
-    return this.getSlots().map(i => {
+    return this.slots.map(i => {
       return i.toString()
     }).join('')
   }

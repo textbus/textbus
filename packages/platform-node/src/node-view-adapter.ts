@@ -150,7 +150,6 @@ export class NodeViewAdapter extends Adapter<VDOMElement, VDOMText, JSXNode, JSX
             throw adapterError(`Component \`${textbusComponent.name}\` is not bound to rootRef, you must bind rootRef to the root element node of the component view.`)
           }
         })
-        const component = props.component
         return viewFlyComponent(props)
       })
     })
