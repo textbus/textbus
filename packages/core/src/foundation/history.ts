@@ -266,11 +266,19 @@ export class LocalHistory extends History {
             }
           }
             break
-          case 'attrDelete':
-            model.removeAttribute(action.name)
+          case 'attrDelete': {
+            const attr = this.registry.getAttribute(action.name)
+            if (attr) {
+              model.removeAttribute(attr)
+            }
+          }
             break
-          case 'attrSet':
-            model.setAttribute(action.name, action.value)
+          case 'attrSet': {
+            const attr = this.registry.getAttribute(action.name)
+            if (attr) {
+              model.setAttribute(attr, action.value)
+            }
+          }
             break
           case 'insert': {
             const data = this.valueToModel(action.data)
