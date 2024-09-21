@@ -45,6 +45,10 @@ class RootComponent extends Component<RooComponentState> {
     super(textbus, state)
   }
 
+  override getSlots(): Slot[] {
+    return [this.state.slot]
+  }
+
   override setup() {
     const selection = useContext(Selection)
     onContentInsert(ev => {
@@ -76,6 +80,10 @@ class ParagraphComponent extends Component<SingleSlot> {
 
   constructor(textbus: Textbus, state: SingleSlot) {
     super(textbus, state)
+  }
+
+  override getSlots(): Slot[] {
+    return [this.state.slot]
   }
 
   override setup() {
@@ -227,7 +235,7 @@ function Paragraph(props: ViewComponentProps<ParagraphComponent>) {
     // console.log('paragraphComponent')
     return (
       adapter.slotRender(slot, children => {
-        return createVNode('p', { ref: props.rootRef, dir: 'rtl' }, children)
+        return createVNode('p', { ref: props.rootRef }, children)
       })
     )
   }
