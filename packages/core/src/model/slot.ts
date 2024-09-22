@@ -716,15 +716,15 @@ export class Slot {
 
   /**
    * 清除插槽格式
-   * @param excludeFormats 要排除的格式
+   * @param remainFormats 要保留的格式
    * @param startIndex 开始位置
    * @param endIndex 结束位置
    */
-  cleanFormats(excludeFormats: Formatter<any>[] | ((formatter: Formatter<any>) => boolean) = [], startIndex = 0, endIndex = this.length) {
+  cleanFormats(remainFormats: Formatter<any>[] | ((formatter: Formatter<any>) => boolean) = [], startIndex = 0, endIndex = this.length) {
     const formats = this.getFormats()
     if (formats.length) {
       formats.forEach(item => {
-        if (typeof excludeFormats === 'function' ? excludeFormats(item.formatter) : excludeFormats.includes(item.formatter)) {
+        if (typeof remainFormats === 'function' ? remainFormats(item.formatter) : remainFormats.includes(item.formatter)) {
           return
         }
         this.retain(startIndex)
@@ -734,7 +734,7 @@ export class Slot {
       this.sliceContent(startIndex, endIndex).forEach(item => {
         if (typeof item !== 'string') {
           item.slots.forEach(slot => {
-            slot.cleanFormats(excludeFormats)
+            slot.cleanFormats(remainFormats)
           })
         }
       })
