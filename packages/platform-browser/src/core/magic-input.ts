@@ -45,6 +45,13 @@ interface CaretStyle {
   fontSize: string
 }
 
+interface RangeSnapshot {
+  startContainer: Node
+  endContainer: Node
+  startOffset: number
+  endOffset: number
+}
+
 class ExperimentalCaret implements Caret {
   onPositionChange: Observable<CaretPosition | null>
   onStyleChange: Observable<CaretStyle>
@@ -81,7 +88,7 @@ class ExperimentalCaret implements Caret {
 
   private positionChangeEvent = new Subject<CaretPosition | null>()
   private styleChangeEvent = new Subject<CaretStyle>()
-  private oldRange: Range | null = null
+  private oldRange: RangeSnapshot | null = null
 
   private isFixed = false
 
@@ -123,7 +130,10 @@ class ExperimentalCaret implements Caret {
   refresh(isFixedCaret = false) {
     this.isFixed = isFixedCaret
     if (this.oldRange) {
-      this.show(this.oldRange, false)
+      const range = document.createRange()
+      range.setStart(this.oldRange.startContainer, this.oldRange.startOffset)
+      range.setEnd(this.oldRange.endContainer, this.oldRange.endOffset)
+      this.show(range, false)
     }
     this.isFixed = false
   }
@@ -135,7 +145,12 @@ class ExperimentalCaret implements Caret {
       left: oldRect.left,
       height: oldRect.height
     }
-    this.oldRange = range
+    this.oldRange = {
+      startContainer: range.startContainer,
+      endContainer: range.endContainer,
+      startOffset: range.startOffset,
+      endOffset: range.endOffset
+    }
     if (restart || this.scheduler.lastChangesHasLocalUpdate) {
       clearTimeout(this.timer)
     }
@@ -368,6 +383,7 @@ export class MagicInput extends Input {
 
   focus(range: Range, restart: boolean) {
     if (!this.disabled) {
+
       this.caret.show(range, restart)
     }
     if (this.controller.readonly) {
