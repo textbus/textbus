@@ -686,7 +686,7 @@ export class Selection {
         const event = new Event(content, null)
         invokeListener(content, 'onSelectionFromEnd', event)
         if (!event.isPrevented) {
-          if (content.state.length === 0) {
+          if (content.slots.length === 0) {
             this.selectComponent(content)
           }
         } else {
