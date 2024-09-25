@@ -29,8 +29,8 @@
     "@textbus/core": "^4.0.0-alpha.73",
     "@textbus/platform-browser": "^4.0.0-alpha.73",
     "@textbus/platform-node": "^4.0.0-alpha.73",
-    "@viewfly/core": "^1.0.0-alpha.21",
-    "@viewfly/platform-browser": "^1.0.0-alpha.21"
+    "@viewfly/core": "^1.0.0-alpha.22",
+    "@viewfly/platform-browser": "^1.0.0-alpha.22"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^23.0.2",

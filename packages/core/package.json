@@ -26,7 +26,7 @@
   ],
   "dependencies": {
     "@tanbo/stream": "^1.2.5",
-    "@viewfly/core": "^1.0.0-alpha.21"
+    "@viewfly/core": "^1.0.0-alpha.22"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^23.0.2",

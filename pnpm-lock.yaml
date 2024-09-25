@@ -49,11 +49,11 @@ importers:
         specifier: ^5.8.0
         version: 5.62.0(eslint@8.56.0)(typescript@5.4.5)
       '@viewfly/core':
-        specifier: ^1.0.0-alpha.21
-        version: 1.0.0-alpha.21
+        specifier: ^1.0.0-alpha.22
+        version: 1.0.0-alpha.22
       '@viewfly/platform-browser':
-        specifier: ^1.0.0-alpha.21
-        version: 1.0.0-alpha.21
+        specifier: ^1.0.0-alpha.22
+        version: 1.0.0-alpha.22
       add-assets-webpack-plugin:
         specifier: ^1.0.0
         version: 1.0.0
@@ -187,17 +187,17 @@ importers:
         specifier: ^4.0.0-alpha.71
         version: link:../../packages/platform-browser
       '@viewfly/core':
-        specifier: ^1.0.0-alpha.21
-        version: 1.0.0-alpha.21
+        specifier: ^1.0.0-alpha.22
+        version: 1.0.0-alpha.22
       '@viewfly/hooks':
-        specifier: ^1.0.0-alpha.21
-        version: 1.0.0-alpha.21
+        specifier: ^1.0.0-alpha.22
+        version: 1.0.0-alpha.22
       '@viewfly/platform-browser':
-        specifier: ^1.0.0-alpha.21
-        version: 1.0.0-alpha.21
+        specifier: ^1.0.0-alpha.22
+        version: 1.0.0-alpha.22
       '@viewfly/scoped-css':
-        specifier: ^1.0.0-alpha.21
-        version: 1.0.0-alpha.21
+        specifier: ^1.0.0-alpha.22
+        version: 1.0.0-alpha.22
       highlight.js:
         specifier: ^11.9.0
         version: 11.10.0
@@ -317,10 +317,10 @@ importers:
         specifier: ^1.2.5
         version: 1.2.5
       '@textbus/core':
-        specifier: ^4.0.0-alpha.72
+        specifier: ^4.0.0-alpha.73
         version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.0.0-alpha.72
+        specifier: ^4.0.0-alpha.73
         version: link:../platform-browser
       react:
         specifier: ^17.0.0 || ^18.0.0
@@ -351,20 +351,20 @@ importers:
         specifier: ^1.2.5
         version: 1.2.5
       '@textbus/core':
-        specifier: ^4.0.0-alpha.72
+        specifier: ^4.0.0-alpha.73
         version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.0.0-alpha.72
+        specifier: ^4.0.0-alpha.73
         version: link:../platform-browser
       '@textbus/platform-node':
-        specifier: ^4.0.0-alpha.72
+        specifier: ^4.0.0-alpha.73
         version: link:../platform-node
       '@viewfly/core':
-        specifier: ^1.0.0-alpha.21
-        version: 1.0.0-alpha.21
+        specifier: ^1.0.0-alpha.22
+        version: 1.0.0-alpha.22
       '@viewfly/platform-browser':
-        specifier: ^1.0.0-alpha.21
-        version: 1.0.0-alpha.21
+        specifier: ^1.0.0-alpha.22
+        version: 1.0.0-alpha.22
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^23.0.2
@@ -388,10 +388,10 @@ importers:
         specifier: ^1.2.5
         version: 1.2.5
       '@textbus/core':
-        specifier: ^4.0.0-alpha.72
+        specifier: ^4.0.0-alpha.73
         version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.0.0-alpha.72
+        specifier: ^4.0.0-alpha.73
         version: link:../platform-browser
       vue:
         specifier: ^3.4.28
@@ -419,11 +419,11 @@ importers:
         specifier: ^1.2.5
         version: 1.2.5
       '@textbus/core':
-        specifier: ^4.0.0-alpha.72
+        specifier: ^4.0.0-alpha.73
         version: link:../core
       '@viewfly/core':
-        specifier: ^1.0.0-alpha.21
-        version: 1.0.0-alpha.21
+        specifier: ^1.0.0-alpha.22
+        version: 1.0.0-alpha.22
       y-websocket:
         specifier: ^1.4.3
         version: 1.5.1(yjs@13.6.14)
@@ -453,8 +453,8 @@ importers:
         specifier: ^1.2.5
         version: 1.2.5
       '@viewfly/core':
-        specifier: ^1.0.0-alpha.21
-        version: 1.0.0-alpha.21
+        specifier: ^1.0.0-alpha.22
+        version: 1.0.0-alpha.22
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^23.0.2
@@ -478,14 +478,14 @@ importers:
         specifier: ^1.2.5
         version: 1.2.5
       '@textbus/collaborate':
-        specifier: ^4.0.0-alpha.72
+        specifier: ^4.0.0-alpha.73
         version: link:../collaborate
       '@textbus/core':
-        specifier: ^4.0.0-alpha.72
+        specifier: ^4.0.0-alpha.73
         version: link:../core
       '@viewfly/core':
-        specifier: ^1.0.0-alpha.21
-        version: 1.0.0-alpha.21
+        specifier: ^1.0.0-alpha.22
+        version: 1.0.0-alpha.22
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^23.0.2
@@ -509,14 +509,14 @@ importers:
         specifier: ^1.2.5
         version: 1.2.5
       '@textbus/core':
-        specifier: ^4.0.0-alpha.72
+        specifier: ^4.0.0-alpha.73
         version: link:../core
       '@viewfly/core':
-        specifier: ^1.0.0-alpha.21
-        version: 1.0.0-alpha.21
+        specifier: ^1.0.0-alpha.22
+        version: 1.0.0-alpha.22
       '@viewfly/platform-browser':
-        specifier: ^1.0.0-alpha.21
-        version: 1.0.0-alpha.21
+        specifier: ^1.0.0-alpha.22
+        version: 1.0.0-alpha.22
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^23.0.2
@@ -1668,61 +1668,61 @@ packages:
       nx: '>= 16 <= 18'
 
   '@nx/nx-darwin-arm64@18.0.7':
-    resolution: {integrity: sha512-0ZCgalq5NwJy0SPJGisFcT+kHftWoyMyb78yFNFeFCL7dPmLUq2QqbLR2HFo2SIuPFY5+DVv9FBB63ZbdPXTJw==, tarball: https://registry.npmjs.org/@nx/nx-darwin-arm64/-/nx-darwin-arm64-18.0.7.tgz}
+    resolution: {integrity: sha512-0ZCgalq5NwJy0SPJGisFcT+kHftWoyMyb78yFNFeFCL7dPmLUq2QqbLR2HFo2SIuPFY5+DVv9FBB63ZbdPXTJw==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [darwin]
 
   '@nx/nx-darwin-x64@18.0.7':
-    resolution: {integrity: sha512-yA5bXhsw0C4YjUcJcsXgsN/Pv8nSM3xo8hJ+RJCjgkh15f3ylXzYvBa+xL6qWTyZqhICULDInfJwsw9x5GTQWg==, tarball: https://registry.npmjs.org/@nx/nx-darwin-x64/-/nx-darwin-x64-18.0.7.tgz}
+    resolution: {integrity: sha512-yA5bXhsw0C4YjUcJcsXgsN/Pv8nSM3xo8hJ+RJCjgkh15f3ylXzYvBa+xL6qWTyZqhICULDInfJwsw9x5GTQWg==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [darwin]
 
   '@nx/nx-freebsd-x64@18.0.7':
-    resolution: {integrity: sha512-KplveiJ59HeMLUN6S6dWMVjIgzLYx0v/1W9RdmTJB8EAAiduJdtDip0GLjSj902pEXbIhr3n9p4USPWFnrdL5w==, tarball: https://registry.npmjs.org/@nx/nx-freebsd-x64/-/nx-freebsd-x64-18.0.7.tgz}
+    resolution: {integrity: sha512-KplveiJ59HeMLUN6S6dWMVjIgzLYx0v/1W9RdmTJB8EAAiduJdtDip0GLjSj902pEXbIhr3n9p4USPWFnrdL5w==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [freebsd]
 
   '@nx/nx-linux-arm-gnueabihf@18.0.7':
-    resolution: {integrity: sha512-Uj4OF7yZLK9US/+4a33FiFpyP6SaDB34HLHIht9ROjL6dGxv1iUs8Ut+JaUQ6DaP/XBwV6/+CDBH5uXMfMWLww==, tarball: https://registry.npmjs.org/@nx/nx-linux-arm-gnueabihf/-/nx-linux-arm-gnueabihf-18.0.7.tgz}
+    resolution: {integrity: sha512-Uj4OF7yZLK9US/+4a33FiFpyP6SaDB34HLHIht9ROjL6dGxv1iUs8Ut+JaUQ6DaP/XBwV6/+CDBH5uXMfMWLww==}
     engines: {node: '>= 10'}
     cpu: [arm]
     os: [linux]
 
   '@nx/nx-linux-arm64-gnu@18.0.7':
-    resolution: {integrity: sha512-hGuM7mtOsZTuxnBTm9uLKNBmkRL0zQs0ZtFomHscSt/reN8WBgduKSPWJ18LLj5D7Z1otxI3ooUf8+5/jwmr3A==, tarball: https://registry.npmjs.org/@nx/nx-linux-arm64-gnu/-/nx-linux-arm64-gnu-18.0.7.tgz}
+    resolution: {integrity: sha512-hGuM7mtOsZTuxnBTm9uLKNBmkRL0zQs0ZtFomHscSt/reN8WBgduKSPWJ18LLj5D7Z1otxI3ooUf8+5/jwmr3A==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
 
   '@nx/nx-linux-arm64-musl@18.0.7':
-    resolution: {integrity: sha512-34Xb5mZT3p2E6mM0D6cFIpPF5hJtF3aDzBnzeitP/lZe70n+S0PUpgB/2Vi9j3IHW2xjci5jU2UYsdF2RIEWTQ==, tarball: https://registry.npmjs.org/@nx/nx-linux-arm64-musl/-/nx-linux-arm64-musl-18.0.7.tgz}
+    resolution: {integrity: sha512-34Xb5mZT3p2E6mM0D6cFIpPF5hJtF3aDzBnzeitP/lZe70n+S0PUpgB/2Vi9j3IHW2xjci5jU2UYsdF2RIEWTQ==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
 
   '@nx/nx-linux-x64-gnu@18.0.7':
-    resolution: {integrity: sha512-tn1puRzCk/Sn8f7d1134Zyob1CT25kovPWPvUadvEoqqetMgRgVxMqTr7Ud/2hu61iGSKQEmOlQ2bVM/NMeRvA==, tarball: https://registry.npmjs.org/@nx/nx-linux-x64-gnu/-/nx-linux-x64-gnu-18.0.7.tgz}
+    resolution: {integrity: sha512-tn1puRzCk/Sn8f7d1134Zyob1CT25kovPWPvUadvEoqqetMgRgVxMqTr7Ud/2hu61iGSKQEmOlQ2bVM/NMeRvA==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
 
   '@nx/nx-linux-x64-musl@18.0.7':
-    resolution: {integrity: sha512-at1nI9mBMNMCIC5BrY8oJ+7ptknZPhQwu7j4jhRAgcHd2JOZZtgJSo4FI2chBTbzf3SLQL1omts0zKB1syas1w==, tarball: https://registry.npmjs.org/@nx/nx-linux-x64-musl/-/nx-linux-x64-musl-18.0.7.tgz}
+    resolution: {integrity: sha512-at1nI9mBMNMCIC5BrY8oJ+7ptknZPhQwu7j4jhRAgcHd2JOZZtgJSo4FI2chBTbzf3SLQL1omts0zKB1syas1w==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
 
   '@nx/nx-win32-arm64-msvc@18.0.7':
-    resolution: {integrity: sha512-DTn5X5NhnjpG1LZgESM0EmBPLnwoeZzOaJfjt92Loib1TmALEHUIdVRcshb8FJfoXY4zNEdNUCmZ+M3us4xb9A==, tarball: https://registry.npmjs.org/@nx/nx-win32-arm64-msvc/-/nx-win32-arm64-msvc-18.0.7.tgz}
+    resolution: {integrity: sha512-DTn5X5NhnjpG1LZgESM0EmBPLnwoeZzOaJfjt92Loib1TmALEHUIdVRcshb8FJfoXY4zNEdNUCmZ+M3us4xb9A==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [win32]
 
   '@nx/nx-win32-x64-msvc@18.0.7':
-    resolution: {integrity: sha512-/2Ue0kTuvXQpF0QfJGtBZ5yqhpRVcDTidDcZSgdFdNEkqUXK2GgXG4lPQtw8zf2Ja9Q+93lXwH6NMhQWCB8cNA==, tarball: https://registry.npmjs.org/@nx/nx-win32-x64-msvc/-/nx-win32-x64-msvc-18.0.7.tgz}
+    resolution: {integrity: sha512-/2Ue0kTuvXQpF0QfJGtBZ5yqhpRVcDTidDcZSgdFdNEkqUXK2GgXG4lPQtw8zf2Ja9Q+93lXwH6NMhQWCB8cNA==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
@@ -1788,7 +1788,7 @@ packages:
     resolution: {integrity: sha512-D4iHGTdAnEEVsB8fl95m1hiz7D5YiRdQ9b/OEb3BYRVwbLsGHcRVPz+u+BgRLNk0Q0/4iZCBqDN96j2XNxfXrA==}
 
   '@pkgjs/parseargs@0.11.0':
-    resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==, tarball: https://registry.npmjs.org/@pkgjs/parseargs/-/parseargs-0.11.0.tgz}
+    resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
   '@rollup/plugin-commonjs@23.0.7':
@@ -2124,20 +2124,20 @@ packages:
   '@ungap/structured-clone@1.2.0':
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
 
-  '@viewfly/core@1.0.0-alpha.21':
-    resolution: {integrity: sha512-qShJ6h68Z1L5yzowq5QLKM7HbSChhy8Wn/9xkWApzcePMxlTLvvBsbxMum7K7nojGnjYd1sRQWRHL99hb6vzwA==, tarball: https://registry.npmjs.org/@viewfly/core/-/core-1.0.0-alpha.21.tgz}
+  '@viewfly/core@1.0.0-alpha.22':
+    resolution: {integrity: sha512-Yqke7ZILx3iHKsnUjpSgKxV4xwA1YLNfPaUxRCDtlc25J6bGu7QI92MxFf3WC0zEuYydOErko0SfbOB1zB7yOQ==}
 
   '@viewfly/devtools@0.7.2':
     resolution: {integrity: sha512-c8zqwgQtHR3+ox/bL8ltIUYUdPR5/94W2lZGVFzD0Y0hlHHQvZMoE67ed8qZ+uGHxEj3/BTF/5diE20NEY54HA==}
 
-  '@viewfly/hooks@1.0.0-alpha.21':
-    resolution: {integrity: sha512-irzMT3wiOogw8rr3w1uMUKkana7YqiPTajpqJqC6MtsOxZL8vHATszRKJbDdJsd7YHYGOasSr5n4NI/69a3X+g==, tarball: https://registry.npmjs.org/@viewfly/hooks/-/hooks-1.0.0-alpha.21.tgz}
+  '@viewfly/hooks@1.0.0-alpha.22':
+    resolution: {integrity: sha512-UDXVQSmOV2RX0Io8a6AcThvkA++5wdr4w00ezmxFuzqcTEWAyiUX+5ynnJl9qKti+8cVqFRHFdLAJ3U7OVitAg==}
 
-  '@viewfly/platform-browser@1.0.0-alpha.21':
-    resolution: {integrity: sha512-lKjNPV+x+gxGK6RO/OStx2Ey38bylYmt0rSbCRVDk2MAZtT7GIAeAf1R2n5V0ZVtTURwEy//PSXhIjYJf69zUw==, tarball: https://registry.npmjs.org/@viewfly/platform-browser/-/platform-browser-1.0.0-alpha.21.tgz}
+  '@viewfly/platform-browser@1.0.0-alpha.22':
+    resolution: {integrity: sha512-vB18gBmq/TAG5E0oRjhsp2P0NzNoinazPNHxV0MErTlvLVdwrahyHtJ09HCgS/YCW4b4EFl4BgXF6TqOTspM/g==}
 
-  '@viewfly/scoped-css@1.0.0-alpha.21':
-    resolution: {integrity: sha512-L1BYarEj9/Rkp7GQ9IbS1+PfEOcGzoOHIWScNZq+Cp55pIZCxEHsA2DhCsp8x6WftDexTqhiApMraM25E3Ye/g==, tarball: https://registry.npmjs.org/@viewfly/scoped-css/-/scoped-css-1.0.0-alpha.21.tgz}
+  '@viewfly/scoped-css@1.0.0-alpha.22':
+    resolution: {integrity: sha512-CPSemqzsekq0TUimiOfnuSKougYnUzOIeYEO3G/NJTztvHZEOxsQxSd3khTndcTCjz0ufY4mPTY5A7EqQEMTwA==}
 
   '@vue/compiler-core@3.3.13':
     resolution: {integrity: sha512-bwi9HShGu7uaZLOErZgsH2+ojsEdsjerbf2cMXPwmvcgZfVPZ2BVZzCVnwZBxTAYd6Mzbmf6izcUNDkWnBBQ6A==}
@@ -3854,7 +3854,7 @@ packages:
     engines: {node: '>=6'}
 
   encoding@0.1.13:
-    resolution: {integrity: sha512-ETBauow1T35Y/WZMkio9jiM0Z5xjHHmJ4XmjZOq1l/dXz3lr2sRn87nJy20RupqSh1F2m3HHPSp8ShIPQJrJ3A==, tarball: https://registry.npmjs.org/encoding/-/encoding-0.1.13.tgz}
+    resolution: {integrity: sha512-ETBauow1T35Y/WZMkio9jiM0Z5xjHHmJ4XmjZOq1l/dXz3lr2sRn87nJy20RupqSh1F2m3HHPSp8ShIPQJrJ3A==}
 
   end-of-stream@1.4.4:
     resolution: {integrity: sha512-+uw1inIHVPQoaVuHzRyXd21icM+cnt4CzD5rW+NC1wjOUSTOs+Te7FOv7AhN7vS9x/oIyhLP5PR1H+phQAHu5Q==}
@@ -3895,7 +3895,7 @@ packages:
     resolution: {integrity: sha512-GiaH0KJUewYok+eeY05IIgjtAe4Yltygk9Wqp1V5yVWLdhf0hYZchRjNIT9bb0mSwRcIusT3cx7PJUf3zEIfUA==}
 
   errno@0.1.8:
-    resolution: {integrity: sha512-dJ6oBr5SQ1VSd9qkk7ByRgb/1SH4JZjCHSW/mr63/QcXO9zLVxvJ6Oy13nio03rxpSnVDDjFor75SjVeZWPW/A==, tarball: https://registry.npmjs.org/errno/-/errno-0.1.8.tgz}
+    resolution: {integrity: sha512-dJ6oBr5SQ1VSd9qkk7ByRgb/1SH4JZjCHSW/mr63/QcXO9zLVxvJ6Oy13nio03rxpSnVDDjFor75SjVeZWPW/A==}
     hasBin: true
 
   error-ex@1.3.2:
@@ -4320,13 +4320,13 @@ packages:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
 
   fsevents@1.2.13:
-    resolution: {integrity: sha512-oWb1Z6mkHIskLzEJ/XWX0srkpkTQ7vaopMQkyaEIoq0fmtFVxOthb8cCxeT+p3ynTdkk/RZwbgG4brR5BeWECw==, tarball: https://registry.npmjs.org/fsevents/-/fsevents-1.2.13.tgz}
+    resolution: {integrity: sha512-oWb1Z6mkHIskLzEJ/XWX0srkpkTQ7vaopMQkyaEIoq0fmtFVxOthb8cCxeT+p3ynTdkk/RZwbgG4brR5BeWECw==}
     engines: {node: '>= 4.0'}
     os: [darwin]
-    deprecated: Upgrade to fsevents v2 to mitigate potential security issues
+    deprecated: The v1 package contains DANGEROUS / INSECURE binaries. Upgrade to safe fsevents v2
 
   fsevents@2.3.3:
-    resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==, tarball: https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz}
+    resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
 
@@ -4755,7 +4755,7 @@ packages:
     engines: {node: '>= 4'}
 
   image-size@0.5.5:
-    resolution: {integrity: sha512-6TDAlDPZxUFCv+fuOkIoXT/V/f3Qbq8e37p+YOiYrUv3v9cc3/6x78VdfPgFVaB9dZYeLUfKgHRebpkm/oP2VQ==, tarball: https://registry.npmjs.org/image-size/-/image-size-0.5.5.tgz}
+    resolution: {integrity: sha512-6TDAlDPZxUFCv+fuOkIoXT/V/f3Qbq8e37p+YOiYrUv3v9cc3/6x78VdfPgFVaB9dZYeLUfKgHRebpkm/oP2VQ==}
     engines: {node: '>=0.10.0'}
     hasBin: true
 
@@ -4763,7 +4763,7 @@ packages:
     resolution: {integrity: sha512-HR7EVodfFUdQCTIeySw+WDRFJlPcLOJbXfwwZ7Oom6tjsvZ3bOkCDJHehQC3nxJrv7+f9XecwazynjU8e4Vw3Q==}
 
   immer@9.0.21:
-    resolution: {integrity: sha512-bc4NBHqOqSfRW7POMkHd51LvClaeMXpm8dx0e8oE2GORbq5aRK7Bxl4FyzVLdGtLmvLKL7BTDBG5ACQm4HWjTA==, tarball: https://registry.npmjs.org/immer/-/immer-9.0.21.tgz}
+    resolution: {integrity: sha512-bc4NBHqOqSfRW7POMkHd51LvClaeMXpm8dx0e8oE2GORbq5aRK7Bxl4FyzVLdGtLmvLKL7BTDBG5ACQm4HWjTA==}
 
   immutable@4.3.4:
     resolution: {integrity: sha512-fsXeu4J4i6WNWSikpI88v/PcVflZz+6kMhUfIwc5SY+poQRPnaf5V7qds6SUyUN3cVxEzuCab7QIoLOQ+DQ1wA==}
@@ -5756,7 +5756,7 @@ packages:
     engines: {node: '>= 0.6'}
 
   mime@1.6.0:
-    resolution: {integrity: sha512-x0Vn8spI+wuJ1O6S7gnbaQg8Pxh4NNHb7KSINmEWKiPE4RKOplvijn+NkmYmmRgP68mc70j2EbeTFRsrswaQeg==, tarball: https://registry.npmjs.org/mime/-/mime-1.6.0.tgz}
+    resolution: {integrity: sha512-x0Vn8spI+wuJ1O6S7gnbaQg8Pxh4NNHb7KSINmEWKiPE4RKOplvijn+NkmYmmRgP68mc70j2EbeTFRsrswaQeg==}
     engines: {node: '>=4'}
     hasBin: true
 
@@ -5923,7 +5923,7 @@ packages:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
 
   needle@3.3.1:
-    resolution: {integrity: sha512-6k0YULvhpw+RoLNiQCRKOl09Rv1dPLr8hHnVjHqdolKwDrdNyk+Hmrthi4lIGPPz3r39dLx0hsF5s40sZ3Us4Q==, tarball: https://registry.npmjs.org/needle/-/needle-3.3.1.tgz}
+    resolution: {integrity: sha512-6k0YULvhpw+RoLNiQCRKOl09Rv1dPLr8hHnVjHqdolKwDrdNyk+Hmrthi4lIGPPz3r39dLx0hsF5s40sZ3Us4Q==}
     engines: {node: '>= 4.4.x'}
     hasBin: true
 
@@ -6979,7 +6979,7 @@ packages:
     engines: {node: '>= 0.8.0'}
 
   prettier@2.8.8:
-    resolution: {integrity: sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==, tarball: https://registry.npmjs.org/prettier/-/prettier-2.8.8.tgz}
+    resolution: {integrity: sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==}
     engines: {node: '>=10.13.0'}
     hasBin: true
 
@@ -8101,7 +8101,7 @@ packages:
     hasBin: true
 
   uglify-js@3.17.4:
-    resolution: {integrity: sha512-T9q82TJI9e/C1TAxYvfb16xO120tMVFZrGA3f9/P4424DNu6ypK103y0GPFVa17yotwSyZW5iYXgjYHkGrJW/g==, tarball: https://registry.npmjs.org/uglify-js/-/uglify-js-3.17.4.tgz}
+    resolution: {integrity: sha512-T9q82TJI9e/C1TAxYvfb16xO120tMVFZrGA3f9/P4424DNu6ypK103y0GPFVa17yotwSyZW5iYXgjYHkGrJW/g==}
     engines: {node: '>=0.8.0'}
     hasBin: true
 
@@ -8452,7 +8452,7 @@ packages:
     engines: {node: '>=8'}
 
   ws@6.2.2:
-    resolution: {integrity: sha512-zmhltoSR8u1cnDsD43TX59mzoMZsLKqUweyYBAIvTngR3shc0W6aOZylZmq/7hqyVxPdi+5Ud2QInblgyE72fw==, tarball: https://registry.npmjs.org/ws/-/ws-6.2.2.tgz}
+    resolution: {integrity: sha512-zmhltoSR8u1cnDsD43TX59mzoMZsLKqUweyYBAIvTngR3shc0W6aOZylZmq/7hqyVxPdi+5Ud2QInblgyE72fw==}
     peerDependencies:
       bufferutil: ^4.0.1
       utf-8-validate: ^5.0.2
@@ -8486,7 +8486,7 @@ packages:
     engines: {node: '>=0.4'}
 
   y-leveldb@0.1.2:
-    resolution: {integrity: sha512-6ulEn5AXfXJYi89rXPEg2mMHAyyw8+ZfeMMdOtBbV8FJpQ1NOrcgi6DTAcXof0dap84NjHPT2+9d0rb6cFsjEg==, tarball: https://registry.npmjs.org/y-leveldb/-/y-leveldb-0.1.2.tgz}
+    resolution: {integrity: sha512-6ulEn5AXfXJYi89rXPEg2mMHAyyw8+ZfeMMdOtBbV8FJpQ1NOrcgi6DTAcXof0dap84NjHPT2+9d0rb6cFsjEg==}
     peerDependencies:
       yjs: ^13.0.0
 
@@ -11121,7 +11121,7 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
-  '@viewfly/core@1.0.0-alpha.21':
+  '@viewfly/core@1.0.0-alpha.22':
     dependencies:
       reflect-metadata: 0.2.2
 
@@ -11203,19 +11203,19 @@ snapshots:
       - webpack
       - whiskers
 
-  '@viewfly/hooks@1.0.0-alpha.21':
+  '@viewfly/hooks@1.0.0-alpha.22':
     dependencies:
-      '@viewfly/core': 1.0.0-alpha.21
+      '@viewfly/core': 1.0.0-alpha.22
       immer: 9.0.21
 
-  '@viewfly/platform-browser@1.0.0-alpha.21':
+  '@viewfly/platform-browser@1.0.0-alpha.22':
     dependencies:
-      '@viewfly/core': 1.0.0-alpha.21
+      '@viewfly/core': 1.0.0-alpha.22
       csstype: 3.1.3
 
-  '@viewfly/scoped-css@1.0.0-alpha.21':
+  '@viewfly/scoped-css@1.0.0-alpha.22':
     dependencies:
-      '@viewfly/core': 1.0.0-alpha.21
+      '@viewfly/core': 1.0.0-alpha.22
 
   '@vue/compiler-core@3.3.13':
     dependencies:
