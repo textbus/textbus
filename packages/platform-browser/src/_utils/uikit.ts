@@ -10,9 +10,9 @@ export interface Rect {
 
 export interface UIElementParams {
   classes?: string[]
-  attrs?: { [key: string]: any }
-  props?: { [key: string]: any }
-  styles?: { [key: string]: any }
+  attrs?: {[key: string]: any}
+  props?: {[key: string]: any}
+  styles?: {[key: string]: any}
   children?: (Node | null)[]
   on?: Record<string, (ev: Event) => void>
 }
@@ -51,6 +51,7 @@ export function createElement(tagName: string, options: UIElementParams = {}): H
 export function createTextNode(content: string) {
   return document.createTextNode(content)
 }
+
 export function getLayoutRectByRange(range: Range): Rect {
   let { startContainer, startOffset } = range
   if (startContainer.nodeType === Node.TEXT_NODE) {
@@ -69,7 +70,7 @@ export function getLayoutRectByRange(range: Range): Rect {
       return {
         left: rect.right,
         top: rect.top,
-        width: rect.width,
+        width: range.collapsed ? 0 : rect.width,
         height: rect.height
       }
     } else if (beforeNode.nodeType === Node.TEXT_NODE) {
@@ -88,14 +89,20 @@ export function getLayoutRectByRange(range: Range): Rect {
       return {
         left: rect.right,
         top: rect.top,
-        width: rect.width,
+        width: range.collapsed ? 0 : rect.width,
         height: rect.height
       }
     }
   }
   if (offsetNode) {
     if (offsetNode.nodeType === Node.ELEMENT_NODE && offsetNode.nodeName.toLowerCase() !== 'br') {
-      return (offsetNode as HTMLElement).getBoundingClientRect()
+      const rect = (offsetNode as HTMLElement).getBoundingClientRect()
+      return {
+        left: rect.left,
+        top: rect.top,
+        width: range.collapsed ? 0 : rect.width,
+        height: rect.height
+      }
     }
     isInsertBefore = true
   }

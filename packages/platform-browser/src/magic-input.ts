@@ -203,14 +203,36 @@ class ExperimentalCaret implements Caret {
     const containerRect = this.editorMask.getBoundingClientRect()
 
     const top = Math.floor(rectTop - containerRect.top)
-    const left = Math.floor(rect.left - containerRect.left)
+    const left = Math.floor(rect.left + rect.width / 2 - containerRect.left)
+    let rotate = 0
+    if (nativeRange.collapsed) {
+      rotate = Math.round(Math.atan2(rect.width, rect.height) * 180 / Math.PI)
+      if (rotate !== 0) {
+        const hackEle = document.createElement('span')
+        hackEle.style.cssText = 'display: inline-block; width: 10px; height: 10px; position: relative; contain: layout style size;'
+        const pointEle = document.createElement('span')
+        pointEle.style.cssText = 'position: absolute; left: 0; top: 0; width:0;height:0'
+        hackEle.append(pointEle)
+        node.append(hackEle)
 
+        const t1 = pointEle.getBoundingClientRect().top
+        pointEle.style.right = '0'
+        pointEle.style.left = ''
+        const t2 = pointEle.getBoundingClientRect().top
+
+        if (t2 < t1) {
+          rotate = -rotate
+        }
+        hackEle.remove()
+      }
+    }
     Object.assign(this.elementRef.style, {
       left: left + 'px',
       top: top + 'px',
       height: boxHeight + 'px',
       lineHeight: boxHeight + 'px',
-      fontSize
+      fontSize,
+      transform: `rotate(${rotate}deg)`,
     })
 
     this.caret.style.backgroundColor = color
