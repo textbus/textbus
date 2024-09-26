@@ -48,10 +48,6 @@ export function createElement(tagName: string, options: UIElementParams = {}): H
   return el
 }
 
-export function createTextNode(content: string) {
-  return document.createTextNode(content)
-}
-
 export function getLayoutRectByRange(range: Range): Rect {
   let { startContainer, startOffset } = range
   if (startContainer.nodeType === Node.TEXT_NODE) {
@@ -77,7 +73,13 @@ export function getLayoutRectByRange(range: Range): Rect {
       const range2 = document.createRange()
       range2.setStart(beforeNode, beforeNode.textContent!.length)
       range2.setEnd(beforeNode, beforeNode.textContent!.length)
-      return range2.getBoundingClientRect()
+      const rect = range2.getBoundingClientRect()
+      return {
+        left: rect.right,
+        top: rect.top,
+        width: range.collapsed ? 0 : rect.width,
+        height: rect.height
+      }
     }
   }
   const offsetNode = startContainer.childNodes[startOffset]
@@ -116,5 +118,10 @@ export function getLayoutRectByRange(range: Range): Rect {
   }
   const rect = span.getBoundingClientRect()
   startContainer.removeChild(span)
-  return rect
+  return {
+    left: rect.left,
+    top: rect.top,
+    width: range.collapsed ? 0 : rect.width,
+    height: rect.height
+  }
 }
