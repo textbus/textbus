@@ -25,6 +25,7 @@
     "typescript editor"
   ],
   "dependencies": {
+    "@hocuspocus/provider": "^2.13.6",
     "@tanbo/stream": "^1.2.5",
     "@textbus/core": "^4.0.0-alpha.74",
     "@viewfly/core": "^1.0.0-alpha.22",

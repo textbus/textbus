@@ -1,14 +1,14 @@
 import { History, Module, Textbus } from '@textbus/core'
 import { Provider } from '@viewfly/core'
-import { WebsocketProvider } from 'y-websocket'
+import { Doc as YDoc } from 'yjs'
 
 import { Collaborate } from './collaborate'
 import { UserActivity, UserInfo } from './user-activity'
+import { SyncConnector } from './sync-connector'
 
 export interface CollaborateConfig {
-  url: string
-  roomName: string
   userinfo: UserInfo
+  createConnector(yDoc: YDoc): SyncConnector
 }
 
 export class CollaborateModule implements Module {
@@ -19,9 +19,9 @@ export class CollaborateModule implements Module {
       provide: History,
       useExisting: Collaborate
     }, {
-      provide: WebsocketProvider,
+      provide: SyncConnector,
       useFactory: (collab: Collaborate) => {
-        return new WebsocketProvider(this.config.url, this.config.roomName, collab.yDoc)
+        return this.config.createConnector(collab.yDoc)
       },
       deps: [Collaborate]
     }
@@ -31,18 +31,14 @@ export class CollaborateModule implements Module {
   }
 
   setup(textbus: Textbus): Promise<(() => void) | void> | (() => void) | void {
-    const provide = textbus.get(WebsocketProvider)
+    const connector = textbus.get(SyncConnector)
     const userActivity = textbus.get(UserActivity)
     userActivity.init(this.config.userinfo)
-    return new Promise<() => void>((resolve) => {
-      provide.on('sync', (is: boolean) => {
-        if (is) {
-          resolve(() => {
-            provide.disconnect()
-            userActivity.destroy()
-          })
-        }
-      })
-    })
+    return connector.onLoad.toPromise()
+  }
+
+  onDestroy(textbus: Textbus) {
+    textbus.get(UserActivity).destroy()
+    textbus.get(SyncConnector).onDestroy()
   }
 }

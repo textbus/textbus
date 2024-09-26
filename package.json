@@ -67,6 +67,7 @@
   "devDependencies": {
     "@babel/core": "^7.16.5",
     "@babel/preset-env": "^7.16.5",
+    "@hocuspocus/server": "^2.13.6",
     "@tanbo/json-parser": "^0.0.2",
     "@types/jest": "^27.0.3",
     "@types/node": "^18.11.11",
