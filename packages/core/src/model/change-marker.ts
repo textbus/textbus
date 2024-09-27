@@ -7,6 +7,8 @@ import { Slot } from './slot'
 
 export type Paths = Array<string | number>
 
+let onewayUpdate = false
+
 /**
  * 用来标识组件或插槽的数据变化
  */
@@ -16,6 +18,10 @@ export class ChangeMarker {
   onChange: Observable<Operation>
   onChildComponentRemoved: Observable<Component>
   onSelfChange: Observable<Action[]>
+
+  get irrevocableUpdate() {
+    return this._irrevocableUpdate
+  }
 
   get dirty() {
     return this._dirty
@@ -27,6 +33,7 @@ export class ChangeMarker {
 
   parentModel: ProxyModel<any> | null = null
 
+  private _irrevocableUpdate = false
   private _dirty = true
   private _changed = true
   private changeEvent = new Subject<Operation>()
@@ -78,10 +85,13 @@ export class ChangeMarker {
 
   markAsDirtied(operation: Operation) {
     this._dirty = true
+    operation.irrevocable = onewayUpdate
+    this._irrevocableUpdate = onewayUpdate
     if (operation.paths.length === 0) {
       this.selfChangeEvent.next([...operation.apply])
     }
     this.markAsChanged(operation)
+    this._irrevocableUpdate = false
   }
 
   markAsChanged(operation: Operation) {
@@ -146,4 +156,14 @@ export class ChangeMarker {
     }
     return null
   }
+}
+
+/**
+ * 在回调函数内改变组件状态时，将更改的状态标记为不可撤回的
+ * @param fn
+ */
+export function irrevocableUpdate(fn: () => void) {
+  onewayUpdate = true
+  fn()
+  onewayUpdate = false
 }

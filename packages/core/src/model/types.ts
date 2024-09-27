@@ -68,8 +68,9 @@ export type Action = InsertAction |
 export interface Operation {
   paths: Array<number | string>
   apply: Action[]
-  source?: Component<any>
   unApply: Action[]
+  source?: Component<any>
+  irrevocable?: boolean
 }
 
 export interface State {

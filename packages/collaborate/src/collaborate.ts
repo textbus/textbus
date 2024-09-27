@@ -605,7 +605,7 @@ export class Collaborate implements History {
             sharedSlot.removeAttribute(action.name)
           }
         }
-      })
+      }, true)
     })
 
     this.slotMap.set(localSlot, sharedSlot)
@@ -676,7 +676,7 @@ export class Collaborate implements History {
               break
           }
         }
-      })
+      }, !localArray.__changeMarker__.irrevocableUpdate)
     })
 
     const syncRemote = (ev: YArrayEvent<any>, tr: Transaction) => {
@@ -739,7 +739,7 @@ export class Collaborate implements History {
               break
           }
         }
-      })
+      }, !localObject.__changeMarker__.irrevocableUpdate)
     })
 
     localObject.__changeMarker__.destroyCallbacks.push(function () {
@@ -748,7 +748,7 @@ export class Collaborate implements History {
     })
   }
 
-  private runLocalUpdate(fn: () => void, record = true) {
+  private runLocalUpdate(fn: () => void, record: boolean) {
     if (this.updateFromRemote) {
       return
     }
