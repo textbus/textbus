@@ -107,7 +107,6 @@ export class ReactAdapter extends DomAdapter<JSX.Element, JSX.Element> {
         useEffect(() => {
           this.onViewUpdated.next()
         }, [updateKey])
-        component.state.length = 0
         const vNode = components[key]({
           component,
           rootRef: (rootNode: HTMLElement) => {
