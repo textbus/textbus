@@ -40,15 +40,18 @@ export class UserActivity {
           selection
         })
       }),
-      this.syncConnector.onStateChange.subscribe((state) => {
+      this.syncConnector.onStateChange.subscribe((states) => {
         const users: UserInfo[] = []
         const remoteSelections: ActivityInfo[] = []
-        if (state.user) {
-          users.push(state.user)
-        }
-        if (state.selection) {
-          remoteSelections.push(state.selection)
-        }
+        states.forEach(item => {
+          const state = item.state
+          if (state.user) {
+            users.push(state.user)
+          }
+          if (state.selection) {
+            remoteSelections.push(state.selection)
+          }
+        })
         const selections = remoteSelections.filter(i => i.id !== userinfo.id)
         this.userChangeEvent.next(users)
         this.stateChangeEvent.next(selections)

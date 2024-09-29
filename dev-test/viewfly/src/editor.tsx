@@ -6,9 +6,9 @@ import {
   DomAdapter,
   Parser,
   ViewOptions,
-  isMobileBrowser
+  isMobileBrowser, CollaborateCursor
 } from '@textbus/platform-browser'
-import { CollaborateConfig, CollaborateModule } from '@textbus/collaborate'
+import { CollaborateConfig, CollaborateModule, UserActivity } from '@textbus/collaborate'
 import { Component, ContentType, Module, Slot, Textbus, TextbusConfig } from '@textbus/core'
 import { ReflectiveInjector } from '@viewfly/core'
 
@@ -242,6 +242,18 @@ export class Editor extends Textbus {
         new LeftToolbarPlugin(),
         new ToolbarPlugin(),
       ],
+      setup(textbus) {
+        if (editorConfig.collaborateConfig) {
+          const activity = textbus.get(UserActivity)
+          const collabCursor = textbus.get(CollaborateCursor)
+          const sub = activity.onStateChange.subscribe(ev => {
+            collabCursor.draw(ev)
+          })
+          return () => {
+            sub.unsubscribe()
+          }
+        }
+      },
       onAfterStartup(textbus: Textbus) {
         registerBoldShortcut(textbus)
         registerCodeShortcut(textbus)

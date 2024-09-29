@@ -71,13 +71,13 @@ const editor = new Editor({
   collaborateConfig: {
     userinfo: user,
     createConnector(yDoc: Doc): SyncConnector {
-      return new HocuspocusConnector({
-        url: 'ws://172.20.10.3:1234',
-        name: 'test212',
-        token: 'xxxx',
-        document: yDoc
-      })
-      // return new YWebsocketConnector('wss://textbus.io/api', 'xnote', yDoc)
+      // return new HocuspocusConnector({
+      //   url: 'ws://172.20.10.3:1234',
+      //   name: 'test212',
+      //   token: 'xxxx',
+      //   document: yDoc
+      // })
+      return new YWebsocketConnector('wss://textbus.io/api', 'xnote', yDoc)
     }
   },
   providers: [

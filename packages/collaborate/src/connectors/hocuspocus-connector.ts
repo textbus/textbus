@@ -1,21 +1,13 @@
-import { Observable, Subject } from '@tanbo/stream'
 import { HocuspocusProvider } from '@hocuspocus/provider'
 import { HocuspocusProviderConfiguration } from '@hocuspocus/provider'
 
-import { SyncConnector } from '../sync-connector'
+import { SyncConnector, SyncState } from '../sync-connector'
 
 export class HocuspocusConnector extends SyncConnector {
-  onLoad: Observable<void>
-  onStateChange: Observable<any>
-  private loadEvent = new Subject<void>()
-  private stateChangeEvent = new Subject<any>()
-
   private provide: HocuspocusProvider
 
   constructor(config: HocuspocusProviderConfiguration) {
     super()
-    this.onLoad = this.loadEvent.asObservable()
-    this.onStateChange = this.stateChangeEvent.asObservable()
     this.provide = new HocuspocusProvider({
       ...config,
       onSynced: (data) => {
@@ -24,9 +16,15 @@ export class HocuspocusConnector extends SyncConnector {
       },
       onAwarenessUpdate: (data) => {
         config.onAwarenessUpdate?.(data)
-        data.states.forEach(state => {
-          this.stateChangeEvent.next(state)
+        const states: SyncState[] = data.states.map(state => {
+          return {
+            clientId: state.clientId,
+            state: {
+              ...state
+            } as Record<string, any>
+          }
         })
+        this.stateChangeEvent.next(states)
       },
     })
   }

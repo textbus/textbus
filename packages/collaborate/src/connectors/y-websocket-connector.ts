@@ -1,15 +1,11 @@
 import { Doc as YDoc } from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
-import { Observable, Subject } from '@tanbo/stream'
 
-import { SyncConnector } from '../sync-connector'
+import { SyncConnector, SyncState } from '../sync-connector'
+
 
 export class YWebsocketConnector extends SyncConnector {
-  onLoad: Observable<void>
-  onStateChange: Observable<any>
   private provide: WebsocketProvider
-  private loadEvent = new Subject<void>()
-  private stateChangeEvent = new Subject<any>()
 
   constructor(url: string, roomName: string, yDoc: YDoc) {
     super()
@@ -24,9 +20,14 @@ export class YWebsocketConnector extends SyncConnector {
     })
 
     this.provide.awareness.on('update', () => {
-      this.provide.awareness.getStates().forEach(state => {
-        this.stateChangeEvent.next(state)
+      const syncStates: SyncState[] = []
+      this.provide.awareness.getStates().forEach((state, id) => {
+        syncStates.push({
+          clientId: id,
+          state: state,
+        })
       })
+      this.stateChangeEvent.next(syncStates)
     })
   }
 
