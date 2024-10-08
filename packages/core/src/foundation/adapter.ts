@@ -287,7 +287,7 @@ export abstract class Adapter<
             endIndex: index + 1
           }
         }
-        return child.location
+        return child?.location || null
       } else if (child instanceof VElement) {
         let r: NodeLocation | null = null
         if (this.adapter.isNativeElementNode(nativeChild)) {

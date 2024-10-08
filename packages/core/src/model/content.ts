@@ -1,5 +1,7 @@
 import { Component, ComponentLiteral } from './component'
 
+let firstRun = true
+
 /**
  * Textbus 内容管理类
  * Content 属于 Slot 的私有属性，在实际场景中，开发者不需在关注此类，也不需要访问或操作此类
@@ -9,8 +11,15 @@ export class Content {
     if (Content._segmenter) {
       return Content._segmenter
     }
-    Content._segmenter = new Intl.Segmenter()
-    return Content._segmenter
+    if (Intl?.Segmenter) {
+      Content._segmenter = new Intl.Segmenter()
+      return Content._segmenter
+    }
+    if (firstRun) {
+      console.warn('[Textbus: warning]: cannot found `Intl.Segmenter`, slot index will revert back to default mode.')
+      firstRun = false
+    }
+    return null
   }
 
   static _segmenter: Intl.Segmenter | null = null
@@ -29,7 +38,7 @@ export class Content {
    * @param toEnd 当需要变更 index 时，是向后还是向前移动
    */
   correctIndex(index: number, toEnd: boolean) {
-    if (index <= 0 || index >= this.length) {
+    if (index <= 0 || index >= this.length || !Content.segmenter) {
       return index
     }
     let i = 0
