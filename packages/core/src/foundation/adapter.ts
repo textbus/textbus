@@ -42,10 +42,10 @@ export interface CompositionState {
  * Textbus 渲染适配器
  */
 export abstract class Adapter<
-  NativeElement extends object = object,
-  NativeTextNode extends object = object,
-  ViewComponent extends object = object,
-  ViewElement extends object = object
+  NativeElement extends {} = {},
+  NativeTextNode extends {} = {},
+  ViewComponent extends {} = {},
+  ViewElement extends {} = {}
 > {
   composition: CompositionState | null = null
   /** 当视图更新时触发事件的可观察对象，用于通知 Textbus 视图渲染已完成 */

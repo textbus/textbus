@@ -139,8 +139,8 @@ export function AttrTool(props: AttrToolProps) {
       ]}>
         {
           props.children || <Button arrow={true} highlight={false}>
-                <span class={`xnote-icon-paragraph-${states.textAlign || 'left'} icon`}/>
-            </Button>
+            <span class={`xnote-icon-paragraph-${states.textAlign || 'left'} icon`}/>
+          </Button>
         }
       </Dropdown>
     )

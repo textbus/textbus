@@ -99,8 +99,7 @@ export const TableComponentView = withAnnotation({
       )
     }
     return (
-      <div class="xnote-table" data-component={props.component.name}
-           data-layout-width={`[${state.layoutWidth.join(',')}]`}>
+      <div class="xnote-table" data-component={props.component.name} data-layout-width={`[${state.layoutWidth.join(',')}]`}>
         <div class="xnote-table-inner" ref={props.rootRef}>
           <TopBar
             isFocus={isFocus}

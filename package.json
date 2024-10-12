@@ -74,8 +74,8 @@
     "@types/prismjs": "^1.16.6",
     "@typescript-eslint/eslint-plugin": "^5.8.0",
     "@typescript-eslint/parser": "^5.8.0",
-    "@viewfly/core": "^1.0.0-alpha.22",
-    "@viewfly/platform-browser": "^1.0.0-alpha.22",
+    "@viewfly/core": "^1.0.2",
+    "@viewfly/platform-browser": "^1.0.3",
     "add-assets-webpack-plugin": "^1.0.0",
     "autoprefixer": "^10.4.0",
     "babel-jest": "^29.7.0",
@@ -120,7 +120,7 @@
     "reflect-metadata": "^0.2.2",
     "y-webrtc": "^10.0.4",
     "y-websocket": "^1.4.3",
-    "yjs": "^13.6.7"
+    "yjs": "^13.6.14"
   },
   "repository": {
     "type": "git",

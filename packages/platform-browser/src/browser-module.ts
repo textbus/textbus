@@ -30,7 +30,7 @@ const browserErrorFn = makeError('BrowserModule')
  */
 export interface ViewOptions {
   /** 跨平台适配器 */
-  adapter: DomAdapter
+  adapter: DomAdapter<any, any>
 
   /** 编辑器根节点 */
   renderTo(): HTMLElement

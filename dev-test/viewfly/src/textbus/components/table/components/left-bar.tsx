@@ -66,7 +66,7 @@ export function LeftBar(props: TopBarProps) {
     return () => sub.unsubscribe()
   })
 
-  const selectedRowRange = createSignal<null | {startIndex: number, endIndex: number}>(null)
+  const selectedRowRange = createSignal<null | { startIndex: number, endIndex: number }>(null)
   const deleteIndex = createSignal<null | number>(null)
 
   function selectRow(index: number, isMultiple: boolean) {

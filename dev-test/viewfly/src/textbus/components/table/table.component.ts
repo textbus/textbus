@@ -89,9 +89,7 @@ export class TableComponent extends Component<TableComponentState> {
   tableSelection = createSignal<TableSelection | null>(null)
 
   override getSlots(): Slot[] {
-    return this.state.rows.map(i => {
-      return i.cells.map(j => j.slot)
-    }).flat()
+    return this.state.rows.map(i => i.cells.map(j => j.slot)).flat()
   }
 
   override setup() {
@@ -164,9 +162,7 @@ export class TableComponent extends Component<TableComponentState> {
 
       if (startPosition && endPosition) {
         if (startPosition.rowIndex === endPosition.rowIndex && startPosition.colIndex === endPosition.colIndex) {
-          if (selection.startSlot === selection.endSlot &&
-            selection.startOffset === 0 &&
-            selection.endOffset === selection.startSlot?.length) {
+          if (selection.startSlot === selection.endSlot && selection.startOffset === 0 && selection.endOffset === selection.startSlot?.length) {
 
             select(ev, {
               startColumn: startPosition.colIndex,

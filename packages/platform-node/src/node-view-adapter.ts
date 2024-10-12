@@ -23,7 +23,7 @@ export interface ViewflyVDomAdapterComponents {
 
 const adapterError = makeError('ViewflyHTMLRenderer')
 
-export class NodeViewAdapter extends Adapter<VDOMElement, VDOMText, JSXNode, JSX.Element> {
+export class NodeViewAdapter extends Adapter<VDOMElement, VDOMText, JSX.Element, JSX.Element> {
   onViewUpdated = new Subject<void>()
   host = new VDOMElement('body')
   private components: ViewflyVDomAdapterComponents = {}
@@ -31,7 +31,7 @@ export class NodeViewAdapter extends Adapter<VDOMElement, VDOMText, JSXNode, JSX
   private componentRefs = new WeakMap<Component, DynamicRef<VDOMElement>>()
 
   constructor(components: ViewflyVDomAdapterComponents,
-              mount: ViewMount<JSXNode, VDOMElement>
+              mount: ViewMount<JSX.Element, VDOMElement>
   ) {
     super({
       createCompositionNode(compositionState: CompositionState,
@@ -79,7 +79,7 @@ export class NodeViewAdapter extends Adapter<VDOMElement, VDOMText, JSXNode, JSX
           vEle.attrs.set('ref', ref)
         }
       },
-      componentRender: (component: Component<any>): JSXNode => {
+      componentRender: (component: Component<any>): JSX.Element => {
         const comp = this.components[component.name] || this.components['*']
         if (comp) {
           let ref = this.componentRefs.get(component)
@@ -99,7 +99,7 @@ export class NodeViewAdapter extends Adapter<VDOMElement, VDOMText, JSXNode, JSX
         }
         throw adapterError(`cannot found view component \`${component.name}\`!`)
       },
-      vElementToViewElement(vNode: VElement, children: Array<JSXNode>): JSXNode {
+      vElementToViewElement(vNode: VElement, children: Array<JSXNode>): JSX.Element {
         const key = vNode.attrs.get('key')
         vNode.attrs.delete('key')
         const props: any = {

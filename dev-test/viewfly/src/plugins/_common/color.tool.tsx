@@ -147,7 +147,7 @@ export function ColorTool(props: ColorToolProps) {
               <span class="xnote-icon-color"></span>
             </span>
           </span>
-            </Button>
+          </Button>
         }
       </Dropdown>
     )

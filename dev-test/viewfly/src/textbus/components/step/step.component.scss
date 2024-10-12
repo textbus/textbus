@@ -1,0 +1,105 @@
+.xnote-step {
+  display: flex;
+}
+
+.xnote-step-item {
+  position: relative;
+  flex: 1;
+}
+
+.xnote-step-item:last-child .xnote-step-item-line {
+  display: none;
+}
+
+.xnote-step-item.xnote-complete .xnote-step-item-line {
+  border-top-color: #15bd9a;
+}
+
+.xnote-step-item.xnote-complete .xnote-step-item-icon {
+  background-color: #15bd9a;
+}
+
+.xnote-step-item.xnote-current .xnote-step-item-line {
+  border-top-style: dashed;
+}
+
+.xnote-step-item.xnote-current .xnote-step-item-icon {
+  background-color: #1296db;
+}
+
+.xnote-step-item.xnote-waiting .xnote-step-item-line {
+  border-top-style: dashed;
+}
+
+.xnote-step-item.xnote-waiting .xnote-step-item-icon {
+  background-color: #bbbec4;
+}
+
+.xnote-step-item.xnote-waiting .xnote-step-item-content {
+  opacity: .8;
+}
+
+.xnote-step-item-header {
+  position: relative;
+  margin-bottom: 1em;
+  cursor: pointer;
+}
+
+.xnote-step-item-icon {
+  width: 1.6em;
+  height: 1.6em;
+  border-radius: 50%;
+  position: relative;
+  text-align: center;
+  line-height: 1.6em;
+  color: #fff;
+  font-weight: 500;
+}
+
+.xnote-step-item-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  border-top: 1px solid #dddee1;
+}
+
+.xnote-step-item-content {
+  padding-right: 15px;
+}
+
+.xnote-step-title {
+  font-weight: 500;
+  margin: 0;
+  font-size: 1.2em;
+}
+
+.xnote-step-title > small {
+  font-weight: normal;
+  opacity: .8;
+}
+
+.xnote-step-content {
+  font-weight: normal;
+  margin: 0;
+}
+
+.xnote-step-tools {
+  position: absolute;
+  display: none;
+  right: 0;
+  top: 0;
+}
+
+.xnote-step-item-content {
+  > *:first-child {
+    margin-top: 0;
+  }
+}
+
+
+.xnote-step-item:hover {
+  .xnote-step-tools {
+    display: block;
+  }
+}

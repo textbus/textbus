@@ -1,8 +1,7 @@
-import { Slot, createVNode } from '@textbus/core'
+import { Slot, createVNode, merge } from '@textbus/core'
 import { DomAdapter } from '@textbus/platform-browser'
 import { DynamicRef, getCurrentInstance, inject, onUnmounted } from '@viewfly/core'
 import { HTMLAttributes } from '@viewfly/platform-browser'
-import { merge } from '@tanbo/stream'
 
 
 interface Props extends HTMLAttributes<unknown> {

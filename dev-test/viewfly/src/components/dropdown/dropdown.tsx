@@ -117,23 +117,23 @@ export const Dropdown = withAnnotation({
           </div>
           {
             isShow() &&
-              <DropdownMenuPortal toLeft={props.toLeft} padding={props.padding} noTrigger={props.trigger === 'none'} width={props.width}
-                                  abreast={props.abreast} triggerRef={triggerRef}>
-                {
-                  Array.isArray(props.menu) ?
-                    props.menu.map(menu => {
-                      return (
-                        <div class="dropdown-menu-item" onClick={() => {
-                          if (menu.disabled) {
-                            return
-                          }
-                          props.onCheck?.(menu.value)
-                        }}>{menu.label}</div>
-                      )
-                    }) :
-                    props.menu
-                }
-              </DropdownMenuPortal>
+            <DropdownMenuPortal toLeft={props.toLeft} padding={props.padding} noTrigger={props.trigger === 'none'} width={props.width}
+                                abreast={props.abreast} triggerRef={triggerRef}>
+              {
+                Array.isArray(props.menu) ?
+                  props.menu.map(menu => {
+                    return (
+                      <div class="dropdown-menu-item" onClick={() => {
+                        if (menu.disabled) {
+                          return
+                        }
+                        props.onCheck?.(menu.value)
+                      }}>{menu.label}</div>
+                    )
+                  }) :
+                  props.menu
+              }
+            </DropdownMenuPortal>
           }
         </div>
       )

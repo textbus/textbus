@@ -16,17 +16,17 @@ export interface MatchRule {
   /** 匹配的标签 */
   tags?: string[] | RegExp;
   /** 匹配的样式 */
-  styles?: {[key: string]: number | string | RegExp | Array<number | string | RegExp>};
+  styles?: { [key: string]: number | string | RegExp | Array<number | string | RegExp> };
   // classes?: string[];
   /** 匹配的属性 */
-  attrs?: Array<{key: string; value?: string | string[]}>;
+  attrs?: Array<{ key: string; value?: string | string[] }>;
   /** 可继承样式的标签，如加粗，可继承自 h1~h6 */
   extendTags?: string[] | RegExp;
   /** 排除的样式 */
-  excludeStyles?: {[key: string]: number | string | RegExp | Array<number | string | RegExp>};
+  excludeStyles?: { [key: string]: number | string | RegExp | Array<number | string | RegExp> };
   // excludeClasses?: string[];
   /** 排除的属性 */
-  excludeAttrs?: Array<{key: string; value?: string | string[]}>;
+  excludeAttrs?: Array<{ key: string; value?: string | string[] }>;
   /** 自定义过滤器，以适配以上不能满足的特殊需求 */
   filter?: (node: HTMLElement) => boolean;
 }
@@ -77,7 +77,7 @@ export abstract class Matcher<T extends FormatValue, U = Attribute<T> | Formatte
         attrs[key] = node.getAttribute(key)!
       })
     }
-    const style: {[key: string]: string | number} = {}
+    const style: { [key: string]: string | number } = {}
     if (config.styleName) {
       (Array.isArray(config.styleName) ? config.styleName : [config.styleName]).forEach(name => {
         const v = node.style[name as any]
@@ -101,7 +101,7 @@ export abstract class Matcher<T extends FormatValue, U = Attribute<T> | Formatte
     }
   }
 
-  private makeAttrsMatcher(attrs: Array<{key: string; value?: string | string[]}>) {
+  private makeAttrsMatcher(attrs: Array<{ key: string; value?: string | string[] }>) {
     return (node: HTMLElement) => {
       return attrs.map(attr => {
         if (attr.value) {
@@ -112,7 +112,7 @@ export abstract class Matcher<T extends FormatValue, U = Attribute<T> | Formatte
     }
   }
 
-  private makeStyleMatcher(styles: {[key: string]: number | string | RegExp | Array<number | string | RegExp>}) {
+  private makeStyleMatcher(styles: { [key: string]: number | string | RegExp | Array<number | string | RegExp> }) {
     return (node: HTMLElement) => {
       return !Object.keys(styles).map(key => {
         const optionValue = (Array.isArray(styles[key]) ?

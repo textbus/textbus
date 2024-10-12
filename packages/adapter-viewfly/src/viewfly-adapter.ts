@@ -1,5 +1,15 @@
 import { Component, CompositionState, makeError, VElement, ViewMount, VTextNode, merge } from '@textbus/core'
-import { ComponentSetup, createDynamicRef, DynamicRef, getCurrentInstance, jsx, JSXNode, onUpdated, withAnnotation } from '@viewfly/core'
+import {
+  ComponentSetup,
+  createDynamicRef,
+  DynamicRef,
+  getCurrentInstance,
+  jsx,
+  JSXNode,
+  onUpdated,
+  ViewFlyNode,
+  withAnnotation,
+} from '@viewfly/core'
 import { DomAdapter } from '@textbus/platform-browser'
 
 const adapterError = makeError('ViewflyDOMRenderer')
@@ -13,13 +23,13 @@ export interface ViewflyAdapterComponents {
   [key: string]: ComponentSetup<ViewComponentProps<any>>
 }
 
-export class ViewflyAdapter extends DomAdapter<JSXNode, Element> {
+export class ViewflyAdapter extends DomAdapter<ViewFlyNode, ViewFlyNode> {
   private components: ViewflyAdapterComponents = {}
 
   private componentRefs = new WeakMap<Component, DynamicRef<HTMLElement>>()
 
   constructor(components: ViewflyAdapterComponents,
-              mount: ViewMount<JSXNode, HTMLElement>
+              mount: ViewMount<ViewFlyNode, HTMLElement>
   ) {
     super({
       createCompositionNode(compositionState: CompositionState,
@@ -67,7 +77,7 @@ export class ViewflyAdapter extends DomAdapter<JSXNode, Element> {
           vEle.attrs.set('ref', ref)
         }
       },
-      componentRender: (component: Component<any>): JSXNode => {
+      componentRender: (component: Component<any>): ViewFlyNode => {
         const comp = this.components[component.name] || this.components['*']
         if (comp) {
           let ref = this.componentRefs.get(component)
@@ -87,7 +97,7 @@ export class ViewflyAdapter extends DomAdapter<JSXNode, Element> {
         }
         throw adapterError(`cannot found view component \`${component.name}\`!`)
       },
-      vElementToViewElement(vNode: VElement, children: Array<JSXNode>): JSXNode {
+      vElementToViewElement(vNode: VElement, children: Array<JSXNode>): ViewFlyNode {
         const key = vNode.attrs.get('key')
         vNode.attrs.delete('key')
         const props: any = {

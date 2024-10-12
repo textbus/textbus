@@ -9,7 +9,7 @@
 
   .resize-tool {
     position: absolute;
-    pointer-events: none;
+    //pointer-events: none;
     left: 0;
     top: 0;
     width: 100%;
@@ -36,6 +36,7 @@
     background-color: rgba(0, 0, 0, .8);
     position: relative;
     z-index: 10;
+    text-indent: 0;
   }
 
   .btn-group {

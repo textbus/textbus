@@ -1,0 +1,62 @@
+.xnote-timeline {
+  display: block;
+  padding-top: 1em;
+  padding-left: 5px;
+}
+
+.xnote-timeline-item {
+  display: block;
+  position: relative;
+  padding-left: 1.5em;
+  padding-bottom: 0.5em;
+  opacity: .76;
+}
+
+.xnote-timeline-item:first-of-type > .xnote-timeline-line {
+  top: 1em;
+}
+
+.xnote-timeline-item:last-of-type > .xnote-timeline-line {
+  bottom: calc(100% - 1em);
+}
+
+.xnote-timeline-line {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 1px solid #dddee1;
+}
+
+.xnote-timeline-icon {
+  box-sizing: border-box;
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  left: -4px;
+  top: .5em;
+  background-color: #fff;
+  border: 1px solid #bbbec4;
+}
+
+.xnote-timeline-tools {
+  position: absolute;
+  display: none;
+  right: 0;
+  top: 0;
+}
+
+.xnote-timeline-item-content {
+  > *:first-child {
+    margin-top: 0;
+  }
+}
+
+
+.xnote-timeline-item:hover {
+  .xnote-timeline-tools {
+    display: block;
+  }
+}

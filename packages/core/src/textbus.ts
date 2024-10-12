@@ -93,7 +93,7 @@ export interface TextbusConfig extends Module {
   /** 是否只读 */
   readonly?: boolean
   /** 附加的渲染器。常用于在内存中渲染 HTML 字符串*/
-  additionalAdapters?: Adapter<any, any>[]
+  additionalAdapters?: Adapter<any, any, any>[]
 }
 
 /**

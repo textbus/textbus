@@ -81,6 +81,13 @@ import { registerTextAlignShortcut, textAlignAttr, textAlignAttrLoader } from '.
 import { registerTextIndentShortcut, textIndentAttr, textIndentAttrLoader } from './textbus/attributes/text-indent.attr'
 import { OutputInjectionToken } from './textbus/injection-tokens'
 import { TableSelectionAwarenessDelegate } from './textbus/components/table/table-selection-awareness-delegate'
+import { TimelineComponent } from './textbus/components/timeline/timeline.component'
+import { timelineComponentLoader, TimelineComponentView } from './textbus/components/timeline/timeline-component.view'
+import { StepComponent } from './textbus/components/step/step.component'
+import {
+  stepComponentLoader,
+  StepComponentView
+} from './textbus/components/step/step-component.view'
 
 export interface EditorConfig extends TextbusConfig {
   content?: string,
@@ -107,6 +114,8 @@ export class Editor extends Textbus {
       [VideoComponent.componentName]: VideoView,
       [AtComponent.componentName]: AtComponentView,
       [KatexComponent.componentName]: KatexComponentView,
+      [StepComponent.componentName]: StepComponentView,
+      [TimelineComponent.componentName]: TimelineComponentView,
     }, (host, root, injector) => {
       const appInjector = new ReflectiveInjector(injector, [{
         provide: OutputInjectionToken,
@@ -142,6 +151,8 @@ export class Editor extends Textbus {
         todolistComponentLoader,
         katexComponentLoader,
         paragraphComponentLoader,
+        stepComponentLoader,
+        timelineComponentLoader
       ],
       formatLoaders: [
         backgroundColorFormatLoader,
@@ -183,7 +194,9 @@ export class Editor extends Textbus {
       [ImageComponent.componentName]: ImageView,
       [VideoComponent.componentName]: VideoView,
       [AtComponent.componentName]: AtComponentView,
-      [KatexComponent.componentName]: KatexComponentView
+      [KatexComponent.componentName]: KatexComponentView,
+      [StepComponent.componentName]: StepComponentView,
+      [TimelineComponent.componentName]: TimelineComponentView,
     } as any, (host, root, injector) => {
       const appInjector = new ReflectiveInjector(injector, [{
         provide: OutputInjectionToken,
@@ -219,7 +232,9 @@ export class Editor extends Textbus {
         ListComponent,
         VideoComponent,
         AtComponent,
-        KatexComponent
+        KatexComponent,
+        StepComponent,
+        TimelineComponent
       ],
       formatters: [
         backgroundColorFormatter,
@@ -242,7 +257,7 @@ export class Editor extends Textbus {
         new LeftToolbarPlugin(),
         new ToolbarPlugin(),
       ],
-      setup(textbus) {
+      setup(textbus: Textbus): Promise<(() => void) | void> | (() => void) | void {
         if (editorConfig.collaborateConfig) {
           const activity = textbus.get(UserActivity)
           const collabCursor = textbus.get(CollaborateCursor)

@@ -94,6 +94,9 @@ export class AtComponent extends Component<AtComponentState> {
   }
 
   override getSlots(): Slot[] {
+    if (this.state.userInfo) {
+      return []
+    }
     if (this.state.slot) {
       return [this.state.slot]
     }

@@ -21,17 +21,14 @@ export function LinkTool(props: LinkToolProps) {
   const container = inject(VIEW_CONTAINER)
 
   const isShow = createSignal(false)
-  const inputRef = createRef<HTMLInputElement>()
+  const value = createSignal('')
 
   function setLink(ev: Event) {
     ev.preventDefault()
-    const value = inputRef.current!.value
-    if (value) {
-      commander.applyFormat(linkFormatter, {
-        href: value,
-        target: '_blanK'
-      } as any)
-    }
+    commander.applyFormat(linkFormatter, {
+      href: value(),
+      target: '_blanK'
+    } as any)
     isShow.set(false)
   }
 
@@ -64,14 +61,16 @@ export function LinkTool(props: LinkToolProps) {
         }}><span class="xnote-icon-link"></span></Button>
         {
           isShow() &&
-            <Popup left={rect.left - containerRect.left} top={rect.top + rect.height - containerRect.top}>
-                <form onSubmit={setLink} onClick={() => {
-                  isClickFromSelf = true
-                }} class="input-group">
-                    <input ref={inputRef} placeholder="请输入链接地址" type="text"/>
-                    <Button type="submit">确定</Button>
-                </form>
-            </Popup>
+          <Popup left={rect.left - containerRect.left} top={rect.top + rect.height - containerRect.top}>
+            <form onSubmit={setLink} onClick={() => {
+              isClickFromSelf = true
+            }} class="input-group">
+              <input onChange={ev => {
+                value.set((ev.target as any).value)
+              }} placeholder="请输入链接地址" type="text"/>
+              <Button type="submit">确定</Button>
+            </form>
+          </Popup>
         }
       </span>
     )

@@ -21,7 +21,7 @@ export function TopBar(props: TopBarProps) {
   const selection = inject(Selection)
   const tableService = inject(TableService)
   const textbus = inject(Textbus)
-  const selectedColumnRange = createSignal<null | {startIndex: number, endIndex: number}>(null)
+  const selectedColumnRange = createSignal<null | { startIndex: number, endIndex: number }>(null)
 
   function selectColumn(index: number, isMultiple: boolean) {
     editorService.hideInlineToolbar = true
