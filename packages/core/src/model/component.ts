@@ -172,8 +172,9 @@ export abstract class Component<T extends State = State> {
 
 
 export type ToLiteral<T> = T extends Slot ? SlotLiteral :
-  T extends Array<infer Item> ? Array<ToLiteral<Item>> :
-    T extends Record<string, any> ? ComponentStateLiteral<T> : T
+  T extends [infer First, ...infer Rest] ? [ToLiteral<First>, ...Rest] :
+    T extends Array<infer Item> ? Array<ToLiteral<Item>> :
+      T extends Record<string, any> ? ComponentStateLiteral<T> : T;
 
 
 export type ComponentStateLiteral<T extends State> = {
