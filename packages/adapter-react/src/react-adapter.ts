@@ -6,7 +6,7 @@ const adapterError = makeError('ReactAdapter')
 
 export interface ViewComponentProps<T extends Component> {
   component: T
-  rootRef: ((rootNode: HTMLElement) => void)
+  rootRef: ((rootNode: Element) => void)
 }
 
 export interface ReactAdapterComponents {
@@ -17,37 +17,37 @@ export class ReactAdapter extends DomAdapter<JSX.Element, JSX.Element> {
   private components: Record<string, (props: {component: Component}) => JSX.Element> = {}
 
   constructor(components: ReactAdapterComponents,
-              mount: ViewMount<JSX.Element, HTMLElement>) {
+              mount: ViewMount<JSX.Element, Element>) {
     super({
       createCompositionNode(compositionState: CompositionState,
-                            updateNativeCompositionNode: (nativeNode: (HTMLElement | null)) => void): VElement {
+                            updateNativeCompositionNode: (nativeNode: (Element | null)) => void): VElement {
         return new VElement('span', {
           style: {
             textDecoration: 'underline'
           },
-          ref: (node: HTMLElement) => {
+          ref: (node: Element) => {
             updateNativeCompositionNode(node)
           }
         }, [
           new VTextNode(compositionState.text)
         ])
       },
-      getParentNode(node: HTMLElement | Text): HTMLElement | null {
-        return (node as Node).parentNode as HTMLElement
+      getParentNode(node: Element | Text): Element | null {
+        return (node as Node).parentNode as Element
       },
-      getChildNodes(parentElement: HTMLElement): Array<HTMLElement | Text> {
-        return Array.from(parentElement.childNodes) as HTMLElement[]
+      getChildNodes(parentElement: Element): Array<Element | Text> {
+        return Array.from(parentElement.childNodes) as Element[]
       },
-      isNativeElementNode(node: HTMLElement | Text): node is HTMLElement {
-        return node instanceof HTMLElement
+      isNativeElementNode(node: Element | Text): node is Element {
+        return node instanceof Element
       },
       getChildByIndex(parentElement, index) {
-        return parentElement.childNodes[index] as HTMLElement
+        return parentElement.childNodes[index] as Element
       },
-      getAndUpdateSlotRootNativeElement(vEle: VElement, update: (nativeElement: (HTMLElement | null)) => void) {
+      getAndUpdateSlotRootNativeElement(vEle: VElement, update: (nativeElement: (Element | null)) => void) {
         const currentRef = vEle.attrs.get('ref')
         if (currentRef) {
-          vEle.attrs.set('ref', (v: HTMLElement) => {
+          vEle.attrs.set('ref', (v: Element) => {
             update(v)
             if (typeof currentRef === 'function') {
               currentRef(v)
@@ -109,7 +109,7 @@ export class ReactAdapter extends DomAdapter<JSX.Element, JSX.Element> {
         }, [updateKey])
         const vNode = components[key]({
           component,
-          rootRef: (rootNode: HTMLElement) => {
+          rootRef: (rootNode: Element) => {
             if (rootNode) {
               this.componentRootElementCaches.set(component, rootNode)
             } else {

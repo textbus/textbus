@@ -16,7 +16,7 @@ const adapterError = makeError('ViewflyDOMRenderer')
 
 export interface ViewComponentProps<T extends Component> {
   component: T
-  rootRef: DynamicRef<HTMLElement>
+  rootRef: DynamicRef<Element>
 }
 
 export interface ViewflyAdapterComponents {
@@ -26,15 +26,15 @@ export interface ViewflyAdapterComponents {
 export class ViewflyAdapter extends DomAdapter<ViewFlyNode, ViewFlyNode> {
   private components: ViewflyAdapterComponents = {}
 
-  private componentRefs = new WeakMap<Component, DynamicRef<HTMLElement>>()
+  private componentRefs = new WeakMap<Component, DynamicRef<Element>>()
 
   constructor(components: ViewflyAdapterComponents,
-              mount: ViewMount<ViewFlyNode, HTMLElement>
+              mount: ViewMount<ViewFlyNode, Element>
   ) {
     super({
       createCompositionNode(compositionState: CompositionState,
-                            updateNativeCompositionNode: (nativeNode: (HTMLElement | null)) => void): VElement {
-        const ref = createDynamicRef<HTMLElement>(node => {
+                            updateNativeCompositionNode: (nativeNode: (Element | null)) => void): VElement {
+        const ref = createDynamicRef<Element>(node => {
           updateNativeCompositionNode(node)
           return () => {
             updateNativeCompositionNode(null)
@@ -49,21 +49,21 @@ export class ViewflyAdapter extends DomAdapter<ViewFlyNode, ViewFlyNode> {
           new VTextNode(compositionState.text)
         ])
       },
-      getParentNode(node: HTMLElement | Text): HTMLElement | null {
-        return (node as Node).parentNode as HTMLElement
+      getParentNode(node: Element | Text): Element | null {
+        return (node as Node).parentNode as Element
       },
-      getChildNodes(parentElement: HTMLElement): Array<HTMLElement | Text> {
-        return Array.from(parentElement.childNodes) as HTMLElement[]
+      getChildNodes(parentElement: Element): Array<Element | Text> {
+        return Array.from(parentElement.childNodes) as Element[]
       },
-      isNativeElementNode(node: HTMLElement | Text): node is HTMLElement {
-        return node instanceof HTMLElement
+      isNativeElementNode(node: Element | Text): node is Element {
+        return node instanceof Element
       },
       getChildByIndex(parentElement, index) {
-        return parentElement.childNodes[index] as HTMLElement
+        return parentElement.childNodes[index] as Element
       },
-      getAndUpdateSlotRootNativeElement(vEle: VElement, update: (nativeElement: (HTMLElement | null)) => void) {
+      getAndUpdateSlotRootNativeElement(vEle: VElement, update: (nativeElement: (Element | null)) => void) {
         const currentRef = vEle.attrs.get('ref')
-        const ref = createDynamicRef<HTMLElement>(nativeNode => {
+        const ref = createDynamicRef<Element>(nativeNode => {
           update(nativeNode)
           return () => {
             update(null)
@@ -82,7 +82,7 @@ export class ViewflyAdapter extends DomAdapter<ViewFlyNode, ViewFlyNode> {
         if (comp) {
           let ref = this.componentRefs.get(component)
           if (!ref) {
-            ref = createDynamicRef<HTMLElement>(rootNode => {
+            ref = createDynamicRef<Element>(rootNode => {
               this.componentRootElementCaches.set(component, rootNode)
               return () => {
                 this.componentRootElementCaches.remove(component)

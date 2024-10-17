@@ -6,7 +6,7 @@ const adapterError = makeError('VueAdapter')
 
 export interface ViewComponentProps<T extends Component> {
   component: T
-  rootRef: Ref<HTMLElement | undefined>
+  rootRef: Ref<Element | undefined>
 }
 
 export interface VueAdapterComponents {
@@ -14,15 +14,15 @@ export interface VueAdapterComponents {
 }
 
 export class VueAdapter extends DomAdapter<VNode, VNode> {
-  // private compositionRef = ref<HTMLElement>()
-  private componentRefs = new WeakMap<Component, Ref<HTMLElement | undefined>>()
+  // private compositionRef = ref<Element>()
+  private componentRefs = new WeakMap<Component, Ref<Element | undefined>>()
   private components: Record<string, DefineComponent<ViewComponentProps<any>>> = {}
 
   constructor(components: VueAdapterComponents,
-              mount: ViewMount<VNode, HTMLElement>) {
+              mount: ViewMount<VNode, Element>) {
     super({
       createCompositionNode: (compositionState: CompositionState,
-                              updateNativeCompositionNode: (nativeNode: (HTMLElement | null)) => void): VElement => {
+                              updateNativeCompositionNode: (nativeNode: (Element | null)) => void): VElement => {
         return new VElement('span', {
           style: {
             textDecoration: 'underline'
@@ -32,22 +32,22 @@ export class VueAdapter extends DomAdapter<VNode, VNode> {
           new VTextNode(compositionState.text)
         ])
       },
-      getParentNode(node: HTMLElement | Text): HTMLElement | null {
-        return (node as Node).parentNode as HTMLElement
+      getParentNode(node: Element | Text): Element | null {
+        return (node as Node).parentNode as Element
       },
-      getChildNodes(parentElement: HTMLElement): Array<HTMLElement | Text> {
-        return Array.from(parentElement.childNodes) as HTMLElement[]
+      getChildNodes(parentElement: Element): Array<Element | Text> {
+        return Array.from(parentElement.childNodes) as Element[]
       },
-      isNativeElementNode(node: HTMLElement | Text): node is HTMLElement {
-        return node instanceof HTMLElement
+      isNativeElementNode(node: Element | Text): node is Element {
+        return node instanceof Element
       },
       getChildByIndex(parentElement, index) {
-        return parentElement.childNodes[index] as HTMLElement
+        return parentElement.childNodes[index] as Element
       },
-      getAndUpdateSlotRootNativeElement(vElement: VElement, update: (nativeElement: (HTMLElement | null)) => void) {
+      getAndUpdateSlotRootNativeElement(vElement: VElement, update: (nativeElement: (Element | null)) => void) {
         const currentRef = vElement.attrs.get('ref')
         if (currentRef) {
-          vElement.attrs.set('ref', (v: HTMLElement) => {
+          vElement.attrs.set('ref', (v: Element) => {
             update(v)
             if (typeof currentRef === 'function') {
               currentRef(v)
@@ -64,7 +64,7 @@ export class VueAdapter extends DomAdapter<VNode, VNode> {
         if (comp) {
           let rootRef = this.componentRefs.get(component)
           if (!rootRef) {
-            rootRef = ref<HTMLElement>()
+            rootRef = ref<Element>()
             this.componentRefs.set(component, rootRef)
           }
           return h(comp, {
@@ -122,7 +122,7 @@ export class VueAdapter extends DomAdapter<VNode, VNode> {
           component.changeMarker.rendered()
           self.onViewUpdated.next()
 
-          if (!(self.componentRefs.get(component)?.value instanceof HTMLElement)) {
+          if (!(self.componentRefs.get(component)?.value instanceof Element)) {
             // eslint-disable-next-line max-len
             throw adapterError(`Component \`${component.name}\` is not bound to rootRef, you must bind rootRef to the root element node of the component view.`)
           }

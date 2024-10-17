@@ -6,7 +6,7 @@ import { VIEW_DOCUMENT } from './injection-tokens'
 
 export abstract class DomAdapter<
   ViewComponent extends object = object,
-  ViewElement extends object = object> extends Adapter<HTMLElement, Node, ViewComponent, ViewElement> {
+  ViewElement extends object = object> extends Adapter<Element, Node, ViewComponent, ViewElement> {
   onViewUpdated = new Subject<void>()
   host = createElement('div', {
     styles: {

@@ -15,7 +15,7 @@ export interface SlotParser {
    * @param slotContentHostElement 插槽的内容节点
    *
    * 注意：当不传入内容节点时，Textbus 会把根节点当成内容节点
-   */<T extends Slot>(childSlot: T, slotRootElement: HTMLElement, slotContentHostElement?: HTMLElement): T
+   */<T extends Slot>(childSlot: T, slotRootElement: Element, slotContentHostElement?: Element): T
 }
 
 /**
@@ -23,11 +23,11 @@ export interface SlotParser {
  */
 export interface ComponentLoader {
   /** 识别组件的匹配方法 */
-  match(element: HTMLElement,
+  match(element: Element,
         returnableContentTypes: ContentType[]): boolean
 
   /** 读取组件内容的方法 */
-  read(element: HTMLElement, textbus: Textbus, slotParser: SlotParser): Component | Slot | void
+  read(element: Element, textbus: Textbus, slotParser: SlotParser): Component | Slot | void
 }
 
 export interface FormatLoaderReadResult<T = FormatValue> {
@@ -43,13 +43,13 @@ export interface FormatLoader<T = FormatValue> {
    * 匹配一个 DOM 节点是否是某个格式节点
    * @param element
    */
-  match(element: HTMLElement): boolean
+  match(element: Element): boolean
 
   /**
    * 读取匹配到的节点，并返回读取后的信息
    * @param element
    */
-  read(element: HTMLElement): FormatLoaderReadResult<T>
+  read(element: Element): FormatLoaderReadResult<T>
 }
 
 export interface AttributeLoaderReadResult<T = FormatValue> {
@@ -65,13 +65,13 @@ export interface AttributeLoader<T = FormatValue> {
    * 匹配一个 DOM 节点是否是某个属性节点
    * @param element
    */
-  match(element: HTMLElement): boolean
+  match(element: Element): boolean
 
   /**
    * 读取匹配到的节点，并返回读取后的信息
    * @param element
    */
-  read(element: HTMLElement): AttributeLoaderReadResult<T>
+  read(element: Element): AttributeLoaderReadResult<T>
 }
 
 /**
@@ -174,7 +174,7 @@ export class Parser {
     slot.insert(textContent as string)
   }
 
-  private readFormats(el: HTMLElement, slot: Slot) {
+  private readFormats(el: Element, slot: Slot) {
     const formats = this.formatLoaders.filter(f => {
       return f.match(el)
     }).map(f => {
@@ -199,7 +199,7 @@ export class Parser {
     return slot
   }
 
-  private readSlot<T extends Slot>(childSlot: T, slotRootElement: HTMLElement, slotContentElement: HTMLElement): T {
+  private readSlot<T extends Slot>(childSlot: T, slotRootElement: Element, slotContentElement: Element): T {
     if (slotRootElement.nodeType === Node.ELEMENT_NODE) {
       this.attributeLoaders.filter(a => {
         return a.match(slotRootElement)
