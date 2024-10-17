@@ -77,7 +77,8 @@ const editor = new Editor({
       //   token: 'xxxx',
       //   document: yDoc
       // })
-      return new YWebsocketConnector('wss://textbus.io/api', 'xnote', yDoc)
+      return new YWebsocketConnector('ws://localhost:1234', 'xnote', yDoc)
+      // return new YWebsocketConnector('wss://textbus.io/api', 'xnote', yDoc)
     }
   },
   providers: [

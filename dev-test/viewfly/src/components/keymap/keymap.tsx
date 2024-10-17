@@ -33,6 +33,8 @@ export function Keymap(props: KeymapProps) {
     }
     if (Array.isArray(keymap.key)) {
       arr.push(<span>{keymap.key.join('/')}</span>)
+    } else if (typeof keymap.key === 'object') {
+      arr.push(<span>{keymap.key.name}</span>)
     } else {
       arr.push(<span>{keymap.key}</span>)
     }
