@@ -1,18 +1,13 @@
-import { Inject, Injectable, Optional } from '@viewfly/core'
+import { Injectable } from '@viewfly/core'
 import { filter, map, Observable, Subject, Subscription } from '@tanbo/stream'
 import {
-  AbstractSelection,
   ChangeOrigin,
   Component,
   Registry,
   Formats,
-  History,
-  HISTORY_STACK_SIZE,
   makeError,
-  RootComponentRef,
   Scheduler,
   Selection,
-  SelectionPaths,
   Slot,
   ProxyModel,
   createObjectProxy,
@@ -22,21 +17,15 @@ import {
   Array as YArray,
   Doc as YDoc,
   Map as YMap,
-  RelativePosition,
   Text as YText,
   Transaction,
   UndoManager,
-  createAbsolutePositionFromRelativePosition,
-  createRelativePositionFromTypeIndex,
-  Item, YArrayEvent, YMapEvent, YTextEvent
+  YArrayEvent,
+  YMapEvent,
+  YTextEvent
 } from 'yjs'
 
 const collaborateErrorFn = makeError('Collaborate')
-
-interface CursorPosition {
-  anchor: RelativePosition
-  focus: RelativePosition
-}
 
 class SlotMap {
   private slotAndYTextMap = new WeakMap<Slot, YText>()
@@ -91,141 +80,25 @@ interface UpdateItem {
   action(): void
 }
 
-export abstract class CustomUndoManagerConfig {
-  abstract captureTransaction?(arg0: Transaction): boolean
-
-  abstract deleteFilter?(arg0: Item): boolean
-}
-
-interface CollaborateHistorySelectionPosition {
-  before: CursorPosition | null
-  after: CursorPosition | null
-}
-
 @Injectable()
-export class Collaborate implements History {
+export class Collaborate {
   onLocalChangesApplied: Observable<void>
   yDoc = new YDoc()
-  onBack: Observable<void>
-  onForward: Observable<void>
-  onChange: Observable<void>
-  onPush: Observable<void>
-
-  get canBack() {
-    return this.manager?.canUndo() || false
-  }
-
-  get canForward() {
-    return this.manager?.canRedo() || false
-  }
-
-  private backEvent = new Subject<void>()
-  private forwardEvent = new Subject<void>()
-  private changeEvent = new Subject<void>()
-  private pushEvent = new Subject<void>()
-
-  private manager: UndoManager | null = null
+  slotMap = new SlotMap()
 
   private subscriptions: Subscription[] = []
   private updateFromRemote = false
 
   private localChangesAppliedEvent = new Subject<void>()
-  private selectionChangeEvent = new Subject<SelectionPaths>()
-  private slotMap = new SlotMap()
 
   private updateRemoteActions: Array<UpdateItem> = []
   private noRecord = {}
 
-  private historyItems: Array<CollaborateHistorySelectionPosition> = []
-  private index = 0
-
-  constructor(@Inject(HISTORY_STACK_SIZE) private stackSize: number,
-              private rootComponentRef: RootComponentRef,
-              private scheduler: Scheduler,
+  constructor(private scheduler: Scheduler,
               private registry: Registry,
-              private selection: Selection,
-              @Optional() private undoManagerConfig: CustomUndoManagerConfig) {
-    this.onBack = this.backEvent.asObservable()
-    this.onForward = this.forwardEvent.asObservable()
-    this.onChange = this.changeEvent.asObservable()
-    this.onPush = this.pushEvent.asObservable()
+              private selection: Selection) {
     this.onLocalChangesApplied = this.localChangesAppliedEvent.asObservable()
-  }
-
-  listen() {
-    const root = this.yDoc.getMap('RootComponent')
-    const rootComponent = this.rootComponentRef.component!
-    const undoManagerConfig = this.undoManagerConfig || {}
-    const manager = new UndoManager(root, {
-      trackedOrigins: new Set<any>([this.yDoc]),
-      captureTransaction(arg) {
-        if (undoManagerConfig.captureTransaction) {
-          return undoManagerConfig.captureTransaction(arg)
-        }
-        return true
-      },
-      deleteFilter(item: Item) {
-        if (undoManagerConfig.deleteFilter) {
-          return undoManagerConfig.deleteFilter(item)
-        }
-        return true
-      }
-    })
-    this.manager = manager
-
-    let beforePosition: CursorPosition | null = null
     this.subscriptions.push(
-      this.scheduler.onLocalChangeBefore.subscribe(() => {
-        beforePosition = this.getRelativeCursorLocation()
-      })
-    )
-
-    manager.on('stack-item-added', (event: any) => {
-      if (event.type === 'undo') {
-        if (event.origin === manager) {
-          this.index++
-        } else {
-          this.historyItems.length = this.index
-          this.historyItems.push({
-            before: beforePosition,
-            after: this.getRelativeCursorLocation()
-          })
-          this.index++
-        }
-      } else {
-        this.index--
-      }
-      if (manager.undoStack.length > this.stackSize) {
-        this.historyItems.shift()
-        manager.undoStack.shift()
-      }
-      if (event.origin === this.yDoc) {
-        this.pushEvent.next()
-      }
-      this.changeEvent.next()
-    })
-    manager.on('stack-item-popped', (ev: any) => {
-      const index = ev.type === 'undo' ? this.index : this.index - 1
-      const position = this.historyItems[index] || null
-      const p = ev.type === 'undo' ? position?.before : position?.after
-      if (p) {
-        const selection = this.getAbstractSelection(p)
-        if (selection) {
-          this.selection.setBaseAndExtent(
-            selection.anchorSlot,
-            selection.anchorOffset,
-            selection.focusSlot,
-            selection.focusOffset)
-          return
-        }
-      }
-      this.selection.unSelect()
-    })
-    this.subscriptions.push(
-      this.selection.onChange.subscribe(() => {
-        const paths = this.selection.getPaths()
-        this.selectionChangeEvent.next(paths)
-      }),
       this.scheduler.onDocChanged.pipe(
         map(item => {
           return item.filter(i => {
@@ -271,52 +144,161 @@ export class Collaborate implements History {
         this.localChangesAppliedEvent.next()
       })
     )
-    this.syncRootComponent(root, rootComponent)
   }
 
-  back() {
-    if (this.canBack) {
-      this.manager?.undo()
-      this.backEvent.next()
-    }
-  }
-
-  forward() {
-    if (this.canForward) {
-      this.manager?.redo()
-      this.forwardEvent.next()
-    }
-  }
-
-  clear() {
-    const last = this.historyItems.pop()
-    this.historyItems = last ? [last] : []
-    this.index = last ? 1 : 0
-    this.manager?.clear()
-    this.changeEvent.next()
-  }
-
-  destroy() {
-    this.index = 0
-    this.historyItems = []
-    this.subscriptions.forEach(i => i.unsubscribe())
-    this.manager?.destroy()
-  }
-
-  private syncRootComponent(root: YMap<any>, rootComponent: Component) {
-    let state = root.get('state') as YMap<any>
+  syncComponent(sharedComponent: YMap<any>, localComponent: Component<any>) {
+    let state = sharedComponent.get('state') as YMap<any>
     if (!state) {
       state = new YMap<any>()
-      this.syncLocalMapToSharedMap(rootComponent.state as ProxyModel<Record<string, any>>, state)
+      this.syncLocalMapToSharedMap(localComponent.state as ProxyModel<Record<string, any>>, state)
       this.yDoc.transact(() => {
-        root.set('state', state)
+        sharedComponent.set('state', state)
       })
     } else {
-      Object.keys(rootComponent.state).forEach(key => {
-        Reflect.deleteProperty(rootComponent.state, key)
+      Object.keys(localComponent.state).forEach(key => {
+        Reflect.deleteProperty(localComponent.state, key)
       })
-      this.syncSharedMapToLocalMap(state, rootComponent.state as ProxyModel<Record<string, any>>)
+      this.syncSharedMapToLocalMap(state, localComponent.state as ProxyModel<Record<string, any>>)
     }
+  }
+
+  syncSlot(sharedSlot: YText, localSlot: Slot) {
+    const syncRemote = (ev: YTextEvent, tr: Transaction) => {
+      this.runRemoteUpdate(tr, () => {
+        localSlot.retain(0)
+        ev.keysChanged.forEach(key => {
+          const change = ev.keys.get(key)
+          if (!change) {
+            return
+          }
+          const updateType = change.action
+          if (updateType === 'update' || updateType === 'add') {
+            const attribute = this.registry.getAttribute(key)
+            if (attribute) {
+              localSlot.setAttribute(attribute, sharedSlot.getAttribute(key))
+            }
+          } else if (updateType === 'delete') {
+            const attribute = this.registry.getAttribute(key)
+            if (attribute) {
+              localSlot.removeAttribute(attribute)
+            }
+          }
+        })
+        ev.delta.forEach(action => {
+          if (Reflect.has(action, 'retain')) {
+            if (action.attributes) {
+              const formats = remoteFormatsToLocal(this.registry, action.attributes)
+              if (formats.length) {
+                localSlot.retain(action.retain!, formats)
+              }
+              localSlot.retain(localSlot.index + action.retain!)
+            } else {
+              localSlot.retain(action.retain!)
+            }
+          } else if (action.insert) {
+            const index = localSlot.index
+            let length = 1
+            if (typeof action.insert === 'string') {
+              length = action.insert.length
+              localSlot.insert(action.insert, remoteFormatsToLocal(this.registry, action.attributes))
+            } else {
+              const sharedComponent = action.insert as YMap<any>
+              const component = this.createLocalComponentBySharedComponent(sharedComponent)
+              localSlot.insert(component)
+            }
+            if (this.selection.isSelected && !(tr.origin instanceof UndoManager)) {
+              if (localSlot === this.selection.anchorSlot && this.selection.anchorOffset! > index) {
+                this.selection.setAnchor(localSlot, this.selection.anchorOffset! + length)
+              }
+              if (localSlot === this.selection.focusSlot && this.selection.focusOffset! > index) {
+                this.selection.setFocus(localSlot, this.selection.focusOffset! + length)
+              }
+            }
+          } else if (action.delete) {
+            const index = localSlot.index
+            localSlot.delete(action.delete)
+            if (this.selection.isSelected && !(tr.origin instanceof UndoManager)) {
+              if (localSlot === this.selection.anchorSlot && this.selection.anchorOffset! >= index) {
+                this.selection.setAnchor(localSlot, this.selection.startOffset! - action.delete)
+              }
+              if (localSlot === this.selection.focusSlot && this.selection.focusOffset! >= index) {
+                this.selection.setFocus(localSlot, this.selection.focusOffset! - action.delete)
+              }
+            }
+          }
+        })
+      })
+    }
+    sharedSlot.observe(syncRemote)
+
+    const sub = localSlot.onContentChange.subscribe(actions => {
+      this.runLocalUpdate(() => {
+        let offset = 0
+        let length = 0
+        for (const action of actions) {
+          if (action.type === 'retain') {
+            const formats = action.formats
+            if (formats) {
+              const keys = Object.keys(formats)
+              let length = keys.length
+              keys.forEach(key => {
+                const formatter = this.registry.getFormatter(key)
+                if (!formatter) {
+                  length--
+                  Reflect.deleteProperty(formats, key)
+                }
+              })
+              if (length) {
+                sharedSlot.format(offset, action.offset, formats)
+              }
+            } else {
+              offset = action.offset
+            }
+          } else if (action.type === 'contentInsert') {
+            const delta = sharedSlot.toDelta()
+            const isEmpty = delta.length === 1 && delta[0].insert === Slot.emptyPlaceholder
+            if (typeof action.content === 'string') {
+              length = action.content.length
+              sharedSlot.insert(offset, action.content, action.formats || {})
+            } else {
+              length = 1
+              const sharedComponent = this.createSharedComponentByLocalComponent(action.ref as Component)
+              sharedSlot.insertEmbed(offset, sharedComponent, action.formats || {})
+            }
+
+            if (isEmpty && offset === 0) {
+              sharedSlot.delete(sharedSlot.length - 1, 1)
+            }
+            offset += length
+          } else if (action.type === 'delete') {
+            const delta = sharedSlot.toDelta()
+            if (sharedSlot.length) {
+              sharedSlot.delete(offset, action.count)
+            }
+            if (sharedSlot.length === 0) {
+              sharedSlot.insert(0, '\n', delta[0]?.attributes)
+            }
+          } else if (action.type === 'attrSet') {
+            sharedSlot.setAttribute(action.name, action.value)
+          } else if (action.type === 'attrDelete') {
+            sharedSlot.removeAttribute(action.name)
+          }
+        }
+      }, true)
+    })
+
+    this.slotMap.set(localSlot, sharedSlot)
+
+    localSlot.__changeMarker__.destroyCallbacks.push(() => {
+      this.slotMap.delete(localSlot)
+      sharedSlot.unobserve(syncRemote)
+      sub.unsubscribe()
+    })
+  }
+
+
+  destroy() {
+    this.subscriptions.forEach(i => i.unsubscribe())
   }
 
   private syncSharedMapToLocalMap(sharedMap: YMap<any>, localMap: ProxyModel<Record<string, any>>) {
@@ -444,178 +426,6 @@ export class Collaborate implements History {
     return sharedModel
   }
 
-  private getAbstractSelection(position: CursorPosition): AbstractSelection | null {
-    const anchorPosition = createAbsolutePositionFromRelativePosition(position.anchor, this.yDoc)
-    const focusPosition = createAbsolutePositionFromRelativePosition(position.focus, this.yDoc)
-    if (anchorPosition && focusPosition) {
-      const focusSlot = this.slotMap.get(focusPosition.type as YText)
-      const anchorSlot = this.slotMap.get(anchorPosition.type as YText)
-      if (focusSlot && anchorSlot) {
-        return {
-          anchorSlot,
-          anchorOffset: anchorPosition.index,
-          focusSlot,
-          focusOffset: focusPosition.index
-        }
-      }
-    }
-    return null
-  }
-
-  private getRelativeCursorLocation(): CursorPosition | null {
-    const { anchorSlot, anchorOffset, focusSlot, focusOffset } = this.selection
-    if (anchorSlot) {
-      const anchorYText = this.slotMap.get(anchorSlot)
-      if (anchorYText) {
-        const anchorPosition = createRelativePositionFromTypeIndex(anchorYText, anchorOffset!)
-        if (focusSlot) {
-          const focusYText = this.slotMap.get(focusSlot)
-          if (focusYText) {
-            const focusPosition = createRelativePositionFromTypeIndex(focusYText, focusOffset!)
-            return {
-              focus: focusPosition,
-              anchor: anchorPosition
-            }
-          }
-        }
-      }
-    }
-    return null
-  }
-
-  private syncSlot(sharedSlot: YText, localSlot: Slot) {
-    const syncRemote = (ev: YTextEvent, tr: Transaction) => {
-      this.runRemoteUpdate(tr, () => {
-        localSlot.retain(0)
-        ev.keysChanged.forEach(key => {
-          const change = ev.keys.get(key)
-          if (!change) {
-            return
-          }
-          const updateType = change.action
-          if (updateType === 'update' || updateType === 'add') {
-            const attribute = this.registry.getAttribute(key)
-            if (attribute) {
-              localSlot.setAttribute(attribute, sharedSlot.getAttribute(key))
-            }
-          } else if (updateType === 'delete') {
-            const attribute = this.registry.getAttribute(key)
-            if (attribute) {
-              localSlot.removeAttribute(attribute)
-            }
-          }
-        })
-        ev.delta.forEach(action => {
-          if (Reflect.has(action, 'retain')) {
-            if (action.attributes) {
-              const formats = remoteFormatsToLocal(this.registry, action.attributes)
-              if (formats.length) {
-                localSlot.retain(action.retain!, formats)
-              }
-              localSlot.retain(localSlot.index + action.retain!)
-            } else {
-              localSlot.retain(action.retain!)
-            }
-          } else if (action.insert) {
-            const index = localSlot.index
-            let length = 1
-            if (typeof action.insert === 'string') {
-              length = action.insert.length
-              localSlot.insert(action.insert, remoteFormatsToLocal(this.registry, action.attributes))
-            } else {
-              const sharedComponent = action.insert as YMap<any>
-              const component = this.createLocalComponentBySharedComponent(sharedComponent)
-              localSlot.insert(component)
-            }
-            if (this.selection.isSelected && tr.origin !== this.manager) {
-              if (localSlot === this.selection.anchorSlot && this.selection.anchorOffset! > index) {
-                this.selection.setAnchor(localSlot, this.selection.anchorOffset! + length)
-              }
-              if (localSlot === this.selection.focusSlot && this.selection.focusOffset! > index) {
-                this.selection.setFocus(localSlot, this.selection.focusOffset! + length)
-              }
-            }
-          } else if (action.delete) {
-            const index = localSlot.index
-            localSlot.delete(action.delete)
-            if (this.selection.isSelected && tr.origin !== this.manager) {
-              if (localSlot === this.selection.anchorSlot && this.selection.anchorOffset! >= index) {
-                this.selection.setAnchor(localSlot, this.selection.startOffset! - action.delete)
-              }
-              if (localSlot === this.selection.focusSlot && this.selection.focusOffset! >= index) {
-                this.selection.setFocus(localSlot, this.selection.focusOffset! - action.delete)
-              }
-            }
-          }
-        })
-      })
-    }
-    sharedSlot.observe(syncRemote)
-
-    const sub = localSlot.onContentChange.subscribe(actions => {
-      this.runLocalUpdate(() => {
-        let offset = 0
-        let length = 0
-        for (const action of actions) {
-          if (action.type === 'retain') {
-            const formats = action.formats
-            if (formats) {
-              const keys = Object.keys(formats)
-              let length = keys.length
-              keys.forEach(key => {
-                const formatter = this.registry.getFormatter(key)
-                if (!formatter) {
-                  length--
-                  Reflect.deleteProperty(formats, key)
-                }
-              })
-              if (length) {
-                sharedSlot.format(offset, action.offset, formats)
-              }
-            } else {
-              offset = action.offset
-            }
-          } else if (action.type === 'contentInsert') {
-            const delta = sharedSlot.toDelta()
-            const isEmpty = delta.length === 1 && delta[0].insert === Slot.emptyPlaceholder
-            if (typeof action.content === 'string') {
-              length = action.content.length
-              sharedSlot.insert(offset, action.content, action.formats || {})
-            } else {
-              length = 1
-              const sharedComponent = this.createSharedComponentByLocalComponent(action.ref as Component)
-              sharedSlot.insertEmbed(offset, sharedComponent, action.formats || {})
-            }
-
-            if (isEmpty && offset === 0) {
-              sharedSlot.delete(sharedSlot.length - 1, 1)
-            }
-            offset += length
-          } else if (action.type === 'delete') {
-            const delta = sharedSlot.toDelta()
-            if (sharedSlot.length) {
-              sharedSlot.delete(offset, action.count)
-            }
-            if (sharedSlot.length === 0) {
-              sharedSlot.insert(0, '\n', delta[0]?.attributes)
-            }
-          } else if (action.type === 'attrSet') {
-            sharedSlot.setAttribute(action.name, action.value)
-          } else if (action.type === 'attrDelete') {
-            sharedSlot.removeAttribute(action.name)
-          }
-        }
-      }, true)
-    })
-
-    this.slotMap.set(localSlot, sharedSlot)
-
-    localSlot.__changeMarker__.destroyCallbacks.push(() => {
-      this.slotMap.delete(localSlot)
-      sharedSlot.unobserve(syncRemote)
-      sub.unsubscribe()
-    })
-  }
 
   private createSharedComponentByLocalComponent(component: Component): YMap<any> {
     const sharedComponent = new YMap()
@@ -763,7 +573,7 @@ export class Collaborate implements History {
       return
     }
     this.updateFromRemote = true
-    if (tr.origin === this.manager) {
+    if (tr.origin instanceof UndoManager) {
       this.scheduler.historyApplyTransact(fn)
     } else {
       this.scheduler.remoteUpdateTransact(fn)

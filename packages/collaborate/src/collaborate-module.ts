@@ -5,6 +5,7 @@ import { Doc as YDoc } from 'yjs'
 import { Collaborate } from './collaborate'
 import { UserActivity, UserInfo } from './user-activity'
 import { SyncConnector } from './sync-connector'
+import { CollabHistory } from './collab-history'
 
 export interface CollaborateConfig {
   userinfo: UserInfo
@@ -15,9 +16,10 @@ export class CollaborateModule implements Module {
   providers: Provider[] = [
     Collaborate,
     UserActivity,
+    CollabHistory,
     {
       provide: History,
-      useExisting: Collaborate
+      useExisting: CollabHistory
     }, {
       provide: SyncConnector,
       useFactory: (collab: Collaborate) => {
