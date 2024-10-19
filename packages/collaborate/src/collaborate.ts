@@ -11,7 +11,7 @@ import {
   Slot,
   ProxyModel,
   createObjectProxy,
-  createArrayProxy
+  createArrayProxy,
 } from '@textbus/core'
 import {
   Array as YArray,
@@ -24,6 +24,8 @@ import {
   YMapEvent,
   YTextEvent
 } from 'yjs'
+
+import { AsyncComponent, AsyncSlot, SubModelLoader } from './sub-model-loader'
 
 const collaborateErrorFn = makeError('Collaborate')
 
@@ -96,7 +98,8 @@ export class Collaborate {
 
   constructor(private scheduler: Scheduler,
               private registry: Registry,
-              private selection: Selection) {
+              private selection: Selection,
+              private subModelLoader: SubModelLoader) {
     this.onLocalChangesApplied = this.localChangesAppliedEvent.asObservable()
     this.subscriptions.push(
       this.scheduler.onDocChanged.pipe(
@@ -345,7 +348,34 @@ export class Collaborate {
 
   private createSharedSlotByLocalSlot(localSlot: Slot): YText {
     const sharedSlot = new YText()
-    sharedSlot.setAttribute('__schema__', [...localSlot.schema])
+    const isAsyncSlot = localSlot instanceof AsyncSlot
+    sharedSlot.setAttribute('schema', [...localSlot.schema])
+    sharedSlot.setAttribute('type', isAsyncSlot ? 'async' : 'sync')
+
+    if (isAsyncSlot) {
+      let isDestroyed = false
+      this.subModelLoader.createSubModelBySlot(localSlot).then(subDocument => {
+        if (isDestroyed) {
+          return
+        }
+        const content = subDocument.getText('content')
+        this.initSharedSlotByLocalSlot(content, localSlot)
+        this.syncSlot(content, localSlot)
+      })
+      localSlot.__changeMarker__.destroyCallbacks.push(() => {
+        isDestroyed = true
+      })
+      return sharedSlot
+    }
+
+    const sharedContent = new YText()
+    this.initSharedSlotByLocalSlot(sharedContent, localSlot)
+    sharedSlot.insertEmbed(0, sharedContent)
+    this.syncSlot(sharedContent, localSlot)
+    return sharedSlot
+  }
+
+  private initSharedSlotByLocalSlot(sharedContent: YText, localSlot: Slot) {
     let offset = 0
     localSlot.toDelta().forEach(i => {
       let formats: any = {}
@@ -357,25 +387,59 @@ export class Collaborate {
         formats = null
       }
       if (typeof i.insert === 'string') {
-        sharedSlot.insert(offset, i.insert, formats)
+        sharedContent.insert(offset, i.insert, formats)
       } else {
         const sharedComponent = this.createSharedComponentByLocalComponent(i.insert)
-        sharedSlot.insertEmbed(offset, sharedComponent, formats)
+        sharedContent.insertEmbed(offset, sharedComponent, formats)
       }
       offset += i.insert.length
     })
     localSlot.getAttributes().forEach(item => {
-      sharedSlot.setAttribute(item[0].name, item[1])
+      sharedContent.setAttribute(item[0].name, item[1])
     })
-    this.syncSlot(sharedSlot, localSlot)
-    return sharedSlot
   }
 
   private createLocalSlotBySharedSlot(sharedSlot: YText): Slot {
-    const delta = sharedSlot.toDelta()
-    const localSlot = new Slot(sharedSlot.getAttribute('__schema__') || [])// TODO 这里有潜在的问题
+    const type = sharedSlot.getAttribute('type')
+    const schema = sharedSlot.getAttribute('schema')
+    const contentDelta = sharedSlot.toDelta()
 
-    const attrs = sharedSlot.getAttributes()
+    if (type === 'async') {
+      const metadata = sharedSlot.getAttribute('metadata')
+      const slot = new AsyncSlot(schema || [], metadata)
+      let isDestroyed = false
+      this.subModelLoader.loadSubModelBySlot(slot).then(subDocument => {
+        if (isDestroyed) {
+          return
+        }
+        const subContent = subDocument.getText('content')
+        this.initLocalSlotBySharedSlot(subContent, slot)
+        this.syncSlot(subContent, slot)
+      })
+      slot.__changeMarker__.destroyCallbacks.push(() => {
+        isDestroyed = true
+      })
+      return slot
+    }
+
+    const content = contentDelta[0]?.insert
+
+    if (!(content instanceof YText)) {
+      throw collaborateErrorFn('shared slot content type is not `YText`.')
+    }
+
+    const localSlot = new Slot(schema || [])
+
+    this.initLocalSlotBySharedSlot(content, localSlot)
+
+    this.syncSlot(content, localSlot)
+    return localSlot
+  }
+
+  private initLocalSlotBySharedSlot(content: YText, localSlot: Slot) {
+    const delta = content.toDelta()
+
+    const attrs = content.getAttributes()
     Object.keys(attrs).forEach(key => {
       const attribute = this.registry.getAttribute(key)
       if (attribute) {
@@ -396,8 +460,6 @@ export class Collaborate {
         throw collaborateErrorFn('unexpected delta action.')
       }
     }
-    this.syncSlot(sharedSlot, localSlot)
-    return localSlot
   }
 
   private createSharedModelByLocalModel(localModel: any) {
@@ -427,20 +489,63 @@ export class Collaborate {
   }
 
 
-  private createSharedComponentByLocalComponent(component: Component): YMap<any> {
+  private createSharedComponentByLocalComponent(component: Component | AsyncComponent): YMap<any> {
     const sharedComponent = new YMap()
-    const sharedState = this.createSharedMapByLocalMap(component.state as ProxyModel<Record<string, any>>)
     sharedComponent.set('name', component.name)
+
+    if (component instanceof AsyncComponent) {
+      sharedComponent.set('type', 'async')
+      sharedComponent.set('metadata', component.getMetadata())
+      const state = component.state as ProxyModel<Record<string, any>>
+      let isDestroyed = false
+      state.__changeMarker__.destroyCallbacks.push(() => {
+        isDestroyed = true
+      })
+      this.subModelLoader.createSubModelByComponent(component).then(subDocument => {
+        if (isDestroyed) {
+          return
+        }
+        const state = subDocument.getMap('state')
+        this.syncComponent(state, component)
+      })
+      return sharedComponent
+    }
+
+    const sharedState = this.createSharedMapByLocalMap(component.state as ProxyModel<Record<string, any>>)
     sharedComponent.set('state', sharedState)
+    sharedComponent.set('type', 'sync')
     return sharedComponent
   }
 
   private createLocalComponentBySharedComponent(yMap: YMap<any>): Component {
     const componentName = yMap.get('name') as string
-    const sharedState = yMap.get('state') as YMap<any>
+    const type = yMap.get('type') as string
 
-    const state = this.createLocalMapBySharedMap(sharedState)
-    const instance = this.registry.createComponentByData(componentName, state)
+    let instance: Component<any> | null
+    if (type === 'async') {
+      instance = this.registry.createComponentByData(componentName, {})
+      if (instance instanceof AsyncComponent) {
+        instance.setMetadata(yMap.get('metadata'))
+        const state = instance.state as ProxyModel<Record<string, any>>
+        let isDestroyed = false
+        this.subModelLoader.loadSubModelByComponent(instance).then(subDocument => {
+          if (isDestroyed) {
+            return
+          }
+          const state = subDocument.getMap('state')
+          this.syncComponent(state, instance!)
+        })
+        state.__changeMarker__.destroyCallbacks.push(() => {
+          isDestroyed = true
+        })
+      } else if (instance instanceof Component) {
+        throw collaborateErrorFn(`component name \`${componentName}\` is not a async component.`)
+      }
+    } else {
+      const sharedState = yMap.get('state') as YMap<any>
+      const state = this.createLocalMapBySharedMap(sharedState)
+      instance = this.registry.createComponentByData(componentName, state)
+    }
     if (instance) {
       return instance
     }
