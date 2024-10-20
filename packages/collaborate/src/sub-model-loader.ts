@@ -1,5 +1,21 @@
 import { Component, ContentType, Slot, State } from '@textbus/core'
 import { Doc as YDoc } from 'yjs'
+import { Observable, Subject } from '@tanbo/stream'
+
+export class AsyncModelLoader {
+  onRequest: Observable<void>
+
+  private requestEvent = new Subject<void>()
+
+  constructor() {
+    this.onRequest = this.requestEvent.asObservable()
+  }
+
+  request() {
+    this.requestEvent.next()
+    this.requestEvent.complete()
+  }
+}
 
 /**
  * 异步加载组件
@@ -8,6 +24,8 @@ import { Doc as YDoc } from 'yjs'
  */
 export abstract class AsyncComponent<Metadata = any,
   T extends State = State> extends Component<T> {
+
+  loader = new AsyncModelLoader()
 
   abstract getMetadata(): Metadata
 
@@ -20,6 +38,8 @@ export abstract class AsyncComponent<Metadata = any,
  * metadata 用于记录子文档静态数据
  */
 export class AsyncSlot extends Slot {
+  loader = new AsyncModelLoader()
+
   constructor(schema: ContentType[], public metadata: any) {
     super(schema)
   }

@@ -408,7 +408,9 @@ export class Collaborate {
       const metadata = sharedSlot.getAttribute('metadata')
       const slot = new AsyncSlot(schema || [], metadata)
       let isDestroyed = false
-      this.subModelLoader.loadSubModelBySlot(slot).then(subDocument => {
+      slot.loader.onRequest.toPromise().then(() => {
+        return this.subModelLoader.loadSubModelBySlot(slot)
+      }).then(subDocument => {
         if (isDestroyed) {
           return
         }
@@ -528,7 +530,10 @@ export class Collaborate {
         instance.setMetadata(yMap.get('metadata'))
         const state = instance.state as ProxyModel<Record<string, any>>
         let isDestroyed = false
-        this.subModelLoader.loadSubModelByComponent(instance).then(subDocument => {
+        instance.loader.onRequest.toPromise().then(() => {
+          return this.subModelLoader.loadSubModelByComponent(instance as AsyncComponent)
+        })
+        .then(subDocument => {
           if (isDestroyed) {
             return
           }
