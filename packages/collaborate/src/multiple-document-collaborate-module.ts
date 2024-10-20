@@ -1,27 +1,25 @@
 import { History, Module, Textbus } from '@textbus/core'
 import { Provider } from '@viewfly/core'
-import { Doc as YDoc } from 'yjs'
 
 import { Collaborate } from './collaborate'
-import { UserActivity, UserInfo } from './user-activity'
+import { UserActivity } from './user-activity'
 import { SyncConnector } from './sync-connector'
-import { CollabHistory } from './collab-history'
-import { NonSubModelLoader, SubModelLoader } from './sub-model-loader'
+import { CollaborateConfig } from './collaborate-module'
+import { MultipleDocCollabHistory } from './multiple-doc-collab-history'
+import { SubModelLoader } from './sub-model-loader'
 
-export interface CollaborateConfig {
-  userinfo: UserInfo
-
-  createConnector(yDoc: YDoc): SyncConnector
+export interface MultipleDocCollaborateConfig extends CollaborateConfig {
+  subModelLoader: SubModelLoader
 }
 
-export class CollaborateModule implements Module {
+export class MultipleDocumentCollaborateModule implements Module {
   providers: Provider[] = [
     Collaborate,
     UserActivity,
-    CollabHistory,
+    MultipleDocCollabHistory,
     {
       provide: History,
-      useExisting: CollabHistory
+      useExisting: MultipleDocCollabHistory
     }, {
       provide: SyncConnector,
       useFactory: (collab: Collaborate) => {
@@ -30,11 +28,13 @@ export class CollaborateModule implements Module {
       deps: [Collaborate]
     }, {
       provide: SubModelLoader,
-      useClass: NonSubModelLoader
+      useFactory: () => {
+        return this.config.subModelLoader
+      }
     }
   ]
 
-  constructor(public config: CollaborateConfig) {
+  constructor(public config: MultipleDocCollaborateConfig) {
   }
 
   setup(textbus: Textbus): Promise<(() => void) | void> | (() => void) | void {

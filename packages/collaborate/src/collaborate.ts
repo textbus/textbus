@@ -14,6 +14,7 @@ import {
   createArrayProxy,
 } from '@textbus/core'
 import {
+  AbstractType,
   Array as YArray,
   Doc as YDoc,
   Map as YMap,
@@ -84,14 +85,13 @@ interface UpdateItem {
 
 @Injectable()
 export class Collaborate {
-  onLocalChangesApplied: Observable<void>
   yDoc = new YDoc()
   slotMap = new SlotMap()
+  onAddSubModel: Observable<AbstractType<any>>
 
   private subscriptions: Subscription[] = []
   private updateFromRemote = false
-
-  private localChangesAppliedEvent = new Subject<void>()
+  private addSubModelEvent = new Subject<AbstractType<any>>()
 
   private updateRemoteActions: Array<UpdateItem> = []
   private noRecord = {}
@@ -100,7 +100,29 @@ export class Collaborate {
               private registry: Registry,
               private selection: Selection,
               private subModelLoader: SubModelLoader) {
-    this.onLocalChangesApplied = this.localChangesAppliedEvent.asObservable()
+    this.onAddSubModel = this.addSubModelEvent.asObservable()
+  }
+
+  syncRootComponent(yDoc: YDoc, sharedComponent: YMap<any>, localComponent: Component<any>) {
+    this.initSyncEvent(yDoc)
+    this.syncComponent(yDoc, sharedComponent, localComponent)
+  }
+
+  syncRootSlot(yDoc: YDoc, sharedSlot: YText, localSlot: Slot) {
+    if (sharedSlot.length) {
+      localSlot.retain(0)
+      localSlot.delete(localSlot.length)
+      localSlot.cleanAttributes()
+      localSlot.cleanFormats()
+      this.initLocalSlotBySharedSlot(sharedSlot, localSlot)
+    } else {
+      this.initSharedSlotByLocalSlot(sharedSlot, localSlot)
+    }
+    this.initSyncEvent(yDoc)
+    this.syncSlot(sharedSlot, localSlot)
+  }
+
+  private initSyncEvent(yDoc: YDoc) {
     this.subscriptions.push(
       this.scheduler.onDocChanged.pipe(
         map(item => {
@@ -138,23 +160,23 @@ export class Collaborate {
         this.updateRemoteActions = []
 
         for (const item of updates) {
-          this.yDoc.transact(() => {
+          yDoc.transact(() => {
             item.actions.forEach(fn => {
               fn()
             })
-          }, item.record ? this.yDoc : this.noRecord)
+          }, item.record ? yDoc : this.noRecord)
         }
-        this.localChangesAppliedEvent.next()
+        // this.localChangesAppliedEvent.next()
       })
     )
   }
 
-  syncComponent(sharedComponent: YMap<any>, localComponent: Component<any>) {
+  private syncComponent(yDoc: YDoc, sharedComponent: YMap<any>, localComponent: Component<any>) {
     let state = sharedComponent.get('state') as YMap<any>
     if (!state) {
       state = new YMap<any>()
       this.syncLocalMapToSharedMap(localComponent.state as ProxyModel<Record<string, any>>, state)
-      this.yDoc.transact(() => {
+      yDoc.transact(() => {
         sharedComponent.set('state', state)
       })
     } else {
@@ -165,7 +187,7 @@ export class Collaborate {
     }
   }
 
-  syncSlot(sharedSlot: YText, localSlot: Slot) {
+  private syncSlot(sharedSlot: YText, localSlot: Slot) {
     const syncRemote = (ev: YTextEvent, tr: Transaction) => {
       this.runRemoteUpdate(tr, () => {
         localSlot.retain(0)
@@ -361,6 +383,7 @@ export class Collaborate {
         const content = subDocument.getText('content')
         this.initSharedSlotByLocalSlot(content, localSlot)
         this.syncSlot(content, localSlot)
+        this.addSubModelEvent.next(content)
       })
       localSlot.__changeMarker__.destroyCallbacks.push(() => {
         isDestroyed = true
@@ -417,6 +440,7 @@ export class Collaborate {
         const subContent = subDocument.getText('content')
         this.initLocalSlotBySharedSlot(subContent, slot)
         this.syncSlot(subContent, slot)
+        this.addSubModelEvent.next(subContent)
       })
       slot.__changeMarker__.destroyCallbacks.push(() => {
         isDestroyed = true
@@ -508,7 +532,8 @@ export class Collaborate {
           return
         }
         const state = subDocument.getMap('state')
-        this.syncComponent(state, component)
+        this.syncComponent(subDocument, state, component)
+        this.addSubModelEvent.next(state)
       })
       return sharedComponent
     }
@@ -533,13 +558,14 @@ export class Collaborate {
         instance.loader.onRequest.toPromise().then(() => {
           return this.subModelLoader.loadSubModelByComponent(instance as AsyncComponent)
         })
-        .then(subDocument => {
-          if (isDestroyed) {
-            return
-          }
-          const state = subDocument.getMap('state')
-          this.syncComponent(state, instance!)
-        })
+          .then(subDocument => {
+            if (isDestroyed) {
+              return
+            }
+            const state = subDocument.getMap('state')
+            this.syncComponent(subDocument, state, instance!)
+            this.addSubModelEvent.next(state)
+          })
         state.__changeMarker__.destroyCallbacks.push(() => {
           isDestroyed = true
         })
@@ -679,7 +705,7 @@ export class Collaborate {
   }
 
   private runRemoteUpdate(tr: Transaction, fn: () => void) {
-    if (tr.origin === this.yDoc) {
+    if (tr.origin === tr.doc) {
       return
     }
     this.updateFromRemote = true

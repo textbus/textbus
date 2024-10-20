@@ -1,6 +1,9 @@
-import { Component, ContentType, Slot, State } from '@textbus/core'
-import { Doc as YDoc } from 'yjs'
+import { Component, ContentType, makeError, Slot, State } from '@textbus/core'
+import { Doc, Doc as YDoc } from 'yjs'
 import { Observable, Subject } from '@tanbo/stream'
+import { Injectable } from '@viewfly/core'
+
+const subModelLoaderErrorFn = makeError('subModelLoaderError')
 
 export class AsyncModelLoader {
   onRequest: Observable<void>
@@ -72,4 +75,23 @@ export abstract class SubModelLoader {
    * @param component
    */
   abstract loadSubModelByComponent(component: AsyncComponent): Promise<YDoc>
+}
+
+@Injectable()
+export class NonSubModelLoader extends SubModelLoader {
+  createSubModelBySlot(): Promise<Doc> {
+    throw subModelLoaderErrorFn('single document does not support async slot.')
+  }
+
+  createSubModelByComponent(): Promise<Doc> {
+    throw subModelLoaderErrorFn('single document does not support async component.')
+  }
+
+  loadSubModelByComponent(): Promise<Doc> {
+    throw subModelLoaderErrorFn('single document does not support async component.')
+  }
+
+  loadSubModelBySlot(): Promise<Doc> {
+    throw subModelLoaderErrorFn('single document does not support async slot.')
+  }
 }

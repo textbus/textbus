@@ -1,5 +1,5 @@
 import { Inject, Injectable, Optional } from '@viewfly/core'
-import { AbstractSelection, History, HISTORY_STACK_SIZE, RootComponentRef, Scheduler, Selection } from '@textbus/core'
+import { AbstractSelection, History, HISTORY_STACK_SIZE, makeError, RootComponentRef, Scheduler, Selection } from '@textbus/core'
 import { Observable, Subject, Subscription } from '@tanbo/stream'
 import {
   createAbsolutePositionFromRelativePosition,
@@ -28,6 +28,8 @@ interface CollaborateHistorySelectionPosition {
   before: CursorPosition | null
   after: CursorPosition | null
 }
+
+const collabHistoryErrorFn = makeError('CollabHistory')
 
 @Injectable()
 export class CollabHistory implements History {
@@ -71,7 +73,7 @@ export class CollabHistory implements History {
   listen() {
     const root = this.collaborate.yDoc.getMap('RootComponent')
     const rootComponent = this.rootComponentRef.component!
-    this.collaborate.syncComponent(root, rootComponent)
+    this.collaborate.syncRootComponent(this.collaborate.yDoc, root, rootComponent)
 
     const undoManagerConfig = this.undoManagerConfig || {}
     const manager = new UndoManager(root, {
@@ -95,6 +97,9 @@ export class CollabHistory implements History {
     this.subscriptions.push(
       this.scheduler.onLocalChangeBefore.subscribe(() => {
         beforePosition = this.getRelativeCursorLocation()
+      }),
+      this.collaborate.onAddSubModel.subscribe(() => {
+        throw collabHistoryErrorFn('single document does not support submodels.')
       })
     )
 
@@ -168,7 +173,6 @@ export class CollabHistory implements History {
     this.index = 0
     this.historyItems = []
     this.subscriptions.forEach(i => i.unsubscribe())
-    this.collaborate.destroy()
     this.manager?.destroy()
   }
 

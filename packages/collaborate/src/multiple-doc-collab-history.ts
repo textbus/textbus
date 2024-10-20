@@ -1,7 +1,10 @@
-import { AbstractType, Doc as YDoc, UndoManager } from 'yjs'
-import { Inject, Injectable } from '@viewfly/core'
-import { Observable, Subject } from '@tanbo/stream'
-import { History, HISTORY_STACK_SIZE } from '@textbus/core'
+import { AbstractType, Item, UndoManager } from 'yjs'
+import { Inject, Injectable, Optional } from '@viewfly/core'
+import { Observable, Subject, Subscription } from '@tanbo/stream'
+import { History, HISTORY_STACK_SIZE, RootComponentRef } from '@textbus/core'
+
+import { Collaborate } from './collaborate'
+import { CustomUndoManagerConfig } from './collab-history'
 
 @Injectable()
 export class MultipleDocCollabHistory implements History {
@@ -31,12 +34,16 @@ export class MultipleDocCollabHistory implements History {
   private stackItem: UndoManager[] | null = null
   private timer: any = null
 
+  private subscription = new Subscription()
 
-  private docCaches = new Map<YDoc, AbstractType<any>>()
+  private subDocs = new Set<AbstractType<any>>()
 
-  private listenerCaches = new Map<YDoc, UndoManager>()
+  private listenerCaches = new Set<UndoManager>()
 
-  constructor(@Inject(HISTORY_STACK_SIZE) private stackSize: number) {
+  constructor(private collaborate: Collaborate,
+              private rootComponentRef: RootComponentRef,
+              @Inject(HISTORY_STACK_SIZE) private stackSize: number,
+              @Optional() private undoManagerConfig: CustomUndoManagerConfig) {
     this.onChange = this.changeEvent.asObservable()
     this.onBack = this.backEvent.asObservable()
     this.onForward = this.forwardEvent.asObservable()
@@ -45,20 +52,23 @@ export class MultipleDocCollabHistory implements History {
 
   listen() {
     this.isListen = true
+    const root = this.collaborate.yDoc.getMap('RootComponent')
+    const rootComponent = this.rootComponentRef.component!
+    this.collaborate.syncRootComponent(this.collaborate.yDoc, root, rootComponent)
 
-    this.docCaches.forEach((yType, yDoc) => {
-      this.listenItem(yType, yDoc)
-    })
-  }
+    this.listenItem(root)
 
-  add(yType: AbstractType<any>, origin: YDoc) {
-    if (this.docCaches.has(origin)) {
-      return
-    }
-    this.docCaches.set(origin, yType)
-    if (this.isListen) {
-      this.listenItem(yType, origin)
-    }
+    this.subscription.add(
+      this.collaborate.onAddSubModel.subscribe(yType => {
+        if (this.subDocs.has(yType)) {
+          return
+        }
+        this.subDocs.add(yType)
+        if (this.isListen) {
+          this.listenItem(yType)
+        }
+      })
+    )
   }
 
   forward() {
@@ -114,18 +124,31 @@ export class MultipleDocCollabHistory implements History {
 
   destroy() {
     this.clear()
-    this.listenerCaches.forEach((undoManager, yDoc) => {
+    this.subscription.unsubscribe()
+    this.listenerCaches.forEach((undoManager) => {
       undoManager.destroy()
-      yDoc.destroy()
     })
-    this.docCaches.clear()
+    this.subDocs.clear()
     this.listenerCaches.clear()
   }
 
-  private listenItem(yType: AbstractType<any>, origin: YDoc) {
+  private listenItem(yType: AbstractType<any>) {
+    const undoManagerConfig = this.undoManagerConfig || {}
     const undoManager = new UndoManager(yType, {
-      trackedOrigins: new Set([origin]),
-      captureTimeout: 0
+      trackedOrigins: new Set([this.collaborate.yDoc]),
+      captureTimeout: 0,
+      captureTransaction(arg) {
+        if (undoManagerConfig.captureTransaction) {
+          return undoManagerConfig.captureTransaction(arg)
+        }
+        return true
+      },
+      deleteFilter(item: Item) {
+        if (undoManagerConfig.deleteFilter) {
+          return undoManagerConfig.deleteFilter(item)
+        }
+        return true
+      }
     })
 
     undoManager.on('stack-item-added', (event: any) => {
@@ -159,6 +182,6 @@ export class MultipleDocCollabHistory implements History {
       }
     })
 
-    this.listenerCaches.set(origin, undoManager)
+    this.listenerCaches.add(undoManager)
   }
 }
