@@ -1,57 +1,25 @@
-import { Component, ContentType, makeError, Slot, State } from '@textbus/core'
 import { Doc, Doc as YDoc } from 'yjs'
-import { Observable, Subject } from '@tanbo/stream'
 import { Injectable } from '@viewfly/core'
+import { AsyncComponent, AsyncSlot, makeError } from '@textbus/core'
 
 const subModelLoaderErrorFn = makeError('subModelLoaderError')
-
-export class AsyncModelLoader {
-  onRequest: Observable<void>
-
-  private requestEvent = new Subject<void>()
-
-  constructor() {
-    this.onRequest = this.requestEvent.asObservable()
-  }
-
-  request() {
-    this.requestEvent.next()
-    this.requestEvent.complete()
-  }
-}
-
-/**
- * 异步加载组件
- *
- * metadata 用于记录子文档静态数据
- */
-export abstract class AsyncComponent<Metadata = any,
-  T extends State = State> extends Component<T> {
-
-  loader = new AsyncModelLoader()
-
-  abstract getMetadata(): Metadata
-
-  abstract setMetadata(metadata: T): void
-}
-
-/**
- * 异步加载插槽
- *
- * metadata 用于记录子文档静态数据
- */
-export class AsyncSlot extends Slot {
-  loader = new AsyncModelLoader()
-
-  constructor(schema: ContentType[], public metadata: any) {
-    super(schema)
-  }
-}
 
 /**
  * 子文档加载器
  */
 export abstract class SubModelLoader {
+  /**
+   * 通过插槽获取已加载的文档
+   * @param slot
+   */
+  abstract getLoadedModelBySlot(slot: AsyncSlot): YDoc | null
+
+  /**
+   * 通过组件获取已加载的文档
+   * @param component
+   */
+  abstract getLoadedModelByComponent(component: AsyncComponent): YDoc | null
+
   /**
    * 当本地新增异步子插槽时调用
    * @param slot
@@ -93,5 +61,13 @@ export class NonSubModelLoader extends SubModelLoader {
 
   loadSubModelBySlot(): Promise<Doc> {
     throw subModelLoaderErrorFn('single document does not support async slot.')
+  }
+
+  getLoadedModelBySlot(): Doc {
+    throw subModelLoaderErrorFn('single document does not support async slot.')
+  }
+
+  getLoadedModelByComponent(): Doc {
+    throw subModelLoaderErrorFn('single document does not support async component.')
   }
 }

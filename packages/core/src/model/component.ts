@@ -1,13 +1,14 @@
 import { AbstractType, Type, InjectionToken, InjectFlags } from '@viewfly/core'
 
 import { makeError } from '../_utils/make-error'
-import { ContentType, Slot, SlotLiteral } from './slot'
+import { AsyncSlotLiteral, ContentType, Slot, SlotLiteral } from './slot'
 import { Formats } from './format'
 import { ChangeMarker } from './change-marker'
 import { State } from './types'
 import { Textbus } from '../textbus'
 import { createObjectProxy, objectToJSON } from './proxy'
 import { Attribute, Formatter } from './attribute'
+import { AsyncSlot } from './async-model'
 
 const componentErrorFn = makeError('Component')
 
@@ -19,6 +20,10 @@ export interface ComponentLiteral<State = any> {
   state: State
 }
 
+export interface AsyncComponentLiteral<State = any> extends ComponentLiteral<State> {
+  async: true
+  metadata: any
+}
 
 export interface Key {
   match: RegExp | ((key: string) => boolean)
@@ -171,10 +176,11 @@ export abstract class Component<T extends State = State> {
 }
 
 
-export type ToLiteral<T> = T extends Slot ? SlotLiteral :
-  T extends [infer First, ...infer Rest] ? [ToLiteral<First>, ...Rest] :
-    T extends Array<infer Item> ? Array<ToLiteral<Item>> :
-      T extends Record<string, any> ? ComponentStateLiteral<T> : T;
+export type ToLiteral<T> = T extends AsyncSlot ? AsyncSlotLiteral :
+  T extends Slot ? SlotLiteral :
+    T extends [infer First, ...infer Rest] ? [ToLiteral<First>, ...Rest] :
+      T extends Array<infer Item> ? Array<ToLiteral<Item>> :
+        T extends Record<string, any> ? ComponentStateLiteral<T> : T;
 
 
 export type ComponentStateLiteral<T extends State> = {
@@ -193,7 +199,13 @@ export interface ComponentConstructor<ComponentState extends State = State> exte
   zenCoding?: ZenCodingGrammarInterceptor<ComponentState> |
     ZenCodingGrammarInterceptor<ComponentState>[]
 
-  fromJSON?(textbus: Textbus, data: ComponentStateLiteral<ComponentState>): Component<ComponentState>
+  /**
+   * 通过 JSON 创建组件实例
+   * @param textbus
+   * @param data 组件状态字面量
+   * @param metadata 异步组件的元数据
+   */
+  fromJSON?(textbus: Textbus, data: ComponentStateLiteral<ComponentState>, metadata?: any): Component<ComponentState>
 }
 
 /**

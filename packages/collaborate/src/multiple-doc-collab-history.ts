@@ -1,4 +1,4 @@
-import { AbstractType, Item, UndoManager } from 'yjs'
+import { AbstractType, Item, UndoManager, Doc as YDoc } from 'yjs'
 import { Inject, Injectable, Optional } from '@viewfly/core'
 import { Observable, Subject, Subscription } from '@tanbo/stream'
 import { History, HISTORY_STACK_SIZE, RootComponentRef } from '@textbus/core'
@@ -56,16 +56,16 @@ export class MultipleDocCollabHistory implements History {
     const rootComponent = this.rootComponentRef.component!
     this.collaborate.syncRootComponent(this.collaborate.yDoc, root, rootComponent)
 
-    this.listenItem(root)
+    this.listenItem(root, this.collaborate.yDoc)
 
     this.subscription.add(
-      this.collaborate.onAddSubModel.subscribe(yType => {
+      this.collaborate.onAddSubModel.subscribe(({yType, yDoc}) => {
         if (this.subDocs.has(yType)) {
           return
         }
         this.subDocs.add(yType)
         if (this.isListen) {
-          this.listenItem(yType)
+          this.listenItem(yType, yDoc)
         }
       })
     )
@@ -132,10 +132,10 @@ export class MultipleDocCollabHistory implements History {
     this.listenerCaches.clear()
   }
 
-  private listenItem(yType: AbstractType<any>) {
+  private listenItem(yType: AbstractType<any>, yDoc: YDoc) {
     const undoManagerConfig = this.undoManagerConfig || {}
     const undoManager = new UndoManager(yType, {
-      trackedOrigins: new Set([this.collaborate.yDoc]),
+      trackedOrigins: new Set([yDoc]),
       captureTimeout: 0,
       captureTransaction(arg) {
         if (undoManagerConfig.captureTransaction) {

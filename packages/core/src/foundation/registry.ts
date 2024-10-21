@@ -6,13 +6,17 @@ import {
   ComponentLiteral,
   Formatter,
   Slot,
-  SlotLiteral
+  SlotLiteral, AsyncSlotLiteral, AsyncSlot, AsyncComponentLiteral
 } from '../model/_api'
 import { ATTRIBUTE_LIST, COMPONENT_LIST, FORMATTER_LIST } from './_injection-tokens'
 import { Textbus } from '../textbus'
 import { makeError } from '../_utils/make-error'
 
 const registryErrorFn = makeError('Registry')
+
+function isAsyncSlotLiteral(slotLiteral: SlotLiteral): slotLiteral is AsyncSlotLiteral {
+  return (slotLiteral as any).async === true
+}
 
 /**
  * 注册表
@@ -81,7 +85,12 @@ export class Registry {
    * 根据插槽数据生成插槽实例
    * @param slotLiteral
    */
-  createSlot(slotLiteral: SlotLiteral): Slot {
+  createSlot(slotLiteral: AsyncSlotLiteral): AsyncSlot
+  createSlot(slotLiteral: SlotLiteral): Slot
+  createSlot(slotLiteral: SlotLiteral | AsyncSlotLiteral): Slot | AsyncSlot {
+    if (isAsyncSlotLiteral(slotLiteral)) {
+      return new AsyncSlot(slotLiteral.schema, slotLiteral.metadata)
+    }
     const slot = new Slot(slotLiteral.schema)
     return this.loadSlot(slot, slotLiteral)
   }
@@ -90,7 +99,7 @@ export class Registry {
    * 根据组件数据生成组件实例
    * @param componentLiteral
    */
-  createComponent(componentLiteral: ComponentLiteral): Component | null {
+  createComponent(componentLiteral: ComponentLiteral | AsyncComponentLiteral): Component | null {
     const factory = this.getComponent(componentLiteral.name)
     if (factory) {
       return this.createComponentByFactory(componentLiteral, factory)
@@ -103,10 +112,10 @@ export class Registry {
    * @param componentLiteral
    * @param factory
    */
-  createComponentByFactory(componentLiteral: ComponentLiteral,
+  createComponentByFactory(componentLiteral: ComponentLiteral | AsyncComponentLiteral,
                            factory: ComponentConstructor) {
     if (typeof factory.fromJSON === 'function') {
-      return factory.fromJSON(this.textbus, componentLiteral.state)
+      return factory.fromJSON(this.textbus, componentLiteral.state, (componentLiteral as any).metadata)
     }
     throw registryErrorFn(`Component ${factory.componentName} does not implement the fromJSON method.`)
   }

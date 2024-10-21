@@ -1,3 +1,4 @@
+export * from './async-model'
 export * from './attribute'
 export * from './change-marker'
 export * from './component'

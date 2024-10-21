@@ -11,7 +11,7 @@ import {
   Slot,
   ProxyModel,
   createObjectProxy,
-  createArrayProxy,
+  createArrayProxy, AsyncSlot, AsyncComponent,
 } from '@textbus/core'
 import {
   AbstractType,
@@ -26,7 +26,7 @@ import {
   YTextEvent
 } from 'yjs'
 
-import { AsyncComponent, AsyncSlot, SubModelLoader } from './sub-model-loader'
+import { SubModelLoader } from './sub-model-loader'
 
 const collaborateErrorFn = makeError('Collaborate')
 
@@ -83,17 +83,22 @@ interface UpdateItem {
   action(): void
 }
 
+export interface SubModelLoaded {
+  yType: AbstractType<any>
+  yDoc: YDoc
+}
+
 @Injectable()
 export class Collaborate {
   yDoc = new YDoc()
   slotMap = new SlotMap()
-  onAddSubModel: Observable<AbstractType<any>>
+  onAddSubModel: Observable<SubModelLoaded>
 
   private subscriptions: Subscription[] = []
   private updateFromRemote = false
-  private addSubModelEvent = new Subject<AbstractType<any>>()
+  private addSubModelEvent = new Subject<SubModelLoaded>()
 
-  private updateRemoteActions: Array<UpdateItem> = []
+  private updateRemoteActions = new WeakMap<YDoc, UpdateItem[]>()
   private noRecord = {}
 
   constructor(private scheduler: Scheduler,
@@ -138,7 +143,9 @@ export class Collaborate {
 
         let update: Update | null = null
 
-        for (const item of this.updateRemoteActions) {
+        const updateRemoteActions = this.updateRemoteActions.get(yDoc) || []
+
+        for (const item of updateRemoteActions) {
           if (!update) {
             update = {
               record: item.record,
@@ -157,7 +164,7 @@ export class Collaborate {
           }
         }
 
-        this.updateRemoteActions = []
+        this.updateRemoteActions.delete(yDoc)
 
         for (const item of updates) {
           yDoc.transact(() => {
@@ -166,7 +173,6 @@ export class Collaborate {
             })
           }, item.record ? yDoc : this.noRecord)
         }
-        // this.localChangesAppliedEvent.next()
       })
     )
   }
@@ -257,7 +263,7 @@ export class Collaborate {
     sharedSlot.observe(syncRemote)
 
     const sub = localSlot.onContentChange.subscribe(actions => {
-      this.runLocalUpdate(() => {
+      this.runLocalUpdate(sharedSlot.doc, true, () => {
         let offset = 0
         let length = 0
         for (const action of actions) {
@@ -309,7 +315,7 @@ export class Collaborate {
             sharedSlot.removeAttribute(action.name)
           }
         }
-      }, true)
+      })
     })
 
     this.slotMap.set(localSlot, sharedSlot)
@@ -376,6 +382,7 @@ export class Collaborate {
 
     if (isAsyncSlot) {
       let isDestroyed = false
+      sharedSlot.setAttribute('metadata', localSlot.metadata)
       this.subModelLoader.createSubModelBySlot(localSlot).then(subDocument => {
         if (isDestroyed) {
           return
@@ -383,7 +390,11 @@ export class Collaborate {
         const content = subDocument.getText('content')
         this.initSharedSlotByLocalSlot(content, localSlot)
         this.syncSlot(content, localSlot)
-        this.addSubModelEvent.next(content)
+        this.addSubModelEvent.next({
+          yDoc: subDocument,
+          yType: content
+        })
+        localSlot.loader.markAsLoaded()
       })
       localSlot.__changeMarker__.destroyCallbacks.push(() => {
         isDestroyed = true
@@ -425,22 +436,35 @@ export class Collaborate {
   private createLocalSlotBySharedSlot(sharedSlot: YText): Slot {
     const type = sharedSlot.getAttribute('type')
     const schema = sharedSlot.getAttribute('schema')
-    const contentDelta = sharedSlot.toDelta()
 
     if (type === 'async') {
       const metadata = sharedSlot.getAttribute('metadata')
       const slot = new AsyncSlot(schema || [], metadata)
+      const loadedSubDocument = this.subModelLoader.getLoadedModelBySlot(slot)
+      if (loadedSubDocument) {
+        const subContent = loadedSubDocument.getText('content')
+        this.syncRootSlot(loadedSubDocument, subContent, slot)
+        this.addSubModelEvent.next({
+          yDoc: loadedSubDocument,
+          yType: subContent
+        })
+        slot.loader.markAsLoaded()
+        return slot
+      }
       let isDestroyed = false
-      slot.loader.onRequest.toPromise().then(() => {
+      slot.loader.onRequestLoad.toPromise().then(() => {
         return this.subModelLoader.loadSubModelBySlot(slot)
       }).then(subDocument => {
         if (isDestroyed) {
           return
         }
+        slot.loader.markAsLoaded()
         const subContent = subDocument.getText('content')
-        this.initLocalSlotBySharedSlot(subContent, slot)
-        this.syncSlot(subContent, slot)
-        this.addSubModelEvent.next(subContent)
+        this.syncRootSlot(subDocument, subContent, slot)
+        this.addSubModelEvent.next({
+          yDoc: subDocument,
+          yType: subContent
+        })
       })
       slot.__changeMarker__.destroyCallbacks.push(() => {
         isDestroyed = true
@@ -448,6 +472,7 @@ export class Collaborate {
       return slot
     }
 
+    const contentDelta = sharedSlot.toDelta()
     const content = contentDelta[0]?.insert
 
     if (!(content instanceof YText)) {
@@ -533,7 +558,11 @@ export class Collaborate {
         }
         const state = subDocument.getMap('state')
         this.syncComponent(subDocument, state, component)
-        this.addSubModelEvent.next(state)
+        this.addSubModelEvent.next({
+          yType: state,
+          yDoc: subDocument
+        })
+        component.loader.markAsLoaded()
       })
       return sharedComponent
     }
@@ -553,18 +582,35 @@ export class Collaborate {
       instance = this.registry.createComponentByData(componentName, {})
       if (instance instanceof AsyncComponent) {
         instance.setMetadata(yMap.get('metadata'))
+
+        const loadedSubDocument = this.subModelLoader.getLoadedModelByComponent(instance)
+        if (loadedSubDocument) {
+          const state = loadedSubDocument.getMap('state')
+          this.syncComponent(loadedSubDocument, state, instance!)
+          this.addSubModelEvent.next({
+            yType: state,
+            yDoc: loadedSubDocument
+          })
+          instance.loader.markAsLoaded()
+          return instance
+        }
+
         const state = instance.state as ProxyModel<Record<string, any>>
         let isDestroyed = false
-        instance.loader.onRequest.toPromise().then(() => {
+        instance.loader.onRequestLoad.toPromise().then(() => {
           return this.subModelLoader.loadSubModelByComponent(instance as AsyncComponent)
         })
           .then(subDocument => {
             if (isDestroyed) {
               return
             }
+            (instance as AsyncComponent).loader.markAsLoaded()
             const state = subDocument.getMap('state')
             this.syncComponent(subDocument, state, instance!)
-            this.addSubModelEvent.next(state)
+            this.addSubModelEvent.next({
+              yType: state,
+              yDoc: subDocument
+            })
           })
         state.__changeMarker__.destroyCallbacks.push(() => {
           isDestroyed = true
@@ -592,7 +638,7 @@ export class Collaborate {
    */
   private syncArray(sharedArray: YArray<any>, localArray: ProxyModel<any[]>) {
     const sub = localArray.__changeMarker__.onSelfChange.subscribe((actions) => {
-      this.runLocalUpdate(() => {
+      this.runLocalUpdate(sharedArray.doc, !localArray.__changeMarker__.irrevocableUpdate, () => {
         let index = 0
         for (const action of actions) {
           switch (action.type) {
@@ -622,7 +668,7 @@ export class Collaborate {
               break
           }
         }
-      }, !localArray.__changeMarker__.irrevocableUpdate)
+      })
     })
 
     const syncRemote = (ev: YArrayEvent<any>, tr: Transaction) => {
@@ -674,7 +720,7 @@ export class Collaborate {
     sharedObject.observe(syncRemote)
 
     const sub = localObject.__changeMarker__.onSelfChange.subscribe((actions) => {
-      this.runLocalUpdate(() => {
+      this.runLocalUpdate(sharedObject.doc, !localObject.__changeMarker__.irrevocableUpdate, () => {
         for (const action of actions) {
           switch (action.type) {
             case 'propSet':
@@ -685,7 +731,7 @@ export class Collaborate {
               break
           }
         }
-      }, !localObject.__changeMarker__.irrevocableUpdate)
+      })
     })
 
     localObject.__changeMarker__.destroyCallbacks.push(function () {
@@ -694,11 +740,16 @@ export class Collaborate {
     })
   }
 
-  private runLocalUpdate(fn: () => void, record: boolean) {
-    if (this.updateFromRemote) {
+  private runLocalUpdate(yDoc: YDoc | null, record: boolean, fn: () => void) {
+    if (this.updateFromRemote || !yDoc) {
       return
     }
-    this.updateRemoteActions.push({
+    let changeList = this.updateRemoteActions.get(yDoc)
+    if (!changeList) {
+      changeList = []
+      this.updateRemoteActions.set(yDoc, changeList)
+    }
+    changeList.push({
       record,
       action: fn
     })

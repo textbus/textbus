@@ -31,6 +31,11 @@ export interface SlotLiteral {
   formats: FormatLiteral
 }
 
+export interface AsyncSlotLiteral extends SlotLiteral {
+  async: true
+  metadata: any
+}
+
 export interface DeltaInsert {
   insert: string | Component
   formats: Formats
