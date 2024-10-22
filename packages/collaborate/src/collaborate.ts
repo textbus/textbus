@@ -121,7 +121,9 @@ export class Collaborate {
       localSlot.cleanFormats()
       this.initLocalSlotBySharedSlot(sharedSlot, localSlot)
     } else {
-      this.initSharedSlotByLocalSlot(sharedSlot, localSlot)
+      yDoc.transact(() => {
+        this.initSharedSlotByLocalSlot(sharedSlot, localSlot)
+      })
     }
     this.initSyncEvent(yDoc)
     this.syncSlot(sharedSlot, localSlot)
@@ -394,6 +396,7 @@ export class Collaborate {
           yDoc: subDocument,
           yType: content
         })
+        this.initSyncEvent(subDocument)
         localSlot.loader.markAsLoaded()
       })
       localSlot.__changeMarker__.destroyCallbacks.push(() => {
@@ -562,6 +565,7 @@ export class Collaborate {
           yType: state,
           yDoc: subDocument
         })
+        this.initSyncEvent(subDocument)
         component.loader.markAsLoaded()
       })
       return sharedComponent
