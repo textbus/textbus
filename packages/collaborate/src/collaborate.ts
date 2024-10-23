@@ -11,13 +11,14 @@ import {
   Slot,
   ProxyModel,
   createObjectProxy,
-  createArrayProxy, AsyncSlot, AsyncComponent,
+  createArrayProxy, AsyncSlot, AsyncComponent, AbstractSelection,
 } from '@textbus/core'
 import {
   AbstractType,
-  Array as YArray,
+  Array as YArray, createAbsolutePositionFromRelativePosition, createRelativePositionFromTypeIndex,
   Doc as YDoc,
   Map as YMap,
+  RelativePosition,
   Text as YText,
   Transaction,
   UndoManager,
@@ -27,6 +28,21 @@ import {
 } from 'yjs'
 
 import { SubModelLoader } from './sub-model-loader'
+
+export interface RelativePositionRecord {
+  doc: YDoc,
+  position: RelativePosition
+}
+
+export interface CursorPosition {
+  anchor: RelativePositionRecord
+  focus: RelativePositionRecord
+}
+
+export interface CollaborateHistorySelectionPosition {
+  before: CursorPosition | null
+  after: CursorPosition | null
+}
 
 const collaborateErrorFn = makeError('Collaborate')
 
@@ -127,6 +143,66 @@ export class Collaborate {
     }
     this.initSyncEvent(yDoc)
     this.syncSlot(sharedSlot, localSlot)
+  }
+
+  getAbstractSelection(position: CursorPosition): AbstractSelection | null {
+    const anchorPosition = createAbsolutePositionFromRelativePosition(position.anchor.position, position.anchor.doc)
+    const focusPosition = createAbsolutePositionFromRelativePosition(position.focus.position, position.focus.doc)
+    if (anchorPosition && focusPosition) {
+      const focusSlot = this.slotMap.get(focusPosition.type as YText)
+      const anchorSlot = this.slotMap.get(anchorPosition.type as YText)
+      if (focusSlot && anchorSlot) {
+        return {
+          anchorSlot,
+          anchorOffset: anchorPosition.index,
+          focusSlot,
+          focusOffset: focusPosition.index
+        }
+      }
+    }
+    return null
+  }
+
+  getRelativeCursorLocation(): CursorPosition | null {
+    const { anchorSlot, anchorOffset, focusSlot, focusOffset } = this.selection
+    if (anchorSlot) {
+      const anchorYText = this.slotMap.get(anchorSlot)
+      if (anchorYText) {
+        const anchorPosition = createRelativePositionFromTypeIndex(anchorYText, anchorOffset!)
+        if (focusSlot) {
+          const focusYText = this.slotMap.get(focusSlot)
+          if (focusYText) {
+            const focusPosition = createRelativePositionFromTypeIndex(focusYText, focusOffset!)
+            return {
+              focus: {
+                doc: focusYText.doc!,
+                position: focusPosition
+              },
+              anchor: {
+                doc: anchorYText.doc!,
+                position: anchorPosition
+              }
+            }
+          }
+        }
+      }
+    }
+    return null
+  }
+
+  restoreCursorPosition(position: CursorPosition | null) {
+    if (!position) {
+      this.selection.unSelect()
+      return
+    }
+    const selection = this.getAbstractSelection(position)
+    if (selection) {
+      this.selection.setBaseAndExtent(
+        selection.anchorSlot,
+        selection.anchorOffset,
+        selection.focusSlot,
+        selection.focusOffset)
+    }
   }
 
   private initSyncEvent(yDoc: YDoc) {

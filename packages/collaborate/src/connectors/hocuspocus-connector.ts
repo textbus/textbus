@@ -4,7 +4,7 @@ import { HocuspocusProviderConfiguration } from '@hocuspocus/provider'
 import { SyncConnector, SyncState } from '../sync-connector'
 
 export class HocuspocusConnector extends SyncConnector {
-  private provide: HocuspocusProvider
+  provide: HocuspocusProvider
 
   constructor(config: HocuspocusProviderConfiguration) {
     super()

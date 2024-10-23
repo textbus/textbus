@@ -5,7 +5,7 @@ import { SyncConnector, SyncState } from '../sync-connector'
 
 
 export class YWebsocketConnector extends SyncConnector {
-  private provide: WebsocketProvider
+  provide: WebsocketProvider
 
   constructor(url: string, roomName: string, yDoc: YDoc) {
     super()

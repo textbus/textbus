@@ -1,32 +1,18 @@
 import { Inject, Injectable, Optional } from '@viewfly/core'
-import { AbstractSelection, History, HISTORY_STACK_SIZE, makeError, RootComponentRef, Scheduler, Selection } from '@textbus/core'
+import { History, HISTORY_STACK_SIZE, makeError, RootComponentRef, Scheduler, Selection } from '@textbus/core'
 import { Observable, Subject, Subscription } from '@tanbo/stream'
 import {
-  createAbsolutePositionFromRelativePosition,
-  createRelativePositionFromTypeIndex,
   Item,
-  RelativePosition,
-  Text as YText,
   Transaction,
   UndoManager
 } from 'yjs'
 
-import { Collaborate } from './collaborate'
+import { Collaborate, CollaborateHistorySelectionPosition, CursorPosition } from './collaborate'
 
 export abstract class CustomUndoManagerConfig {
   abstract captureTransaction?(arg0: Transaction): boolean
 
   abstract deleteFilter?(arg0: Item): boolean
-}
-
-interface CursorPosition {
-  anchor: RelativePosition
-  focus: RelativePosition
-}
-
-interface CollaborateHistorySelectionPosition {
-  before: CursorPosition | null
-  after: CursorPosition | null
 }
 
 const collabHistoryErrorFn = makeError('CollabHistory')
@@ -96,7 +82,7 @@ export class CollabHistory implements History {
     let beforePosition: CursorPosition | null = null
     this.subscriptions.push(
       this.scheduler.onLocalChangeBefore.subscribe(() => {
-        beforePosition = this.getRelativeCursorLocation()
+        beforePosition = this.collaborate.getRelativeCursorLocation()
       }),
       this.collaborate.onAddSubModel.subscribe(() => {
         throw collabHistoryErrorFn('single document does not support submodels.')
@@ -111,7 +97,7 @@ export class CollabHistory implements History {
           this.historyItems.length = this.index
           this.historyItems.push({
             before: beforePosition,
-            after: this.getRelativeCursorLocation()
+            after: this.collaborate.getRelativeCursorLocation()
           })
           this.index++
         }
@@ -131,18 +117,7 @@ export class CollabHistory implements History {
       const index = ev.type === 'undo' ? this.index : this.index - 1
       const position = this.historyItems[index] || null
       const p = ev.type === 'undo' ? position?.before : position?.after
-      if (p) {
-        const selection = this.getAbstractSelection(p)
-        if (selection) {
-          this.selection.setBaseAndExtent(
-            selection.anchorSlot,
-            selection.anchorOffset,
-            selection.focusSlot,
-            selection.focusOffset)
-          return
-        }
-      }
-      this.selection.unSelect()
+      this.collaborate.restoreCursorPosition(p)
     })
   }
 
@@ -174,44 +149,5 @@ export class CollabHistory implements History {
     this.historyItems = []
     this.subscriptions.forEach(i => i.unsubscribe())
     this.manager?.destroy()
-  }
-
-  private getAbstractSelection(position: CursorPosition): AbstractSelection | null {
-    const anchorPosition = createAbsolutePositionFromRelativePosition(position.anchor, this.collaborate.yDoc)
-    const focusPosition = createAbsolutePositionFromRelativePosition(position.focus, this.collaborate.yDoc)
-    if (anchorPosition && focusPosition) {
-      const focusSlot = this.collaborate.slotMap.get(focusPosition.type as YText)
-      const anchorSlot = this.collaborate.slotMap.get(anchorPosition.type as YText)
-      if (focusSlot && anchorSlot) {
-        return {
-          anchorSlot,
-          anchorOffset: anchorPosition.index,
-          focusSlot,
-          focusOffset: focusPosition.index
-        }
-      }
-    }
-    return null
-  }
-
-  private getRelativeCursorLocation(): CursorPosition | null {
-    const { anchorSlot, anchorOffset, focusSlot, focusOffset } = this.selection
-    if (anchorSlot) {
-      const anchorYText = this.collaborate.slotMap.get(anchorSlot)
-      if (anchorYText) {
-        const anchorPosition = createRelativePositionFromTypeIndex(anchorYText, anchorOffset!)
-        if (focusSlot) {
-          const focusYText = this.collaborate.slotMap.get(focusSlot)
-          if (focusYText) {
-            const focusPosition = createRelativePositionFromTypeIndex(focusYText, focusOffset!)
-            return {
-              focus: focusPosition,
-              anchor: anchorPosition
-            }
-          }
-        }
-      }
-    }
-    return null
   }
 }

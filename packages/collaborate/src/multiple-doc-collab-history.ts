@@ -1,10 +1,14 @@
 import { AbstractType, Item, UndoManager, Doc as YDoc } from 'yjs'
 import { Inject, Injectable, Optional } from '@viewfly/core'
 import { Observable, Subject, Subscription } from '@tanbo/stream'
-import { History, HISTORY_STACK_SIZE, RootComponentRef } from '@textbus/core'
+import { History, HISTORY_STACK_SIZE, RootComponentRef, Scheduler } from '@textbus/core'
 
-import { Collaborate } from './collaborate'
+import { Collaborate, CollaborateHistorySelectionPosition, CursorPosition } from './collaborate'
 import { CustomUndoManagerConfig } from './collab-history'
+
+interface HistoryStackItem extends CollaborateHistorySelectionPosition {
+  undoManagers: UndoManager[]
+}
 
 @Injectable()
 export class MultipleDocCollabHistory implements History {
@@ -27,12 +31,13 @@ export class MultipleDocCollabHistory implements History {
   private backEvent = new Subject<void>()
   private forwardEvent = new Subject<void>()
   private pushEvent = new Subject<void>()
-  private actionStack: UndoManager[][] = []
+  private actionStack: HistoryStackItem[] = []
 
   private index = 0
 
-  private stackItem: UndoManager[] | null = null
+  private stackItem: HistoryStackItem | null = null
   private timer: any = null
+  private beforePosition: CursorPosition | null = null
 
   private subscription = new Subscription()
 
@@ -41,6 +46,7 @@ export class MultipleDocCollabHistory implements History {
   private listenerCaches = new Set<UndoManager>()
 
   constructor(private collaborate: Collaborate,
+              private scheduler: Scheduler,
               private rootComponentRef: RootComponentRef,
               @Inject(HISTORY_STACK_SIZE) private stackSize: number,
               @Optional() private undoManagerConfig: CustomUndoManagerConfig) {
@@ -59,7 +65,7 @@ export class MultipleDocCollabHistory implements History {
     this.listenItem(root, this.collaborate.yDoc)
 
     this.subscription.add(
-      this.collaborate.onAddSubModel.subscribe(({yType, yDoc}) => {
+      this.collaborate.onAddSubModel.subscribe(({ yType, yDoc }) => {
         if (this.subDocs.has(yType)) {
           return
         }
@@ -67,6 +73,9 @@ export class MultipleDocCollabHistory implements History {
         if (this.isListen) {
           this.listenItem(yType, yDoc)
         }
+      }),
+      this.scheduler.onLocalChangeBefore.subscribe(() => {
+        this.beforePosition = this.collaborate.getRelativeCursorLocation()
       })
     )
   }
@@ -78,9 +87,10 @@ export class MultipleDocCollabHistory implements History {
     clearTimeout(this.timer as any)
     const item = this.actionStack[this.index]
     if (item) {
-      for (const i of item) {
+      for (const i of item.undoManagers) {
         i.redo()
       }
+      this.collaborate.restoreCursorPosition(item.after)
     }
     this.index++
     this.forwardEvent.next()
@@ -92,20 +102,22 @@ export class MultipleDocCollabHistory implements History {
       return
     }
     clearTimeout(this.timer as any)
-    let actions: UndoManager[]
+    let historyStackItem: HistoryStackItem
     if (this.stackItem) {
-      actions = this.stackItem
+      historyStackItem = this.stackItem
       this.stackItem = null
     } else {
       this.index--
-      actions = this.actionStack[this.index]
+      historyStackItem = this.actionStack[this.index]
     }
-    let len = actions.length
+    let len = historyStackItem.undoManagers.length
     while (len > 0) {
       len--
-      actions[len].undo()
+      historyStackItem.undoManagers[len].undo()
     }
-    if (actions) {
+    if (historyStackItem) {
+      const beforePosition = historyStackItem.before
+      this.collaborate.restoreCursorPosition(beforePosition)
       this.backEvent.next()
       this.changeEvent.next()
     }
@@ -113,8 +125,9 @@ export class MultipleDocCollabHistory implements History {
 
   clear() {
     this.actionStack = []
-    this.stackItem = []
+    this.stackItem = null
     this.index = 0
+    this.beforePosition = null
     clearTimeout(this.timer as any)
     this.listenerCaches.forEach((undoManager) => {
       undoManager.clear()
@@ -124,6 +137,7 @@ export class MultipleDocCollabHistory implements History {
 
   destroy() {
     this.clear()
+    this.beforePosition = this.stackItem = null
     this.subscription.unsubscribe()
     this.listenerCaches.forEach((undoManager) => {
       undoManager.destroy()
@@ -156,7 +170,7 @@ export class MultipleDocCollabHistory implements History {
         if (this.index != this.actionStack.length) {
           const redoStack = this.actionStack.slice(this.index)
           redoStack.forEach(item => {
-            item.forEach(i => {
+            item.undoManagers.forEach(i => {
               i.clear(false, true)
             })
           })
@@ -164,13 +178,19 @@ export class MultipleDocCollabHistory implements History {
           this.changeEvent.next()
         }
         if (this.stackItem === null) {
-          this.stackItem = []
+          this.stackItem = {
+            before: this.beforePosition,
+            after: null,
+            undoManagers: []
+          }
           this.timer = setTimeout(() => {
             if (this.actionStack.length >= this.stackSize) {
               this.actionStack.shift()
             } else {
               this.index++
             }
+            // this.beforePosition = this.collaborate.getRelativeCursorLocation()
+            this.stackItem!.after = this.beforePosition
             this.actionStack.push(this.stackItem!)
             this.stackItem = null
             this.pushEvent.next()
@@ -178,7 +198,7 @@ export class MultipleDocCollabHistory implements History {
           }, 500)
         }
 
-        this.stackItem.push(undoManager)
+        this.stackItem.undoManagers.push(undoManager)
       }
     })
 
