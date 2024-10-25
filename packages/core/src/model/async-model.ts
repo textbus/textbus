@@ -1,8 +1,9 @@
 import { Observable, Subject } from '@tanbo/stream'
 
 import { State } from './types'
-import { AsyncComponentLiteral, Component } from './component'
-import { AsyncSlotLiteral, ContentType, Slot } from './slot'
+import { AsyncComponentLiteral, Component, ComponentLiteral } from './component'
+import { AsyncSlotLiteral, ContentType, Slot, SlotJSON } from './slot'
+import { FormatLiteral } from './format'
 
 export class AsyncModelLoader {
   onRequestLoad: Observable<void>
@@ -57,6 +58,18 @@ export abstract class AsyncComponent<Metadata = any,
   }
 }
 
+export class AsyncSlotJSON extends SlotJSON implements AsyncSlotLiteral {
+  async = true as const
+
+  constructor(schema: ContentType[],
+              content: Array<string | ComponentLiteral>,
+              attributes: Record<string, any>,
+              formats: FormatLiteral,
+              public metadata: any) {
+    super(schema, content, attributes, formats)
+  }
+}
+
 /**
  * 异步加载插槽
  *
@@ -69,11 +82,17 @@ export class AsyncSlot extends Slot {
     super(schema)
   }
 
-  override toJSON(): AsyncSlotLiteral {
-    return {
-      ...super.toJSON(),
-      async: true,
-      metadata: this.metadata,
-    }
+  override toJSON(): AsyncSlotJSON {
+    const attrs: Record<string, any> = {}
+    this.attributes.forEach((value, key) => {
+      attrs[key.name] = value
+    })
+    return new AsyncSlotJSON(
+      [...this.schema],
+      this.content.toJSON(),
+      attrs,
+      this.format.toJSON(),
+      this.metadata
+    )
   }
 }

@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@viewfly/core'
 import { map, Observable, Subject, Subscription } from '@tanbo/stream'
 
-import { Component, ComponentLiteral, Formats, Operation, Paths, Slot, SlotJSON } from '../model/_api'
+import { AsyncSlotJSON, Component, ComponentLiteral, Formats, Operation, Paths, Slot, SlotJSON } from '../model/_api'
 import { Selection } from './selection'
 import { Registry } from './registry'
 import { HISTORY_STACK_SIZE, RootComponentRef } from './_injection-tokens'
@@ -334,7 +334,7 @@ export class LocalHistory extends History {
         return this.valueToModel(i)
       })
     }
-    if (value instanceof SlotJSON) {
+    if (value instanceof SlotJSON || value instanceof AsyncSlotJSON) {
       return this.registry.createSlot(value)
     }
     if (typeof value === 'object' && value !== null) {
