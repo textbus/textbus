@@ -10,7 +10,7 @@ import { Scheduler } from './scheduler'
  * 快捷键配置
  */
 export interface KeymapState {
-  ctrlKey: boolean
+  modKey: boolean
   altKey: boolean
   shiftKey: boolean
   key: string
@@ -86,7 +86,7 @@ export class Keyboard {
 
     const commonAncestorSlot = this.selection.commonAncestorSlot!
     if (this.zenCoding &&
-      !keymapState.ctrlKey &&
+      !keymapState.modKey &&
       !keymapState.shiftKey &&
       !keymapState.altKey &&
       commonAncestorSlot === this.selection.startSlot &&
@@ -149,7 +149,8 @@ export class Keyboard {
       if (ex.test(keymap.key) &&
         !!config.keymap.altKey === keymap.altKey &&
         !!config.keymap.shiftKey === keymap.shiftKey &&
-        !!config.keymap.ctrlKey === keymap.ctrlKey) {
+        !!config.keymap.modKey === keymap.modKey
+      ) {
         const b = config.action(keymap.key)
         if (b !== false) {
           return true

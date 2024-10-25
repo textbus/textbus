@@ -522,7 +522,7 @@ export class MagicInput extends Input {
           key: key,
           altKey: ev.altKey,
           shiftKey: ev.shiftKey,
-          ctrlKey: this.isMac ? ev.metaKey : ev.ctrlKey
+          modKey: this.isMac ? ev.metaKey : ev.ctrlKey
         })
         if (is) {
           this.ignoreComposition = true

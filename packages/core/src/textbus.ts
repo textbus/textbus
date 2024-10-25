@@ -423,7 +423,7 @@ export class Textbus extends ReflectiveInjector {
     keyboard.addShortcut({
       keymap: {
         key: 's',
-        ctrlKey: true
+        modKey: true
       },
       action: () => {
         this.saveEvent.next()
@@ -501,7 +501,7 @@ export class Textbus extends ReflectiveInjector {
     keyboard.addShortcut({
       keymap: {
         key: 'a',
-        ctrlKey: true
+        modKey: true
       },
       action: () => {
         selection.selectAll()
@@ -510,7 +510,7 @@ export class Textbus extends ReflectiveInjector {
     keyboard.addShortcut({
       keymap: {
         key: 'c',
-        ctrlKey: true
+        modKey: true
       },
       action: () => {
         commander.copy()
@@ -519,7 +519,7 @@ export class Textbus extends ReflectiveInjector {
     keyboard.addShortcut({
       keymap: {
         key: 'x',
-        ctrlKey: true
+        modKey: true
       },
       action: () => {
         commander.cut()
@@ -528,7 +528,7 @@ export class Textbus extends ReflectiveInjector {
     keyboard.addShortcut({
       keymap: {
         key: 'z',
-        ctrlKey: true
+        modKey: true
       },
       action: () => {
         history.back()
@@ -537,7 +537,7 @@ export class Textbus extends ReflectiveInjector {
     keyboard.addShortcut({
       keymap: {
         key: 'z',
-        ctrlKey: true,
+        modKey: true,
         shiftKey: true
       },
       action: () => {
@@ -547,7 +547,7 @@ export class Textbus extends ReflectiveInjector {
     keyboard.addShortcut({
       keymap: {
         key: 'y',
-        ctrlKey: true,
+        modKey: true,
       },
       action: () => {
         history.forward()

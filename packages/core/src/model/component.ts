@@ -4,7 +4,7 @@ import { makeError } from '../_utils/make-error'
 import { AsyncSlotLiteral, ContentType, Slot, SlotLiteral } from './slot'
 import { Formats } from './format'
 import { ChangeMarker } from './change-marker'
-import { State } from './types'
+import { Shortcut, State } from './types'
 import { Textbus } from '../textbus'
 import { createObjectProxy, objectToJSON } from './proxy'
 import { Attribute, Formatter } from './attribute'
@@ -23,24 +23,6 @@ export interface ComponentLiteral<State = any> {
 export interface AsyncComponentLiteral<State = any> extends ComponentLiteral<State> {
   async: true
   metadata: any
-}
-
-export interface Key {
-  match: RegExp | ((key: string) => boolean)
-  name: string | string[]
-}
-
-export interface Keymap {
-  ctrlKey?: boolean;
-  shiftKey?: boolean;
-  altKey?: boolean;
-  key: string | string[] | Key;
-}
-
-export interface Shortcut {
-  keymap: Keymap
-
-  action(key: string): boolean | void
 }
 
 export interface ZenCodingGrammarInterceptor<T extends State> {

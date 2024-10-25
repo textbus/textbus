@@ -78,3 +78,21 @@ export interface State {
 }
 
 export type DestroyCallbacks = Array<() => void>
+
+export interface Key {
+  match: RegExp | ((key: string) => boolean)
+  name: string | string[]
+}
+
+export interface Keymap {
+  modKey?: boolean;
+  shiftKey?: boolean;
+  altKey?: boolean;
+  key: string | string[] | Key;
+}
+
+export interface Shortcut {
+  keymap: Keymap
+
+  action(key: string): boolean | void
+}
