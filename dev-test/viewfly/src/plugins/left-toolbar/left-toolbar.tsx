@@ -84,7 +84,7 @@ export const LeftToolbar = withAnnotation({
 
   onMounted(() => {
     const rootComponent = rootComponentRef.component as RootComponent
-    const docContentContainer = adapter.getNativeNodeBySlot(rootComponent.state.content)!
+    const docContentContainer = adapter.getNativeNodeBySlot(rootComponent.state.content)! as HTMLElement
     const sub = fromEvent(docContentContainer!, 'mousemove').pipe(
       filter(() => {
         return !isIgnoreMove

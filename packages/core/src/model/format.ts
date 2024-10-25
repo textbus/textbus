@@ -154,10 +154,14 @@ export class Format {
    * 提取指定范围内的样式
    * @param startIndex
    * @param endIndex
+   * @param formatter
    */
-  extract(startIndex: number, endIndex: number): Format {
+  extract(startIndex: number, endIndex: number, formatter?: Formatter[]): Format {
     const format = new Format(this.slot)
     this.map.forEach((ranges, key) => {
+      if (formatter && !formatter.includes(key)) {
+        return
+      }
       const extractRanges = this.extractFormatRangesByFormatter(startIndex, endIndex, key)
       if (extractRanges.length) {
         format.map.set(key, extractRanges)

@@ -88,6 +88,7 @@ function createArrayProxyHandlers(source: any[],
       return function (this: any[], ...args: any[]) {
         if (this === proxy) {
           ignoreChange = true
+          const length = source.length
           const result = source.push(...args)
           ignoreChange = false
           changeMarker.markAsDirtied({

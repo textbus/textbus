@@ -392,10 +392,11 @@ export class Slot {
       opt[next[0].name] = null
       return opt
     }, {})
+    const currentFormatters = formats.map(i => i[0])
     this.content.slice(startIndex, endIndex).forEach(content => {
       const offset = content.length
       if (typeof content === 'string' || content.type !== ContentType.BlockComponent) {
-        const deletedFormat = this.format.extract(index, index + offset)
+        const deletedFormat = this.format.extract(index, index + offset, currentFormatters)
         this.applyFormats(formats, index, offset, this.applyFormatCoverChild, canApply || (() => true))
         applyActions.push({
           type: 'retain',
