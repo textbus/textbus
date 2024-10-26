@@ -80,7 +80,7 @@ export interface State {
 export type DestroyCallbacks = Array<() => void>
 
 export interface Key {
-  match: RegExp | ((key: string) => boolean)
+  match: RegExp | ((key: string, agent: RawKeyAgent) => boolean)
   name: string | string[]
 }
 
@@ -95,4 +95,13 @@ export interface Shortcut {
   keymap: Keymap
 
   action(key: string): boolean | void
+}
+
+export interface RawKeyAgent {
+  key: string
+  code: string
+  /**
+   * @deprecated
+   */
+  keyCode: number
 }

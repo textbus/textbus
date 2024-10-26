@@ -4,7 +4,7 @@ import { makeError } from '../_utils/make-error'
 import { AsyncSlotLiteral, ContentType, Slot, SlotLiteral } from './slot'
 import { Formats } from './format'
 import { ChangeMarker } from './change-marker'
-import { Shortcut, State } from './types'
+import { Shortcut, State, RawKeyAgent } from './types'
 import { Textbus } from '../textbus'
 import { createObjectProxy, objectToJSON } from './proxy'
 import { Attribute, Formatter } from './attribute'
@@ -29,7 +29,7 @@ export interface ZenCodingGrammarInterceptor<T extends State> {
   /** 匹配字符 */
   match: RegExp | ((content: string, textbus: Textbus) => boolean)
   /** 触发键 */
-  key: string | string[] | RegExp | ((content: string) => boolean)
+  key: string | string[] | RegExp | ((key: string, agent: RawKeyAgent) => boolean)
 
   /** 触发执行的方法 */
   createState(content: string, textbus: Textbus): T

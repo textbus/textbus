@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@viewfly/core'
-import { ComponentConstructor, Shortcut, ZenCodingGrammarInterceptor } from '../model/_api'
+import { ComponentConstructor, RawKeyAgent, Shortcut, ZenCodingGrammarInterceptor } from '../model/_api'
 import { Commander } from './commander'
 import { Selection } from './selection'
 import { COMPONENT_LIST, ZEN_CODING_DETECT } from './_injection-tokens'
@@ -14,10 +14,11 @@ export interface KeymapState {
   altKey: boolean
   shiftKey: boolean
   key: string
+  agent: RawKeyAgent
 }
 
 interface ShortcutEx {
-  test(key: string): boolean
+  test(key: string, agent: RawKeyAgent): boolean
 
   config: Shortcut
 }
@@ -27,7 +28,7 @@ export interface ZenCodingInterceptor {
   match(content: string): boolean
 
   /** 触发键 */
-  try(key: string): boolean
+  try(key: string, agent: RawKeyAgent): boolean
 
   /** 触发执行的方法 */
   action(content: string): boolean
@@ -94,7 +95,7 @@ export class Keyboard {
 
       for (let i = this.zenCodingInterceptors.length - 1; i > -1; i--) {
         const interceptor = this.zenCodingInterceptors[i]
-        const matchKey = interceptor.try(key)
+        const matchKey = interceptor.try(key, keymapState.agent)
         if (matchKey) {
           const activeSlotContents = commonAncestorSlot.sliceContent()
           let content = activeSlotContents[0]
@@ -146,7 +147,7 @@ export class Keyboard {
     for (let i = shortcutList.length - 1; i > -1; i--) {
       const ex = shortcutList[i]
       const config = ex.config
-      if (ex.test(keymap.key) &&
+      if (ex.test(keymap.key, keymap.agent) &&
         !!config.keymap.altKey === keymap.altKey &&
         !!config.keymap.shiftKey === keymap.shiftKey &&
         !!config.keymap.modKey === keymap.modKey
@@ -160,19 +161,19 @@ export class Keyboard {
     return false
   }
 
-  private createZenCodingEx(component: ComponentConstructor, config: ZenCodingGrammarInterceptor<any>) {
+  private createZenCodingEx(component: ComponentConstructor, config: ZenCodingGrammarInterceptor<any>): ZenCodingInterceptor {
     const selection = this.selection
     const commander = this.commander
     return {
       match: (content: string) => {
         return typeof config.match === 'function' ? config.match(content, this.textbus) : config.match.test(content)
       },
-      try(key: string): boolean {
+      try(key: string, agent: RawKeyAgent): boolean {
         if (typeof config.key === 'string') {
           return key.toLowerCase() === config.key.toLowerCase()
         }
         if (typeof config.key === 'function') {
-          return config.key(key)
+          return config.key(key, agent)
         }
         if (Array.isArray(config.key)) {
           return config.key.some(item => item.toLowerCase() === key.toLowerCase())
@@ -218,7 +219,7 @@ export class Keyboard {
     const key = config.keymap.key
     return {
       config,
-      test(k: string): boolean {
+      test(k: string, agent: RawKeyAgent): boolean {
         if (typeof key === 'string') {
           return k.toLowerCase() === key.toLowerCase()
         } else if (Array.isArray(key)) {
@@ -226,7 +227,7 @@ export class Keyboard {
             return k.toLowerCase() === v.toLowerCase()
           })
         } else if (typeof key.match === 'function') {
-          return key.match(k)
+          return key.match(k, agent)
         }
         return key.match.test(k)
       }
