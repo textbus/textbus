@@ -69,3 +69,12 @@ export enum RenderMode {
   Readonly = 'Readonly',
   Editing = 'Editing'
 }
+
+export interface RawKeyAgent {
+  key: string
+  code: string
+  /**
+   * @deprecated
+   */
+  keyCode: number
+}

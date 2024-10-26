@@ -8,7 +8,7 @@ import { ContentType, Slot, SlotLiteral } from './slot'
 import { Formats } from './format'
 import { ChangeMarker } from './change-marker'
 import { Slots } from './slots'
-import { RenderMode, StateChange } from './types'
+import { RawKeyAgent, RenderMode, StateChange } from './types'
 
 enablePatches()
 
@@ -69,7 +69,7 @@ export interface ComponentExtends {
 }
 
 export interface Key {
-  match: RegExp | ((key: string) => boolean)
+  match: RegExp | ((key: string, agent: RawKeyAgent) => boolean)
   name: string | string[]
 }
 
@@ -90,7 +90,7 @@ export interface ZenCodingGrammarInterceptor<Data = any> {
   /** 匹配字符 */
   match: RegExp | ((content: string) => boolean)
   /** 触发键 */
-  key: string | string[] | RegExp | ((content: string) => boolean)
+  key: string | string[] | RegExp | ((key: string, agent: RawKeyAgent) => boolean)
 
   /** 触发执行的方法 */
   generateInitData(content: string, injector: Injector): Data

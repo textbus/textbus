@@ -335,7 +335,12 @@ export class NativeInput extends Input {
           key: key,
           altKey: ev.altKey,
           shiftKey: ev.shiftKey,
-          ctrlKey: this.isMac ? ev.metaKey : ev.ctrlKey
+          ctrlKey: this.isMac ? ev.metaKey : ev.ctrlKey,
+          agent: {
+            key: ev.key,
+            keyCode: ev.keyCode,
+            code: ev.code
+          }
         })
         if (is) {
           this.ignoreComposition = true
