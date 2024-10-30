@@ -1,10 +1,5 @@
+export * from './base/_api'
 export * from './connectors/_api'
 
-export * from './collab-history'
-export * from './collaborate'
 export * from './collaborate-module'
-export * from './multiple-doc-collab-history'
 export * from './multiple-document-collaborate-module'
-export * from './sub-model-loader'
-export * from './sync-connector'
-export * from './user-activity'

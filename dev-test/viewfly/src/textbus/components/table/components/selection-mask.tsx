@@ -48,16 +48,20 @@ export function SelectionMask(props: SelectionMaskProps) {
       if (selection.startRow > 0) {
         heightCompensation = -1
       }
-      if (selection.endRow === state.rows.length) {
+      if (selection.endRow + 1 === state.rows.length) {
         heightCompensation += 0.5
       }
       const trs = Array.from(props.tableRef.current!.rows)
       updateStyles(draft => {
+
+        const height = trs[selection.endRow - 1].offsetHeight ||
+          (trs[selection.endRow - 1].children[0] as HTMLElement)?.offsetHeight || 0
+
         draft.visible = true
-        draft.left = sum(state.layoutWidth.slice(0, selection.startColumn))
+        draft.left = sum(state.columnsConfig.slice(0, selection.startColumn))
         draft.top = trs[selection.startRow].offsetTop + topCompensation
-        draft.width = sum(state.layoutWidth.slice(selection.startColumn, selection.endColumn)) - 1 + 'px'
-        draft.height = trs[selection.endRow - 1].offsetTop + trs[selection.endRow - 1].offsetHeight + heightCompensation - draft.top + 'px'
+        draft.width = sum(state.columnsConfig.slice(selection.startColumn, selection.endColumn)) - 1 + 'px'
+        draft.height = trs[selection.endRow - 1].offsetTop + height + heightCompensation - draft.top + 'px'
       })
     } else {
       updateStyles(draft => {

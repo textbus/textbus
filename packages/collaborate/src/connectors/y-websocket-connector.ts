@@ -1,7 +1,8 @@
 import { Doc as YDoc } from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
 
-import { SyncConnector, SyncState } from '../sync-connector'
+import { SyncConnector } from '../base/sync-connector'
+import { Message } from '../base/message-bus'
 
 
 export class YWebsocketConnector extends SyncConnector {
@@ -20,11 +21,11 @@ export class YWebsocketConnector extends SyncConnector {
     })
 
     this.provide.awareness.on('update', () => {
-      const syncStates: SyncState[] = []
+      const syncStates: Message<any>[] = []
       this.provide.awareness.getStates().forEach((state, id) => {
         syncStates.push({
           clientId: id,
-          state: state,
+          message: state.message,
         })
       })
       this.stateChangeEvent.next(syncStates)

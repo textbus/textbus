@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'textbus';
   src:
-    url('fonts/textbus.ttf?iigo9d') format('truetype'),
-    url('fonts/textbus.woff?iigo9d') format('woff'),
-    url('fonts/textbus.svg?iigo9d#textbus') format('svg');
+    url('fonts/textbus.ttf?vdynb') format('truetype'),
+    url('fonts/textbus.woff?vdynb') format('woff'),
+    url('fonts/textbus.svg?vdynb#textbus') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -24,6 +24,24 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.xnote-icon-align-bottom:before {
+  content: "\e914";
+}
+.xnote-icon-align-top:before {
+  content: "\e915";
+}
+.xnote-icon-align-middle:before {
+  content: "\e913";
+}
+.xnote-icon-palette:before {
+  content: "\e916";
+}
+.xnote-icon-split-cells:before {
+  content: "\e917";
+}
+.xnote-icon-merge-cells:before {
+  content: "\e918";
+}
 .xnote-icon-timeline:before {
   content: "\e900";
 }

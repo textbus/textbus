@@ -1,4 +1,5 @@
 import { Component, ComponentStateLiteral, ContentType, Registry, Slot, Textbus } from '@textbus/core'
+
 import { ParagraphComponent } from '../paragraph/paragraph.component'
 import { fontSizeFormatter } from '../../formatters/font-size'
 import { boldFormatter } from '../../formatters/bold'

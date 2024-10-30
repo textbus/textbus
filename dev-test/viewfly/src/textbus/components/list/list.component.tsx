@@ -62,7 +62,7 @@ export function registerListShortcut(textbus: Textbus) {
   keyboard.addShortcut({
     keymap: {
       key: ['o', 'u'],
-      ctrlKey: true,
+      modKey: true,
       shiftKey: true
     },
     action(key: string): boolean | void {

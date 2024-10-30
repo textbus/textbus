@@ -1,4 +1,4 @@
-import { createRef, createSignal, inject, onUnmounted } from '@viewfly/core'
+import { createSignal, inject, onUnmounted } from '@viewfly/core'
 import { SelectionBridge, VIEW_CONTAINER } from '@textbus/platform-browser'
 import { withScopedCSS } from '@viewfly/scoped-css'
 import { Commander, fromEvent, Selection } from '@textbus/core'

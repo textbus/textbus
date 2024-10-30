@@ -41,7 +41,7 @@ export function registerCodeShortcut(textbus: Textbus) {
 
   keyboard.addShortcut({
     keymap: {
-      ctrlKey: true,
+      modKey: true,
       key: ','
     },
     action: () => {

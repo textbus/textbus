@@ -1,7 +1,7 @@
-import { createRef, getCurrentInstance, inject, onUnmounted, withAnnotation } from '@viewfly/core'
+import { createRef, Fragment, getCurrentInstance, inject, onUnmounted, withAnnotation } from '@viewfly/core'
 import { withScopedCSS } from '@viewfly/scoped-css'
 import { debounceTime, delay, filter, fromEvent, map, merge, RootComponentRef, Selection, Subscription, Textbus } from '@textbus/core'
-import { DomAdapter, SelectionBridge, VIEW_CONTAINER } from '@textbus/platform-browser'
+import { DomAdapter, Rect, SelectionBridge, VIEW_CONTAINER } from '@textbus/platform-browser'
 import { useProduce } from '@viewfly/hooks'
 
 import css from './toolbar.scoped.scss'
@@ -20,6 +20,12 @@ import { FontFamilyTool } from '../_common/font-family.tool'
 import { EditorService } from '../../services/editor.service'
 import { SourceCodeComponent } from '../../textbus/components/source-code/source-code.component'
 import { LinkTool } from '../_common/link.tool'
+import { MergeCellsTool } from '../_common/table/merge-cells.tool'
+import { SplitCellsTool } from '../_common/table/split-cells.tool'
+import { CellAlignTool } from '../_common/table/cell-align.tool'
+import { TableComponent } from '../../textbus/components/table/table.component'
+import { sum } from '../../textbus/components/table/_utils'
+import { CellBackgroundTool } from '../_common/table/cell-background.tool'
 
 export const Toolbar = withAnnotation({
   providers: [RefreshService]
@@ -58,10 +64,34 @@ export const Toolbar = withAnnotation({
     const docRect = viewDocument.getBoundingClientRect()
     const toolbarHeight = 36
     // const documentHeight = document.documentElement.clientHeight
-    const selectionFocusRect = bridge.getRect({
-      slot: selection.focusSlot!,
-      offset: selection.focusOffset!
-    })
+    let selectionFocusRect: Rect | null = null
+    const commonAncestorComponent = selection.commonAncestorComponent
+    if (commonAncestorComponent instanceof TableComponent) {
+      const slots = commonAncestorComponent.getSelectedNormalizedSlots()!.map(item => {
+        return item.cells.filter(i => {
+          return i.visible
+        }).map(cell => {
+          return cell.raw.slot
+        })
+      }).flat()
+      const startSlot = slots.at(0)!
+      const endSlot = slots.at(-1)!
+      const rect = commonAncestorComponent.getSelectedRect()!
+      const startRect = (adapter.getNativeNodeBySlot(startSlot) as HTMLElement).getBoundingClientRect()
+      const endEle = (adapter.getNativeNodeBySlot(endSlot) as HTMLElement).getBoundingClientRect()
+      const width = sum(commonAncestorComponent.state.columnsConfig.slice(rect.x1, rect.x2))
+      selectionFocusRect = {
+        left: startRect.left + width / 2,
+        top: startRect.top,
+        height: endEle.bottom - startRect.top,
+        width
+      }
+    } else {
+      selectionFocusRect = bridge.getRect({
+        slot: selection.focusSlot!,
+        offset: selection.focusOffset!
+      })
+    }
     if (!selectionFocusRect) {
       return null
     }
@@ -98,7 +128,14 @@ export const Toolbar = withAnnotation({
   function bindMouseup() {
     const docElement = adapter.getNativeNodeByComponent(rootComponentRef.component)!
     mouseupSubscription = fromEvent<MouseEvent>(docElement, 'mouseup').pipe(
+      delay(),
       filter(ev => {
+        const c = selection.commonAncestorComponent
+        if (c instanceof TableComponent) {
+          const b = !c.ignoreSelectionChanges
+          c.ignoreSelectionChanges = false
+          return b
+        }
         return !ev.composedPath().includes(toolbarRef.current!)
       }),
       delay(100),
@@ -154,6 +191,22 @@ export const Toolbar = withAnnotation({
         display: editorService.hideInlineToolbar ? 'none' : '',
         transitionDuration: p.transitionDuration + 's'
       }}>
+        {
+          selection.commonAncestorComponent instanceof TableComponent && <Fragment key="table">
+            <ToolbarItem>
+              <MergeCellsTool/>
+            </ToolbarItem>
+            <ToolbarItem>
+              <SplitCellsTool/>
+            </ToolbarItem>
+            <ToolbarItem>
+              <CellBackgroundTool/>
+            </ToolbarItem>
+            <ToolbarItem>
+              <CellAlignTool/>
+            </ToolbarItem>
+          </Fragment>
+        }
         <ToolbarItem>
           <BlockTool/>
         </ToolbarItem>

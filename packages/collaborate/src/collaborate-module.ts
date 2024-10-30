@@ -1,23 +1,18 @@
-import { History, Module, Textbus } from '@textbus/core'
+import { History, Module, Textbus, Selection } from '@textbus/core'
+import { Subscription } from '@tanbo/stream'
 import { Provider } from '@viewfly/core'
 import { Doc as YDoc } from 'yjs'
 
-import { Collaborate } from './collaborate'
-import { UserActivity, UserInfo } from './user-activity'
-import { SyncConnector } from './sync-connector'
-import { CollabHistory } from './collab-history'
-import { NonSubModelLoader, SubModelLoader } from './sub-model-loader'
+import { Collaborate, SyncConnector, CollabHistory, NonSubModelLoader, SubModelLoader, MessageBus } from './base/_api'
 
 export interface CollaborateConfig {
-  userinfo: UserInfo
-
   createConnector(yDoc: YDoc): SyncConnector
 }
 
 export class CollaborateModule implements Module {
+  private subscription = new Subscription()
   providers: Provider[] = [
     Collaborate,
-    UserActivity,
     CollabHistory,
     {
       provide: History,
@@ -38,16 +33,30 @@ export class CollaborateModule implements Module {
   }
 
   setup(textbus: Textbus): Promise<(() => void) | void> | (() => void) | void {
+    const messageBus = textbus.get(MessageBus, null)
     const connector = textbus.get(SyncConnector)
-    const userActivity = textbus.get(UserActivity)
-    userActivity.init(this.config.userinfo)
+    if (messageBus) {
+      const selection = textbus.get(Selection)
+      connector.setLocalStateField('message', messageBus.get(textbus))
+      this.subscription.add(
+        messageBus.onSync.subscribe(() => {
+          connector.setLocalStateField('message', messageBus.get(textbus))
+        }),
+        selection.onChange.subscribe(() => {
+          connector.setLocalStateField('message', messageBus.get(textbus))
+        }),
+        connector.onStateChange.subscribe((states) => {
+          messageBus.consume(states, textbus)
+        })
+      )
+    }
     return connector.onLoad.toPromise()
   }
 
   onDestroy(textbus: Textbus) {
+    this.subscription.unsubscribe()
     textbus.get(Collaborate).destroy()
     textbus.get(History).destroy()
-    textbus.get(UserActivity).destroy()
     textbus.get(SyncConnector).onDestroy()
   }
 }

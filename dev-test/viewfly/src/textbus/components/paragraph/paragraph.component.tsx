@@ -101,7 +101,8 @@ export function ParagraphView(props: ViewComponentProps<ParagraphComponent>) {
 
 export const paragraphComponentLoader: ComponentLoader = {
   match(element: HTMLElement, returnableContentTypes): boolean {
-    return returnableContentTypes.includes(ContentType.BlockComponent) && (element.dataset.component === ParagraphComponent.componentName || /^P|H[1-6]$/.test(element.tagName))
+    return returnableContentTypes.includes(ContentType.BlockComponent) &&
+      (element.dataset.component === ParagraphComponent.componentName || /^P|H[1-6]$/.test(element.tagName))
   },
   read(element: HTMLElement, textbus: Textbus, slotParser: SlotParser): Component | Slot {
     let content: HTMLElement

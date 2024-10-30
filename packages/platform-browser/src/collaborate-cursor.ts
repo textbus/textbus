@@ -21,7 +21,9 @@ export interface RemoteSelectionCursor {
  * 远程光标绘制范围计算代理类，可用于定制特定场景下的远程选区绘制，如表格有选区，不会遵守常见的文档流形式
  */
 export abstract class CollaborateSelectionAwarenessDelegate {
-  abstract getRects(abstractSelection: AbstractSelection, nativeRange: Range): false | Rect[]
+  abstract getRects(abstractSelection: AbstractSelection,
+                    nativeRange: Range,
+                    selectionCursor: UserSelectionCursor): false | Rect[]
 }
 
 /**
@@ -31,6 +33,7 @@ export interface UserSelectionCursor {
   username: string
   color: string
   selection: SelectionPaths
+  data?: any
 }
 
 /**
@@ -183,7 +186,7 @@ export class CollaborateCursor {
           anchorOffset,
           focusSlot,
           anchorSlot
-        }, nativeRange)
+        }, nativeRange, item)
       }
       if (!rects) {
         rects = nativeRange.getClientRects()

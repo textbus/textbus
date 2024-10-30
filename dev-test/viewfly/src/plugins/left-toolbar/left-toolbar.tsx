@@ -1,5 +1,5 @@
 import { withScopedCSS } from '@viewfly/scoped-css'
-import { createRef, createSignal, inject, JSXNode, onMounted, onUnmounted, ViewFlyNode, withAnnotation, } from '@viewfly/core'
+import { createRef, createSignal, inject, JSX, onMounted, onUnmounted, withAnnotation, } from '@viewfly/core'
 import { useProduce } from '@viewfly/hooks'
 import {
   Commander,
@@ -240,7 +240,7 @@ export const LeftToolbar = withAnnotation({
     const states = checkStates(slot)
 
     if (slot) {
-      const types: [boolean, ViewFlyNode][] = [
+      const types: [boolean, JSX.Element][] = [
         [states.paragraph, <span class="xnote-icon-pilcrow"/>],
         [states.sourceCode, <span class="xnote-icon-source-code"/>],
         [states.blockquote, <span class="xnote-icon-quotes-right"/>],

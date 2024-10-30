@@ -1,6 +1,6 @@
 import { withScopedCSS } from '@viewfly/scoped-css'
-import { createSignal, getCurrentInstance, inject, onMounted, onUnmounted, Signal } from '@viewfly/core'
-import { Slot, Selection, Textbus, fromEvent } from '@textbus/core'
+import { createSignal, inject, onMounted, onUnmounted, Signal } from '@viewfly/core'
+import { fromEvent } from '@textbus/core'
 
 import css from './top-bar.scoped.scss'
 import { EditorService } from '../../../../services/editor.service'
@@ -9,6 +9,7 @@ import { ComponentToolbar } from '../../../../components/component-toolbar/compo
 import { ToolbarItem } from '../../../../components/toolbar-item/toolbar-item'
 import { Button } from '../../../../components/button/button'
 import { TableService } from '../table.service'
+import { sum } from '../_utils'
 
 export interface TopBarProps {
   isFocus: Signal<boolean>
@@ -18,9 +19,7 @@ export interface TopBarProps {
 
 export function TopBar(props: TopBarProps) {
   const editorService = inject(EditorService)
-  const selection = inject(Selection)
   const tableService = inject(TableService)
-  const textbus = inject(Textbus)
   const selectedColumnRange = createSignal<null | { startIndex: number, endIndex: number }>(null)
 
   function selectColumn(index: number, isMultiple: boolean) {
@@ -38,27 +37,12 @@ export function TopBar(props: TopBarProps) {
       })
     }
 
-    const range = selectedColumnRange()!
-    const [startIndex, endIndex] = [range.startIndex, range.endIndex].sort((a, b) => a - b)
+    let { startIndex, endIndex } = selectedColumnRange()!
 
-    const selectedSlots: Slot[] = []
-    const rows = props.component.state.rows
-    rows.forEach(row => {
-      selectedSlots.push(...row.cells.slice(startIndex, endIndex + 1).map(i => i.slot))
-    })
-
-    textbus.nextTick(() => {
-      selection.setSelectedRanges(selectedSlots.map(i => {
-        return {
-          slot: i,
-          startIndex: 0,
-          endIndex: i.length
-        }
-      }))
-
-      selection.restore()
-      textbus.focus()
-    })
+    if (startIndex > endIndex) {
+      [startIndex, endIndex] = [endIndex, startIndex]
+    }
+    props.component.selectColumn(startIndex, endIndex + 1)
   }
 
   let mouseDownFromToolbar = false
@@ -69,7 +53,6 @@ export function TopBar(props: TopBarProps) {
         mouseDownFromToolbar = false
         return
       }
-      deleteIndex.set(null)
       selectedColumnRange.set(null)
     })
     return () => sub.unsubscribe()
@@ -85,25 +68,52 @@ export function TopBar(props: TopBarProps) {
     return () => sub.unsubscribe()
   })
 
-  const instance = getCurrentInstance()
+  // const instance = getCurrentInstance()
   const s = props.component.changeMarker.onChange.subscribe(() => {
-    instance.markAsDirtied()
+    const currentLayout = props.component.state.columnsConfig.slice()
+    if (currentLayout.join(',') !== props.layoutWidth().join(',')) {
+      props.layoutWidth.set(currentLayout)
+    }
+    // instance.markAsDirtied()
   })
   onUnmounted(() => {
     s.unsubscribe()
   })
-  const deleteIndex = createSignal<null | number>(null)
 
   return withScopedCSS(css, () => {
     const { state, tableSelection } = props.component
 
     const position = tableSelection()
+    const range = selectedColumnRange()
+    let left = 0
+    if (range) {
+      left = sum(props.component.state.columnsConfig.slice(0, Math.min(range.startIndex, range.endIndex)))
+      left += sum(props.component.state.columnsConfig.slice(
+        Math.min(range.startIndex, range.endIndex),
+        Math.max(range.startIndex, range.endIndex) + 1)
+      ) / 2
+    }
     return (
       <div class={['top-bar', {
         active: props.isFocus()
       }]}>
         <div class="toolbar-wrapper">
           <div class="insert-bar">
+            <ComponentToolbar
+              style={{
+                left: left - leftDistance() + 'px',
+                display: selectedColumnRange() ? 'inline-block' : 'none',
+              }}
+              innerStyle={{
+                transform: 'translateX(-50%)'
+              }}
+              visible={!!selectedColumnRange()}>
+              <ToolbarItem>
+                <Button onClick={() => {
+                  props.component.deleteColumns()
+                }}><span class="xnote-icon-bin"></span></Button>
+              </ToolbarItem>
+            </ComponentToolbar>
             <table style={{
               transform: `translateX(${-leftDistance()}px)`
             }}>
@@ -138,22 +148,6 @@ export function TopBar(props: TopBarProps) {
                           }}>
                             <button class="insert-btn" type="button">+</button>
                           </span>
-                          <ComponentToolbar
-                            style={{
-                              display: deleteIndex() === index ? 'inline-block' : 'none',
-                              left: '50%',
-                            }}
-                            innerStyle={{
-                              transform: 'translateX(-50%)'
-                            }}
-                            visible={deleteIndex() === index}>
-                            <ToolbarItem>
-                              <Button onClick={() => {
-                                props.component.deleteColumn(index)
-                                deleteIndex.set(null)
-                              }}><span class="xnote-icon-bin"></span></Button>
-                            </ToolbarItem>
-                          </ComponentToolbar>
                         </div>
                       </td>
                     )
@@ -171,13 +165,8 @@ export function TopBar(props: TopBarProps) {
               <tr>
                 {
                   props.layoutWidth().map((i, index) => {
-                    return <td onClick={ev => {
+                    return <td onMousedown={ev => ev.preventDefault()} onClick={ev => {
                       mouseDownFromToolbar = true
-                      if (!ev.shiftKey) {
-                        deleteIndex.set(index)
-                      } else {
-                        deleteIndex.set(null)
-                      }
                       selectColumn(index, ev.shiftKey)
                     }} class={{
                       active: !position ? false :

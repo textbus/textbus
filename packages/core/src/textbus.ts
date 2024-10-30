@@ -21,9 +21,9 @@ import {
   Scheduler,
   Selection, SelectionSnapshot,
   ZEN_CODING_DETECT,
-} from './foundation/_api'
+  Adapter
+} from './base/_api'
 import { makeError } from './_utils/make-error'
-import { Adapter } from './foundation/adapter'
 
 const textbusError = makeError('Textbus')
 

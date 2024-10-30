@@ -123,7 +123,7 @@ export function registerBlockquoteShortcut(textbus: Textbus) {
   const keyboard = textbus.get(Keyboard)
   keyboard.addShortcut({
     keymap: {
-      ctrlKey: true,
+      modKey: true,
       key: '\''
     },
     action(): boolean | void {

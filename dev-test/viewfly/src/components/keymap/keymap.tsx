@@ -12,7 +12,7 @@ export interface KeymapProps {
 export function Keymap(props: KeymapProps) {
   const arr: JSXNode[] = []
   const keymap = props.keymap
-  if (keymap.ctrlKey) {
+  if (keymap.modKey) {
     arr.push(isMac() ? <span class="xnote-icon-command"></span> : <span>Ctrl</span>)
   }
   if (keymap.shiftKey) {

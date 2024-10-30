@@ -110,19 +110,19 @@ export function AttrTool(props: AttrToolProps) {
     return (
       <Dropdown width={'auto'} style={props.style} abreast={props.abreast} onCheck={updateAttr} trigger={'hover'} menu={[
         {
-          label: <MenuItem icon={<span class="xnote-icon-paragraph-left"/>} desc={<Keymap keymap={{ key: 'L', ctrlKey: true }}/>}
+          label: <MenuItem icon={<span class="xnote-icon-paragraph-left"/>} desc={<Keymap keymap={{ key: 'L', modKey: true }}/>}
                            checked={states.textAlign === 'left'}>左对齐</MenuItem>,
           value: 't-l'
         }, {
-          label: <MenuItem icon={<span class="xnote-icon-paragraph-right"/>} desc={<Keymap keymap={{ key: 'R', ctrlKey: true }}/>}
+          label: <MenuItem icon={<span class="xnote-icon-paragraph-right"/>} desc={<Keymap keymap={{ key: 'R', modKey: true }}/>}
                            checked={states.textAlign === 'right'}>右对齐</MenuItem>,
           value: 't-r'
         }, {
-          label: <MenuItem icon={<span class="xnote-icon-paragraph-center"/>} desc={<Keymap keymap={{ key: 'E', ctrlKey: true }}/>}
+          label: <MenuItem icon={<span class="xnote-icon-paragraph-center"/>} desc={<Keymap keymap={{ key: 'E', modKey: true }}/>}
                            checked={states.textAlign === 'center'}>居中对齐</MenuItem>,
           value: 't-c'
         }, {
-          label: <MenuItem icon={<span class="xnote-icon-paragraph-justify"/>} desc={<Keymap keymap={{ key: 'J', ctrlKey: true }}/>}
+          label: <MenuItem icon={<span class="xnote-icon-paragraph-justify"/>} desc={<Keymap keymap={{ key: 'J', modKey: true }}/>}
                            checked={states.textAlign === 'justify'}>分散对齐</MenuItem>,
           value: 't-j'
         }, {

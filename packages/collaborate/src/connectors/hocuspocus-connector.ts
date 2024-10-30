@@ -1,7 +1,8 @@
 import { HocuspocusProvider } from '@hocuspocus/provider'
 import { HocuspocusProviderConfiguration } from '@hocuspocus/provider'
 
-import { SyncConnector, SyncState } from '../sync-connector'
+import { SyncConnector } from '../base/sync-connector'
+import { Message } from '../base/message-bus'
 
 export class HocuspocusConnector extends SyncConnector {
   provide: HocuspocusProvider
@@ -16,12 +17,10 @@ export class HocuspocusConnector extends SyncConnector {
       },
       onAwarenessUpdate: (data) => {
         config.onAwarenessUpdate?.(data)
-        const states: SyncState[] = data.states.map(state => {
+        const states: Message<any>[] = data.states.map(state => {
           return {
             clientId: state.clientId,
-            state: {
-              ...state
-            } as Record<string, any>
+            message: state.message as any
           }
         })
         this.stateChangeEvent.next(states)

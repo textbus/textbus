@@ -35,7 +35,7 @@ export function registerHeadingShortcut(textbus: Textbus) {
   keyboard.addShortcut({
     keymap: {
       key: '0123456'.split(''),
-      ctrlKey: true
+      modKey: true
     },
     action(key: string): boolean | void {
       if (key === '0') {

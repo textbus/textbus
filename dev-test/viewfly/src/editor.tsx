@@ -6,9 +6,9 @@ import {
   DomAdapter,
   Parser,
   ViewOptions,
-  isMobileBrowser, CollaborateCursor
+  isMobileBrowser
 } from '@textbus/platform-browser'
-import { CollaborateConfig, CollaborateModule, UserActivity } from '@textbus/collaborate'
+import { CollaborateConfig, CollaborateModule } from '@textbus/collaborate'
 import { Component, ContentType, Module, Slot, Textbus, TextbusConfig } from '@textbus/core'
 import { ReflectiveInjector } from '@viewfly/core'
 
@@ -88,6 +88,7 @@ import {
   stepComponentLoader,
   StepComponentView
 } from './textbus/components/step/step-component.view'
+import { cellAlignAttr, cellAlignAttrLoader } from './textbus/attributes/cell-align.attr'
 
 export interface EditorConfig extends TextbusConfig {
   content?: string,
@@ -167,6 +168,7 @@ export class Editor extends Textbus {
         underlineFormatLoader
       ],
       attributeLoaders: [
+        cellAlignAttrLoader,
         headingAttrLoader,
         textAlignAttrLoader,
         textIndentAttrLoader
@@ -249,6 +251,7 @@ export class Editor extends Textbus {
         underlineFormatter
       ],
       attributes: [
+        cellAlignAttr,
         headingAttr,
         textAlignAttr,
         textIndentAttr
@@ -257,18 +260,6 @@ export class Editor extends Textbus {
         new LeftToolbarPlugin(),
         new ToolbarPlugin(),
       ],
-      setup(textbus: Textbus): Promise<(() => void) | void> | (() => void) | void {
-        if (editorConfig.collaborateConfig) {
-          const activity = textbus.get(UserActivity)
-          const collabCursor = textbus.get(CollaborateCursor)
-          const sub = activity.onStateChange.subscribe(ev => {
-            collabCursor.draw(ev)
-          })
-          return () => {
-            sub.unsubscribe()
-          }
-        }
-      },
       onAfterStartup(textbus: Textbus) {
         registerBoldShortcut(textbus)
         registerCodeShortcut(textbus)

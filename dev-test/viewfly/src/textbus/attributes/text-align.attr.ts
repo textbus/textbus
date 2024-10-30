@@ -26,7 +26,7 @@ export function registerTextAlignShortcut(textbus: Textbus) {
   keyboard.addShortcut({
     keymap: {
       key: 'lrej'.split(''),
-      ctrlKey: true
+      modKey: true
     },
     action(key: string): boolean | void {
       const valueMap = {

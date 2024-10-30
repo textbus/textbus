@@ -1,10 +1,5 @@
 import { Observable, Subject } from '@tanbo/stream'
 
-export interface SyncState {
-  clientId: number
-  state: Record<string, any>
-}
-
 /**
  * 协作通信通用接口
  */
@@ -16,10 +11,10 @@ export abstract class SyncConnector {
   /**
    * 当文档 awareness 状态变更时触发的观察者
    */
-  onStateChange: Observable<SyncState[]>
+  onStateChange: Observable<any[]>
 
   protected loadEvent = new Subject<void>()
-  protected stateChangeEvent = new Subject<SyncState[]>()
+  protected stateChangeEvent = new Subject<any[]>()
 
   protected constructor() {
     this.onLoad = this.loadEvent.asObservable()

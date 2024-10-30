@@ -39,7 +39,7 @@ export function registerUnderlineShortcut(textbus: Textbus) {
 
   keyboard.addShortcut({
     keymap: {
-      ctrlKey: true,
+      modKey: true,
       key: 'u'
     },
     action: () => {

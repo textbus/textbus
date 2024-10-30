@@ -9,3 +9,5 @@ export * from './italic.tool'
 export * from './link.tool'
 export * from './strike-through.tool'
 export * from './underline.tool'
+
+export * from './table/_api'

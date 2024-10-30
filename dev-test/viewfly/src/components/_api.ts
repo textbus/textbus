@@ -1,4 +1,5 @@
 export * from './button/button'
+export * from './color-picker/color-picker'
 export * from './component-toolbar/component-toolbar'
 export * from './divider/divider'
 export * from './drag-resize/drag-resize'
