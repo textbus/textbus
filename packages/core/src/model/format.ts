@@ -111,11 +111,33 @@ export class Format {
    * @param distance
    */
   split(index: number, distance: number) {
-    const expandedValues = Array.from<string>({ length: distance })
     Array.from(this.map).forEach(([key, formatRanges]) => {
-      const values = this.tileRanges(formatRanges)
-      values.splice(index, 0, ...expandedValues)
-      const newRanges = Format.toRanges(values)
+      const newRanges: FormatRange[] = []
+      formatRanges.forEach(range => {
+        if (range.endIndex <= index) {
+          newRanges.push({ ...range })
+          return
+        }
+        if (range.startIndex >= index) {
+          newRanges.push({
+            startIndex: range.startIndex + distance,
+            endIndex: range.endIndex + distance,
+            value: range.value
+          })
+          return
+        }
+
+        newRanges.push({
+          startIndex: range.startIndex,
+          endIndex: index,
+          value: range.value
+        }, {
+          startIndex: index + distance,
+          endIndex: distance + range.endIndex,
+          value: range.value
+        })
+      })
+      // console.log([key, formatRanges, JSON.parse(JSON.stringify(newRanges)), index, distance])
       this.map.set(key, newRanges)
     })
     return this
@@ -381,46 +403,30 @@ export class Format {
   }
 
   private normalizeFormatRange(background: boolean, oldRanges: FormatRange<any>[], newRange?: FormatRange<any>) {
-    if (newRange) {
-      oldRanges = background ? [newRange, ...oldRanges] : [...oldRanges, newRange]
-    }
-    const formatValues: Array<FormatValue> = this.tileRanges(oldRanges)
-
-    return Format.toRanges(formatValues)
-  }
-
-  private tileRanges(ranges: FormatRange<any>[]) {
-    const formatValues: Array<FormatValue> = []
-    ranges.forEach(range => {
-      formatValues.length = Math.max(formatValues.length, range.endIndex)
-      formatValues.fill(range.value, range.startIndex, range.endIndex)
+    const length = this.slot.length
+    oldRanges = oldRanges.filter(range => {
+      range.endIndex = Math.min(range.endIndex, length)
+      return range.startIndex < range.endIndex
     })
-    formatValues.length = Math.min(formatValues.length, this.slot.length)
-    return formatValues
-  }
-
-  private static toRanges(values: Array<FormatValue>) {
-    const newRanges: FormatRange<any>[] = []
-    let range: FormatRange<any> = null as any
-    for (let i = 0; i < values.length; i++) {
-      const item = values[i]
-      if (isVoid(item)) {
-        range = null as any
-        continue
+    if (newRange) {
+      if (background) {
+        oldRanges.unshift(newRange)
+      } else {
+        oldRanges.push(newRange)
       }
-      if (Format.equal(range?.value, item)) {
-        range.endIndex = i + 1
-        continue
-      }
-      range = {
-        startIndex: i,
-        endIndex: i + 1,
-        value: item
-      }
-      newRanges.push(range)
+    }
+    if (oldRanges.length === 0) {
+      return []
     }
 
-    return newRanges
+    let mergedRanges: FormatRange<any>[] = [oldRanges.at(0)!]
+    for (let i = 1; i < oldRanges.length; i++) {
+      const range = oldRanges[i]
+      mergedRanges = Format.mergeRanges(mergedRanges, range)
+    }
+    return mergedRanges.filter(range => {
+      return !isVoid(range.value)
+    })
   }
 
   private static equal(left: FormatValue, right: FormatValue): boolean {
@@ -437,5 +443,80 @@ export class Format {
       }
     }
     return false
+  }
+
+  private static mergeRanges(ranges: FormatRange[], newRange: FormatRange) {
+    const results: FormatRange[] = []
+    let isMerged = false
+    for (let i = 0; i < ranges.length; i++) {
+      const range = ranges[i]
+      if (isMerged) {
+        results.push(range)
+        continue
+      }
+      if (range.endIndex < newRange.startIndex) {
+        results.push(range)
+        continue
+      }
+      if (range.startIndex > newRange.endIndex) {
+        results.push(newRange)
+        results.push(range)
+        isMerged = true
+        continue
+      }
+      const before = range
+      let last: FormatRange | null = null
+
+      // if (before.endIndex <= newRange.endIndex) {
+      //   i++
+      // }
+      for (; i < ranges.length; i++) {
+        const next = ranges[i]
+        if (next.startIndex <= newRange.endIndex) {
+          last = next
+        } else {
+          i--
+          break
+        }
+      }
+      if (!last) {
+        results.push(newRange)
+        isMerged = true
+        continue
+      }
+      if (Format.equal(before.value, newRange.value)) {
+        newRange.startIndex = Math.min(before.startIndex, newRange.startIndex)
+        newRange.endIndex = Math.max(before.endIndex, newRange.endIndex)
+      }
+      if (before.startIndex < newRange.startIndex) {
+        results.push({
+          startIndex: before.startIndex,
+          endIndex: newRange.startIndex,
+          value: before.value
+        })
+      }
+      if (Format.equal(last.value, newRange.value)) {
+        results.push({
+          startIndex: Math.min(last.startIndex, newRange.startIndex),
+          endIndex: Math.max(last.endIndex, newRange.endIndex),
+          value: newRange.value
+        })
+        isMerged = true
+        continue
+      }
+      results.push(newRange)
+      if (newRange.endIndex < last.endIndex) {
+        results.push({
+          startIndex: newRange.endIndex,
+          endIndex: last.endIndex,
+          value: last.value
+        })
+      }
+      isMerged = true
+    }
+    if (!isMerged) {
+      results.push(newRange)
+    }
+    return results
   }
 }

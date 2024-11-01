@@ -16,7 +16,7 @@ import {
   useContext,
   useSelf,
   VElement, Adapter,
-  VTextNode,
+  VTextNode, FormatRange, Format,
 } from '@textbus/core'
 import { ViewflyAdapter, ViewflyVDomAdapter, ViewComponentProps } from '@textbus/adapter-viewfly'
 import { createApp, HTMLRenderer, OutputTranslator } from '@viewfly/platform-browser'
