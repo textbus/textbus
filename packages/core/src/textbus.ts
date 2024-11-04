@@ -232,11 +232,7 @@ export class Textbus extends ReflectiveInjector {
       this.beforeDestroyCallbacks.push(destroyView)
     }
     this.config.additionalAdapters?.forEach(adapter => {
-      const childInjector = new ReflectiveInjector(this, [{
-        provide: Adapter,
-        useValue: adapter
-      }])
-      const fn = adapter.render(rootComponent, childInjector)
+      const fn = adapter.render(rootComponent, this)
       if (typeof fn === 'function') {
         this.beforeDestroyCallbacks.push(fn)
       }

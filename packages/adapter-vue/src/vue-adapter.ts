@@ -1,6 +1,7 @@
-import { Component, CompositionState, makeError, VElement, ViewMount, VTextNode } from '@textbus/core'
+import { Adapter, Component, CompositionState, makeError, VElement, ViewMount, VTextNode } from '@textbus/core'
 import { DefineComponent, getCurrentInstance, h, onMounted, onUnmounted, onUpdated, ref, Ref, VNode } from 'vue'
 import { DomAdapter } from '@textbus/platform-browser'
+import { Injector, ReflectiveInjector } from '@viewfly/core'
 
 const adapterError = makeError('VueAdapter')
 
@@ -134,6 +135,20 @@ export class VueAdapter extends DomAdapter<VNode, VNode> {
       }
       this.components[key] = vueComponent
     })
+  }
+
+  override render(rootComponent: Component, injector: Injector): void | (() => void) {
+    const childrenInjector = new ReflectiveInjector(injector, [{
+      provide: Adapter,
+      useValue: this
+    }, {
+      provide: DomAdapter,
+      useValue: this,
+    }, {
+      provide: VueAdapter,
+      useValue: this
+    }])
+    return super.render(rootComponent, childrenInjector)
   }
 
   override copy() {

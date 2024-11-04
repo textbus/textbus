@@ -1,12 +1,12 @@
-import { Component, CompositionState, makeError, VElement, ViewMount, VTextNode, merge } from '@textbus/core'
+import { Component, CompositionState, makeError, VElement, ViewMount, VTextNode, merge, Adapter } from '@textbus/core'
 import {
   ComponentSetup,
   createDynamicRef,
   DynamicRef,
-  getCurrentInstance,
+  getCurrentInstance, Injector,
   jsx,
   JSXNode,
-  onUpdated,
+  onUpdated, ReflectiveInjector,
   ViewFlyNode,
   withAnnotation,
 } from '@viewfly/core'
@@ -151,6 +151,20 @@ export class ViewflyAdapter extends DomAdapter<ViewFlyNode, ViewFlyNode> {
         return viewFlyComponent(props)
       })
     })
+  }
+
+  override render(rootComponent: Component, injector: Injector): void | (() => void) {
+    const childInjector = new ReflectiveInjector(injector, [{
+      provide: Adapter,
+      useValue: this
+    }, {
+      provide: DomAdapter,
+      useValue: this
+    }, {
+      provide: ViewflyAdapter,
+      useValue: this
+    }])
+    return super.render(rootComponent, childInjector)
   }
 
   override copy() {
