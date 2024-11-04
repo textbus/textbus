@@ -176,7 +176,7 @@ class ExperimentalCaret implements Caret {
       nativeRange.collapse()
     }
     const rect = getLayoutRectByRange(nativeRange)
-    const { fontSize, lineHeight, color } = getComputedStyle(node)
+    const { fontSize, lineHeight, color, writingMode } = getComputedStyle(node)
 
     let height: number
     if (isNaN(+lineHeight)) {
@@ -207,9 +207,11 @@ class ExperimentalCaret implements Caret {
     let rotate = 0
     if (nativeRange.collapsed) {
       rotate = Math.round(Math.atan2(rect.width, rect.height) * 180 / Math.PI)
+
       if (rotate !== 0) {
         const hackEle = document.createElement('span')
-        hackEle.style.cssText = 'display: inline-block; width: 10px; height: 10px; position: relative; contain: layout style size;'
+        // eslint-disable-next-line max-len
+        hackEle.style.cssText = 'display: inline-block; width: 10px; height: 10px; position: relative; contain: layout style size; writing-mode: inherit'
         const pointEle = document.createElement('span')
         pointEle.style.cssText = 'position: absolute; left: 0; top: 0; width:0;height:0'
         hackEle.append(pointEle)
@@ -225,6 +227,9 @@ class ExperimentalCaret implements Caret {
         }
         hackEle.remove()
       }
+    }
+    if (rotate === 0 && (writingMode === 'vertical-lr' || writingMode === 'vertical-rl')) {
+      rotate += 90
     }
     Object.assign(this.elementRef.style, {
       left: left + 'px',
