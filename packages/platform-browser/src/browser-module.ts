@@ -142,7 +142,7 @@ export class BrowserModule implements Module {
     return registry.createComponentByFactory(data, rootComponent)
   }
 
-  setup(textbus: Textbus) {
+  async setup(textbus: Textbus) {
     this.textbus = textbus
     const host = this.config.renderTo()
     if (!(host instanceof HTMLElement)) {
@@ -150,6 +150,7 @@ export class BrowserModule implements Module {
     }
 
     host.append(this.workbench)
+    await textbus.get(Input).onReady
     return () => {
       this.workbench.remove()
     }
