@@ -25,6 +25,8 @@ export class SelectionBridge implements NativeSelectionBridge {
   onSelectionChange: Observable<Range | null>
   nativeSelection = document.getSelection()!
 
+  syncSelectionFromNativeSelectionChange = true
+
   private selectionChangeEvent = new Subject<Range | null>()
 
   private subs: Subscription[] = []
@@ -98,7 +100,7 @@ export class SelectionBridge implements NativeSelectionBridge {
   }
 
   getRect(location: SelectionPosition) {
-    const {focus, anchor} = this.getPositionByRange({
+    const { focus, anchor } = this.getPositionByRange({
       focusOffset: location.offset,
       anchorOffset: location.offset,
       focusSlot: location.slot,
@@ -126,7 +128,7 @@ export class SelectionBridge implements NativeSelectionBridge {
       return
     }
 
-    const {focus, anchor} = this.getPositionByRange(abstractSelection)
+    const { focus, anchor } = this.getPositionByRange(abstractSelection)
     if (!focus || !anchor) {
       this.nativeSelection.removeAllRanges()
       this.selectionChangeEvent.next(null)
@@ -134,7 +136,7 @@ export class SelectionBridge implements NativeSelectionBridge {
       return
     }
 
-    function tryOffset(position: { node: Node, offset: number }) {
+    function tryOffset(position: {node: Node, offset: number}) {
       if (!position.node) {
         return
       }
@@ -369,7 +371,9 @@ export class SelectionBridge implements NativeSelectionBridge {
     }
     this.subs.push(
       fromEvent(document, 'selectionchange').pipe().subscribe(() => {
-        this.syncSelection(connector)
+        if (this.syncSelectionFromNativeSelectionChange) {
+          this.syncSelection(connector)
+        }
       })
     )
   }
@@ -422,7 +426,7 @@ export class SelectionBridge implements NativeSelectionBridge {
         anchorSlot: endPosition.slot,
         anchorOffset: endPosition.offset
       }
-      const {focus, anchor} = this.getPositionByRange(abstractSelection)
+      const { focus, anchor } = this.getPositionByRange(abstractSelection)
       if (focus && anchor) {
         let start = anchor
         let end = focus

@@ -1,6 +1,6 @@
 /* eslint-disable */
 import 'reflect-metadata'
-import { BrowserModule, DomAdapter } from '@textbus/platform-browser'
+import { BrowserModule, DomAdapter, SelectionBridge } from '@textbus/platform-browser'
 import {
   Commander,
   Component,
@@ -191,7 +191,17 @@ htmlRenderer.onViewUpdated.subscribe(() => {
 //   console.log(selection.startSlot, selection.startOffset)
 // })
 
-textbus.render(rootModel)
+textbus.render(rootModel).then(() => {
+  const commander = editor.get(Commander)
+  const s = editor.get(SelectionBridge)
+  let i = 0
+  setInterval(() => {
+    // s.disConnect()
+    commander.insert(i + '')
+    s.syncSelectionFromNativeSelectionChange = false
+    i++
+  }, 1000)
+})
 // 从这里开始创建编辑器
 
 // textbus.render(rootModel)
