@@ -338,10 +338,10 @@ importers:
         specifier: ^1.2.5
         version: 1.2.5
       '@textbus/core':
-        specifier: ^4.1.0
+        specifier: ^4.2.1
         version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.1.0
+        specifier: ^4.2.2
         version: link:../platform-browser
       react:
         specifier: ^17.0.0 || ^18.0.0
@@ -372,13 +372,13 @@ importers:
         specifier: ^1.2.5
         version: 1.2.5
       '@textbus/core':
-        specifier: ^4.1.0
+        specifier: ^4.2.1
         version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.1.0
+        specifier: ^4.2.2
         version: link:../platform-browser
       '@textbus/platform-node':
-        specifier: ^4.1.0
+        specifier: ^4.2.1
         version: link:../platform-node
       '@viewfly/core':
         specifier: ^1.0.5
@@ -409,10 +409,10 @@ importers:
         specifier: ^1.2.5
         version: 1.2.5
       '@textbus/core':
-        specifier: ^4.1.0
+        specifier: ^4.2.1
         version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.1.0
+        specifier: ^4.2.2
         version: link:../platform-browser
       vue:
         specifier: ^3.4.28
@@ -443,7 +443,7 @@ importers:
         specifier: ^1.2.5
         version: 1.2.5
       '@textbus/core':
-        specifier: ^4.1.0
+        specifier: ^4.2.1
         version: link:../core
       '@viewfly/core':
         specifier: ^1.0.5
@@ -502,7 +502,7 @@ importers:
         specifier: ^1.2.5
         version: 1.2.5
       '@textbus/core':
-        specifier: ^4.1.0
+        specifier: ^4.2.1
         version: link:../core
       '@viewfly/core':
         specifier: ^1.0.5
@@ -530,7 +530,7 @@ importers:
         specifier: ^1.2.5
         version: 1.2.5
       '@textbus/core':
-        specifier: ^4.1.0
+        specifier: ^4.2.1
         version: link:../core
       '@viewfly/core':
         specifier: ^1.0.5
