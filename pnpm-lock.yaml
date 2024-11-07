@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@tanbo/stream':
-        specifier: ^1.2.5
-        version: 1.2.5
+        specifier: ^1.2.6
+        version: 1.2.6
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -55,8 +55,8 @@ importers:
         specifier: ^1.0.5
         version: 1.0.5
       '@viewfly/platform-browser':
-        specifier: ^1.0.5
-        version: 1.0.5
+        specifier: ^1.0.6
+        version: 1.0.6
       add-assets-webpack-plugin:
         specifier: ^1.0.0
         version: 1.0.0
@@ -335,8 +335,8 @@ importers:
   packages/adapter-react:
     dependencies:
       '@tanbo/stream':
-        specifier: ^1.2.5
-        version: 1.2.5
+        specifier: ^1.2.6
+        version: 1.2.6
       '@textbus/core':
         specifier: ^4.2.1
         version: link:../core
@@ -369,8 +369,8 @@ importers:
   packages/adapter-viewfly:
     dependencies:
       '@tanbo/stream':
-        specifier: ^1.2.5
-        version: 1.2.5
+        specifier: ^1.2.6
+        version: 1.2.6
       '@textbus/core':
         specifier: ^4.2.1
         version: link:../core
@@ -384,8 +384,8 @@ importers:
         specifier: ^1.0.5
         version: 1.0.5
       '@viewfly/platform-browser':
-        specifier: ^1.0.5
-        version: 1.0.5
+        specifier: ^1.0.6
+        version: 1.0.6
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^23.0.2
@@ -406,8 +406,8 @@ importers:
   packages/adapter-vue:
     dependencies:
       '@tanbo/stream':
-        specifier: ^1.2.5
-        version: 1.2.5
+        specifier: ^1.2.6
+        version: 1.2.6
       '@textbus/core':
         specifier: ^4.2.1
         version: link:../core
@@ -440,8 +440,8 @@ importers:
         specifier: ^2.13.6
         version: 2.13.6(y-protocols@1.0.6(yjs@13.6.14))(yjs@13.6.14)
       '@tanbo/stream':
-        specifier: ^1.2.5
-        version: 1.2.5
+        specifier: ^1.2.6
+        version: 1.2.6
       '@textbus/core':
         specifier: ^4.2.1
         version: link:../core
@@ -474,8 +474,8 @@ importers:
   packages/core:
     dependencies:
       '@tanbo/stream':
-        specifier: ^1.2.5
-        version: 1.2.5
+        specifier: ^1.2.6
+        version: 1.2.6
       '@viewfly/core':
         specifier: ^1.0.5
         version: 1.0.5
@@ -499,8 +499,8 @@ importers:
   packages/platform-browser:
     dependencies:
       '@tanbo/stream':
-        specifier: ^1.2.5
-        version: 1.2.5
+        specifier: ^1.2.6
+        version: 1.2.6
       '@textbus/core':
         specifier: ^4.2.1
         version: link:../core
@@ -527,8 +527,8 @@ importers:
   packages/platform-node:
     dependencies:
       '@tanbo/stream':
-        specifier: ^1.2.5
-        version: 1.2.5
+        specifier: ^1.2.6
+        version: 1.2.6
       '@textbus/core':
         specifier: ^4.2.1
         version: link:../core
@@ -536,8 +536,8 @@ importers:
         specifier: ^1.0.5
         version: 1.0.5
       '@viewfly/platform-browser':
-        specifier: ^1.0.5
-        version: 1.0.5
+        specifier: ^1.0.6
+        version: 1.0.6
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^23.0.2
@@ -2068,8 +2068,8 @@ packages:
   '@tanbo/json-parser@0.0.2':
     resolution: {integrity: sha512-oNKMDlIC9iHkl1DXzURiMRH9zTcM25w2MzZ5lWGj8HB2JW12H7ZkkJ7zd3n56rd5T8fuUhc0vblucI9p5BFc6A==}
 
-  '@tanbo/stream@1.2.5':
-    resolution: {integrity: sha512-mBqj2voqjB00NgThE/YEdv2zIHKFVS8o5oc001OVX7UMT+u6DEVkI6XHF0dpx5uzIzNTjHWReIBFWIqQY5/r1g==}
+  '@tanbo/stream@1.2.6':
+    resolution: {integrity: sha512-dFiYqg8C7AtJfqWp37BAqyxdjGXsXqNxcXlOZNJjJegTjjLsJspyfpAajU3VP/g7Xa5rnX6tJY1qB0hP620GUg==}
 
   '@tootallnate/once@2.0.0':
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
@@ -2329,6 +2329,9 @@ packages:
 
   '@viewfly/platform-browser@1.0.5':
     resolution: {integrity: sha512-Dm9jf/wlLJm8YdepMSFPTBeK+Ah4TIxzLN2o+EXqGY/3WzKuGfTF1Qag0k3mQT1bLGCjkcXWlcr7KVLUK9HG5Q==}
+
+  '@viewfly/platform-browser@1.0.6':
+    resolution: {integrity: sha512-ueLx0HhEq6JMoora1MbClQAfDWiPJD64XyJWy11tBNi+fkgIzFlmE5DtGe1t7IpBGthOIHpZMkfqGdrx3w3sZg==}
 
   '@viewfly/scoped-css@1.0.5':
     resolution: {integrity: sha512-nSkazIjzYyt94ZS+mcHDsy7HOY2ynhC2dgKfE1pI4E9EDygiaUMTzp8Ua2RYQwErti0IWc2BhJ0WJ5gd4IZYhg==}
@@ -4527,7 +4530,7 @@ packages:
     resolution: {integrity: sha512-oWb1Z6mkHIskLzEJ/XWX0srkpkTQ7vaopMQkyaEIoq0fmtFVxOthb8cCxeT+p3ynTdkk/RZwbgG4brR5BeWECw==}
     engines: {node: '>= 4.0'}
     os: [darwin]
-    deprecated: The v1 package contains DANGEROUS / INSECURE binaries. Upgrade to safe fsevents v2
+    deprecated: Upgrade to fsevents v2 to mitigate potential security issues
 
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
@@ -11468,7 +11471,7 @@ snapshots:
 
   '@tanbo/json-parser@0.0.2': {}
 
-  '@tanbo/stream@1.2.5': {}
+  '@tanbo/stream@1.2.6': {}
 
   '@tootallnate/once@2.0.0': {}
 
@@ -11855,6 +11858,11 @@ snapshots:
       immer: 9.0.21
 
   '@viewfly/platform-browser@1.0.5':
+    dependencies:
+      '@viewfly/core': 1.0.5
+      csstype: 3.1.3
+
+  '@viewfly/platform-browser@1.0.6':
     dependencies:
       '@viewfly/core': 1.0.5
       csstype: 3.1.3

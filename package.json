@@ -75,7 +75,7 @@
     "@typescript-eslint/eslint-plugin": "^5.8.0",
     "@typescript-eslint/parser": "^5.8.0",
     "@viewfly/core": "^1.0.5",
-    "@viewfly/platform-browser": "^1.0.5",
+    "@viewfly/platform-browser": "^1.0.6",
     "add-assets-webpack-plugin": "^1.0.0",
     "autoprefixer": "^10.4.0",
     "babel-jest": "^29.7.0",
@@ -115,7 +115,7 @@
     "webpack-dev-server": "^4.7.1"
   },
   "dependencies": {
-    "@tanbo/stream": "^1.2.5",
+    "@tanbo/stream": "^1.2.6",
     "reflect-metadata": "^0.2.2",
     "y-webrtc": "^10.0.4",
     "y-websocket": "^1.4.3",

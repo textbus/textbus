@@ -25,7 +25,7 @@
     "typescript editor"
   ],
   "dependencies": {
-    "@tanbo/stream": "^1.2.5",
+    "@tanbo/stream": "^1.2.6",
     "@textbus/core": "^4.2.1",
     "@textbus/platform-browser": "^4.2.2",
     "react": "^17.0.0 || ^18.0.0"
