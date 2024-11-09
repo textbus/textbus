@@ -155,7 +155,7 @@ export class Registry {
 
     if (slotLiteral.attributes !== null && typeof slotLiteral.attributes === 'object') {
       Object.keys(slotLiteral.attributes).forEach(key => {
-        const attribute = this.attributeMap.get(key)
+        const attribute = this.getAttribute(key)
         if (attribute) {
           slot.setAttribute(attribute, slotLiteral.attributes[key])
         }
