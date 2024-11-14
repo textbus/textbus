@@ -31,9 +31,9 @@ export interface SlotLiteral {
   formats: FormatLiteral
 }
 
-export interface AsyncSlotLiteral extends SlotLiteral {
+export interface AsyncSlotLiteral<T = any> extends SlotLiteral {
   async: true
-  metadata: any
+  metadata: T
 }
 
 export interface DeltaInsert {

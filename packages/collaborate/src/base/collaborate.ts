@@ -460,7 +460,8 @@ export class Collaborate {
 
     if (isAsyncSlot) {
       let isDestroyed = false
-      sharedSlot.setAttribute('metadata', localSlot.metadata)
+      const sharedMetadata = this.createSharedMapByLocalMap(localSlot.metadata)
+      sharedSlot.setAttribute('metadata', sharedMetadata)
       this.subModelLoader.createSubModelBySlot(localSlot).then(subDocument => {
         if (isDestroyed) {
           return
@@ -517,8 +518,9 @@ export class Collaborate {
     const schema = sharedSlot.getAttribute('schema')
 
     if (type === 'async') {
-      const metadata = sharedSlot.getAttribute('metadata')
-      const slot = new AsyncSlot(schema || [], metadata)
+      const metadata = sharedSlot.getAttribute('metadata') as YMap<any>
+      const slot = new AsyncSlot(schema || [], {})
+      this.syncSharedMapToLocalMap(metadata, slot.metadata as ProxyModel<Record<string, any>>)
       const loadedSubDocument = this.subModelLoader.getLoadedModelBySlot(slot)
       if (loadedSubDocument) {
         const subContent = loadedSubDocument.getText('content')
@@ -625,7 +627,8 @@ export class Collaborate {
 
     if (component instanceof AsyncComponent) {
       sharedComponent.set('type', 'async')
-      sharedComponent.set('metadata', component.getMetadata())
+      const sharedMetadata = this.createSharedMapByLocalMap(component.metadata)
+      sharedComponent.set('metadata', sharedMetadata)
       const state = component.state as ProxyModel<Record<string, any>>
       let isDestroyed = false
       state.__changeMarker__.destroyCallbacks.push(() => {
@@ -659,10 +662,10 @@ export class Collaborate {
 
     let instance: Component<any> | null
     if (type === 'async') {
-      instance = this.registry.createComponentByData(componentName, {})
+      instance = this.registry.createComponentByData(componentName, {}, {})
       if (instance instanceof AsyncComponent) {
-        instance.setMetadata(yMap.get('metadata'))
-
+        const sharedMetadata = yMap.get('metadata') as YMap<any>
+        this.syncSharedMapToLocalMap(sharedMetadata, instance.metadata)
         const loadedSubDocument = this.subModelLoader.getLoadedModelByComponent(instance)
         if (loadedSubDocument) {
           const state = loadedSubDocument.getMap('state')

@@ -1,7 +1,7 @@
 import { Injector, normalizeProvider, NullInjector, Provider, ReflectiveInjector, Scope } from '@viewfly/core'
 import { Observable, Subject } from '@tanbo/stream'
 
-import { Attribute, Component, ComponentConstructor, ComponentLiteral, Formatter } from './model/_api'
+import { AsyncComponentConstructor, Attribute, Component, ComponentConstructor, ComponentLiteral, Formatter } from './model/_api'
 import {
   ATTRIBUTE_LIST,
   Commander,
@@ -48,7 +48,7 @@ export interface Plugin {
  */
 export interface Module {
   /** 组件列表 */
-  components?: ComponentConstructor[]
+  components?: (ComponentConstructor | AsyncComponentConstructor)[]
   /** 格式列表 */
   formatters?: Formatter<any>[]
   /** 属性列表 */

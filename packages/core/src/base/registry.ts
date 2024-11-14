@@ -6,7 +6,7 @@ import {
   ComponentLiteral,
   Formatter,
   Slot,
-  SlotLiteral, AsyncSlotLiteral, AsyncSlot, AsyncComponentLiteral
+  SlotLiteral, AsyncSlotLiteral, AsyncSlot, AsyncComponentLiteral, AsyncComponentConstructor, AsyncComponent, Metadata
 } from '../model/_api'
 import { ATTRIBUTE_LIST, COMPONENT_LIST, FORMATTER_LIST } from './_injection-tokens'
 import { Textbus } from '../textbus'
@@ -72,11 +72,12 @@ export class Registry {
    * 根据组件名和数据创建组件
    * @param name
    * @param data
+   * @param metadata 异步组件元数据
    */
-  createComponentByData(name: string, data: any) {
+  createComponentByData(name: string, data: any, metadata?: Metadata) {
     const factory = this.getComponent(name)
     if (factory) {
-      return new factory(this.textbus, data)
+      return new factory(this.textbus, data, metadata)
     }
     return null
   }
@@ -99,7 +100,7 @@ export class Registry {
    * 根据组件数据生成组件实例
    * @param componentLiteral
    */
-  createComponent(componentLiteral: ComponentLiteral | AsyncComponentLiteral): Component | null {
+  createComponent(componentLiteral: ComponentLiteral | AsyncComponentLiteral): Component | AsyncComponent | null {
     const factory = this.getComponent(componentLiteral.name)
     if (factory) {
       return this.createComponentByFactory(componentLiteral, factory)
@@ -112,10 +113,16 @@ export class Registry {
    * @param componentLiteral
    * @param factory
    */
-  createComponentByFactory(componentLiteral: ComponentLiteral | AsyncComponentLiteral,
-                           factory: ComponentConstructor) {
+  createComponentByFactory(componentLiteral: ComponentLiteral, factory: ComponentConstructor): Component
+  createComponentByFactory(componentLiteral: AsyncComponentLiteral, factory: AsyncComponentConstructor): AsyncComponent
+  createComponentByFactory(
+    componentLiteral: ComponentLiteral | AsyncComponentLiteral,
+    factory: any): AsyncComponent | Component {
+    if (typeof factory.fromJSONAndMetadata === 'function') {
+      return factory.fromJSONAndMetadata(this.textbus, componentLiteral.state, (componentLiteral as any).metadata)
+    }
     if (typeof factory.fromJSON === 'function') {
-      return factory.fromJSON(this.textbus, componentLiteral.state, (componentLiteral as any).metadata)
+      return factory.fromJSON(this.textbus, componentLiteral.state)
     }
     throw registryErrorFn(`Component ${factory.componentName} does not implement the fromJSON method.`)
   }

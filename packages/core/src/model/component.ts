@@ -185,9 +185,8 @@ export interface ComponentConstructor<ComponentState extends State = State> exte
    * 通过 JSON 创建组件实例
    * @param textbus
    * @param data 组件状态字面量
-   * @param metadata 异步组件的元数据
    */
-  fromJSON?(textbus: Textbus, data: ComponentStateLiteral<ComponentState>, metadata?: any): Component<ComponentState>
+  fromJSON?(textbus: Textbus, data: ComponentStateLiteral<ComponentState>): Component<ComponentState>
 }
 
 /**
