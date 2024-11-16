@@ -255,17 +255,34 @@ class ExperimentalCaret implements Caret {
     if (this.changeFromSelf) {
       this.changeFromSelf = false
       const selfRect = this.elementRef.getBoundingClientRect()
+      const scrollContainer = this.getScrollContainer(startContainer)
+      const scrollRect = scrollContainer === document.documentElement ?
+        { top: 0, bottom: document.documentElement.clientHeight } :
+        scrollContainer.getBoundingClientRect()
       const limit = this.getLimit()
-      if (selfRect.top < limit.top) {
-        this.elementRef.scrollIntoView({
-          block: 'start'
-        })
-      } else if (selfRect.bottom > limit.bottom) {
-        this.elementRef.scrollIntoView({
-          block: 'end'
-        })
+
+      const top = Math.max(limit.top, scrollRect.top)
+      const bottom = Math.min(limit.bottom, scrollRect.bottom)
+
+      if (selfRect.top < top) {
+        scrollContainer.scrollTop -= top - selfRect.top
+      } else if (selfRect.bottom > bottom) {
+        scrollContainer.scrollTop += selfRect.bottom - bottom
       }
     }
+  }
+
+  private getScrollContainer(container: Node): Element {
+    while (container) {
+      if (container instanceof Element) {
+        const styles = getComputedStyle(container)
+        if (styles.overflow !== 'visible' || styles.overflowX !== 'visible' || styles.overflowY !== 'visible') {
+          return container
+        }
+      }
+      container = container.parentNode as Node
+    }
+    return document.documentElement
   }
 }
 
