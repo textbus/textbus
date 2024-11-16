@@ -273,8 +273,7 @@ export interface SlotApplyFormatEventData<T = any> {
  * 上下文本菜单配置项
  */
 export interface ContextMenuItem {
-  iconClasses?: string[]
-  label: string
+  type: string
   disabled?: boolean
 
   onClick(): void
@@ -297,8 +296,7 @@ export interface ContextMenuCustomItem<T = unknown> {
  * 上下文多级菜单配置项
  */
 export interface ContextMenuGroup {
-  iconClasses?: string[]
-  label: string
+  type: string
   disabled?: boolean
   submenu: Array<ContextMenuItem | ContextMenuCustomItem>
 }
