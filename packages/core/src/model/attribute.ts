@@ -1,6 +1,7 @@
 import { VElement, VTextNode } from './element'
 import { FormatValue } from './format'
 import { Component } from './component'
+import { Slot } from './slot'
 
 /**
  * 格式渲染可回退的渲染模式
@@ -65,6 +66,11 @@ export interface FormatterConfig<T> {
   columned?: boolean
 
   /**
+   * 校验是否可应用，当返回 false 时，由不应用
+   */
+  checkHost?(host: Slot, value: T): boolean
+
+  /**
    * 格式渲染的方法
    * @param children 子节点集合
    * @param formatValue 当前格式要渲染的值
@@ -97,6 +103,13 @@ export class Formatter<T = FormatValue> {
     this.columned = columned
   }
 
+  checkHost(host: Slot, value: T): boolean {
+    if (typeof this.config.checkHost === 'function') {
+      return this.config.checkHost(host, value)
+    }
+    return true
+  }
+
   render(
     children: Array<VElement | VTextNode | Component>,
     formatValue: T,
@@ -106,6 +119,17 @@ export class Formatter<T = FormatValue> {
 }
 
 export interface AttributeConfig<T> {
+  /**
+   * 当应用时，Textbus 默认会应用到当前插槽和其后代组件的所有插槽，
+   * 当设置为 true 时，则只应用自身
+   */
+  onlySelf?: boolean
+
+  /**
+   * 校验是否可应用，当返回 false 时，由不应用
+   */
+  checkHost?(host: Slot, value: T): boolean
+
   /**
    * 渲染属性的方法
    * @param node 不附加属性的节点
@@ -124,12 +148,22 @@ export interface AttributeConfig<T> {
  * Attribute 可以在任意插槽的整体生效，常用于块级样式或给事个插槽附加信息的情况
  */
 export class Attribute<T = FormatValue> {
+  readonly onlySelf: boolean
+
   /**
    * 构建函数
    * @param name 属性的名字，在同一个编辑器实例内不可重复
    * @param config
    */
   constructor(public name: string, private config: AttributeConfig<T>) {
+    this.onlySelf = !!config.onlySelf
+  }
+
+  checkHost(host: Slot, value: T): boolean {
+    if (typeof this.config.checkHost === 'function') {
+      return this.config.checkHost(host, value)
+    }
+    return true
   }
 
   render(

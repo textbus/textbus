@@ -814,7 +814,7 @@ export class Commander {
       const childComponents: Component[] = []
       let hasInlineContent = false
       contents.forEach(item => {
-        if (typeof item === 'string' || item.type === ContentType.InlineComponent) {
+        if (typeof item === 'string') {
           hasInlineContent = true
         } else {
           childComponents.push(item)
@@ -845,15 +845,15 @@ export class Commander {
     this.selection.getSelectedScopes().forEach(i => {
       const contents = i.slot.sliceContent(i.startIndex, i.endIndex)
       const childComponents: Component[] = []
-      let hasString = false
+      let hasInlineContent = false
       contents.forEach(item => {
-        if (typeof item !== 'string') {
-          childComponents.push(item)
+        if (typeof item === 'string') {
+          hasInlineContent = true
         } else {
-          hasString = true
+          childComponents.push(item)
         }
       })
-      if (hasString) {
+      if (hasInlineContent) {
         i.slot.removeAttribute(attribute)
       } else {
         childComponents.forEach(i => {
@@ -872,15 +872,15 @@ export class Commander {
     this.selection.getSelectedScopes().forEach(i => {
       const contents = i.slot.sliceContent(i.startIndex, i.endIndex)
       const childComponents: Component[] = []
-      let hasString = false
+      let hasInlineContent = false
       contents.forEach(item => {
-        if (typeof item !== 'string') {
-          childComponents.push(item)
+        if (typeof item === 'string') {
+          hasInlineContent = true
         } else {
-          hasString = true
+          childComponents.push(item)
         }
       })
-      if (hasString) {
+      if (hasInlineContent) {
         i.slot.cleanAttributes(excludeAttributes)
       } else {
         childComponents.forEach(i => {

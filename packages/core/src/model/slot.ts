@@ -127,6 +127,9 @@ export class Slot {
     if (typeof canSet === 'function' && !canSet(this, attribute, value)) {
       return
     }
+    if (!attribute.checkHost(this, value)) {
+      return
+    }
     const has = this.attributes.has(attribute)
     const v = this.attributes.get(attribute)
 
@@ -136,13 +139,16 @@ export class Slot {
       name: attribute.name,
       value
     }]
-    this.sliceContent().forEach(item => {
-      if (typeof item !== 'string') {
-        item.slots.forEach(slot => {
-          slot.setAttribute(attribute, value)
-        })
-      }
-    })
+    if (!attribute.onlySelf) {
+      this.sliceContent().forEach(item => {
+        if (typeof item !== 'string') {
+          item.slots.forEach(slot => {
+            slot.setAttribute(attribute, value)
+          })
+        }
+      })
+    }
+
     this.__changeMarker__.markAsDirtied({
       paths: [],
       apply: applyActions,
@@ -176,8 +182,12 @@ export class Slot {
   /**
    * 删除属性
    * @param attribute
+   * @param canRemove
    */
-  removeAttribute(attribute: Attribute<any>) {
+  removeAttribute(attribute: Attribute<any>, canRemove?: (slot: Slot, attr: Attribute<any>) => boolean) {
+    if (typeof canRemove === 'function' && !canRemove(this, attribute)) {
+      return
+    }
     this.sliceContent().forEach(item => {
       if (typeof item !== 'string') {
         item.slots.forEach(slot => {
@@ -220,10 +230,19 @@ export class Slot {
    * 向插槽内写入内容，并根据当前位置的格式，自动扩展
    * @param content
    * @param formats
+   * @param canApply
    */
-  write(content: string | Component, formats?: Formats): boolean
-  write<T>(content: string | Component, formatter?: Formatter<T>, value?: T): boolean
-  write(content: string | Component, formatter?: Formatter<any> | Formats, value?: FormatValue): boolean {
+  write(content: string | Component,
+        formats?: Formats,
+        canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean
+  write<T>(content: string | Component,
+           formatter?: Formatter<T>,
+           value?: T,
+           canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean
+  write(content: string | Component,
+        formatter?: Formatter<any> | Formats,
+        value?: FormatValue,
+        canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean {
     const index = this.index
     const expandFormat = (this.isEmpty || index === 0) ? this.format.extract(0, 1) : this.format.extract(index - 1, index)
 
@@ -240,7 +259,7 @@ export class Slot {
         formats.push([formatter, value as FormatValue])
       }
     }
-    return this.insert(content, formats)
+    return this.insert(content, formats, canApply)
   }
 
   /**
@@ -294,6 +313,9 @@ export class Slot {
         formats.push([formatter, value as FormatValue])
       }
     }
+    formats = formats.filter(i => {
+      return i[0].checkHost(this, i[1])
+    })
     this.format.split(startIndex, length)
 
     this.content.insert(startIndex, content)
@@ -506,10 +528,12 @@ export class Slot {
    * 给插槽应用新的格式，如果为块级样式，则应用到整个插槽，否则根据参数配置的范围应用
    * @param formatter
    * @param data
+   * @param canApply
    */
-  applyFormat<U extends FormatValue>(formatter: Formatter<U>, data: FormatRange<U>): void {
+  applyFormat<U extends FormatValue>(formatter: Formatter<U>, data: FormatRange<U>,
+                                     canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): void {
     this.retain(data.startIndex)
-    this.retain(data.endIndex - data.startIndex, formatter, data.value)
+    this.retain(data.endIndex - data.startIndex, formatter, data.value, canApply)
   }
 
   /**
@@ -703,14 +727,16 @@ export class Slot {
   /**
    * 根据 delta 插入内容
    * @param delta
+   * @param canApply
    */
-  insertDelta(delta: DeltaLite): DeltaLite {
+  insertDelta(delta: DeltaLite,
+              canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): DeltaLite {
     delta.attributes.forEach((value, key) => {
       this.setAttribute(key, value)
     })
     while (delta.length) {
       const first = delta[0]!
-      const is = this.insert(first.insert, first.formats)
+      const is = this.insert(first.insert, first.formats, canApply)
       if (is) {
         delta.shift()
       } else {
@@ -725,8 +751,13 @@ export class Slot {
    * @param remainFormats 要保留的格式
    * @param startIndex 开始位置
    * @param endIndex 结束位置
+   * @param canApply
    */
-  cleanFormats(remainFormats: Formatter<any>[] | ((formatter: Formatter<any>) => boolean) = [], startIndex = 0, endIndex = this.length) {
+  cleanFormats(
+    remainFormats: Formatter<any>[] | ((formatter: Formatter<any>) => boolean) = [],
+    startIndex = 0,
+    endIndex = this.length,
+    canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean) {
     const formats = this.getFormats()
     if (formats.length) {
       formats.forEach(item => {
@@ -734,13 +765,13 @@ export class Slot {
           return
         }
         this.retain(startIndex)
-        this.retain(endIndex - startIndex, item.formatter, null)
+        this.retain(endIndex - startIndex, item.formatter, null, canApply)
       })
     } else {
       this.sliceContent(startIndex, endIndex).forEach(item => {
         if (typeof item !== 'string') {
           item.slots.forEach(slot => {
-            slot.cleanFormats(remainFormats)
+            slot.cleanFormats(remainFormats, 0, slot.length, canApply)
           })
         }
       })
@@ -759,19 +790,21 @@ export class Slot {
 
   /**
    * 清除插槽属性
-   * @param excludeAttributes 要排除的属性
+   * @param remainAttributes 要保留的属性
+   * @param canRemove
    */
-  cleanAttributes(excludeAttributes: Attribute<any>[] | ((attribute: Attribute<any>) => boolean) = []) {
+  cleanAttributes(remainAttributes: Attribute<any>[] | ((attribute: Attribute<any>) => boolean) = [],
+                  canRemove?: (slot: Slot, attr: Attribute<any>) => boolean) {
     Array.from(this.attributes.keys()).forEach(item => {
-      if (typeof excludeAttributes === 'function' ? excludeAttributes(item) : excludeAttributes.includes(item)) {
+      if (typeof remainAttributes === 'function' ? remainAttributes(item) : remainAttributes.includes(item)) {
         return
       }
-      this.removeAttribute(item)
+      this.removeAttribute(item, canRemove)
     })
     this.sliceContent().forEach(item => {
       if (typeof item !== 'string') {
         item.slots.forEach(slot => {
-          slot.cleanAttributes(excludeAttributes)
+          slot.cleanAttributes(remainAttributes, canRemove)
         })
       }
     })
@@ -809,6 +842,9 @@ export class Slot {
     formats.forEach(keyValue => {
       const key = keyValue[0]
       const value = keyValue[1]
+      if (!key.checkHost(this, value)) {
+        return
+      }
 
       if (canApply(this, key, value)) {
         this.format.merge(key, {
