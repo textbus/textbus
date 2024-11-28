@@ -466,8 +466,9 @@ export class MagicInput extends Input {
       fromEvent<ClipboardEvent>(textarea, 'paste').subscribe(ev => {
         const text = ev.clipboardData!.getData('Text')
 
+        const types = Array.from(ev.clipboardData!.types || [])
         const files = Array.from(ev.clipboardData!.files)
-        if (files.length) {
+        if (types.every(type => type === 'Files') && files.length) {
           Promise.all(files.filter(i => {
             return /image/i.test(i.type)
           }).map(item => {
