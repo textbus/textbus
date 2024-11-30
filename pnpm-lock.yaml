@@ -52,11 +52,11 @@ importers:
         specifier: ^5.8.0
         version: 5.62.0(eslint@8.56.0)(typescript@5.4.5)
       '@viewfly/core':
-        specifier: ^1.1.0
-        version: 1.1.0
+        specifier: ^1.1.2
+        version: 1.1.2
       '@viewfly/platform-browser':
-        specifier: ^1.1.0
-        version: 1.1.0
+        specifier: ^1.1.5
+        version: 1.1.5
       add-assets-webpack-plugin:
         specifier: ^1.0.0
         version: 1.0.0
@@ -338,10 +338,10 @@ importers:
         specifier: ^1.2.6
         version: 1.2.6
       '@textbus/core':
-        specifier: ^4.2.3
+        specifier: ^4.3.0
         version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.2.3
+        specifier: ^4.3.0
         version: link:../platform-browser
       react:
         specifier: ^17.0.0 || ^18.0.0
@@ -372,20 +372,20 @@ importers:
         specifier: ^1.2.6
         version: 1.2.6
       '@textbus/core':
-        specifier: ^4.2.3
+        specifier: ^4.3.0
         version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.2.3
+        specifier: ^4.3.0
         version: link:../platform-browser
       '@textbus/platform-node':
-        specifier: ^4.2.3
+        specifier: ^4.3.0
         version: link:../platform-node
       '@viewfly/core':
-        specifier: ^1.1.0
-        version: 1.1.0
+        specifier: ^1.1.2
+        version: 1.1.2
       '@viewfly/platform-browser':
-        specifier: ^1.1.0
-        version: 1.1.0
+        specifier: ^1.1.5
+        version: 1.1.5
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^23.0.2
@@ -409,10 +409,10 @@ importers:
         specifier: ^1.2.6
         version: 1.2.6
       '@textbus/core':
-        specifier: ^4.2.3
+        specifier: ^4.3.0
         version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.2.3
+        specifier: ^4.3.0
         version: link:../platform-browser
       vue:
         specifier: ^3.4.28
@@ -443,11 +443,11 @@ importers:
         specifier: ^1.2.6
         version: 1.2.6
       '@textbus/core':
-        specifier: ^4.2.3
+        specifier: ^4.3.0
         version: link:../core
       '@viewfly/core':
-        specifier: ^1.1.0
-        version: 1.1.0
+        specifier: ^1.1.2
+        version: 1.1.2
       y-websocket:
         specifier: ^1.4.3
         version: 1.5.1(yjs@13.6.14)
@@ -477,8 +477,8 @@ importers:
         specifier: ^1.2.6
         version: 1.2.6
       '@viewfly/core':
-        specifier: ^1.1.0
-        version: 1.1.0
+        specifier: ^1.1.2
+        version: 1.1.2
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^23.0.2
@@ -502,11 +502,11 @@ importers:
         specifier: ^1.2.6
         version: 1.2.6
       '@textbus/core':
-        specifier: ^4.2.3
+        specifier: ^4.3.0
         version: link:../core
       '@viewfly/core':
-        specifier: ^1.1.0
-        version: 1.1.0
+        specifier: ^1.1.2
+        version: 1.1.2
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^23.0.2
@@ -530,14 +530,14 @@ importers:
         specifier: ^1.2.6
         version: 1.2.6
       '@textbus/core':
-        specifier: ^4.2.3
+        specifier: ^4.3.0
         version: link:../core
       '@viewfly/core':
-        specifier: ^1.1.0
-        version: 1.1.0
+        specifier: ^1.1.2
+        version: 1.1.2
       '@viewfly/platform-browser':
-        specifier: ^1.1.0
-        version: 1.1.0
+        specifier: ^1.1.5
+        version: 1.1.5
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^23.0.2
@@ -2321,6 +2321,9 @@ packages:
   '@viewfly/core@1.1.0':
     resolution: {integrity: sha512-OVb/5nfgwmhlFO9PRQdELnM5hFwR3NaFYHKSs2tGPTAaEDNxTLUmcXmuhDGaG0qTiSoMBmuMPig5HC1wPo2tPA==}
 
+  '@viewfly/core@1.1.2':
+    resolution: {integrity: sha512-k3JqJhGqTRlVrP5AzOkQ5yKQ6Cljk1rRJSUJDX2bff8v8sJLgjsTtnZqoVWQtxsp22Pm7CONxA3HBMlG96UhXA==}
+
   '@viewfly/devtools@1.0.2':
     resolution: {integrity: sha512-bXwTLTNB6/RDx59wOKHNR2xcG82p/e1eVlixDR6fMiEwD0KB4NqFkmrPL2XQODBOgcijc6tC+1bWKbMy2sbM8w==}
 
@@ -2329,6 +2332,9 @@ packages:
 
   '@viewfly/platform-browser@1.1.0':
     resolution: {integrity: sha512-FjldlNuetAwvAEt0xu2Q3kQEukkFr5dw63Nq6oQGzplG/c+HSoOiGw/UiozAaNjLlKtMpzv1Bbv/su4/u4pyhA==}
+
+  '@viewfly/platform-browser@1.1.5':
+    resolution: {integrity: sha512-NUBsgLypBf3HsBMNeDp5rtmQIWpTTxuyw2UU0+QdUlbwsSUVN6lGlBmk2BFhS05OCjgt5R0vmN0DKf33c8vaUA==}
 
   '@viewfly/scoped-css@1.1.0':
     resolution: {integrity: sha512-FkYToH6ANJyqUH2a/vmm64deW45E565uowgoxwGqsbVDykoGWRhyOG9P4U+iNu/5L56OSyxT5Y+jnfp1VVcCbQ==}
@@ -4527,7 +4533,7 @@ packages:
     resolution: {integrity: sha512-oWb1Z6mkHIskLzEJ/XWX0srkpkTQ7vaopMQkyaEIoq0fmtFVxOthb8cCxeT+p3ynTdkk/RZwbgG4brR5BeWECw==}
     engines: {node: '>= 4.0'}
     os: [darwin]
-    deprecated: Upgrade to fsevents v2 to mitigate potential security issues
+    deprecated: The v1 package contains DANGEROUS / INSECURE binaries. Upgrade to safe fsevents v2
 
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
@@ -11771,6 +11777,10 @@ snapshots:
     dependencies:
       reflect-metadata: 0.2.2
 
+  '@viewfly/core@1.1.2':
+    dependencies:
+      reflect-metadata: 0.2.2
+
   '@viewfly/devtools@1.0.2(babel-core@6.26.3)(ejs@3.1.9)(handlebars@4.7.8)(lodash@4.17.21)(webpack@5.89.0(webpack-cli@4.10.0))':
     dependencies:
       '@vue/component-compiler-utils': 3.3.0(babel-core@6.26.3)(ejs@3.1.9)(handlebars@4.7.8)(lodash@4.17.21)
@@ -11857,6 +11867,11 @@ snapshots:
   '@viewfly/platform-browser@1.1.0':
     dependencies:
       '@viewfly/core': 1.1.0
+      csstype: 3.1.3
+
+  '@viewfly/platform-browser@1.1.5':
+    dependencies:
+      '@viewfly/core': 1.1.2
       csstype: 3.1.3
 
   '@viewfly/scoped-css@1.1.0':
