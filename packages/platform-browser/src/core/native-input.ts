@@ -86,7 +86,7 @@ class NativeCaret implements Caret {
     let docIsChanged = true
 
     function limitPosition(position: CaretPosition) {
-      const { top, bottom } = scroller.getLimit()
+      const {top, bottom} = scroller.getLimit()
       const caretTop = position.top
       if (caretTop + position.height > bottom) {
         const offset = caretTop - bottom + position.height
@@ -230,67 +230,74 @@ export class NativeInput extends Input {
   private handleDefaultActions(textarea: HTMLElement) {
     this.subscription.add(
       fromEvent<ClipboardEvent>(isFirefox() ? textarea : document, 'copy').subscribe(ev => {
-        const selection = this.selection
-        if (!selection.isSelected) {
-          return
-        }
-        if (selection.startSlot === selection.endSlot && selection.endOffset! - selection.startOffset! === 1) {
-          const content = selection.startSlot!.getContentAtIndex(selection.startOffset!)
-          if (typeof content === 'object') {
-            const clipboardData = ev.clipboardData!
-            const nativeSelection = document.getSelection()!
-            const range = nativeSelection.getRangeAt(0)
-            const div = document.createElement('div')
-            const fragment = range.cloneContents()
-            div.append(fragment)
-            clipboardData.setData('text/html', div.innerHTML)
-            clipboardData.setData('text', div.innerText)
-            ev.preventDefault()
-          }
-        }
-
+        this.copyHandler(ev)
       }),
       fromEvent<ClipboardEvent>(textarea, 'paste').subscribe(ev => {
-        const text = ev.clipboardData!.getData('Text')
-
-        const types = Array.from(ev.clipboardData!.types || [])
-        const files = Array.from(ev.clipboardData!.files)
-        if (types.every(type => type === 'Files') && files.length) {
-          Promise.all(files.filter(i => {
-            return /image/i.test(i.type)
-          }).map(item => {
-            const reader = new FileReader()
-            return new Promise(resolve => {
-              reader.onload = (event) => {
-                resolve(event.target!.result)
-              }
-              reader.readAsDataURL(item)
-            })
-          })).then(urls => {
-            const html = urls.map(i => {
-              return `<img src=${i}>`
-            }).join('')
-            this.handlePaste(html, text)
-          })
-          ev.preventDefault()
-          return
-        }
-
-        const div = document.createElement('div')
-        div.style.cssText = 'width:1px; height:10px; overflow: hidden; position: fixed; left: 50%; top: 50%; opacity:0'
-        div.contentEditable = 'true'
-        document.body.appendChild(div)
-        div.focus()
-        setTimeout(() => {
-          document.body.removeChild(div)
-          div.style.cssText = ''
-          this.handlePaste(div, text)
-        })
+        this.pasteHandler(ev)
       })
     )
   }
 
-  private handlePaste(dom: HTMLElement | string, text: string) {
+  copyHandler(ev: ClipboardEvent) {
+    const selection = this.selection
+    if (!selection.isSelected) {
+      return
+    }
+    if (selection.startSlot === selection.endSlot && selection.endOffset! - selection.startOffset! === 1) {
+      const content = selection.startSlot!.getContentAtIndex(selection.startOffset!)
+      if (typeof content === 'object') {
+        const clipboardData = ev.clipboardData!
+        const nativeSelection = document.getSelection()!
+        const range = nativeSelection.getRangeAt(0)
+        const div = document.createElement('div')
+        const fragment = range.cloneContents()
+        div.append(fragment)
+        clipboardData.setData('text/html', div.innerHTML)
+        clipboardData.setData('text', div.innerText)
+        ev.preventDefault()
+      }
+    }
+  }
+
+  pasteHandler(ev: ClipboardEvent) {
+    const text = ev.clipboardData!.getData('Text')
+
+    const types = Array.from(ev.clipboardData!.types || [])
+    const files = Array.from(ev.clipboardData!.files)
+    if (types.every(type => type === 'Files') && files.length) {
+      Promise.all(files.filter(i => {
+        return /image/i.test(i.type)
+      }).map(item => {
+        const reader = new FileReader()
+        return new Promise(resolve => {
+          reader.onload = (event) => {
+            resolve(event.target!.result)
+          }
+          reader.readAsDataURL(item)
+        })
+      })).then(urls => {
+        const html = urls.map(i => {
+          return `<img src=${i}>`
+        }).join('')
+        this.paste(html, text)
+      })
+      ev.preventDefault()
+      return
+    }
+
+    const div = document.createElement('div')
+    div.style.cssText = 'width:1px; height:10px; overflow: hidden; position: fixed; left: 50%; top: 50%; opacity:0'
+    div.contentEditable = 'true'
+    document.body.appendChild(div)
+    div.focus()
+    setTimeout(() => {
+      document.body.removeChild(div)
+      div.style.cssText = ''
+      this.paste(div, text)
+    })
+  }
+
+  private paste(dom: HTMLElement | string, text: string) {
     const slot = this.parser.parse(dom, new Slot([
       ContentType.BlockComponent,
       ContentType.InlineComponent,
