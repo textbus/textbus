@@ -90,6 +90,11 @@ function createArrayProxyHandlers(source: any[],
           ignoreChange = true
           const length = source.length
           const result = source.push(...args)
+          args.forEach(i => {
+            if (i instanceof Slot) {
+              i.__changeMarker__.parentModel = proxy
+            }
+          })
           ignoreChange = false
           changeMarker.markAsDirtied({
             paths: [],
@@ -120,9 +125,13 @@ function createArrayProxyHandlers(source: any[],
           ignoreChange = true
           const offset = source.length
           const item = source.pop()
-          const proxy = rawToProxyCache.get(item)
-          if (proxy) {
-            proxy.__changeMarker__.parentModel = null
+          if (item instanceof Slot) {
+            item.__changeMarker__.parentModel = null
+          } else {
+            const proxy = rawToProxyCache.get(item)
+            if (proxy) {
+              proxy.__changeMarker__.parentModel = null
+            }
           }
           ignoreChange = false
           changeMarker.markAsDirtied({
@@ -154,6 +163,11 @@ function createArrayProxyHandlers(source: any[],
         if (this === proxy) {
           ignoreChange = true
           const result = source.unshift(...args)
+          args.forEach(i => {
+            if (i instanceof Slot) {
+              i.__changeMarker__.parentModel = proxy
+            }
+          })
           ignoreChange = false
           changeMarker.markAsDirtied({
             paths: [],
@@ -183,9 +197,13 @@ function createArrayProxyHandlers(source: any[],
         if (this === proxy) {
           ignoreChange = true
           const item = source.shift()
-          const proxy = rawToProxyCache.get(item)
-          if (proxy) {
-            proxy.__changeMarker__.parentModel = null
+          if (item instanceof Slot) {
+            item.__changeMarker__.parentModel = null
+          } else {
+            const proxy = rawToProxyCache.get(item)
+            if (proxy) {
+              proxy.__changeMarker__.parentModel = null
+            }
           }
           ignoreChange = false
           changeMarker.markAsDirtied({
@@ -224,9 +242,19 @@ function createArrayProxyHandlers(source: any[],
           }
           const deletedItems = source.splice(startIndex, deleteCount, ...args)
           deletedItems.forEach(i => {
-            const proxy = rawToProxyCache.get(i)
-            if (proxy) {
-              proxy.__changeMarker__.parentModel = null
+            if (i instanceof Slot) {
+              i.__changeMarker__.parentModel = null
+            } else {
+              const proxy = rawToProxyCache.get(i)
+              if (proxy) {
+                proxy.__changeMarker__.parentModel = null
+              }
+            }
+          })
+
+          args.forEach(i => {
+            if (i instanceof Slot) {
+              i.__changeMarker__.parentModel = proxy
             }
           })
           ignoreChange = false
@@ -292,9 +320,9 @@ export function createArrayProxy<T extends any[]>(raw: T): T {
       }
       newValue = toRaw(newValue)
       const oldValue = (raw as any)[p]
-      const proxy = rawToProxyCache.get(oldValue)
-      if (proxy) {
-        proxy.__changeMarker__.parentModel = null
+      const oldValueProxy = rawToProxyCache.get(oldValue)
+      if (oldValueProxy) {
+        oldValueProxy.__changeMarker__.parentModel = null
       }
       const length = raw.length
 
@@ -302,6 +330,9 @@ export function createArrayProxy<T extends any[]>(raw: T): T {
 
       if (newValue === oldValue) {
         return b
+      }
+      if (newValue instanceof Slot) {
+        newValue.__changeMarker__.parentModel = proxy
       }
 
       if (!handlers.ignoreChange && /^(0|[1-9]\d*)$/.test(p as string)) {
@@ -313,7 +344,7 @@ export function createArrayProxy<T extends any[]>(raw: T): T {
             index,
             afterLength: raw.length,
             value: valueToJSON(newValue),
-            ref: valueToProxy(newValue, proxy as ProxyModel<T>),
+            ref: valueToProxy(newValue, oldValueProxy as ProxyModel<T>),
           }],
           unApply: [{
             type: 'setIndex',
@@ -376,13 +407,16 @@ export function createObjectProxy<T extends object>(raw: T): T {
       newValue = toRaw(newValue)
       const has = Object.hasOwn(raw, p)
       const oldValue = (raw as any)[p]
-      const proxy = rawToProxyCache.get(oldValue)
-      if (proxy) {
-        proxy.__changeMarker__.parentModel = null
+      const oldValueProxy = rawToProxyCache.get(oldValue)
+      if (oldValueProxy) {
+        oldValueProxy.__changeMarker__.parentModel = null
       }
       const b = Reflect.set(target, p, newValue, receiver)
       if (newValue === oldValue) {
         return b
+      }
+      if (newValue instanceof Slot) {
+        newValue.__changeMarker__.parentModel = proxy
       }
       const unApplyAction: Action = has ? {
         type: 'propSet',
@@ -399,7 +433,7 @@ export function createObjectProxy<T extends object>(raw: T): T {
           type: 'propSet',
           key: p as string,
           value: valueToJSON(newValue),
-          ref: valueToProxy(newValue, proxy as ProxyModel<T>),
+          ref: valueToProxy(newValue, oldValueProxy as ProxyModel<T>),
         }],
         unApply: [unApplyAction]
       })

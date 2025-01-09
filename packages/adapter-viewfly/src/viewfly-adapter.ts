@@ -5,7 +5,7 @@ import {
   DynamicRef,
   getCurrentInstance, Injector,
   jsx,
-  JSXNode,
+  JSXNode, onUnmounted,
   onUpdated, ReflectiveInjector,
   ViewFlyNode,
   withAnnotation,
@@ -129,11 +129,14 @@ export class ViewflyAdapter extends DomAdapter<ViewFlyNode, ViewFlyNode> {
       }, (props: ViewComponentProps<Component>) => {
         const comp = getCurrentInstance()
         const textbusComponent = props.component
-        merge(textbusComponent.changeMarker.onChange,
+        const subscription = merge(textbusComponent.changeMarker.onChange,
           textbusComponent.changeMarker.onForceChange).subscribe(() => {
           if (textbusComponent.changeMarker.dirty) {
             comp.markAsDirtied()
           }
+        })
+        onUnmounted(() => {
+          subscription.unsubscribe()
         })
         if (isRoot) {
           onUpdated(() => {
