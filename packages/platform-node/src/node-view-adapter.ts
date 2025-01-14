@@ -7,7 +7,7 @@ import {
   getCurrentInstance,
   jsx,
   JSX,
-  JSXNode,
+  JSXNode, onUnmounted,
   onUpdated,
   withAnnotation
 } from '@viewfly/core'
@@ -131,11 +131,14 @@ export class NodeViewAdapter extends Adapter<VDOMElement, VDOMText, JSX.Element,
       }, (props: ViewVDomComponentProps<Component>) => {
         const comp = getCurrentInstance()
         const textbusComponent = props.component
-        merge(textbusComponent.changeMarker.onChange,
+        const subscription = merge(textbusComponent.changeMarker.onChange,
           textbusComponent.changeMarker.onForceChange).subscribe(() => {
           if (textbusComponent.changeMarker.dirty) {
             comp.markAsDirtied()
           }
+        })
+        onUnmounted(() => {
+          subscription.unsubscribe()
         })
         if (isRoot) {
           onUpdated(() => {
