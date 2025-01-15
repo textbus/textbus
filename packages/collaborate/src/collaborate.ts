@@ -426,7 +426,7 @@ export class Collaborate implements History {
             if (typeof action.insert === 'string') {
               length = action.insert.length
               slot.insert(action.insert, remoteFormatsToLocal(this.registry, action.attributes))
-            } else {
+            } else if (Reflect.has(action.insert, 'get')) {
               const sharedComponent = action.insert as YMap<any>
               const component = this.createComponentBySharedComponent(sharedComponent)
               this.syncComponentSlots(sharedComponent.get('slots'), component)
@@ -566,13 +566,17 @@ export class Collaborate implements History {
             index += action.retain
             slots.retain(index)
           } else if (action.insert) {
-            (action.insert as Array<YMap<any>>).forEach(item => {
-              const slot = this.createSlotBySharedSlot(item)
-              slots.insert(slot)
-              this.syncSlotContent(item.get('content'), slot)
-              this.syncSlotState(item, slot)
-              index++
-            })
+            if (Reflect.has(action.insert, 'forEach')) {
+              (action.insert as Array<YMap<any>>).forEach(item => {
+                if (Reflect.has(item, 'get')) {
+                  const slot = this.createSlotBySharedSlot(item)
+                  slots.insert(slot)
+                  this.syncSlotContent(item.get('content'), slot)
+                  this.syncSlotState(item, slot)
+                  index++
+                }
+              })
+            }
           } else if (action.delete) {
             slots.retain(index)
             slots.delete(action.delete)
@@ -765,7 +769,7 @@ export class Collaborate implements History {
         if (typeof action.insert === 'string') {
           const formats = remoteFormatsToLocal(this.registry, action.attributes)
           slot.insert(action.insert, formats)
-        } else {
+        } else if (Reflect.has(action.insert, 'get')) {
           const sharedComponent = action.insert as YMap<any>
           const component = this.createComponentBySharedComponent(sharedComponent)
           slot.insert(component, remoteFormatsToLocal(this.registry, action.attributes))
