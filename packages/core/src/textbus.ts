@@ -164,6 +164,7 @@ export class Textbus extends ReflectiveInjector {
         module.beforeEach(this)
       }
     })
+    config.beforeEach?.(this)
   }
 
   /**
@@ -295,6 +296,7 @@ export class Textbus extends ReflectiveInjector {
    */
   destroy() {
     this.isDestroyed = true
+    this.config.onDestroy?.(this)
     this.plugins.forEach(i => i.onDestroy?.())
     this.config.imports?.forEach(module => {
       module.onDestroy?.(this)
@@ -306,6 +308,9 @@ export class Textbus extends ReflectiveInjector {
     ;[this.get(History), this.get(Selection), this.get(Scheduler)].forEach(i => {
       i.destroy()
     })
+
+    this.recordValues.clear()
+    this.normalizedProviders = []
   }
 
   protected guardReady() {
