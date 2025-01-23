@@ -10,6 +10,12 @@ export type Paths = Array<string | number>
 let onewayUpdate = false
 
 /**
+ * @internal
+ * 修复内存泄漏，外部不可用
+ */
+export const __markerCache = new Set<ChangeMarker>()
+
+/**
  * 用来标识组件或插槽的数据变化
  */
 export class ChangeMarker {
@@ -42,6 +48,7 @@ export class ChangeMarker {
   private forceChangeEvent = new Subject<void>()
 
   constructor(public host: object) {
+    __markerCache.add(this)
     this.onChange = this.changeEvent.asObservable()
     this.onChildComponentRemoved = this.childComponentRemovedEvent.asObservable()
     this.onSelfChange = this.selfChangeEvent.asObservable()
@@ -129,6 +136,7 @@ export class ChangeMarker {
   }
 
   destroy(sync = false) {
+    __markerCache.delete(this)
     this.destroyCallbacks.forEach(i => i())
     if (this.host instanceof Slot) {
       this.host.sliceContent().forEach(i => {

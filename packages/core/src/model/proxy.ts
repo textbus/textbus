@@ -130,10 +130,12 @@ function createArrayProxyHandlers(source: any[],
           const offset = source.length
           const item = source.pop()
           if (item instanceof Slot) {
+            item.__changeMarker__.destroy()
             item.__changeMarker__.parentModel = null
           } else {
             const proxy = rawToProxyCache.get(item)
             if (proxy) {
+              proxy.__changeMarker__.destroy()
               proxy.__changeMarker__.parentModel = null
             }
           }
@@ -202,10 +204,12 @@ function createArrayProxyHandlers(source: any[],
           ignoreChange = true
           const item = source.shift()
           if (item instanceof Slot) {
+            item.__changeMarker__.destroy()
             item.__changeMarker__.parentModel = null
           } else {
             const proxy = rawToProxyCache.get(item)
             if (proxy) {
+              proxy.__changeMarker__.destroy()
               proxy.__changeMarker__.parentModel = null
             }
           }
@@ -247,10 +251,12 @@ function createArrayProxyHandlers(source: any[],
           const deletedItems = source.splice(startIndex, deleteCount, ...args)
           deletedItems.forEach(i => {
             if (i instanceof Slot) {
+              i.__changeMarker__.destroy()
               i.__changeMarker__.parentModel = null
             } else {
               const proxy = rawToProxyCache.get(i)
               if (proxy) {
+                proxy.__changeMarker__.destroy()
                 proxy.__changeMarker__.parentModel = null
               }
             }
@@ -326,6 +332,7 @@ export function createArrayProxy<T extends any[]>(raw: T): T {
       const oldValue = (raw as any)[p]
       const oldValueProxy = rawToProxyCache.get(oldValue)
       if (oldValueProxy) {
+        oldValueProxy.__changeMarker__.destroy()
         oldValueProxy.__changeMarker__.parentModel = null
       }
       const length = raw.length
@@ -450,6 +457,7 @@ export function createObjectProxy<T extends object>(raw: T): T {
       const oldValue = (raw as any)[p]
       const proxy = rawToProxyCache.get(oldValue)
       if (proxy) {
+        proxy.__changeMarker__.destroy()
         proxy.__changeMarker__.parentModel = null
       }
       const b = Reflect.deleteProperty(target, p)

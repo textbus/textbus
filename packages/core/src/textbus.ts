@@ -1,7 +1,15 @@
 import { Injector, normalizeProvider, NullInjector, Provider, ReflectiveInjector, Scope } from '@viewfly/core'
 import { Observable, Subject } from '@tanbo/stream'
 
-import { AsyncComponentConstructor, Attribute, Component, ComponentConstructor, ComponentLiteral, Formatter } from './model/_api'
+import {
+  __markerCache,
+  AsyncComponentConstructor,
+  Attribute,
+  Component,
+  ComponentConstructor,
+  ComponentLiteral,
+  Formatter
+} from './model/_api'
 import {
   ATTRIBUTE_LIST,
   Commander,
@@ -305,12 +313,17 @@ export class Textbus extends ReflectiveInjector {
       i()
     })
 
-    ;[this.get(History), this.get(Selection), this.get(Scheduler)].forEach(i => {
+    const root = this.get(RootComponentRef)
+    root.component.changeMarker.destroy(true)
+    const instances = [this.get(History), this.get(Selection), this.get(Scheduler)]
+    instances.forEach(i => {
       i.destroy()
     })
 
     this.recordValues.clear()
     this.normalizedProviders = []
+    __markerCache.forEach(i => i.destroy())
+    __markerCache.clear()
   }
 
   protected guardReady() {
