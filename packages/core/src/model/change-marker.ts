@@ -4,16 +4,11 @@ import { Action, DestroyCallbacks, Operation } from './types'
 import { Component, invokeListener } from './component'
 import { getProxyObject, isType, ProxyModel, toRaw } from './proxy'
 import { Slot } from './slot'
+import { __markerCache } from '../help'
 
 export type Paths = Array<string | number>
 
 let onewayUpdate = false
-
-/**
- * @internal
- * 修复内存泄漏，外部不可用
- */
-export const __markerCache = new Set<ChangeMarker>()
 
 /**
  * 用来标识组件或插槽的数据变化

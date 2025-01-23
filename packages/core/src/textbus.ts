@@ -2,7 +2,6 @@ import { Injector, normalizeProvider, NullInjector, Provider, ReflectiveInjector
 import { Observable, Subject } from '@tanbo/stream'
 
 import {
-  __markerCache,
   AsyncComponentConstructor,
   Attribute,
   Component,
@@ -32,6 +31,7 @@ import {
   Adapter
 } from './base/_api'
 import { makeError } from './_utils/make-error'
+import { __markerCache } from './help'
 
 const textbusError = makeError('Textbus')
 
