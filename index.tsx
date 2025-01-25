@@ -195,12 +195,12 @@ textbus.render(rootModel).then(() => {
   const commander = editor.get(Commander)
   const s = editor.get(SelectionBridge)
   let i = 0
-  setInterval(() => {
-    // s.disConnect()
-    commander.insert(i + '')
-    s.syncSelectionFromNativeSelectionChange = false
-    i++
-  }, 1000)
+  // setInterval(() => {
+  //   // s.disConnect()
+  //   commander.insert(i + '')
+  //   s.syncSelectionFromNativeSelectionChange = false
+  //   i++
+  // }, 1000)
 })
 // 从这里开始创建编辑器
 
