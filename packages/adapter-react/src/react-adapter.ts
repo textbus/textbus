@@ -2,6 +2,7 @@ import { Adapter, Component, CompositionState, makeError, VElement, ViewMount, V
 import { DomAdapter } from '@textbus/platform-browser'
 import { createElement, JSX, useEffect, useState } from 'react'
 import { Injector, ReflectiveInjector } from '@viewfly/core'
+import { merge } from '@tanbo/stream'
 
 const adapterError = makeError('ReactAdapter')
 
@@ -96,7 +97,7 @@ export class ReactAdapter extends DomAdapter<JSX.Element, JSX.Element> {
         const [updateKey, refreshUpdateKey] = useState(Math.random())
 
         useEffect(() => {
-          const sub = component.changeMarker.onChange.subscribe(() => {
+          const sub = merge(component.changeMarker.onChange, component.changeMarker.onForceChange).subscribe(() => {
             if (component.changeMarker.dirty) {
               refreshUpdateKey(Math.random())
             }

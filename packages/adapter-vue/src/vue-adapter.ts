@@ -2,6 +2,7 @@ import { Adapter, Component, CompositionState, makeError, VElement, ViewMount, V
 import { DefineComponent, getCurrentInstance, h, onMounted, onUnmounted, onUpdated, ref, Ref, VNode } from 'vue'
 import { DomAdapter } from '@textbus/platform-browser'
 import { Injector, ReflectiveInjector } from '@viewfly/core'
+import { merge } from '@tanbo/stream'
 
 const adapterError = makeError('VueAdapter')
 
@@ -107,7 +108,7 @@ export class VueAdapter extends DomAdapter<VNode, VNode> {
       vueComponent.setup = function (props: ViewComponentProps<Component>, context, ...args: any[]) {
         const component = props.component
         const vueInstance = getCurrentInstance()!
-        const sub = component.changeMarker.onChange.subscribe(() => {
+        const sub = merge(component.changeMarker.onChange, component.changeMarker.onForceChange).subscribe(() => {
           if (component.changeMarker.dirty) {
             vueInstance.proxy!.$forceUpdate()
           }
