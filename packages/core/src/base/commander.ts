@@ -14,8 +14,10 @@ import {
   FormatValue,
   InsertEventData,
   invokeListener,
-  Slot, SlotApplyFormatEventData,
-  SlotRange, SlotSetAttributeEventData
+  Slot,
+  SlotApplyFormatEventData,
+  SlotRange,
+  SlotSetAttributeEventData
 } from '../model/_api'
 import { RootComponentRef } from './_injection-tokens'
 import { Registry } from './registry'
@@ -814,7 +816,7 @@ export class Commander {
       const childComponents: Component[] = []
       let hasInlineContent = false
       contents.forEach(item => {
-        if (typeof item === 'string') {
+        if (typeof item === 'string' || item .type === ContentType.InlineComponent) {
           hasInlineContent = true
         } else {
           childComponents.push(item)
@@ -847,7 +849,7 @@ export class Commander {
       const childComponents: Component[] = []
       let hasInlineContent = false
       contents.forEach(item => {
-        if (typeof item === 'string') {
+        if (typeof item === 'string' || item .type === ContentType.InlineComponent) {
           hasInlineContent = true
         } else {
           childComponents.push(item)
@@ -874,7 +876,7 @@ export class Commander {
       const childComponents: Component[] = []
       let hasInlineContent = false
       contents.forEach(item => {
-        if (typeof item === 'string') {
+        if (typeof item === 'string' || item .type === ContentType.InlineComponent) {
           hasInlineContent = true
         } else {
           childComponents.push(item)

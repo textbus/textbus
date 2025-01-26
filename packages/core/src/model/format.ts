@@ -433,6 +433,9 @@ export class Format {
     if (left === right) {
       return true
     }
+    if (left === null || right === null) {
+      return false
+    }
     if (typeof left === 'object' && typeof right === 'object') {
       const leftKeys = Object.keys(left!)
       const rightKeys = Object.keys(right!)

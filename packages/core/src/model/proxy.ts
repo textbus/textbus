@@ -290,9 +290,7 @@ export function createArrayProxy<T extends any[]>(raw: T): T {
       if (p === 'length') {
         return Reflect.set(target, p, newValue, receiver)
       }
-      if (rawToProxyCache.has(newValue)) {
-        newValue = rawToProxyCache.get(newValue)
-      }
+      newValue = toRaw(newValue)
       const oldValue = (raw as any)[p]
       const proxy = rawToProxyCache.get(oldValue)
       if (proxy) {
@@ -301,6 +299,10 @@ export function createArrayProxy<T extends any[]>(raw: T): T {
       const length = raw.length
 
       const b = Reflect.set(target, p, newValue, receiver)
+
+      if (newValue === oldValue) {
+        return b
+      }
 
       if (!handlers.ignoreChange && /^(0|[1-9]\d*)$/.test(p as string)) {
         const index = Number(p)
@@ -371,9 +373,7 @@ export function createObjectProxy<T extends object>(raw: T): T {
       return valueToProxy(value, proxy)
     },
     set(target, p, newValue, receiver) {
-      if (rawToProxyCache.has(newValue)) {
-        newValue = rawToProxyCache.get(newValue)
-      }
+      newValue = toRaw(newValue)
       const has = Object.hasOwn(raw, p)
       const oldValue = (raw as any)[p]
       const proxy = rawToProxyCache.get(oldValue)
@@ -381,6 +381,9 @@ export function createObjectProxy<T extends object>(raw: T): T {
         proxy.__changeMarker__.parentModel = null
       }
       const b = Reflect.set(target, p, newValue, receiver)
+      if (newValue === oldValue) {
+        return b
+      }
       const unApplyAction: Action = has ? {
         type: 'propSet',
         key: p as string,
