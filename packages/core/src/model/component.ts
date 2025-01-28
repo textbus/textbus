@@ -109,6 +109,7 @@ export abstract class Component<T extends State = State> {
 
   /** 组件变化标识器 */
   readonly changeMarker: ChangeMarker
+  readonly __changeMarker__: ChangeMarker
 
   constructor(public textbus: Textbus,
               initData: T) {
@@ -118,6 +119,7 @@ export abstract class Component<T extends State = State> {
     this.type = type
     this.state = createObjectProxy(initData)
     this.changeMarker = this.state.__changeMarker__
+    this.__changeMarker__ = this.state.__changeMarker__
     this.changeMarker.host = this
 
     const context: ComponentContext = {

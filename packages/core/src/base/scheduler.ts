@@ -1,7 +1,7 @@
 import { Injectable } from '@viewfly/core'
 import { map, microTask, Observable, Subject, Subscription, take } from '@tanbo/stream'
 
-import { Component, invokeListener, Operation } from '../model/_api'
+import { Component, Operation } from '../model/_api'
 import { RootComponentRef } from './_injection-tokens'
 import { Selection } from './selection'
 import { Adapter } from './adapter'
@@ -190,13 +190,13 @@ export class Scheduler {
   }
 
   private static invokeChildComponentDestroyHook(parent: Component) {
-    parent.slots.forEach(slot => {
-      slot.sliceContent().forEach(i => {
-        if (typeof i !== 'string') {
-          Scheduler.invokeChildComponentDestroyHook(i)
-        }
-      })
-    })
-    invokeListener(parent, 'onDestroy')
+    parent.changeMarker.destroy(true)
+    // parent.slots.forEach(slot => {
+    //   slot.sliceContent().forEach(i => {
+    //     if (typeof i !== 'string') {
+    //       Scheduler.invokeChildComponentDestroyHook(i)
+    //     }
+    //   })
+    // })
   }
 }

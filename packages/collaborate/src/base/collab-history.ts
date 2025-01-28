@@ -148,6 +148,13 @@ export class CollabHistory implements History {
     this.index = 0
     this.historyItems = []
     this.subscriptions.forEach(i => i.unsubscribe())
-    this.manager?.destroy()
+    if (this.manager) {
+      this.manager.destroy()
+      this.manager.captureTransaction = () => true
+      this.manager.deleteFilter = () => true
+      this.manager.trackedOrigins = new Set([null])
+    }
+
+    this.manager = null
   }
 }

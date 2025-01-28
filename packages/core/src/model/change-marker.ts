@@ -1,9 +1,10 @@
 import { Observable, Subject } from '@tanbo/stream'
 
 import { Action, DestroyCallbacks, Operation } from './types'
-import { Component } from './component'
-import { isType, ProxyModel, toRaw } from './proxy'
+import { Component, invokeListener } from './component'
+import { getProxyObject, isType, ProxyModel, toRaw } from './proxy'
 import { Slot } from './slot'
+import { __markerCache } from '../help'
 
 export type Paths = Array<string | number>
 
@@ -42,6 +43,7 @@ export class ChangeMarker {
   private forceChangeEvent = new Subject<void>()
 
   constructor(public host: object) {
+    __markerCache.add(this)
     this.onChange = this.changeEvent.asObservable()
     this.onChildComponentRemoved = this.childComponentRemovedEvent.asObservable()
     this.onSelfChange = this.selfChangeEvent.asObservable()
@@ -128,8 +130,43 @@ export class ChangeMarker {
     }
   }
 
-  destroy() {
+  destroy(sync = false) {
+    __markerCache.delete(this)
     this.destroyCallbacks.forEach(i => i())
+    if (this.host instanceof Slot) {
+      this.host.sliceContent().forEach(i => {
+        if (i instanceof Component) {
+          if (sync) {
+            i.changeMarker.destroy(sync)
+          } else {
+            this.recordComponentRemoved(i)
+          }
+        }
+      })
+    } else if (Array.isArray(this.host)) {
+      this.host.forEach(i => {
+        const proxy = getProxyObject(i)
+        if (proxy) {
+          proxy.__changeMarker__.destroy(sync)
+        }
+      })
+    } else if (isType(this.host, 'Object')) {
+      const state = this.host instanceof Component ? this.host.state : this.host
+      const values = Object.values(state)
+      for (const value of values) {
+        if (value instanceof Slot) {
+          value.__changeMarker__.destroy(sync)
+        } else {
+          const proxy = getProxyObject(toRaw(value as any))
+          if (proxy) {
+            proxy.__changeMarker__.destroy(sync)
+          }
+        }
+      }
+      if (this.host instanceof Component) {
+        invokeListener(this.host, 'onDestroy')
+      }
+    }
     this.destroyCallbacks = []
   }
 

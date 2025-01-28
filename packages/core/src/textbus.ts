@@ -1,7 +1,14 @@
 import { Injector, normalizeProvider, NullInjector, Provider, ReflectiveInjector, Scope } from '@viewfly/core'
 import { Observable, Subject } from '@tanbo/stream'
 
-import { AsyncComponentConstructor, Attribute, Component, ComponentConstructor, ComponentLiteral, Formatter } from './model/_api'
+import {
+  AsyncComponentConstructor,
+  Attribute,
+  Component,
+  ComponentConstructor,
+  ComponentLiteral,
+  Formatter
+} from './model/_api'
 import {
   ATTRIBUTE_LIST,
   Commander,
@@ -24,6 +31,7 @@ import {
   Adapter
 } from './base/_api'
 import { makeError } from './_utils/make-error'
+import { __markerCache } from './help'
 
 const textbusError = makeError('Textbus')
 
@@ -164,6 +172,7 @@ export class Textbus extends ReflectiveInjector {
         module.beforeEach(this)
       }
     })
+    config.beforeEach?.(this)
   }
 
   /**
@@ -295,6 +304,7 @@ export class Textbus extends ReflectiveInjector {
    */
   destroy() {
     this.isDestroyed = true
+    this.config.onDestroy?.(this)
     this.plugins.forEach(i => i.onDestroy?.())
     this.config.imports?.forEach(module => {
       module.onDestroy?.(this)
@@ -303,9 +313,17 @@ export class Textbus extends ReflectiveInjector {
       i()
     })
 
-    ;[this.get(History), this.get(Selection), this.get(Scheduler)].forEach(i => {
+    const root = this.get(RootComponentRef)
+    root.component.changeMarker.destroy(true)
+    const instances = [this.get(History), this.get(Selection), this.get(Scheduler)]
+    instances.forEach(i => {
       i.destroy()
     })
+
+    this.recordValues.clear()
+    this.normalizedProviders = []
+    __markerCache.forEach(i => i.destroy())
+    __markerCache.clear()
   }
 
   protected guardReady() {
