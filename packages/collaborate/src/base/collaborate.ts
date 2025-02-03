@@ -9,9 +9,11 @@ import {
   Scheduler,
   Selection,
   Slot,
-  ProxyModel,
-  createObjectProxy,
-  createArrayProxy, AsyncSlot, AsyncComponent, AbstractSelection,
+  AsyncSlot,
+  AsyncComponent,
+  AbstractSelection,
+  observe,
+  ProxyModel
 } from '@textbus/core'
 import {
   AbstractType,
@@ -398,7 +400,7 @@ export class Collaborate {
 
     this.slotMap.set(localSlot, sharedSlot)
 
-    localSlot.__changeMarker__.destroyCallbacks.push(() => {
+    localSlot.__changeMarker__.addDetachCallback(() => {
       this.slotMap.delete(localSlot)
       sharedSlot.unobserve(syncRemote)
       sub.unsubscribe()
@@ -418,13 +420,13 @@ export class Collaborate {
   }
 
   private createLocalMapBySharedMap(sharedMap: YMap<any>): ProxyModel<Record<string, any>> {
-    const localMap = createObjectProxy({}) as ProxyModel<Record<string, any>>
+    const localMap = observe({}) as ProxyModel<Record<string, any>>
     this.syncSharedMapToLocalMap(sharedMap, localMap)
     return localMap
   }
 
   private createLocalArrayBySharedArray(sharedArray: YArray<any>): ProxyModel<any[]> {
-    const localArray = createArrayProxy<any[]>([]) as ProxyModel<any[]>
+    const localArray = observe<any[]>([]) as ProxyModel<any[]>
     localArray.push(...sharedArray.map(item => this.createLocalModelBySharedByModel(item)))
     this.syncArray(sharedArray, localArray)
     return localArray
@@ -476,7 +478,7 @@ export class Collaborate {
         this.initSyncEvent(subDocument)
         localSlot.loader.markAsLoaded()
       })
-      localSlot.__changeMarker__.destroyCallbacks.push(() => {
+      localSlot.__changeMarker__.addDetachCallback(() => {
         isDestroyed = true
       })
       return sharedSlot
@@ -547,7 +549,7 @@ export class Collaborate {
           yType: subContent
         })
       })
-      slot.__changeMarker__.destroyCallbacks.push(() => {
+      slot.__changeMarker__.addDetachCallback(() => {
         isDestroyed = true
       })
       return slot
@@ -631,7 +633,7 @@ export class Collaborate {
       sharedComponent.set('metadata', sharedMetadata)
       const state = component.state as ProxyModel<Record<string, any>>
       let isDestroyed = false
-      state.__changeMarker__.destroyCallbacks.push(() => {
+      state.__changeMarker__.addDetachCallback(() => {
         isDestroyed = true
       })
       this.subModelLoader.createSubModelByComponent(component).then(subDocument => {
@@ -695,7 +697,7 @@ export class Collaborate {
               yDoc: subDocument
             })
           })
-        state.__changeMarker__.destroyCallbacks.push(() => {
+        state.__changeMarker__.addDetachCallback(() => {
           isDestroyed = true
         })
       } else if (instance instanceof Component) {
@@ -774,7 +776,7 @@ export class Collaborate {
     }
 
     sharedArray.observe(syncRemote)
-    localArray.__changeMarker__.destroyCallbacks.push(() => {
+    localArray.__changeMarker__.addDetachCallback(() => {
       sub.unsubscribe()
       sharedArray.unobserve(syncRemote)
     })
@@ -817,7 +819,7 @@ export class Collaborate {
       })
     })
 
-    localObject.__changeMarker__.destroyCallbacks.push(function () {
+    localObject.__changeMarker__.addDetachCallback(function () {
       sharedObject.unobserve(syncRemote)
       sub.unsubscribe()
     })

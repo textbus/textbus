@@ -190,7 +190,7 @@ export class Scheduler {
   }
 
   private static invokeChildComponentDestroyHook(parent: Component) {
-    parent.changeMarker.destroy(true)
+    parent.changeMarker.detach()
     // parent.slots.forEach(slot => {
     //   slot.sliceContent().forEach(i => {
     //     if (typeof i !== 'string') {

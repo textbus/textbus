@@ -1,5 +1,7 @@
 import { NativeSelectionBridge, SelectionPosition } from '@textbus/core'
+import { Injectable } from '@viewfly/core'
 
+@Injectable()
 export class NodeSelectionBridge implements NativeSelectionBridge {
   connect() {
     //

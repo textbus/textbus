@@ -1,20 +1,20 @@
 import { Observable, Subject } from '@tanbo/stream'
 
-import { Action, DestroyCallbacks, Operation } from './types'
-import { Component, invokeListener } from './component'
-import { getProxyObject, isType, ProxyModel, toRaw } from './proxy'
-import { Slot } from './slot'
-import { __markerCache } from '../help'
+import { Action, DestroyCallbacks, Operation } from '../model/types'
+import { Component, invokeListener } from '../model/component'
+import { Slot } from '../model/slot'
+import { Model, toRaw } from './observe'
+import { isType } from './util'
+import { getObserver } from './help'
 
 export type Paths = Array<string | number>
 
 let onewayUpdate = false
 
 /**
- * 用来标识组件或插槽的数据变化
+ * 用来标识数据模型的数据变化
  */
 export class ChangeMarker {
-  destroyCallbacks: DestroyCallbacks = []
   onForceChange: Observable<void>
   onChange: Observable<Operation>
   onChildComponentRemoved: Observable<Component>
@@ -32,8 +32,9 @@ export class ChangeMarker {
     return this._changed
   }
 
-  parentModel: ProxyModel<any> | null = null
+  parentModel: Model | null = null
 
+  private detachCallbacks: DestroyCallbacks = []
   private _irrevocableUpdate = false
   private _dirty = true
   private _changed = true
@@ -43,11 +44,14 @@ export class ChangeMarker {
   private forceChangeEvent = new Subject<void>()
 
   constructor(public host: object) {
-    __markerCache.add(this)
     this.onChange = this.changeEvent.asObservable()
     this.onChildComponentRemoved = this.childComponentRemovedEvent.asObservable()
     this.onSelfChange = this.selfChangeEvent.asObservable()
     this.onForceChange = this.forceChangeEvent.asObservable()
+  }
+
+  addDetachCallback(callback: () => void) {
+    this.detachCallbacks.push(callback)
   }
 
   getPaths(): Paths {
@@ -130,24 +134,19 @@ export class ChangeMarker {
     }
   }
 
-  destroy(sync = false) {
-    __markerCache.delete(this)
-    this.destroyCallbacks.forEach(i => i())
+  detach() {
+    this.detachCallbacks.forEach(i => i())
     if (this.host instanceof Slot) {
       this.host.sliceContent().forEach(i => {
         if (i instanceof Component) {
-          if (sync) {
-            i.changeMarker.destroy(sync)
-          } else {
-            this.recordComponentRemoved(i)
-          }
+          i.changeMarker.detach()
         }
       })
     } else if (Array.isArray(this.host)) {
       this.host.forEach(i => {
-        const proxy = getProxyObject(i)
+        const proxy = getObserver(i) as Model
         if (proxy) {
-          proxy.__changeMarker__.destroy(sync)
+          proxy.__changeMarker__.detach()
         }
       })
     } else if (isType(this.host, 'Object')) {
@@ -155,19 +154,19 @@ export class ChangeMarker {
       const values = Object.values(state)
       for (const value of values) {
         if (value instanceof Slot) {
-          value.__changeMarker__.destroy(sync)
+          value.__changeMarker__.detach()
         } else {
-          const proxy = getProxyObject(toRaw(value as any))
+          const proxy = getObserver(toRaw(value as any)) as Model
           if (proxy) {
-            proxy.__changeMarker__.destroy(sync)
+            proxy.__changeMarker__.detach()
           }
         }
       }
       if (this.host instanceof Component) {
-        invokeListener(this.host, 'onDestroy')
+        invokeListener(this.host, 'onDetach')
       }
     }
-    this.destroyCallbacks = []
+    this.detachCallbacks = []
   }
 
   private getPathInParent(): string | number | null {

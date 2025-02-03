@@ -31,7 +31,6 @@ import {
   Adapter
 } from './base/_api'
 import { makeError } from './_utils/make-error'
-import { __markerCache } from './help'
 
 const textbusError = makeError('Textbus')
 
@@ -303,6 +302,9 @@ export class Textbus extends ReflectiveInjector {
    * 销毁 Textbus 实例
    */
   destroy() {
+    if (this.isDestroyed) {
+      return
+    }
     this.isDestroyed = true
     this.config.onDestroy?.(this)
     this.plugins.forEach(i => i.onDestroy?.())
@@ -314,7 +316,7 @@ export class Textbus extends ReflectiveInjector {
     })
 
     const root = this.get(RootComponentRef)
-    root.component.changeMarker.destroy(true)
+    root.component?.changeMarker.detach()
     const instances = [this.get(History), this.get(Selection), this.get(Scheduler)]
     instances.forEach(i => {
       i.destroy()
@@ -322,8 +324,6 @@ export class Textbus extends ReflectiveInjector {
 
     this.recordValues.clear()
     this.normalizedProviders = []
-    __markerCache.forEach(i => i.destroy())
-    __markerCache.clear()
   }
 
   protected guardReady() {

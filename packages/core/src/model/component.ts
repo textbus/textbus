@@ -3,12 +3,13 @@ import { AbstractType, Type, InjectionToken, InjectFlags } from '@viewfly/core'
 import { makeError } from '../_utils/make-error'
 import { AsyncSlotLiteral, ContentType, Slot, SlotLiteral } from './slot'
 import { Formats } from './format'
-import { ChangeMarker } from './change-marker'
+import { ChangeMarker } from '../observable/change-marker'
 import { Shortcut, State, RawKeyAgent } from './types'
 import { Textbus } from '../textbus'
-import { createObjectProxy, objectToJSON } from './proxy'
 import { Attribute, Formatter } from './attribute'
 import { AsyncSlot } from './async-model'
+import { observe, ProxyModel } from '../observable/observe'
+import { objectToJSON } from '../observable/util'
 
 const componentErrorFn = makeError('Component')
 
@@ -117,9 +118,10 @@ export abstract class Component<T extends State = State> {
     const { componentName, type } = this.constructor as ComponentConstructor
     this.name = componentName
     this.type = type
-    this.state = createObjectProxy(initData)
-    this.changeMarker = this.state.__changeMarker__
-    this.__changeMarker__ = this.state.__changeMarker__
+    const state = observe(initData)
+    this.state = state
+    this.changeMarker = (state as ProxyModel<T>).__changeMarker__
+    this.__changeMarker__ = (state as ProxyModel<T>).__changeMarker__
     this.changeMarker.host = this
 
     const context: ComponentContext = {
@@ -318,7 +320,11 @@ export interface EventTypes {
   onBlur: () => void
   onFocusIn: () => void
   onFocusOut: () => void
+  /**
+   * @deprecated
+   */
   onDestroy: () => void
+  onDetach: () => void
   onParentSlotUpdated: () => void
   onSelectionFromFront: (event: Event<Component>) => void
   onSelectionFromEnd: (event: Event<Component>) => void
@@ -487,7 +493,12 @@ export function invokeListener(target: Component, eventType: 'onFocus'): void
 export function invokeListener(target: Component, eventType: 'onBlur'): void
 export function invokeListener(target: Component, eventType: 'onFocusIn'): void
 export function invokeListener(target: Component, eventType: 'onFocusOut'): void
+/**
+ * @deprecated
+ * 组件在 4.0 中，并不能很准确的定义销毁，请使用 onDetach 替代
+ */
 export function invokeListener(target: Component, eventType: 'onDestroy'): void
+export function invokeListener(target: Component, eventType: 'onDetach'): void
 export function invokeListener(target: Component, eventType: 'onParentSlotUpdated'): void
 export function invokeListener<K extends keyof EventTypes,
   D = EventTypes[K] extends (args: infer U) => any ?

@@ -5,7 +5,7 @@ import { AsyncComponentLiteral, Component, ComponentConstructor, ComponentLitera
 import { AsyncSlotLiteral, ContentType, Slot, SlotJSON } from './slot'
 import { FormatLiteral } from './format'
 import { Textbus } from '../textbus'
-import { createObjectProxy } from './proxy'
+import { observe } from '../observable/observe'
 
 export class AsyncModelLoader {
   onRequestLoad: Observable<void>
@@ -52,7 +52,7 @@ export abstract class AsyncComponent<M extends Metadata = Metadata,
 
   constructor(textbus: Textbus, state: T, metadata: M) {
     super(textbus, state)
-    this.metadata = createObjectProxy(metadata)
+    this.metadata = observe(metadata)
   }
 
   loader = new AsyncModelLoader()
@@ -101,7 +101,7 @@ export class AsyncSlot<M extends Metadata = Metadata> extends Slot {
 
   constructor(schema: ContentType[], metadata: M) {
     super(schema)
-    this.metadata = createObjectProxy(metadata)
+    this.metadata = observe(metadata)
   }
 
   override toJSON(): AsyncSlotJSON<M> {

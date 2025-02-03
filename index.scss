@@ -1,4 +1,11 @@
-#editor {
+.app {
+  display: flex;
+  width: 1200px;
+  margin: 0 auto;
+}
+
+.editor {
+  flex: 1;
   border: 1px solid #ccc;
 }
 
