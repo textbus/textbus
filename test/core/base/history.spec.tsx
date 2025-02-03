@@ -1,4 +1,5 @@
-import { Commander, ContentType, History, Selection, Slot } from '@textbus/core'
+import { Commander, ContentType, History, NativeSelectionBridge, Selection, Slot } from '@textbus/core'
+import { NodeSelectionBridge } from '@textbus/platform-node'
 
 import { boldFormatter, Editor, fontSizeFormatter, ParagraphComponent, RootComponent } from '../../_editor/_api'
 import { sleep } from '../../util'
@@ -8,8 +9,14 @@ describe('本地历史记录', () => {
   let paragraph: ParagraphComponent
 
   beforeEach(async () => {
-    const host = document.createElement('div')
-    editor = new Editor(host)
+    editor = new Editor(document.body, {
+      providers: [
+        {
+          provide: NativeSelectionBridge,
+          useClass: NodeSelectionBridge
+        }
+      ]
+    })
     const slot = new Slot([
       ContentType.Text,
       ContentType.BlockComponent,

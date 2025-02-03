@@ -10,6 +10,10 @@ export interface InlineComponentState {
 export class InlineComponent extends Component<InlineComponentState> {
   static componentName = 'InlineComponent'
   static type = ContentType.InlineComponent
+
+  override getSlots(): Slot[] {
+    return [this.state.slot]
+  }
 }
 
 export function InlineComponentView(props: ViewComponentProps<InlineComponent>) {

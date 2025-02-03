@@ -99,9 +99,17 @@ describe('slot 行内样式', () => {
     static componentName = 'Inline'
   }
 
-  class Block extends Component {
+  interface BlockState {
+    slot: Slot
+  }
+
+  class Block extends Component<BlockState> {
     static type = ContentType.BlockComponent
     static componentName = 'Block'
+
+    override getSlots(): Slot[] {
+      return [this.state.slot]
+    }
   }
 
   test('合并/拆分常量样式', () => {
@@ -242,7 +250,6 @@ describe('slot 行内样式', () => {
     slot.insert('1234')
     slot.insert(block)
     slot.insert('5678')
-    block.__slots__.push(block.state.slot)
     slot.applyFormat(formatter, {
       startIndex: 0,
       endIndex: 8,

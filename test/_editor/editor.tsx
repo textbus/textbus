@@ -1,4 +1,4 @@
-import { Textbus } from '@textbus/core'
+import { Textbus, TextbusConfig, Module } from '@textbus/core'
 import { BrowserModule, DomAdapter } from '@textbus/platform-browser'
 import { ViewflyAdapter, ViewflyVDomAdapter } from '@textbus/adapter-viewfly'
 import { createApp, HTMLRenderer, OutputTranslator } from '@viewfly/platform-browser'
@@ -15,7 +15,7 @@ export class Editor extends Textbus {
   translator = new OutputTranslator()
   private vDomAdapter: ViewflyVDomAdapter
 
-  constructor(host: HTMLElement) {
+  constructor(host: HTMLElement, config: TextbusConfig = {}, modules: Module[] = []) {
     const adapter = new ViewflyAdapter({
       [RootComponent.componentName]: RootComponentView,
       [ParagraphComponent.componentName]: ParagraphComponentView,
@@ -60,7 +60,8 @@ export class Editor extends Textbus {
 
     super({
       imports: [
-        browserModule
+        browserModule,
+        ...modules
       ],
       additionalAdapters: [vDomAdapter],
       components: [
@@ -74,7 +75,8 @@ export class Editor extends Textbus {
       ],
       attributes: [
         textAlignAttribute
-      ]
+      ],
+      ...config
     })
 
     this.vDomAdapter = vDomAdapter

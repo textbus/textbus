@@ -10,6 +10,10 @@ export interface ParagraphComponentState {
 export class ParagraphComponent extends Component<ParagraphComponentState> {
   static componentName = 'ParagraphComponent'
   static type = ContentType.BlockComponent
+
+  override getSlots(): Slot[] {
+    return [this.state.slot]
+  }
 }
 
 export function ParagraphComponentView(props: ViewComponentProps<ParagraphComponent>) {

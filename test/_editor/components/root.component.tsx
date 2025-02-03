@@ -10,6 +10,10 @@ export interface RootComponentState {
 export class RootComponent extends Component<RootComponentState> {
   static componentName = 'RootComponent'
   static type = ContentType.BlockComponent
+
+  override getSlots(): Slot[] {
+    return [this.state.slot]
+  }
 }
 
 export function RootComponentView(props: ViewComponentProps<RootComponent>) {

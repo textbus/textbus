@@ -1,4 +1,6 @@
-import { Commander, ContentType, RootComponentRef, Selection, Slot } from '@textbus/core'
+import { Commander, ContentType, NativeSelectionBridge, RootComponentRef, Selection, Slot } from '@textbus/core'
+import { NodeSelectionBridge } from '@textbus/platform-node'
+
 import { sleep } from '../../util'
 import {
   boldFormatter,
@@ -14,8 +16,14 @@ describe('字符串内容写入', () => {
   let editor!: Editor
 
   beforeEach(async () => {
-    const host = document.createElement('div')
-    editor = new Editor(host)
+    editor = new Editor(document.body, {
+      providers: [
+        {
+          provide: NativeSelectionBridge,
+          useClass: NodeSelectionBridge
+        }
+      ]
+    })
     const root = new RootComponent(editor, {
       slot: new Slot([
         ContentType.Text
@@ -143,8 +151,14 @@ describe('组件内容写入', () => {
   let editor!: Editor
 
   beforeEach(async () => {
-    const host = document.createElement('div')
-    editor = new Editor(host)
+    editor = new Editor(document.body, {
+      providers: [
+        {
+          provide: NativeSelectionBridge,
+          useClass: NodeSelectionBridge
+        }
+      ]
+    })
     const root = new RootComponent(editor, {
       slot: new Slot([
         ContentType.Text,
@@ -197,8 +211,14 @@ describe('内容删除', () => {
   let editor!: Editor
 
   beforeEach(async () => {
-    const host = document.createElement('div')
-    editor = new Editor(host)
+    editor = new Editor(document.body, {
+      providers: [
+        {
+          provide: NativeSelectionBridge,
+          useClass: NodeSelectionBridge
+        }
+      ]
+    })
     const slot = new Slot([
       ContentType.Text,
       ContentType.BlockComponent,
@@ -276,8 +296,14 @@ describe('应用样式和属性', () => {
   let paragraph: ParagraphComponent
   let inline: InlineComponent
   beforeEach(async () => {
-    const host = document.createElement('div')
-    editor = new Editor(host)
+    editor = new Editor(document.body, {
+      providers: [
+        {
+          provide: NativeSelectionBridge,
+          useClass: NodeSelectionBridge
+        }
+      ]
+    })
     const slot = new Slot([
       ContentType.Text,
       ContentType.BlockComponent,

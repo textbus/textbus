@@ -1,4 +1,6 @@
-import { ContentType, Query, QueryStateType, RootComponentRef, Selection, Slot } from '@textbus/core'
+import { ContentType, NativeSelectionBridge, Query, QueryStateType, RootComponentRef, Selection, Slot } from '@textbus/core'
+import { NodeSelectionBridge } from '@textbus/platform-node'
+
 import {
   boldFormatter,
   Editor,
@@ -12,8 +14,14 @@ import {
 describe('样式查询', () => {
   let editor!: Editor
   beforeEach(async () => {
-    const host = document.createElement('div')
-    editor = new Editor(host)
+    editor = new Editor(document.body, {
+      providers: [
+        {
+          provide: NativeSelectionBridge,
+          useClass: NodeSelectionBridge
+        }
+      ]
+    })
     const slot = new Slot([
       ContentType.Text,
       ContentType.BlockComponent,
@@ -78,8 +86,14 @@ describe('属性查询', () => {
   let paragraph: ParagraphComponent
   let inline: InlineComponent
   beforeEach(async () => {
-    const host = document.createElement('div')
-    editor = new Editor(host)
+    editor = new Editor(document.body, {
+      providers: [
+        {
+          provide: NativeSelectionBridge,
+          useClass: NodeSelectionBridge
+        }
+      ]
+    })
     const slot = new Slot([
       ContentType.Text,
       ContentType.BlockComponent,
@@ -138,8 +152,14 @@ describe('组件查询', () => {
   let paragraph: ParagraphComponent
 
   beforeEach(async () => {
-    const host = document.createElement('div')
-    editor = new Editor(host)
+    editor = new Editor(document.body, {
+      providers: [
+        {
+          provide: NativeSelectionBridge,
+          useClass: NodeSelectionBridge
+        }
+      ]
+    })
     const slot = new Slot([
       ContentType.Text,
       ContentType.BlockComponent,
