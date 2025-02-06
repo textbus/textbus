@@ -57,9 +57,10 @@ export class Slot {
   }
 
   /** 插槽变更标记器 */
-  __changeMarker__ = new ChangeMarker(this)
+  readonly __changeMarker__ = new ChangeMarker(this)
+  readonly changeMarker = this.__changeMarker__
 
-  onContentChange: Observable<Action[]>
+  readonly onContentChange: Observable<Action[]>
 
   readonly schema: ContentType[]
 

@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@tanbo/stream':
-        specifier: ^1.2.6
-        version: 1.2.6
+        specifier: ^1.2.7
+        version: 1.2.7
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -172,8 +172,8 @@ importers:
   packages/adapter-react:
     dependencies:
       '@tanbo/stream':
-        specifier: ^1.2.6
-        version: 1.2.6
+        specifier: ^1.2.7
+        version: 1.2.7
       '@textbus/core':
         specifier: ^4.3.1
         version: 4.3.9
@@ -206,8 +206,8 @@ importers:
   packages/adapter-viewfly:
     dependencies:
       '@tanbo/stream':
-        specifier: ^1.2.6
-        version: 1.2.6
+        specifier: ^1.2.7
+        version: 1.2.7
       '@textbus/core':
         specifier: ^4.3.4
         version: 4.3.9
@@ -243,8 +243,8 @@ importers:
   packages/adapter-vue:
     dependencies:
       '@tanbo/stream':
-        specifier: ^1.2.6
-        version: 1.2.6
+        specifier: ^1.2.7
+        version: 1.2.7
       '@textbus/core':
         specifier: ^4.3.1
         version: 4.3.9
@@ -277,8 +277,8 @@ importers:
         specifier: ^2.13.6
         version: 2.13.6(y-protocols@1.0.6(yjs@13.6.14))(yjs@13.6.14)
       '@tanbo/stream':
-        specifier: ^1.2.6
-        version: 1.2.6
+        specifier: ^1.2.7
+        version: 1.2.7
       '@textbus/core':
         specifier: ^4.3.4
         version: 4.3.9
@@ -311,8 +311,8 @@ importers:
   packages/core:
     dependencies:
       '@tanbo/stream':
-        specifier: ^1.2.6
-        version: 1.2.6
+        specifier: ^1.2.7
+        version: 1.2.7
       '@viewfly/core':
         specifier: ^1.1.10
         version: 1.1.10
@@ -336,8 +336,8 @@ importers:
   packages/platform-browser:
     dependencies:
       '@tanbo/stream':
-        specifier: ^1.2.6
-        version: 1.2.6
+        specifier: ^1.2.7
+        version: 1.2.7
       '@textbus/core':
         specifier: ^4.3.4
         version: 4.3.9
@@ -364,8 +364,8 @@ importers:
   packages/platform-node:
     dependencies:
       '@tanbo/stream':
-        specifier: ^1.2.6
-        version: 1.2.6
+        specifier: ^1.2.7
+        version: 1.2.7
       '@textbus/core':
         specifier: ^4.3.4
         version: 4.3.9
@@ -1564,8 +1564,8 @@ packages:
   '@tanbo/json-parser@0.0.2':
     resolution: {integrity: sha512-oNKMDlIC9iHkl1DXzURiMRH9zTcM25w2MzZ5lWGj8HB2JW12H7ZkkJ7zd3n56rd5T8fuUhc0vblucI9p5BFc6A==}
 
-  '@tanbo/stream@1.2.6':
-    resolution: {integrity: sha512-dFiYqg8C7AtJfqWp37BAqyxdjGXsXqNxcXlOZNJjJegTjjLsJspyfpAajU3VP/g7Xa5rnX6tJY1qB0hP620GUg==}
+  '@tanbo/stream@1.2.7':
+    resolution: {integrity: sha512-ATKVjpQFmr7x+iCKGOGWFzrtB5ZsNef6UKATWZs1R1eE16pyrBwl2AZrnALi+eQQTxOo5Ol6Rmck2BBBgBAnmA==}
 
   '@textbus/core@4.3.9':
     resolution: {integrity: sha512-AgFmR/9fdpF9Zc704jlUC5vNpypaeM0IUa5YbaOLnF1QdXVEZFOVr6D52LekQkywJw4XOsy5cNpZbOqZ0M9fzA==}
@@ -8872,22 +8872,22 @@ snapshots:
 
   '@tanbo/json-parser@0.0.2': {}
 
-  '@tanbo/stream@1.2.6': {}
+  '@tanbo/stream@1.2.7': {}
 
   '@textbus/core@4.3.9':
     dependencies:
-      '@tanbo/stream': 1.2.6
+      '@tanbo/stream': 1.2.7
       '@viewfly/core': 1.1.10
 
   '@textbus/platform-browser@4.3.9':
     dependencies:
-      '@tanbo/stream': 1.2.6
+      '@tanbo/stream': 1.2.7
       '@textbus/core': 4.3.9
       '@viewfly/core': 1.1.10
 
   '@textbus/platform-node@4.3.9':
     dependencies:
-      '@tanbo/stream': 1.2.6
+      '@tanbo/stream': 1.2.7
       '@textbus/core': 4.3.9
       '@viewfly/core': 1.1.10
       '@viewfly/platform-browser': 1.1.10

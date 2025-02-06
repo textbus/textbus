@@ -410,6 +410,7 @@ export class Collaborate {
 
   destroy() {
     this.subscriptions.forEach(i => i.unsubscribe())
+    this.subscriptions = []
   }
 
   private syncSharedMapToLocalMap(sharedMap: YMap<any>, localMap: ProxyModel<Record<string, any>>) {

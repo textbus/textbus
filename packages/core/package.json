@@ -25,7 +25,7 @@
     "typescript editor"
   ],
   "dependencies": {
-    "@tanbo/stream": "^1.2.6",
+    "@tanbo/stream": "^1.2.7",
     "@viewfly/core": "^1.1.10"
   },
   "devDependencies": {

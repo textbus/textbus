@@ -115,7 +115,7 @@
     "webpack-dev-server": "^4.7.1"
   },
   "dependencies": {
-    "@tanbo/stream": "^1.2.6",
+    "@tanbo/stream": "^1.2.7",
     "reflect-metadata": "^0.2.2",
     "y-webrtc": "^10.0.4",
     "y-websocket": "^1.4.3",

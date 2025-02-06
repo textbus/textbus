@@ -324,6 +324,7 @@ export class Textbus extends ReflectiveInjector {
 
     this.recordValues.clear()
     this.normalizedProviders = []
+    this.beforeDestroyCallbacks = []
   }
 
   protected guardReady() {

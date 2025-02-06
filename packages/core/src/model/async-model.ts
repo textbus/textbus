@@ -6,6 +6,7 @@ import { AsyncSlotLiteral, ContentType, Slot, SlotJSON } from './slot'
 import { FormatLiteral } from './format'
 import { Textbus } from '../textbus'
 import { observe } from '../observable/observe'
+import { detachModel } from '../observable/help'
 
 export class AsyncModelLoader {
   onRequestLoad: Observable<void>
@@ -53,6 +54,9 @@ export abstract class AsyncComponent<M extends Metadata = Metadata,
   constructor(textbus: Textbus, state: T, metadata: M) {
     super(textbus, state)
     this.metadata = observe(metadata)
+    this.changeMarker.addDetachCallback(() => {
+      detachModel(this.metadata)
+    })
   }
 
   loader = new AsyncModelLoader()
@@ -97,11 +101,14 @@ export class AsyncSlotJSON<T> extends SlotJSON implements AsyncSlotLiteral<T> {
  */
 export class AsyncSlot<M extends Metadata = Metadata> extends Slot {
   loader = new AsyncModelLoader()
-  metadata: M
+  readonly metadata: M
 
   constructor(schema: ContentType[], metadata: M) {
     super(schema)
     this.metadata = observe(metadata)
+    this.changeMarker.addDetachCallback(() => {
+      detachModel(this.metadata)
+    })
   }
 
   override toJSON(): AsyncSlotJSON<M> {
