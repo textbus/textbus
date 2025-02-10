@@ -15,14 +15,14 @@ importers:
         specifier: ^0.2.2
         version: 0.2.2
       y-webrtc:
-        specifier: ^10.0.4
-        version: 10.2.6(yjs@13.6.14)
+        specifier: ^10.3.0
+        version: 10.3.0(yjs@13.6.23)
       y-websocket:
-        specifier: ^1.4.3
-        version: 1.5.1(yjs@13.6.14)
+        specifier: ^2.1.0
+        version: 2.1.0(yjs@13.6.23)
       yjs:
-        specifier: ^13.6.14
-        version: 13.6.14
+        specifier: ^13.6.23
+        version: 13.6.23
     devDependencies:
       '@babel/core':
         specifier: ^7.16.5
@@ -32,7 +32,7 @@ importers:
         version: 7.23.6(@babel/core@7.23.6)
       '@hocuspocus/server':
         specifier: ^2.13.6
-        version: 2.13.6(y-protocols@1.0.6(yjs@13.6.14))(yjs@13.6.14)
+        version: 2.13.6(y-protocols@1.0.6(yjs@13.6.23))(yjs@13.6.23)
       '@tanbo/json-parser':
         specifier: ^0.0.2
         version: 0.0.2
@@ -178,7 +178,7 @@ importers:
         specifier: ^4.3.10
         version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.3.10
+        specifier: ^4.3.11
         version: link:../platform-browser
       react:
         specifier: ^17.0.0 || ^18.0.0
@@ -212,7 +212,7 @@ importers:
         specifier: ^4.3.4
         version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.3.10
+        specifier: ^4.3.11
         version: link:../platform-browser
       '@textbus/platform-node':
         specifier: ^4.3.10
@@ -249,7 +249,7 @@ importers:
         specifier: ^4.3.10
         version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.3.10
+        specifier: ^4.3.11
         version: link:../platform-browser
       vue:
         specifier: ^3.4.28
@@ -286,8 +286,8 @@ importers:
         specifier: ^1.1.10
         version: 1.1.10
       y-websocket:
-        specifier: ^1.5.4
-        version: 1.5.4(yjs@13.6.23)
+        specifier: ^2.1.0
+        version: 2.1.0(yjs@13.6.23)
       yjs:
         specifier: ^13.6.23
         version: 13.6.23
@@ -1930,10 +1930,12 @@ packages:
   abstract-leveldown@6.2.3:
     resolution: {integrity: sha512-BsLm5vFMRUrrLeCcRc+G0t2qOaTzpoJQLOubq2XM72eNpjF5UdU5o/5NvlNhx95XHcAvcl8OMXr4mlg/fRgUXQ==}
     engines: {node: '>=6'}
+    deprecated: Superseded by abstract-level (https://github.com/Level/community#faq)
 
   abstract-leveldown@6.3.0:
     resolution: {integrity: sha512-TU5nlYgta8YrBMNpc9FwQzRbiXsj49gsALsXadbGHt9CROPzX5fB0rWDR5mtdpOOKa5XqRFpbj1QroPAoPzVjQ==}
     engines: {node: '>=6'}
+    deprecated: Superseded by abstract-level (https://github.com/Level/community#faq)
 
   accepts@1.3.8:
     resolution: {integrity: sha512-PYAthTa2m2VKxuvSD3DPC/Gy+U+sOA1LAuT8mkmRuvw+NACSaeXEQ+NHcVF7rONl6qcaxV3Uuemwawk+7+SJLw==}
@@ -3029,6 +3031,7 @@ packages:
   deferred-leveldown@5.3.0:
     resolution: {integrity: sha512-a59VOT+oDy7vtAbLRCZwWgxu2BaCfd5Hk7wxJd48ei7I+nsg8Orlb9CLG0PMZienk9BSUKgeAqkO2+Lw+1+Ukw==}
     engines: {node: '>=6'}
+    deprecated: Superseded by abstract-level (https://github.com/Level/community#faq)
 
   define-data-property@1.1.1:
     resolution: {integrity: sha512-E7uGkTzkk1d0ByLeSc6ZsFS79Axg+m1P/VsgYsxHgiuc3tFSj+MjMIwe90FC4lOAZzNBdY7kkO2P2wKdsQ1vgQ==}
@@ -3202,6 +3205,7 @@ packages:
   encoding-down@6.3.0:
     resolution: {integrity: sha512-QKrV0iKR6MZVJV08QY0wp1e7vF6QbhnbQhb07bwpEyuz4uZiZgPlEGdkCROuFkUwdxlFaiPIhjyarH1ee/3vhw==}
     engines: {node: '>=6'}
+    deprecated: Superseded by abstract-level (https://github.com/Level/community#faq)
 
   encoding@0.1.13:
     resolution: {integrity: sha512-ETBauow1T35Y/WZMkio9jiM0Z5xjHHmJ4XmjZOq1l/dXz3lr2sRn87nJy20RupqSh1F2m3HHPSp8ShIPQJrJ3A==}
@@ -4627,14 +4631,17 @@ packages:
   level-codec@9.0.2:
     resolution: {integrity: sha512-UyIwNb1lJBChJnGfjmO0OR+ezh2iVu1Kas3nvBS/BzGnx79dv6g7unpKIDNPMhfdTEGoc7mC8uAu51XEtX+FHQ==}
     engines: {node: '>=6'}
+    deprecated: Superseded by level-transcoder (https://github.com/Level/community#faq)
 
   level-concat-iterator@2.0.1:
     resolution: {integrity: sha512-OTKKOqeav2QWcERMJR7IS9CUo1sHnke2C0gkSmcR7QuEtFNLLzHQAvnMw8ykvEcv0Qtkg0p7FOwP1v9e5Smdcw==}
     engines: {node: '>=6'}
+    deprecated: Superseded by abstract-level (https://github.com/Level/community#faq)
 
   level-errors@2.0.1:
     resolution: {integrity: sha512-UVprBJXite4gPS+3VznfgDSU8PTRuVX0NXwoWW50KLxd2yw4Y1t2JUR5In1itQnudZqRMT9DlAM3Q//9NCjCFw==}
     engines: {node: '>=6'}
+    deprecated: Superseded by abstract-level (https://github.com/Level/community#faq)
 
   level-iterator-stream@4.0.2:
     resolution: {integrity: sha512-ZSthfEqzGSOMWoUGhTXdX9jv26d32XJuHz/5YnuHZzH6wldfWMOVwI9TBtKcya4BKTyTt3XVA0A3cF3q5CY30Q==}
@@ -4642,10 +4649,12 @@ packages:
 
   level-js@5.0.2:
     resolution: {integrity: sha512-SnBIDo2pdO5VXh02ZmtAyPP6/+6YTJg2ibLtl9C34pWvmtMEmRTWpra+qO/hifkUtBTOtfx6S9vLDjBsBK4gRg==}
+    deprecated: Superseded by browser-level (https://github.com/Level/community#faq)
 
   level-packager@5.1.1:
     resolution: {integrity: sha512-HMwMaQPlTC1IlcwT3+swhqf/NUO+ZhXVz6TY1zZIIZlIR0YSn8GtAAWmIvKjNY16ZkEg/JcpAuQskxsXqC0yOQ==}
     engines: {node: '>=6'}
+    deprecated: Superseded by abstract-level (https://github.com/Level/community#faq)
 
   level-supports@1.0.1:
     resolution: {integrity: sha512-rXM7GYnW8gsl1vedTJIbzOrRv85c/2uCMpiiCzO2fndd06U/kUXEEU9evYn4zFggBOg36IsBW8LzqIpETwwQzg==}
@@ -4658,10 +4667,12 @@ packages:
   leveldown@5.6.0:
     resolution: {integrity: sha512-iB8O/7Db9lPaITU1aA2txU/cBEXAt4vWwKQRrrWuS6XDgbP4QZGj9BL2aNbwb002atoQ/lIotJkfyzz+ygQnUQ==}
     engines: {node: '>=8.6.0'}
+    deprecated: Superseded by classic-level (https://github.com/Level/community#faq)
 
   levelup@4.4.0:
     resolution: {integrity: sha512-94++VFO3qN95cM/d6eBXvd894oJE0w3cInq9USsyQzzoJxmiYzPAocNcuGCPGGjoXqDVJcr3C1jzt1TSjyaiLQ==}
     engines: {node: '>=6'}
+    deprecated: Superseded by abstract-level (https://github.com/Level/community#faq)
 
   leven@3.1.0:
     resolution: {integrity: sha512-qsda+H8jTaUaN/x5vzW2rzc+8Rw4TAQ/4KjB46IwK5VH+IlVeeeje/EoZRpiXvIqjFgK84QffqPztGI3VBLG1A==}
@@ -7184,22 +7195,15 @@ packages:
     peerDependencies:
       yjs: ^13.0.0
 
-  y-webrtc@10.2.6:
-    resolution: {integrity: sha512-1kZ4YYwksFZi8+l8mTebVX9vW6Q5MnqxMkvNU700X5dBE38usurt/JgeXSIQRpK3NwUYYb9y63Jn9FMpMH6/vA==}
+  y-webrtc@10.3.0:
+    resolution: {integrity: sha512-KalJr7dCgUgyVFxoG3CQYbpS0O2qybegD0vI4bYnYHI0MOwoVbucED3RZ5f2o1a5HZb1qEssUKS0H/Upc6p1lA==}
     engines: {node: '>=12'}
     hasBin: true
     peerDependencies:
       yjs: ^13.6.8
 
-  y-websocket@1.5.1:
-    resolution: {integrity: sha512-fi7G9RXzNQpW9S59DA0dgkdNBMF0hyaUGpXkRXiyUH2UIEEcQ9cv6gxf45lDzdmXgBtvw6Sk0DNuzKWmJIHimg==}
-    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
-    hasBin: true
-    peerDependencies:
-      yjs: ^13.5.6
-
-  y-websocket@1.5.4:
-    resolution: {integrity: sha512-Y3021uy0anOIHqAPyAZbNDoR05JuMEGjRNI8c+K9MHzVS8dWoImdJUjccljAznc8H2L7WkIXhRHZ1igWNRSgPw==}
+  y-websocket@2.1.0:
+    resolution: {integrity: sha512-WHYDRqomaGkkaujtowCDwL8KYk+t1zQCGIgKyvxvchhjTQlMgWXRHJK+FDEcWmHA7I7o/4fy0eniOrtmz0e4mA==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
     hasBin: true
     peerDependencies:
@@ -7247,10 +7251,6 @@ packages:
 
   yargs@7.1.2:
     resolution: {integrity: sha512-ZEjj/dQYQy0Zx0lgLMLR8QuaqTihnxirir7EwUHp1Axq4e3+k8jXU5K0VLbNvedv1f4EWtBonDIZm0NUr+jCcA==}
-
-  yjs@13.6.14:
-    resolution: {integrity: sha512-D+7KcUr0j+vBCUSKXXEWfA+bG4UQBviAwP3gYBhkstkgwy5+8diOPMx0iqLIOxNo/HxaREUimZRxqHGAHCL2BQ==}
-    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
 
   yjs@13.6.23:
     resolution: {integrity: sha512-ExtnT5WIOVpkL56bhLeisG/N5c4fmzKn4k0ROVfJa5TY2QHbH7F0Wu2T5ZhR7ErsFWQEFafyrnSI8TPKVF9Few==}
@@ -8265,7 +8265,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@hocuspocus/server@2.13.6(y-protocols@1.0.6(yjs@13.6.14))(yjs@13.6.14)':
+  '@hocuspocus/server@2.13.6(y-protocols@1.0.6(yjs@13.6.23))(yjs@13.6.23)':
     dependencies:
       '@hocuspocus/common': 2.13.6
       async-lock: 1.4.1
@@ -8273,8 +8273,8 @@ snapshots:
       lib0: 0.2.88
       uuid: 10.0.0
       ws: 8.18.0
-      y-protocols: 1.0.6(yjs@13.6.14)
-      yjs: 13.6.14
+      y-protocols: 1.0.6(yjs@13.6.23)
+      yjs: 13.6.23
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -15699,59 +15699,34 @@ snapshots:
 
   xtend@4.0.2: {}
 
-  y-leveldb@0.1.2(yjs@13.6.14):
-    dependencies:
-      level: 6.0.1
-      lib0: 0.2.88
-      yjs: 13.6.14
-    optional: true
-
   y-leveldb@0.1.2(yjs@13.6.23):
     dependencies:
       level: 6.0.1
-      lib0: 0.2.88
+      lib0: 0.2.99
       yjs: 13.6.23
     optional: true
 
-  y-protocols@1.0.6(yjs@13.6.14):
-    dependencies:
-      lib0: 0.2.88
-      yjs: 13.6.14
-
   y-protocols@1.0.6(yjs@13.6.23):
     dependencies:
-      lib0: 0.2.88
+      lib0: 0.2.99
       yjs: 13.6.23
 
-  y-webrtc@10.2.6(yjs@13.6.14):
+  y-webrtc@10.3.0(yjs@13.6.23):
     dependencies:
-      lib0: 0.2.88
+      lib0: 0.2.99
       simple-peer: 9.11.1
-      y-protocols: 1.0.6(yjs@13.6.14)
-      yjs: 13.6.14
+      y-protocols: 1.0.6(yjs@13.6.23)
+      yjs: 13.6.23
     optionalDependencies:
-      ws: 8.15.1
+      ws: 8.18.0
     transitivePeerDependencies:
       - bufferutil
       - supports-color
       - utf-8-validate
 
-  y-websocket@1.5.1(yjs@13.6.14):
+  y-websocket@2.1.0(yjs@13.6.23):
     dependencies:
-      lib0: 0.2.88
-      lodash.debounce: 4.0.8
-      y-protocols: 1.0.6(yjs@13.6.14)
-      yjs: 13.6.14
-    optionalDependencies:
-      ws: 6.2.2
-      y-leveldb: 0.1.2(yjs@13.6.14)
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-
-  y-websocket@1.5.4(yjs@13.6.23):
-    dependencies:
-      lib0: 0.2.88
+      lib0: 0.2.99
       lodash.debounce: 4.0.8
       y-protocols: 1.0.6(yjs@13.6.23)
       yjs: 13.6.23
@@ -15818,10 +15793,6 @@ snapshots:
       which-module: 1.0.0
       y18n: 3.2.2
       yargs-parser: 5.0.1
-
-  yjs@13.6.14:
-    dependencies:
-      lib0: 0.2.88
 
   yjs@13.6.23:
     dependencies:

@@ -17,7 +17,8 @@ function App() {
   const root = new RootComponent(editor, {
     slot: new Slot([
       ContentType.BlockComponent
-    ])
+    ]),
+    items: []
   })
 
   onMounted(() => {

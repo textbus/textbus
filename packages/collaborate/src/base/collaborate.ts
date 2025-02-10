@@ -723,6 +723,10 @@ export class Collaborate {
    * @private
    */
   private syncArray(sharedArray: YArray<any>, localArray: ProxyModel<any[]>) {
+    function logError(type: string) {
+      console.error(collaborateErrorFn(`${type} error, length exceeded, path in ${localArray.__changeMarker__.getPaths().join('/')}`))
+    }
+
     const sub = localArray.__changeMarker__.onSelfChange.subscribe((actions) => {
       this.runLocalUpdate(sharedArray.doc, !localArray.__changeMarker__.irrevocableUpdate, () => {
         let index = 0
@@ -739,18 +743,32 @@ export class Collaborate {
               const data = ref.map(item => {
                 return this.createSharedModelByLocalModel(item)
               })
-              sharedArray.insert(index, data)
+              if (index < sharedArray.length) {
+                sharedArray.insert(index, data)
+              } else {
+                sharedArray.insert(sharedArray.length, data)
+                logError('insert')
+              }
             }
               break
             case 'delete':
               if (action.count <= 0) {
                 break
               }
-              sharedArray.delete(index, action.count)
+              if (index < sharedArray.length) {
+                sharedArray.delete(index, action.count)
+              } else {
+                logError('delete')
+              }
               break
             case 'setIndex':
-              sharedArray.delete(action.index, 1)
-              sharedArray.insert(action.index, [this.createSharedModelByLocalModel(action.ref)])
+              if (action.index < sharedArray.length) {
+                sharedArray.delete(action.index, 1)
+                sharedArray.insert(action.index, [this.createSharedModelByLocalModel(action.ref)])
+              } else {
+                sharedArray.insert(sharedArray.length, [this.createSharedModelByLocalModel(action.ref)])
+                logError('setIndex')
+              }
               break
           }
         }

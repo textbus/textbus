@@ -6,6 +6,8 @@ import { Textbus } from '@textbus/core'
 import { RootComponent, RootComponentView } from './components/root.component'
 import { ParagraphComponent, ParagraphComponentView } from './components/paragraph.component'
 import { fontSizeFormatter } from './formatters/font-size'
+import { CollaborateModule, SyncConnector, YWebsocketConnector } from '@textbus/collaborate'
+import { Doc } from 'yjs'
 
 export class TestEditor extends Textbus {
   constructor(getHost: () => HTMLElement) {
@@ -29,6 +31,11 @@ export class TestEditor extends Textbus {
       },
       // useContentEditable: true
     })
+    const collab = new CollaborateModule({
+      createConnector(yDoc: Doc): SyncConnector {
+        return new YWebsocketConnector('ws://localhost:1234', 'test', yDoc)
+      }
+    })
     super({
       components: [
         RootComponent,
@@ -38,7 +45,8 @@ export class TestEditor extends Textbus {
         fontSizeFormatter
       ],
       imports: [
-        browserModule
+        browserModule,
+        collab
       ]
     })
   }

@@ -5,7 +5,8 @@ import { ViewComponentProps } from '@textbus/adapter-viewfly'
 import { SlotRender } from '../common/slot-render'
 
 export interface RooComponentState {
-  slot: Slot
+  slot: Slot,
+  items: number[]
 }
 
 export class RootComponent extends Component<RooComponentState> {
@@ -47,10 +48,11 @@ export class RootComponent extends Component<RooComponentState> {
 export function RootComponentView(props: ViewComponentProps<RootComponent>) {
   const { slot } = props.component.state
 
+  ;(window as any)['testItems'] = props.component.state.items
   return () => {
-    // console.log('rootComponent')
     return (
       <div ref={props.rootRef}>
+        <div>{props.component.state.items.join('')}</div>
         <SlotRender slot={slot}/>
       </div>
     )

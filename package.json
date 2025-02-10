@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "start": "webpack-dev-server",
+    "serve": "npx y-websocket HOST=localhost PORT=1234 ",
     "build:lib": "lerna run build:lib",
     "publish:lib": "lerna publish",
     "lint-staged": "lint-staged",
@@ -117,9 +118,9 @@
   "dependencies": {
     "@tanbo/stream": "^1.2.7",
     "reflect-metadata": "^0.2.2",
-    "y-webrtc": "^10.0.4",
-    "y-websocket": "^1.4.3",
-    "yjs": "^13.6.14"
+    "y-webrtc": "^10.3.0",
+    "y-websocket": "^2.1.0",
+    "yjs": "^13.6.23"
   },
   "repository": {
     "type": "git",
