@@ -25,12 +25,12 @@
     "typescript editor"
   ],
   "dependencies": {
-    "@hocuspocus/provider": "^2.13.6",
+    "@hocuspocus/provider": "^2.15.2",
     "@tanbo/stream": "^1.2.7",
     "@textbus/core": "^4.3.4",
     "@viewfly/core": "^1.1.10",
-    "y-websocket": "^1.4.3",
-    "yjs": "^13.6.14"
+    "y-websocket": "^1.5.4",
+    "yjs": "^13.6.23"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^23.0.2",

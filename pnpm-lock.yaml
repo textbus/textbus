@@ -175,11 +175,11 @@ importers:
         specifier: ^1.2.7
         version: 1.2.7
       '@textbus/core':
-        specifier: ^4.3.1
-        version: 4.3.9
+        specifier: ^4.3.10
+        version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.3.1
-        version: 4.3.9
+        specifier: ^4.3.10
+        version: link:../platform-browser
       react:
         specifier: ^17.0.0 || ^18.0.0
         version: 18.2.0
@@ -210,13 +210,13 @@ importers:
         version: 1.2.7
       '@textbus/core':
         specifier: ^4.3.4
-        version: 4.3.9
+        version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.3.4
-        version: 4.3.9
+        specifier: ^4.3.10
+        version: link:../platform-browser
       '@textbus/platform-node':
-        specifier: ^4.3.4
-        version: 4.3.9
+        specifier: ^4.3.10
+        version: link:../platform-node
       '@viewfly/core':
         specifier: ^1.1.10
         version: 1.1.10
@@ -246,11 +246,11 @@ importers:
         specifier: ^1.2.7
         version: 1.2.7
       '@textbus/core':
-        specifier: ^4.3.1
-        version: 4.3.9
+        specifier: ^4.3.10
+        version: link:../core
       '@textbus/platform-browser':
-        specifier: ^4.3.1
-        version: 4.3.9
+        specifier: ^4.3.10
+        version: link:../platform-browser
       vue:
         specifier: ^3.4.28
         version: 3.4.28(typescript@5.4.5)
@@ -274,23 +274,23 @@ importers:
   packages/collaborate:
     dependencies:
       '@hocuspocus/provider':
-        specifier: ^2.13.6
-        version: 2.13.6(y-protocols@1.0.6(yjs@13.6.14))(yjs@13.6.14)
+        specifier: ^2.15.2
+        version: 2.15.2(y-protocols@1.0.6(yjs@13.6.23))(yjs@13.6.23)
       '@tanbo/stream':
         specifier: ^1.2.7
         version: 1.2.7
       '@textbus/core':
         specifier: ^4.3.4
-        version: 4.3.9
+        version: link:../core
       '@viewfly/core':
         specifier: ^1.1.10
         version: 1.1.10
       y-websocket:
-        specifier: ^1.4.3
-        version: 1.5.1(yjs@13.6.14)
+        specifier: ^1.5.4
+        version: 1.5.4(yjs@13.6.23)
       yjs:
-        specifier: ^13.6.14
-        version: 13.6.14
+        specifier: ^13.6.23
+        version: 13.6.23
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^23.0.2
@@ -340,7 +340,7 @@ importers:
         version: 1.2.7
       '@textbus/core':
         specifier: ^4.3.4
-        version: 4.3.9
+        version: link:../core
       '@viewfly/core':
         specifier: ^1.1.10
         version: 1.1.10
@@ -368,7 +368,7 @@ importers:
         version: 1.2.7
       '@textbus/core':
         specifier: ^4.3.4
-        version: 4.3.9
+        version: link:../core
       '@viewfly/core':
         specifier: ^1.1.10
         version: 1.1.10
@@ -1153,8 +1153,11 @@ packages:
   '@hocuspocus/common@2.13.6':
     resolution: {integrity: sha512-jeEawHoaBckfbjMRPqjANjtQkeHgCBsk3XN7CEs/1jvUm60d86FT4y5fp3MWTEE18qkZacbZldn32za+72RBdg==}
 
-  '@hocuspocus/provider@2.13.6':
-    resolution: {integrity: sha512-84tBdGU8275SXQirRQ5FbBGwsQ6iLNuIbmV2SV6/f361phBoAVUSobJ+CYAzdIJPlfIYSL2BwGJSRbbDhqJdJw==}
+  '@hocuspocus/common@2.15.2':
+    resolution: {integrity: sha512-wU1wxXNnQQMXyeL3mdSDYiQsm/r/QyJVjjQhF7sUBrLnjdsN7bA1cvfcSvJBr1ymrMSeYRmUL3UlQmEHEOaP7w==}
+
+  '@hocuspocus/provider@2.15.2':
+    resolution: {integrity: sha512-mdBurviyaUd7bQx4vMIE39WqRJDTpfFelHOVXr7w/jA8G1E7K7lxQ9/DacSrbg+9o8s+1z1+SerZiUjaToaBJg==}
     peerDependencies:
       y-protocols: ^1.0.6
       yjs: ^13.6.8
@@ -1566,15 +1569,6 @@ packages:
 
   '@tanbo/stream@1.2.7':
     resolution: {integrity: sha512-ATKVjpQFmr7x+iCKGOGWFzrtB5ZsNef6UKATWZs1R1eE16pyrBwl2AZrnALi+eQQTxOo5Ol6Rmck2BBBgBAnmA==}
-
-  '@textbus/core@4.3.9':
-    resolution: {integrity: sha512-AgFmR/9fdpF9Zc704jlUC5vNpypaeM0IUa5YbaOLnF1QdXVEZFOVr6D52LekQkywJw4XOsy5cNpZbOqZ0M9fzA==}
-
-  '@textbus/platform-browser@4.3.9':
-    resolution: {integrity: sha512-B0tg0wKxG0/aULQYTakEsChkKAZRhrkw9Yc64TsYw8Ml5KN27B4CHg34Ol4RI3mvGkhNn8ewbyX4ygD2sahNCQ==}
-
-  '@textbus/platform-node@4.3.9':
-    resolution: {integrity: sha512-dOjDDrfbOKty5T64hwPGULMq71X80Tz4qWJR2tLrhJNdsygx/FCGXy6v1UYOWIgNtT5Cx3SIBQevfmePxwVY+A==}
 
   '@tootallnate/once@2.0.0':
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
@@ -4682,6 +4676,11 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
+  lib0@0.2.99:
+    resolution: {integrity: sha512-vwztYuUf1uf/1zQxfzRfO5yzfNKhTtgOByCruuiQQxWQXnPb8Itaube5ylofcV0oM0aKal9Mv+S1s1Ky0UYP1w==}
+    engines: {node: '>=16'}
+    hasBin: true
+
   libnpmaccess@7.0.2:
     resolution: {integrity: sha512-vHBVMw1JFMTgEk15zRsJuSAg7QtGGHpUSEfnbcRL1/gTBag9iEfJbyjpDmdJmwMhvpoLoNBtdAUCdGnaP32hhw==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
@@ -7199,6 +7198,13 @@ packages:
     peerDependencies:
       yjs: ^13.5.6
 
+  y-websocket@1.5.4:
+    resolution: {integrity: sha512-Y3021uy0anOIHqAPyAZbNDoR05JuMEGjRNI8c+K9MHzVS8dWoImdJUjccljAznc8H2L7WkIXhRHZ1igWNRSgPw==}
+    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
+    hasBin: true
+    peerDependencies:
+      yjs: ^13.5.6
+
   y18n@3.2.2:
     resolution: {integrity: sha512-uGZHXkHnhF0XeeAPgnKfPv1bgKAYyVvmNL1xlKsPYZPaIHxGti2hHqvOCQv71XMsLxu1QjergkqogUnms5D3YQ==}
 
@@ -7244,6 +7250,10 @@ packages:
 
   yjs@13.6.14:
     resolution: {integrity: sha512-D+7KcUr0j+vBCUSKXXEWfA+bG4UQBviAwP3gYBhkstkgwy5+8diOPMx0iqLIOxNo/HxaREUimZRxqHGAHCL2BQ==}
+    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
+
+  yjs@13.6.23:
+    resolution: {integrity: sha512-ExtnT5WIOVpkL56bhLeisG/N5c4fmzKn4k0ROVfJa5TY2QHbH7F0Wu2T5ZhR7ErsFWQEFafyrnSI8TPKVF9Few==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
 
   yocto-queue@0.1.0:
@@ -8239,14 +8249,18 @@ snapshots:
     dependencies:
       lib0: 0.2.88
 
-  '@hocuspocus/provider@2.13.6(y-protocols@1.0.6(yjs@13.6.14))(yjs@13.6.14)':
+  '@hocuspocus/common@2.15.2':
     dependencies:
-      '@hocuspocus/common': 2.13.6
+      lib0: 0.2.88
+
+  '@hocuspocus/provider@2.15.2(y-protocols@1.0.6(yjs@13.6.23))(yjs@13.6.23)':
+    dependencies:
+      '@hocuspocus/common': 2.15.2
       '@lifeomic/attempt': 3.1.0
       lib0: 0.2.88
       ws: 8.18.0
-      y-protocols: 1.0.6(yjs@13.6.14)
-      yjs: 13.6.14
+      y-protocols: 1.0.6(yjs@13.6.23)
+      yjs: 13.6.23
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -8873,24 +8887,6 @@ snapshots:
   '@tanbo/json-parser@0.0.2': {}
 
   '@tanbo/stream@1.2.7': {}
-
-  '@textbus/core@4.3.9':
-    dependencies:
-      '@tanbo/stream': 1.2.7
-      '@viewfly/core': 1.1.10
-
-  '@textbus/platform-browser@4.3.9':
-    dependencies:
-      '@tanbo/stream': 1.2.7
-      '@textbus/core': 4.3.9
-      '@viewfly/core': 1.1.10
-
-  '@textbus/platform-node@4.3.9':
-    dependencies:
-      '@tanbo/stream': 1.2.7
-      '@textbus/core': 4.3.9
-      '@viewfly/core': 1.1.10
-      '@viewfly/platform-browser': 1.1.10
 
   '@tootallnate/once@2.0.0': {}
 
@@ -12940,6 +12936,10 @@ snapshots:
     dependencies:
       isomorphic.js: 0.2.5
 
+  lib0@0.2.99:
+    dependencies:
+      isomorphic.js: 0.2.5
+
   libnpmaccess@7.0.2:
     dependencies:
       npm-package-arg: 10.1.0
@@ -15706,10 +15706,22 @@ snapshots:
       yjs: 13.6.14
     optional: true
 
+  y-leveldb@0.1.2(yjs@13.6.23):
+    dependencies:
+      level: 6.0.1
+      lib0: 0.2.88
+      yjs: 13.6.23
+    optional: true
+
   y-protocols@1.0.6(yjs@13.6.14):
     dependencies:
       lib0: 0.2.88
       yjs: 13.6.14
+
+  y-protocols@1.0.6(yjs@13.6.23):
+    dependencies:
+      lib0: 0.2.88
+      yjs: 13.6.23
 
   y-webrtc@10.2.6(yjs@13.6.14):
     dependencies:
@@ -15733,6 +15745,19 @@ snapshots:
     optionalDependencies:
       ws: 6.2.2
       y-leveldb: 0.1.2(yjs@13.6.14)
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  y-websocket@1.5.4(yjs@13.6.23):
+    dependencies:
+      lib0: 0.2.88
+      lodash.debounce: 4.0.8
+      y-protocols: 1.0.6(yjs@13.6.23)
+      yjs: 13.6.23
+    optionalDependencies:
+      ws: 6.2.2
+      y-leveldb: 0.1.2(yjs@13.6.23)
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -15797,5 +15822,9 @@ snapshots:
   yjs@13.6.14:
     dependencies:
       lib0: 0.2.88
+
+  yjs@13.6.23:
+    dependencies:
+      lib0: 0.2.99
 
   yocto-queue@0.1.0: {}
