@@ -743,7 +743,7 @@ export class Collaborate {
               const data = ref.map(item => {
                 return this.createSharedModelByLocalModel(item)
               })
-              if (index < sharedArray.length) {
+              if (index <= sharedArray.length) {
                 sharedArray.insert(index, data)
               } else {
                 sharedArray.insert(sharedArray.length, data)
