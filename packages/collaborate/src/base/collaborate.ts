@@ -827,8 +827,14 @@ export class Collaborate {
       this.runLocalUpdate(sharedObject.doc, !localObject.__changeMarker__.irrevocableUpdate, () => {
         for (const action of actions) {
           switch (action.type) {
-            case 'propSet':
-              sharedObject.set(action.key, this.createSharedModelByLocalModel(action.ref))
+            case 'propSet': {
+              const subModel = this.createSharedModelByLocalModel(action.ref)
+              sharedObject.set(action.key, subModel)
+              if (sharedObject.size === 0) {
+                // 奇怪的 bug，设置了子模型，但子模型会标记为 deleted，导致设置后无效
+                console.error(collaborateErrorFn(`prop set error, key is ${action.key}`))
+              }
+            }
               break
             case 'propDelete':
               sharedObject.delete(action.key)
