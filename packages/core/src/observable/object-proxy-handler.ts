@@ -49,7 +49,11 @@ export class ObjectProxyHandler<T extends object> implements ProxyHandler<T> {
     if (p === markKey) {
       return objectChangeMarkerCache.get(target)
     }
+    const has = Object.hasOwn(target, p)
     const value = Reflect.get(target, p, receiver)
+    if (!has) {
+      return value
+    }
     const subModel = observe(value as any)
     attachModel(getObserver(target)!, subModel as unknown as Model)
     return subModel
