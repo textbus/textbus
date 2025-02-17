@@ -24,7 +24,7 @@ describe('字符串内容写入', () => {
         }
       ]
     })
-    const root = new RootComponent(editor, {
+    const root = new RootComponent({
       slot: new Slot([
         ContentType.Text
       ])
@@ -134,7 +134,7 @@ describe('字符串内容写入', () => {
     const rootComponentRef = editor.get(RootComponentRef)
 
     selection.selectFirstPosition(rootComponentRef.component, false, true)
-    commander.write(new ParagraphComponent(editor, {
+    commander.write(new ParagraphComponent({
       slot: new Slot([
         ContentType.Text
       ])
@@ -159,7 +159,7 @@ describe('组件内容写入', () => {
         }
       ]
     })
-    const root = new RootComponent(editor, {
+    const root = new RootComponent({
       slot: new Slot([
         ContentType.Text,
         ContentType.BlockComponent,
@@ -179,7 +179,7 @@ describe('组件内容写入', () => {
 
     selection.selectFirstPosition(rootComponentRef.component, false, true)
     commander.write('textbus', boldFormatter, true)
-    commander.write(new ParagraphComponent(editor, {
+    commander.write(new ParagraphComponent({
       slot: new Slot([
         ContentType.Text,
       ])
@@ -196,7 +196,7 @@ describe('组件内容写入', () => {
 
     selection.selectFirstPosition(rootComponentRef.component, false, true)
     commander.write('textbus', boldFormatter, true)
-    commander.write(new InlineComponent(editor, {
+    commander.write(new InlineComponent({
       slot: new Slot([
         ContentType.Text
       ])
@@ -224,11 +224,11 @@ describe('内容删除', () => {
       ContentType.BlockComponent,
       ContentType.InlineComponent
     ])
-    const root = new RootComponent(editor, {
+    const root = new RootComponent({
       slot
     })
     slot.insert('hello,', boldFormatter, true)
-    slot.insert(new InlineComponent(editor, {
+    slot.insert(new InlineComponent({
       slot: new Slot([
         ContentType.Text
       ])
@@ -309,11 +309,11 @@ describe('应用样式和属性', () => {
       ContentType.BlockComponent,
       ContentType.InlineComponent
     ])
-    const root = new RootComponent(editor, {
+    const root = new RootComponent({
       slot
     })
     slot.insert('hello,')
-    paragraph = new ParagraphComponent(editor, {
+    paragraph = new ParagraphComponent({
       slot: new Slot([
         ContentType.Text
       ])
@@ -321,7 +321,7 @@ describe('应用样式和属性', () => {
     paragraph.state.slot.insert('content')
     slot.insert(paragraph)
     slot.insert('textbus!')
-    inline = new InlineComponent(editor, {
+    inline = new InlineComponent({
       slot: new Slot([
         ContentType.Text
       ])
