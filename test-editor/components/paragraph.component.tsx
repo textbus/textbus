@@ -26,11 +26,7 @@ export class ParagraphComponent extends Component<ParagraphComponentState> {
 
   static fromJSON(textbus: Textbus, state: any) {
     state.slot = textbus.get(Registry).createSlot(state.slot)
-    return new ParagraphComponent(textbus, state)
-  }
-
-  constructor(textbus: Textbus, state: ParagraphComponentState) {
-    super(textbus, state)
+    return new ParagraphComponent(state)
   }
 
   override getSlots(): Slot[] {
@@ -38,7 +34,6 @@ export class ParagraphComponent extends Component<ParagraphComponentState> {
   }
 
   override setup() {
-    const context = useContext()
     const commander = useContext(Commander)
     const selection = useContext(Selection)
     const self = useSelf()
@@ -46,7 +41,7 @@ export class ParagraphComponent extends Component<ParagraphComponentState> {
     onBreak(ev => {
       ev.preventDefault()
       const nextContent = ev.target.cut(ev.data.index)
-      const p = new ParagraphComponent(context, {
+      const p = new ParagraphComponent({
         slot: nextContent
       })
       commander.insertAfter(p, self)

@@ -14,7 +14,7 @@ function App() {
     return editorRef.current as HTMLElement
   })
 
-  const root = new RootComponent(editor, {
+  const root = new RootComponent({
     slot: new Slot([
       ContentType.BlockComponent
     ]),

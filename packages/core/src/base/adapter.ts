@@ -1,10 +1,11 @@
 import { Observable } from '@tanbo/stream'
 import { Injector } from '@viewfly/core'
 
-import { Component, invokeListener } from '../model/component'
+import { Component } from '../model/component'
 import { Slot } from '../model/slot'
 import { NodeLocation, VElement, VTextNode } from '../model/element'
 import { createBidirectionalMapping, replaceEmpty } from '../_utils/tools'
+import { invokeListener } from '../model/on-events'
 
 export interface ViewMount<ViewComponent, NativeElement> {
   (host: NativeElement, viewComponent: ViewComponent, injector: Injector): (void | (() => void))

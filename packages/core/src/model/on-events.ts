@@ -154,10 +154,6 @@ export interface EventTypes {
   onBlur: () => void
   onFocusIn: () => void
   onFocusOut: () => void
-  /**
-   * @deprecated
-   */
-  onDestroy: () => void
   onDetach: () => void
   onParentSlotUpdated: () => void
   onSelectionFromFront: (event: Event<Component>) => void
@@ -261,11 +257,6 @@ export function invokeListener(target: Component, eventType: 'onFocus'): void
 export function invokeListener(target: Component, eventType: 'onBlur'): void
 export function invokeListener(target: Component, eventType: 'onFocusIn'): void
 export function invokeListener(target: Component, eventType: 'onFocusOut'): void
-/**
- * @deprecated
- * 组件在 4.0 中，并不能很准确的定义销毁，请使用 onDetach 替代
- */
-export function invokeListener(target: Component, eventType: 'onDestroy'): void
 export function invokeListener(target: Component, eventType: 'onDetach'): void
 export function invokeListener(target: Component, eventType: 'onParentSlotUpdated'): void
 export function invokeListener<K extends keyof EventTypes,
@@ -281,7 +272,7 @@ export function invokeListener<K extends keyof EventTypes,
     callbacks.forEach(fn => {
       return (fn as any)(event)
     })
-    if (eventType === 'onDestroy') {
+    if (eventType === 'onDetach') {
       eventCacheMap.delete(target)
     }
   }
@@ -396,10 +387,6 @@ export const onContentInsert = makeEventHook('onContentInsert')
 export const onContentInserted = makeEventHook('onContentInserted')
 
 /**
- * 组件销毁时的勾子
- */
-export const onDestroy = makeEventHook('onDestroy')
-/**
  * 当组件为选区公共父组件时的勾子
  */
 export const onGetRanges = makeEventHook('onGetRanges')
@@ -427,3 +414,8 @@ export const onSlotSetAttribute = makeEventHook('onSlotSetAttribute')
  * 当组件插槽应用格式时触发
  */
 export const onSlotApplyFormat = makeEventHook('onSlotApplyFormat')
+
+/**
+ * 当组件从数据模型上剥离时触发
+ */
+export const onDetach = makeEventHook('onDetach')

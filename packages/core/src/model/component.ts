@@ -107,6 +107,8 @@ export abstract class Component<T extends State = State> {
   readonly changeMarker: ChangeMarker
   readonly __changeMarker__: ChangeMarker
 
+  textbus: Textbus | null = null
+
   constructor(initData: T) {
 
     const { componentName, type } = this.constructor as ComponentConstructor
