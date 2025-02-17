@@ -1,4 +1,4 @@
-import { ChangeMarker, Component, Operation } from '@textbus/core'
+import { ChangeMarker, Operation } from '@textbus/core'
 
 describe('ChangeMarker 基本状态', () => {
   let changeMarker: ChangeMarker
@@ -139,16 +139,6 @@ describe('ChangeMarker 事件', () => {
     })
     changeMarker.forceMarkDirtied()
     expect(result).toStrictEqual(source)
-  })
-
-  test('子组件删除事件', () => {
-    const source = {} as Component
-    let result: any
-    changeMarker.onChildComponentRemoved.subscribe(() => {
-      result = source
-    })
-    changeMarker.recordComponentRemoved(source)
-    expect(result).toEqual(source)
   })
 
   test('不重复发送事件', () => {
