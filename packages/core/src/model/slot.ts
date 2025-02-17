@@ -8,6 +8,7 @@ import { ChangeMarker } from '../observable/change-marker'
 import { Action } from './types'
 import { VElement, VTextNode } from './element'
 import { makeError } from '../_utils/make-error'
+import { setup } from './setup'
 
 const slotError = makeError('Slot')
 
@@ -304,6 +305,9 @@ export class Slot {
         content.parent.removeComponent(content)
       }
       content.changeMarker.parentModel = this
+      if (this.parent?.textbus) {
+        setup(this.parent.textbus, content)
+      }
     }
     let formats: Formats = []
     const isBlockContent = content instanceof Component && content.type === ContentType.BlockComponent
@@ -512,8 +516,9 @@ export class Slot {
             ref: item
           }
         }
+        item.textbus = null
         item.changeMarker.parentModel = null
-        this.__changeMarker__.recordComponentRemoved(item)
+        item.changeMarker.detach()
         return {
           type: 'contentInsert',
           content: item.toJSON(),

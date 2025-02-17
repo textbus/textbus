@@ -1,11 +1,12 @@
 import { Observable, Subject } from '@tanbo/stream'
 
 import { Action, DestroyCallbacks, Operation } from '../model/types'
-import { Component, invokeListener } from '../model/component'
+import { Component } from '../model/component'
 import { Slot } from '../model/slot'
 import { Model, toRaw } from './observe'
 import { isType } from './util'
 import { getObserver } from './help'
+import { invokeListener } from '../model/on-events'
 
 export type Paths = Array<string | number>
 
@@ -17,7 +18,6 @@ let onewayUpdate = false
 export class ChangeMarker {
   onForceChange: Observable<void>
   onChange: Observable<Operation>
-  onChildComponentRemoved: Observable<Component>
   onSelfChange: Observable<Action[]>
 
   get irrevocableUpdate() {
@@ -45,7 +45,6 @@ export class ChangeMarker {
 
   constructor(public host: object) {
     this.onChange = this.changeEvent.asObservable()
-    this.onChildComponentRemoved = this.childComponentRemovedEvent.asObservable()
     this.onSelfChange = this.selfChangeEvent.asObservable()
     this.onForceChange = this.forceChangeEvent.asObservable()
   }
@@ -125,13 +124,6 @@ export class ChangeMarker {
 
   reset() {
     this._changed = this._dirty = true
-  }
-
-  recordComponentRemoved(instance: Component) {
-    this.childComponentRemovedEvent.next(instance)
-    if (this.parentModel) {
-      this.parentModel.__changeMarker__.recordComponentRemoved(instance)
-    }
   }
 
   detach() {

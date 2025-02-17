@@ -1,7 +1,7 @@
 import { Injectable } from '@viewfly/core'
 import { map, microTask, Observable, Subject, Subscription, take } from '@tanbo/stream'
 
-import { Component, Operation } from '../model/_api'
+import { Operation } from '../model/_api'
 import { RootComponentRef } from './_injection-tokens'
 import { Selection } from './selection'
 import { Adapter } from './adapter'
@@ -62,7 +62,6 @@ export class Scheduler {
   private _lastChangesHasRemoteUpdate = false
   private changeFromRemote = false
   private changeFromHistory = false
-  private instanceList = new Set<Component>()
 
   private docChangedEvent = new Subject<ChangeItem[]>()
   private docChangeEvent = new Subject<void>()
@@ -147,9 +146,6 @@ export class Scheduler {
         })
         this.docChangedEvent.next(ops)
       }),
-      changeMarker.onChildComponentRemoved.subscribe(instance => {
-        this.instanceList.add(instance)
-      }),
       this.adapter.onViewUpdated.pipe(microTask()).subscribe(() => {
         const tasks = this.updatedTasks
         this.updatedTasks = []
@@ -157,21 +153,6 @@ export class Scheduler {
           fn()
         })
         this.selection.restore(this._lastChangesHasLocalUpdate)
-        this.instanceList.forEach(instance => {
-          let comp = instance
-          while (comp) {
-            const parent = comp.parentComponent
-            if (parent) {
-              comp = parent
-            } else {
-              break
-            }
-          }
-          if (comp !== rootComponent) {
-            Scheduler.invokeChildComponentDestroyHook(comp)
-          }
-        })
-        this.instanceList.clear()
       })
     )
   }
@@ -182,21 +163,6 @@ export class Scheduler {
   destroy() {
     this.updatedTasks = []
     this.subs.forEach(i => i.unsubscribe())
-    const component = this.rootComponentRef.component
-    if (component) {
-      Scheduler.invokeChildComponentDestroyHook(component)
-    }
     this.subs = []
-  }
-
-  private static invokeChildComponentDestroyHook(parent: Component) {
-    parent.changeMarker.detach()
-    // parent.slots.forEach(slot => {
-    //   slot.sliceContent().forEach(i => {
-    //     if (typeof i !== 'string') {
-    //       Scheduler.invokeChildComponentDestroyHook(i)
-    //     }
-    //   })
-    // })
   }
 }

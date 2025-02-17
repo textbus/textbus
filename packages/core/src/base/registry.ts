@@ -77,7 +77,7 @@ export class Registry {
   createComponentByData(name: string, data: any, metadata?: Metadata) {
     const factory = this.getComponent(name)
     if (factory) {
-      return new factory(this.textbus, data, metadata)
+      return new factory(data, metadata)
     }
     return null
   }

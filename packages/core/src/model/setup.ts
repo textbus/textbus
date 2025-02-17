@@ -2,7 +2,7 @@ import { Component } from './component'
 
 import { Textbus } from '../textbus'
 import { makeError } from '../_utils/make-error'
-import { EventCache, eventCacheMap, EventTypes, onDestroy } from './on-events'
+import { EventCache, eventCacheMap, EventTypes, onDetach } from './on-events'
 
 const componentErrorFn = makeError('Component')
 
@@ -25,19 +25,31 @@ export function getCurrentContext() {
 }
 
 export function setup(textbus: Textbus, component: Component<any>) {
+  if (component.textbus) {
+    return
+  }
   const context: ComponentContext = {
     textbus,
     componentInstance: component,
     eventCache: new EventCache<EventTypes>(),
   }
   contextStack.push(context)
+  component.textbus = textbus
+  onDetach(() => {
+    eventCacheMap.delete(component)
+  })
   if (typeof component.setup === 'function') {
     component.setup()
   }
 
-  onDestroy(() => {
-    eventCacheMap.delete(component)
+  component.slots.forEach(slot => {
+    slot.sliceContent().forEach(i => {
+      if (i instanceof Component) {
+        setup(textbus, i)
+      }
+    })
   })
+
   eventCacheMap.set(component, context.eventCache)
   contextStack.pop()
 }

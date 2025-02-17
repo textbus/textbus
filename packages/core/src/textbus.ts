@@ -31,6 +31,7 @@ import {
   Adapter
 } from './base/_api'
 import { makeError } from './_utils/make-error'
+import { setup } from './model/setup'
 
 const textbusError = makeError('Textbus')
 
@@ -184,6 +185,8 @@ export class Textbus extends ReflectiveInjector {
     }
     const rootComponentRef = this.get(RootComponentRef)
     rootComponentRef.component = rootComponent
+
+    setup(this, rootComponent)
 
     const callbacks: Array<(() => void) | Promise<(() => void) | void> | null> = []
 

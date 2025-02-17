@@ -15,11 +15,7 @@ export class RootComponent extends Component<RooComponentState> {
 
   static fromJSON(textbus: Textbus, state: any) {
     state.slot = textbus.get(Registry).createSlot(state.slot)
-    return new RootComponent(textbus, state)
-  }
-
-  constructor(textbus: Textbus, state: RooComponentState) {
-    super(textbus, state)
+    return new RootComponent(state)
   }
 
   override getSlots(): Slot[] {
@@ -33,7 +29,7 @@ export class RootComponent extends Component<RooComponentState> {
         const slot = new Slot([
           ContentType.Text
         ])
-        const p = new ParagraphComponent(this.textbus, {
+        const p = new ParagraphComponent({
           slot
         })
         slot.insert(ev.data.content)
