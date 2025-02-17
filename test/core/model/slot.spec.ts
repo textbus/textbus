@@ -31,8 +31,8 @@ describe('slot 数据限制', () => {
   test('不能插入任何内容', () => {
     const slot = new Slot([])
     slot.insert('x')
-    const inline = new Inline(textbus, {})
-    const block = new Block(textbus, {})
+    const inline = new Inline({})
+    const block = new Block({})
     slot.insert(inline)
     slot.insert(block)
 
@@ -46,8 +46,8 @@ describe('slot 数据限制', () => {
       ContentType.Text
     ])
     slot.insert('x')
-    const inline = new Inline(textbus, {})
-    const block = new Block(textbus, {})
+    const inline = new Inline({})
+    const block = new Block({})
     slot.insert(inline)
     slot.insert(block)
 
@@ -136,7 +136,7 @@ describe('slot 行内样式', () => {
       formatter
     })
     slot.retain(4)
-    slot.insert(new Inline(textbus, {}))
+    slot.insert(new Inline({}))
     expect(slot.getFormats().length).toBe(2)
     expect(slot.getFormats()).toEqual([{
       startIndex: 2,
@@ -192,7 +192,7 @@ describe('slot 行内样式', () => {
       formatter
     })
     slot.retain(4)
-    slot.insert(new Inline(textbus, {}))
+    slot.insert(new Inline({}))
     expect(slot.getFormats().length).toBe(2)
     expect(slot.getFormats()).toEqual([{
       startIndex: 2,
@@ -224,7 +224,7 @@ describe('slot 行内样式', () => {
         return createVNode('span', { test: formatValue }, children)
       }
     })
-    const inline = new Inline(textbus, {})
+    const inline = new Inline({})
     slot.insert('1234')
     slot.insert(inline)
     slot.insert('5678')
@@ -246,7 +246,7 @@ describe('slot 行内样式', () => {
         return createVNode('span', { test: formatValue }, children)
       }
     })
-    const block = new Block(textbus, { slot: new Slot([ContentType.Text]) })
+    const block = new Block({ slot: new Slot([ContentType.Text]) })
     slot.insert('1234')
     slot.insert(block)
     slot.insert('5678')
@@ -322,7 +322,7 @@ describe('样式范围自动更新', () => {
         return createVNode('span', { test: formatValue }, children)
       }
     })
-    const inline = new Inline(textbus, {})
+    const inline = new Inline({})
     const slot = new Slot([
       ContentType.Text,
       ContentType.InlineComponent

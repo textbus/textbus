@@ -27,11 +27,11 @@ describe('样式查询', () => {
       ContentType.BlockComponent,
       ContentType.InlineComponent
     ])
-    const root = new RootComponent(editor, {
+    const root = new RootComponent({
       slot
     })
     slot.insert('hello,', boldFormatter, true)
-    const p = new ParagraphComponent(editor, {
+    const p = new ParagraphComponent({
       slot: new Slot([
         ContentType.Text
       ])
@@ -99,11 +99,11 @@ describe('属性查询', () => {
       ContentType.BlockComponent,
       ContentType.InlineComponent
     ])
-    const root = new RootComponent(editor, {
+    const root = new RootComponent({
       slot
     })
     slot.insert('hello,')
-    paragraph = new ParagraphComponent(editor, {
+    paragraph = new ParagraphComponent({
       slot: new Slot([
         ContentType.Text
       ])
@@ -112,7 +112,7 @@ describe('属性查询', () => {
     paragraph.state.slot.setAttribute(textAlignAttribute, 'right')
     slot.insert(paragraph)
     slot.insert('textbus!')
-    inline = new InlineComponent(editor, {
+    inline = new InlineComponent({
       slot: new Slot([
         ContentType.Text
       ])
@@ -165,11 +165,11 @@ describe('组件查询', () => {
       ContentType.BlockComponent,
       ContentType.InlineComponent
     ])
-    const root = new RootComponent(editor, {
+    const root = new RootComponent({
       slot
     })
     slot.insert('hello,', boldFormatter, true)
-    const p = new ParagraphComponent(editor, {
+    const p = new ParagraphComponent({
       slot: new Slot([
         ContentType.Text
       ])

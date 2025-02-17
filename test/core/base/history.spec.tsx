@@ -22,11 +22,11 @@ describe('本地历史记录', () => {
       ContentType.BlockComponent,
       ContentType.InlineComponent
     ])
-    const root = new RootComponent(editor, {
+    const root = new RootComponent({
       slot
     })
     slot.insert('hello,', boldFormatter, true)
-    const p = new ParagraphComponent(editor, {
+    const p = new ParagraphComponent({
       slot: new Slot([
         ContentType.Text
       ])

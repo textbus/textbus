@@ -19,7 +19,7 @@ class MockSyncConnector extends SyncConnector {
   }
 
   override onDestroy() {
-
+    //
   }
 }
 
@@ -39,7 +39,7 @@ describe('ObservableSync', () => {
         return new MockSyncConnector()
       }
     })])
-    const root = new RootComponent(editor, {
+    const root = new RootComponent({
       slot: new Slot([
         ContentType.Text
       ])

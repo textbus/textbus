@@ -7,7 +7,7 @@ describe('样式渲染', () => {
 
   beforeEach(async () => {
     editor = new Editor(document.body)
-    const root = new RootComponent(editor, {
+    const root = new RootComponent({
       slot: new Slot([
         ContentType.Text
       ])
