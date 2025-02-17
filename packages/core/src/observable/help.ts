@@ -3,6 +3,7 @@ import { Slot } from '../model/slot'
 import { Component } from '../model/component'
 import { ChangeMarker } from './change-marker'
 import { makeError } from '../_utils/make-error'
+import { setup } from '../model/setup'
 
 export function isModel(value: any): value is Model {
   return value instanceof Slot || value instanceof Component || proxyToRawCache.has(value)
@@ -40,6 +41,17 @@ export function attachModel(parentModel: Model, subModel: unknown) {
     throw attachErrorFn('A data model cannot appear on two nodes.')
   }
   subCM.parentModel = parentModel
+
+  if (subModel instanceof Slot) {
+    const textbus = subModel.parent?.textbus
+    if (textbus) {
+      subModel.sliceContent().forEach(i => {
+        if (i instanceof Component) {
+          setup(textbus, i)
+        }
+      })
+    }
+  }
 }
 
 export function detachModel(...models: any[]) {

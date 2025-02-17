@@ -1,12 +1,13 @@
 import { Inject, Injectable } from '@viewfly/core'
 import { map, Observable, Subject, Subscription } from '@tanbo/stream'
 
-import { AsyncSlotJSON, Component, ComponentLiteral, Formats, Operation, Paths, Slot, SlotJSON } from '../model/_api'
+import { AsyncSlotJSON, Component, ComponentLiteral, Formats, Operation, Slot, SlotJSON } from '../model/_api'
 import { Selection } from './selection'
 import { Registry } from './registry'
 import { HISTORY_STACK_SIZE, RootComponentRef } from './_injection-tokens'
 import { ChangeOrigin, Scheduler } from './scheduler'
 import { makeError } from '../_utils/make-error'
+import { Paths } from '../observable/change-marker'
 
 interface SelectionPaths {
   anchor: Paths

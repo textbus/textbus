@@ -51,8 +51,8 @@ export abstract class AsyncComponent<M extends Metadata = Metadata,
   T extends State = State> extends Component<T> {
   metadata: M
 
-  constructor(textbus: Textbus, state: T, metadata: M) {
-    super(textbus, state)
+  constructor(state: T, metadata: M) {
+    super(state)
     this.metadata = observe(metadata)
     this.changeMarker.addDetachCallback(() => {
       detachModel(this.metadata)
