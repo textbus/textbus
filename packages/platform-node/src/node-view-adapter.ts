@@ -9,7 +9,6 @@ import {
   JSX,
   JSXNode, onUnmounted,
   onUpdated,
-  withAnnotation
 } from '@viewfly/core'
 
 export interface ViewVDomComponentProps<T extends Component> {
@@ -126,9 +125,7 @@ export class NodeViewAdapter extends Adapter<VDOMElement, VDOMText, JSX.Element,
 
     let isRoot = true
     Object.entries(components).forEach(([key, viewFlyComponent]) => {
-      this.components[key] = withAnnotation({
-        ...viewFlyComponent.annotation
-      }, (props: ViewVDomComponentProps<Component>) => {
+      this.components[key] = (props: ViewVDomComponentProps<Component>) => {
         const comp = getCurrentInstance()
         const textbusComponent = props.component
         const subscription = merge(textbusComponent.changeMarker.onChange,
@@ -154,7 +151,7 @@ export class NodeViewAdapter extends Adapter<VDOMElement, VDOMText, JSX.Element,
           }
         })
         return viewFlyComponent(props)
-      })
+      }
     })
   }
 
