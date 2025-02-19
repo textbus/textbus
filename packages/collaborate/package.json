@@ -27,8 +27,8 @@
   "dependencies": {
     "@hocuspocus/provider": "^2.15.2",
     "@tanbo/stream": "^1.2.7",
-    "@textbus/core": "^4.3.4",
-    "@viewfly/core": "^1.1.10",
+    "@textbus/core": "^5.0.0-alpha.0",
+    "@viewfly/core": "^1.2.0",
     "y-websocket": "^2.1.0",
     "yjs": "^13.6.23"
   },

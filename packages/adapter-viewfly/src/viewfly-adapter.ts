@@ -8,7 +8,6 @@ import {
   JSXNode, onUnmounted,
   onUpdated, ReflectiveInjector,
   ViewFlyNode,
-  withAnnotation,
 } from '@viewfly/core'
 import { DomAdapter } from '@textbus/platform-browser'
 
@@ -124,9 +123,7 @@ export class ViewflyAdapter extends DomAdapter<ViewFlyNode, ViewFlyNode> {
 
     let isRoot = true
     Object.entries(components).forEach(([key, viewFlyComponent]) => {
-      this.components[key] = withAnnotation({
-        ...viewFlyComponent.annotation
-      }, (props: ViewComponentProps<Component>) => {
+      this.components[key] = (props: ViewComponentProps<Component>) => {
         const comp = getCurrentInstance()
         const textbusComponent = props.component
         const subscription = merge(textbusComponent.changeMarker.onChange,
@@ -152,7 +149,7 @@ export class ViewflyAdapter extends DomAdapter<ViewFlyNode, ViewFlyNode> {
           }
         })
         return viewFlyComponent(props)
-      })
+      }
     })
   }
 

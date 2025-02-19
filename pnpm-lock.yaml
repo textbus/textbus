@@ -52,11 +52,11 @@ importers:
         specifier: ^5.8.0
         version: 5.62.0(eslint@8.56.0)(typescript@5.4.5)
       '@viewfly/core':
-        specifier: ^1.1.10
-        version: 1.1.10
+        specifier: ^1.2.0
+        version: 1.2.0
       '@viewfly/platform-browser':
-        specifier: ^1.1.10
-        version: 1.1.10
+        specifier: ^1.2.0
+        version: 1.2.0
       add-assets-webpack-plugin:
         specifier: ^1.0.0
         version: 1.0.0
@@ -218,11 +218,11 @@ importers:
         specifier: ^4.3.10
         version: link:../platform-node
       '@viewfly/core':
-        specifier: ^1.1.10
-        version: 1.1.10
+        specifier: ^1.2.0
+        version: 1.2.0
       '@viewfly/platform-browser':
-        specifier: ^1.1.10
-        version: 1.1.10
+        specifier: ^1.2.0
+        version: 1.2.0
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^23.0.2
@@ -280,11 +280,11 @@ importers:
         specifier: ^1.2.7
         version: 1.2.7
       '@textbus/core':
-        specifier: ^4.3.4
-        version: link:../core
+        specifier: ^5.0.0-alpha.0
+        version: 5.0.0-alpha.0
       '@viewfly/core':
-        specifier: ^1.1.10
-        version: 1.1.10
+        specifier: ^1.2.0
+        version: 1.2.0
       y-websocket:
         specifier: ^2.1.0
         version: 2.1.0(yjs@13.6.23)
@@ -314,8 +314,8 @@ importers:
         specifier: ^1.2.7
         version: 1.2.7
       '@viewfly/core':
-        specifier: ^1.1.10
-        version: 1.1.10
+        specifier: ^1.2.0
+        version: 1.2.0
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^23.0.2
@@ -342,8 +342,8 @@ importers:
         specifier: ^4.3.4
         version: link:../core
       '@viewfly/core':
-        specifier: ^1.1.10
-        version: 1.1.10
+        specifier: ^1.2.0
+        version: 1.2.0
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^23.0.2
@@ -370,11 +370,11 @@ importers:
         specifier: ^4.3.4
         version: link:../core
       '@viewfly/core':
-        specifier: ^1.1.10
-        version: 1.1.10
+        specifier: ^1.2.0
+        version: 1.2.0
       '@viewfly/platform-browser':
-        specifier: ^1.1.10
-        version: 1.1.10
+        specifier: ^1.2.0
+        version: 1.2.0
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^23.0.2
@@ -1570,6 +1570,9 @@ packages:
   '@tanbo/stream@1.2.7':
     resolution: {integrity: sha512-ATKVjpQFmr7x+iCKGOGWFzrtB5ZsNef6UKATWZs1R1eE16pyrBwl2AZrnALi+eQQTxOo5Ol6Rmck2BBBgBAnmA==}
 
+  '@textbus/core@5.0.0-alpha.0':
+    resolution: {integrity: sha512-NjAP8lYydUZ1YZp2ATrH2jipn5ojH65Qng+FSmrfIPE9mZV2+INOHSzTzrlXF09HCeRvbgcSVpjH6gPk6aCMtQ==}
+
   '@tootallnate/once@2.0.0':
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
     engines: {node: '>= 10'}
@@ -1798,11 +1801,14 @@ packages:
   '@ungap/structured-clone@1.2.0':
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
 
-  '@viewfly/core@1.1.10':
-    resolution: {integrity: sha512-boIOB7KAf7G4AuNEe0YT/fTNm9sIOIbwrkkQG0tvLGJok4NTtI0n5AYrRyeCDDVqGr9NoMf5Ii+LMXHfCh+lOg==}
+  '@viewfly/core@1.2.0':
+    resolution: {integrity: sha512-U0gnvVJnfO9qU/Z+4y8+r9A6VnUsqX4U5a4HPfwWgOQBYFGlxyCZM0GoekHN0qNWjkBeiANo2eyKrbAq6cJl5Q==}
 
-  '@viewfly/platform-browser@1.1.10':
-    resolution: {integrity: sha512-2U65pl6JMaSvWPbk9UQZ1b9LgOqRUwUkgjHn+rXZ3yEElU7l3BgYMNGcyua/K3A3PcIvVmGjcKEjxUq+L/MO4Q==}
+  '@viewfly/core@2.0.0-alpha.1':
+    resolution: {integrity: sha512-j7LmR5gQqEKOxk0tvfSU2GHekpZ5pZh0bzJ0FcjX2WtrSQPDfqSpWCpJ/j/cTNmd7xcVzCTNuKnWIYhfY3hJ1w==}
+
+  '@viewfly/platform-browser@1.2.0':
+    resolution: {integrity: sha512-MEH1IY2P6meLyz7oVQeQyw9V4RNHledt0F1WNv3ZviuwvfNpTvhjQB3vv59abQImTrOlsXYrr7wZFit8hoLqYw==}
 
   '@vue/compiler-core@3.4.28':
     resolution: {integrity: sha512-yJ6CFFu6qDYB4RrF9LJ1DU7Cq7rgODBrwHoiadvHSBGhMHcROl5AOp9WEPDba5J9OEptUdpSPVZb7q++MO/7vA==}
@@ -8888,6 +8894,11 @@ snapshots:
 
   '@tanbo/stream@1.2.7': {}
 
+  '@textbus/core@5.0.0-alpha.0':
+    dependencies:
+      '@tanbo/stream': 1.2.7
+      '@viewfly/core': 2.0.0-alpha.1
+
   '@tootallnate/once@2.0.0': {}
 
   '@tufjs/canonical-json@1.0.0': {}
@@ -9165,13 +9176,17 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
-  '@viewfly/core@1.1.10':
+  '@viewfly/core@1.2.0':
     dependencies:
       reflect-metadata: 0.2.2
 
-  '@viewfly/platform-browser@1.1.10':
+  '@viewfly/core@2.0.0-alpha.1':
     dependencies:
-      '@viewfly/core': 1.1.10
+      reflect-metadata: 0.2.2
+
+  '@viewfly/platform-browser@1.2.0':
+    dependencies:
+      '@viewfly/core': 1.2.0
       csstype: 3.1.3
 
   '@vue/compiler-core@3.4.28':
