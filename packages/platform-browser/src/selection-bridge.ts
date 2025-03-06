@@ -1,4 +1,4 @@
-import { filter, fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
+import { delay, filter, fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
 import { Inject, Injectable } from '@viewfly/core'
 import {
   NativeSelectionBridge,
@@ -8,7 +8,9 @@ import {
   AbstractSelection,
   RootComponentRef,
   Controller,
-  Selection, Textbus
+  Selection,
+  Textbus,
+  Scheduler
 } from '@textbus/core'
 
 import { EDITOR_OPTIONS, VIEW_DOCUMENT } from './injection-tokens'
@@ -47,6 +49,7 @@ export class SelectionBridge implements NativeSelectionBridge {
               private selection: Selection,
               private rootComponentRef: RootComponentRef,
               private input: Input,
+              private scheduler: Scheduler,
               private domAdapter: DomAdapter) {
     this.docContainer = textbus.get(VIEW_DOCUMENT)
     this.onSelectionChange = this.selectionChangeEvent.asObservable().pipe(filter(() => {
@@ -369,8 +372,18 @@ export class SelectionBridge implements NativeSelectionBridge {
         })
       )
     }
+    let isUpdating = false
     this.subs.push(
+      this.scheduler.onDocChange.subscribe(() => {
+        isUpdating = true
+      }),
+      this.scheduler.onDocChanged.pipe(delay()).subscribe(() => {
+        isUpdating = false
+      }),
       fromEvent(document, 'selectionchange').pipe().subscribe(() => {
+        if (isUpdating) {
+          return
+        }
         if (this.syncSelectionFromNativeSelectionChange) {
           this.syncSelection(connector)
         }
