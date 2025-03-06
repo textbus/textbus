@@ -302,7 +302,7 @@ export class LocalHistory extends History {
           }
           if (action.type === 'insert') {
             const formatsObj = action.formats
-            let formats: Formats | void
+            let formats: Formats | void = void 0
             if (formatsObj) {
               formats = objToFormats(formatsObj, this.registry)
             }

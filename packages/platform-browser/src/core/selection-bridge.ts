@@ -431,7 +431,7 @@ export class SelectionBridge implements NativeSelectionBridge {
       startPosition :
       this.getCorrectedPosition(nativeRange.endContainer, nativeRange.endOffset, isFocusEnd)
 
-    if ([Node.ELEMENT_NODE, Node.TEXT_NODE].includes(nativeRange.commonAncestorContainer?.nodeType) &&
+    if ([Node.ELEMENT_NODE, Node.TEXT_NODE].includes(nativeRange.commonAncestorContainer?.nodeType as any) &&
       startPosition && endPosition) {
       const abstractSelection: AbstractSelection = isFocusEnd ? {
         anchorSlot: startPosition.slot,
