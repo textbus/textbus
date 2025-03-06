@@ -1,4 +1,4 @@
-import { filter, fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
+import { delay, filter, fromEvent, Observable, Subject, Subscription } from '@tanbo/stream'
 import { Inject, Injectable, Injector } from '@tanbo/di'
 import {
   NativeSelectionBridge,
@@ -14,7 +14,7 @@ import {
   Selection
 } from '@textbus/core'
 
-import { EDITOR_OPTIONS, VIEW_DOCUMENT, VIEW_MASK } from './injection-tokens'
+import { EDITOR_OPTIONS, VIEW_DOCUMENT } from './injection-tokens'
 import { createElement, getLayoutRectByRange, Rect } from '../_utils/uikit'
 import { Input, ViewOptions } from './types'
 
@@ -38,20 +38,18 @@ export class SelectionBridge implements NativeSelectionBridge {
 
   private changeFromUser = false
   private docContainer: HTMLElement
-  private maskContainer: HTMLElement
 
   private cacheCaretPositionTimer!: any
   private oldCaretPosition!: Rect | null
 
   constructor(@Inject(EDITOR_OPTIONS) private config: ViewOptions,
-              private injector: Injector,
-              private controller: Controller,
+              injector: Injector,
+              controller: Controller,
               private selection: Selection,
               private rootComponentRef: RootComponentRef,
               private input: Input,
               private renderer: Renderer) {
     this.docContainer = injector.get(VIEW_DOCUMENT)
-    this.maskContainer = injector.get(VIEW_MASK)
     this.onSelectionChange = this.selectionChangeEvent.asObservable().pipe(filter(() => {
       return !controller.readonly
     }))
@@ -373,8 +371,18 @@ export class SelectionBridge implements NativeSelectionBridge {
         })
       )
     }
+    let isUpdating = false
     this.subs.push(
-      fromEvent(document, 'selectionchange').pipe().subscribe(() => {
+      this.renderer.onViewUpdateBefore.subscribe(() => {
+        isUpdating = true
+      }),
+      this.renderer.onViewUpdated.pipe(delay()).subscribe(() => {
+        isUpdating = false
+      }),
+      fromEvent(document, 'selectionchange').subscribe(() => {
+        if (isUpdating) {
+          return
+        }
         this.syncSelection(connector)
       })
     )
