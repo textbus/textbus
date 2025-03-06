@@ -33,10 +33,10 @@
     "@viewfly/platform-browser": "^1.2.1"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^23.0.2",
-    "@rollup/plugin-typescript": "^9.0.2",
+    "@rollup/plugin-commonjs": "^28.0.2",
+    "@rollup/plugin-typescript": "^12.1.2",
     "rimraf": "^3.0.2",
-    "rollup": "^3.2.5",
+    "rollup": "4.22.4",
     "tslib": "^2.4.1"
   },
   "author": {
