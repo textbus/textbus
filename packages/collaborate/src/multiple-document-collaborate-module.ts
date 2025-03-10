@@ -37,6 +37,7 @@ export class MultipleDocumentCollaborateModule implements Module {
   setup(textbus: Textbus): Promise<(() => void) | void> | (() => void) | void {
     const messageBus = textbus.get(MessageBus, null)
     const connector = textbus.get(SyncConnector)
+    const collab = textbus.get(Collaborate)
     if (messageBus) {
       const selection = textbus.get(Selection)
       connector.setLocalStateField('message', messageBus.get(textbus))
@@ -52,7 +53,9 @@ export class MultipleDocumentCollaborateModule implements Module {
         })
       )
     }
-    return connector.onLoad.toPromise()
+    return connector.onLoad.toPromise().then(() => {
+      return this.config.beforeSync?.(collab.yDoc)
+    })
   }
 
   onDestroy(textbus: Textbus) {
