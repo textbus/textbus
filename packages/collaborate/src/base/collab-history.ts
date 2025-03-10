@@ -1,5 +1,5 @@
 import { Inject, Injectable, Optional } from '@viewfly/core'
-import { History, HISTORY_STACK_SIZE, makeError, RootComponentRef, Scheduler, Selection } from '@textbus/core'
+import { History, HISTORY_STACK_SIZE, makeError, RootComponentRef, Scheduler } from '@textbus/core'
 import { Observable, Subject, Subscription } from '@tanbo/stream'
 import {
   Item,
@@ -46,7 +46,6 @@ export class CollabHistory implements History {
   constructor(private rootComponentRef: RootComponentRef,
               private collaborate: Collaborate,
               private scheduler: Scheduler,
-              private selection: Selection,
               @Inject(HISTORY_STACK_SIZE) private stackSize: number,
               @Optional() private undoManagerConfig: CustomUndoManagerConfig) {
     this.onBack = this.backEvent.asObservable()

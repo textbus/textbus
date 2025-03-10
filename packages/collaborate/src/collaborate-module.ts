@@ -7,6 +7,8 @@ import { Collaborate, SyncConnector, CollabHistory, NonSubModelLoader, SubModelL
 
 export interface CollaborateConfig {
   createConnector(yDoc: YDoc): SyncConnector
+
+  beforeSync?(yDoc: YDoc): Promise<void> | void
 }
 
 export class CollaborateModule implements Module {
@@ -35,6 +37,7 @@ export class CollaborateModule implements Module {
   setup(textbus: Textbus): Promise<(() => void) | void> | (() => void) | void {
     const messageBus = textbus.get(MessageBus, null)
     const connector = textbus.get(SyncConnector)
+    const collab = textbus.get(Collaborate)
     if (messageBus) {
       const selection = textbus.get(Selection)
       connector.setLocalStateField('message', messageBus.get(textbus))
@@ -50,7 +53,10 @@ export class CollaborateModule implements Module {
         })
       )
     }
-    return connector.onLoad.toPromise()
+
+    return connector.onLoad.toPromise().then(() => {
+      return this.config.beforeSync?.(collab.yDoc)
+    })
   }
 
   onDestroy(textbus: Textbus) {
