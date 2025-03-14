@@ -1,14 +1,14 @@
-import { History, Module, Textbus, Selection } from '@textbus/core'
+import { History, Module, Selection, Textbus } from '@textbus/core'
 import { Subscription } from '@tanbo/stream'
 import { Provider } from '@viewfly/core'
 import { Doc as YDoc } from 'yjs'
 
-import { Collaborate, SyncConnector, CollabHistory, NonSubModelLoader, SubModelLoader, MessageBus } from './base/_api'
+import { CollabHistory, Collaborate, MessageBus, NonSubModelLoader, SubModelLoader, SyncConnector } from './base/_api'
 
 export interface CollaborateConfig {
   createConnector(yDoc: YDoc): SyncConnector
 
-  beforeSync?(yDoc: YDoc): Promise<void> | void
+  onlyLoad?: boolean
 }
 
 export class CollaborateModule implements Module {
@@ -30,6 +30,8 @@ export class CollaborateModule implements Module {
       useClass: NonSubModelLoader
     }
   ]
+
+  private timer: any = null
 
   constructor(public config: CollaborateConfig) {
   }
@@ -55,7 +57,23 @@ export class CollaborateModule implements Module {
     }
 
     return connector.onLoad.toPromise().then(() => {
-      return this.config.beforeSync?.(collab.yDoc)
+      if (!this.config.onlyLoad) {
+        return
+      }
+      const root = collab.yDoc.getMap('RootComponent')
+      if (root.has('state')) {
+        return
+      }
+      return new Promise(resolve => {
+        const testing = () => {
+          if (root.has('state')) {
+            resolve()
+          } else {
+            this.timer = setTimeout(testing, 1000)
+          }
+        }
+        this.timer = setTimeout(testing, 1000)
+      })
     })
   }
 
@@ -64,5 +82,6 @@ export class CollaborateModule implements Module {
     textbus.get(Collaborate).destroy()
     textbus.get(History).destroy()
     textbus.get(SyncConnector).onDestroy()
+    clearTimeout(this.timer)
   }
 }
