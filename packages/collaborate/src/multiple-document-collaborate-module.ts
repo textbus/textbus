@@ -31,6 +31,8 @@ export class MultipleDocumentCollaborateModule implements Module {
     }
   ]
 
+  private timer: any = null
+
   constructor(public config: MultipleDocCollaborateConfig) {
   }
 
@@ -54,7 +56,23 @@ export class MultipleDocumentCollaborateModule implements Module {
       )
     }
     return connector.onLoad.toPromise().then(() => {
-      return this.config.beforeSync?.(collab.yDoc)
+      if (!this.config.onlyLoad) {
+        return
+      }
+      const root = collab.yDoc.getMap('RootComponent')
+      if (root.has('state')) {
+        return
+      }
+      return new Promise(resolve => {
+        const testing = () => {
+          if (root.has('state')) {
+            resolve()
+          } else {
+            this.timer = setTimeout(testing, 1000)
+          }
+        }
+        this.timer = setTimeout(testing, 1000)
+      })
     })
   }
 
@@ -63,5 +81,6 @@ export class MultipleDocumentCollaborateModule implements Module {
     textbus.get(Collaborate).destroy()
     textbus.get(History).destroy()
     textbus.get(SyncConnector).onDestroy()
+    clearTimeout(this.timer)
   }
 }
