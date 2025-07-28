@@ -470,6 +470,8 @@ export class Collaborate {
           return
         }
         const content = subDocument.getText('content')
+        const data = subDocument.getMap('data')
+        this.syncLocalMapToSharedMap(localSlot.data, data)
         this.initSharedSlotByLocalSlot(content, localSlot)
         this.syncSlot(content, localSlot)
         this.addSubModelEvent.next({
@@ -522,11 +524,13 @@ export class Collaborate {
 
     if (type === 'async') {
       const metadata = sharedSlot.getAttribute('metadata') as YMap<any>
-      const slot = new AsyncSlot(schema || [], {})
+      const slot = new AsyncSlot(schema || [], {}, {})
       this.syncSharedMapToLocalMap(metadata, slot.metadata as ProxyModel<Record<string, any>>)
       const loadedSubDocument = this.subModelLoader.getLoadedModelBySlot(slot)
       if (loadedSubDocument) {
         const subContent = loadedSubDocument.getText('content')
+        const data = loadedSubDocument.getMap('data')
+        this.syncLocalMapToSharedMap(slot, data)
         this.syncRootSlot(loadedSubDocument, subContent, slot)
         this.addSubModelEvent.next({
           yDoc: loadedSubDocument,
