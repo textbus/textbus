@@ -99,13 +99,16 @@ export class AsyncSlotJSON<T> extends SlotJSON implements AsyncSlotLiteral<T> {
  *
  * metadata 用于记录子文档静态数据
  */
-export class AsyncSlot<M extends Metadata = Metadata> extends Slot {
+export class AsyncSlot<M extends Metadata = Metadata,
+  U extends Record<string, any> = Record<string, any>> extends Slot {
   loader = new AsyncModelLoader()
   readonly metadata: M
+  readonly data: U
 
-  constructor(schema: ContentType[], metadata: M) {
+  constructor(schema: ContentType[], metadata: M, data: U = {} as U) {
     super(schema)
     this.metadata = observe(metadata)
+    this.data = observe(data)
     this.changeMarker.addDetachCallback(() => {
       detachModel(this.metadata)
     })
