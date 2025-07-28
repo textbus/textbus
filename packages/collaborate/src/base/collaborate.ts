@@ -529,7 +529,7 @@ export class Collaborate {
       if (loadedSubDocument) {
         const subContent = loadedSubDocument.getText('content')
         const data = loadedSubDocument.getMap('data')
-        this.syncLocalMapToSharedMap(slot, data)
+        this.syncSharedMapToLocalMap(data, slot.data as ProxyModel<Record<string, any>>)
         this.syncRootSlot(loadedSubDocument, subContent, slot)
         this.addSubModelEvent.next({
           yDoc: loadedSubDocument,
@@ -547,6 +547,8 @@ export class Collaborate {
         }
         slot.loader.markAsLoaded()
         const subContent = subDocument.getText('content')
+        const data = subDocument.getMap('data')
+        this.syncSharedMapToLocalMap(data, slot.data as ProxyModel<Record<string, any>>)
         this.syncRootSlot(subDocument, subContent, slot)
         this.addSubModelEvent.next({
           yDoc: subDocument,
