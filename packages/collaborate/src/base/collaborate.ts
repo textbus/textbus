@@ -302,10 +302,8 @@ export class Collaborate {
               if (formats.length) {
                 localSlot.retain(action.retain!, formats)
               }
-              localSlot.retain(localSlot.index + action.retain!)
-            } else {
-              localSlot.retain(action.retain!)
             }
+            localSlot.retain(localSlot.index + action.retain!)
           } else if (action.insert) {
             const index = localSlot.index
             let length = 1
@@ -384,6 +382,7 @@ export class Collaborate {
           } else if (action.type === 'delete') {
             const delta = sharedSlot.toDelta()
             if (sharedSlot.length) {
+              console.log([offset, action.count])
               sharedSlot.delete(offset, action.count)
             }
             if (sharedSlot.length === 0) {
