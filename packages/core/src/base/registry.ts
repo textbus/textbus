@@ -6,7 +6,13 @@ import {
   ComponentLiteral,
   Formatter,
   Slot,
-  SlotLiteral, AsyncSlotLiteral, AsyncSlot, AsyncComponentLiteral, AsyncComponentConstructor, AsyncComponent, Metadata
+  SlotLiteral,
+  AsyncSlotLiteral,
+  AsyncSlot,
+  AsyncComponentLiteral,
+  AsyncComponentConstructor,
+  AsyncComponent,
+  Metadata
 } from '../model/_api'
 import { ATTRIBUTE_LIST, COMPONENT_LIST, FORMATTER_LIST } from './_injection-tokens'
 import { Textbus } from '../textbus'
@@ -90,9 +96,9 @@ export class Registry {
   createSlot(slotLiteral: SlotLiteral): Slot
   createSlot(slotLiteral: SlotLiteral | AsyncSlotLiteral): Slot | AsyncSlot {
     if (isAsyncSlotLiteral(slotLiteral)) {
-      return new AsyncSlot(slotLiteral.schema, slotLiteral.metadata)
+      return new AsyncSlot(slotLiteral.schema, slotLiteral.state, slotLiteral.metadata)
     }
-    const slot = new Slot(slotLiteral.schema)
+    const slot = new Slot(slotLiteral.schema, slotLiteral.state)
     return this.loadSlot(slot, slotLiteral)
   }
 

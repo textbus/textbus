@@ -382,7 +382,6 @@ export class Collaborate {
           } else if (action.type === 'delete') {
             const delta = sharedSlot.toDelta()
             if (sharedSlot.length) {
-              console.log([offset, action.count])
               sharedSlot.delete(offset, action.count)
             }
             if (sharedSlot.length === 0) {
@@ -469,8 +468,8 @@ export class Collaborate {
           return
         }
         const content = subDocument.getText('content')
-        const data = subDocument.getMap('data')
-        this.syncLocalMapToSharedMap(localSlot.data, data)
+        const state = subDocument.getMap('state')
+        this.syncLocalMapToSharedMap(localSlot.state, state)
         this.initSharedSlotByLocalSlot(content, localSlot)
         this.syncSlot(content, localSlot)
         this.addSubModelEvent.next({
@@ -485,6 +484,10 @@ export class Collaborate {
       })
       return sharedSlot
     }
+
+    const sharedSlotState = new YMap()
+    this.syncLocalMapToSharedMap(localSlot.state as ProxyModel<Record<string, any>>, sharedSlotState)
+    sharedSlot.setAttribute('state', sharedSlotState)
 
     const sharedContent = new YText()
     this.initSharedSlotByLocalSlot(sharedContent, localSlot)
@@ -528,8 +531,8 @@ export class Collaborate {
       const loadedSubDocument = this.subModelLoader.getLoadedModelBySlot(slot)
       if (loadedSubDocument) {
         const subContent = loadedSubDocument.getText('content')
-        const data = loadedSubDocument.getMap('data')
-        this.syncSharedMapToLocalMap(data, slot.data as ProxyModel<Record<string, any>>)
+        const data = loadedSubDocument.getMap('state')
+        this.syncSharedMapToLocalMap(data, slot.state as ProxyModel<Record<string, any>>)
         this.syncRootSlot(loadedSubDocument, subContent, slot)
         this.addSubModelEvent.next({
           yDoc: loadedSubDocument,
@@ -547,8 +550,8 @@ export class Collaborate {
         }
         slot.loader.markAsLoaded()
         const subContent = subDocument.getText('content')
-        const data = subDocument.getMap('data')
-        this.syncSharedMapToLocalMap(data, slot.data as ProxyModel<Record<string, any>>)
+        const state = subDocument.getMap('state')
+        this.syncSharedMapToLocalMap(state, slot.state as ProxyModel<Record<string, any>>)
         this.syncRootSlot(subDocument, subContent, slot)
         this.addSubModelEvent.next({
           yDoc: subDocument,
@@ -568,7 +571,10 @@ export class Collaborate {
       throw collaborateErrorFn('shared slot content type is not `YText`.')
     }
 
-    const localSlot = new Slot(schema || [])
+    const localSlot = new Slot(schema || [], {})
+
+    const sharedSlotState = sharedSlot.getAttribute('state')
+    this.syncSharedMapToLocalMap(sharedSlotState, localSlot.state as ProxyModel<Record<string, any>>)
 
     this.initLocalSlotBySharedSlot(content, localSlot)
 

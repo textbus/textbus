@@ -2,11 +2,12 @@ import { Observable, Subject } from '@tanbo/stream'
 
 import { State } from './types'
 import { AsyncComponentLiteral, Component, ComponentConstructor, ComponentLiteral, ComponentStateLiteral } from './component'
-import { AsyncSlotLiteral, ContentType, Slot, SlotJSON } from './slot'
+import { ContentType, Slot, SlotJSON, SlotLiteral } from './slot'
 import { FormatLiteral } from './format'
 import { Textbus } from '../textbus'
 import { observe } from '../observable/observe'
 import { detachModel } from '../observable/help'
+import { ChangeMarker } from '../observable/change-marker'
 
 export class AsyncModelLoader {
   onRequestLoad: Observable<void>
@@ -82,15 +83,25 @@ export interface AsyncComponentConstructor<
   fromJSONAndMetadata?(textbus: Textbus, data: ComponentStateLiteral<T>, metadata: M): AsyncComponent<M, T>
 }
 
-export class AsyncSlotJSON<T> extends SlotJSON implements AsyncSlotLiteral<T> {
+export interface AsyncSlotLiteral<
+  T extends Record<string, any> = Record<string, any>,
+  U = any> extends SlotLiteral<T> {
+  async: true
+  metadata: U
+}
+
+export class AsyncSlotJSON<
+  T extends Record<string, any>,
+  U extends Record<string, any> = Record<string, any>> extends SlotJSON<T> implements AsyncSlotLiteral<T, U> {
   async = true as const
 
   constructor(schema: ContentType[],
               content: Array<string | ComponentLiteral>,
               attributes: Record<string, any>,
               formats: FormatLiteral,
-              public metadata: T) {
-    super(schema, content, attributes, formats)
+              state: T,
+              public metadata: U) {
+    super(schema, content, attributes, formats, state)
   }
 }
 
@@ -99,22 +110,30 @@ export class AsyncSlotJSON<T> extends SlotJSON implements AsyncSlotLiteral<T> {
  *
  * metadata 用于记录子文档静态数据
  */
-export class AsyncSlot<M extends Metadata = Metadata,
-  U extends Record<string, any> = Record<string, any>> extends Slot {
+export class AsyncSlot<
+  U extends Record<string, any> = Record<string, any>,
+  M extends Metadata = Metadata,
+> extends Slot<U> {
   loader = new AsyncModelLoader()
   readonly metadata: M
-  readonly data: U
 
-  constructor(schema: ContentType[], metadata: M, data: U = {} as U) {
-    super(schema)
+  constructor(schema: ContentType[], state: U = {} as U, metadata: M) {
+    super(schema, state)
     this.metadata = observe(metadata)
-    this.data = observe(data)
+
+    const metadataChangeMarker = this.metadata.__changeMarker__ as ChangeMarker
+
+    const sub = metadataChangeMarker.onChange.subscribe(() => {
+      this.changeMarker.forceMarkDirtied()
+    })
+
     this.changeMarker.addDetachCallback(() => {
+      sub.unsubscribe()
       detachModel(this.metadata)
     })
   }
 
-  override toJSON(): AsyncSlotJSON<M> {
+  override toJSON(): AsyncSlotJSON<U, M> {
     const attrs: Record<string, any> = {}
     this.attributes.forEach((value, key) => {
       attrs[key.name] = value
@@ -124,7 +143,8 @@ export class AsyncSlot<M extends Metadata = Metadata,
       this.content.toJSON(),
       attrs,
       this.format.toJSON(),
-      this.metadata
+      this.state,
+      this.metadata,
     )
   }
 }

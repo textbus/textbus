@@ -1,10 +1,10 @@
 import { Type } from '@viewfly/core'
 
-import { AsyncSlotLiteral, ContentType, Slot, SlotLiteral } from './slot'
+import { ContentType, Slot, SlotLiteral } from './slot'
 import { ChangeMarker } from '../observable/change-marker'
 import { Shortcut, State, RawKeyAgent } from './types'
 import { Textbus } from '../textbus'
-import { AsyncSlot } from './async-model'
+import { AsyncSlot, AsyncSlotLiteral } from './async-model'
 import { observe, ProxyModel } from '../observable/observe'
 import { objectToJSON } from '../observable/util'
 
@@ -142,8 +142,8 @@ export abstract class Component<T extends State = State> {
 }
 
 
-export type ToLiteral<T> = T extends AsyncSlot ? AsyncSlotLiteral :
-  T extends Slot ? SlotLiteral :
+export type ToLiteral<T> = T extends AsyncSlot<infer A, infer B> ? AsyncSlotLiteral<A, B> :
+  T extends Slot<infer C> ? SlotLiteral<C> :
     T extends [infer First, ...infer Rest] ? [ToLiteral<First>, ...Rest] :
       T extends Array<infer Item> ? Array<ToLiteral<Item>> :
         T extends Record<string, any> ? ComponentStateLiteral<T> : T;

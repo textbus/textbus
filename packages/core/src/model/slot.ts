@@ -9,6 +9,8 @@ import { Action } from './types'
 import { VElement, VTextNode } from './element'
 import { makeError } from '../_utils/make-error'
 import { setup } from './setup'
+import { observe } from '../observable/observe'
+import { detachModel } from '../observable/help'
 
 const slotError = makeError('Slot')
 
@@ -25,16 +27,12 @@ export enum ContentType {
   BlockComponent
 }
 
-export interface SlotLiteral {
+export interface SlotLiteral<T extends Record<string, any> = Record<string, any>> {
   schema: ContentType[]
+  state: T
   content: Array<string | ComponentLiteral>
   attributes: Record<string, FormatValue>
   formats: FormatLiteral
-}
-
-export interface AsyncSlotLiteral<T = any> extends SlotLiteral {
-  async: true
-  metadata: T
 }
 
 export interface DeltaInsert {
@@ -49,7 +47,7 @@ export class DeltaLite extends Array<DeltaInsert> {
 /**
  * Textbus 插槽类，用于管理组件、文本及格式的增删改查
  */
-export class Slot {
+export class Slot<T extends Record<string, any> = Record<string, any>> {
   static placeholder = '\u200b'
 
   static get emptyPlaceholder() {
@@ -112,11 +110,24 @@ export class Slot {
 
   protected applyFormatCoverChild = false
 
-  constructor(schema: ContentType[]) {
+  readonly state: T
+
+  constructor(schema: ContentType[], state: T = {} as T) {
     this.schema = schema.sort()
     this.onContentChange = this.contentChangeEvent.asObservable()
     this.content.append(Slot.emptyPlaceholder)
     this._index = 0
+    this.state = observe(state)
+
+    const dataChangeMarker = this.state.__changeMarker__ as ChangeMarker
+    const sub = dataChangeMarker.onChange.subscribe(() => {
+      this.changeMarker.forceMarkDirtied()
+    })
+
+    this.changeMarker.addDetachCallback(() => {
+      sub.unsubscribe()
+      detachModel(this.state)
+    })
   }
 
   /**
@@ -373,11 +384,11 @@ export class Slot {
    */
   retain(offset: number): boolean
   retain(offset: number, formats: Formats,
-         canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean
-  retain<T>(offset: number, formatter: Formatter<T>, value: T | null,
-            canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean
+         canApply?: (slot: Slot<T>, formatter: Formatter, value: any) => boolean): boolean
+  retain<U>(offset: number, formatter: Formatter<U>, value: U | null,
+            canApply?: (slot: Slot<T>, formatter: Formatter, value: any) => boolean): boolean
   retain(offset: number, formatter?: Formatter<any> | Formats, value?: FormatValue | null,
-         canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean {
+         canApply?: (slot: Slot<T>, formatter: Formatter, value: any) => boolean): boolean {
     let formats: Formats = []
     if (formatter) {
       if (Array.isArray(formatter)) {
@@ -537,7 +548,7 @@ export class Slot {
    * @param canApply
    */
   applyFormat<U extends FormatValue>(formatter: Formatter<U>, data: FormatRange<U>,
-                                     canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): void {
+                                     canApply?: (slot: Slot<T>, formatter: Formatter, value: any) => boolean): void {
     this.retain(data.startIndex)
     this.retain(data.endIndex - data.startIndex, formatter, data.value, canApply)
   }
@@ -560,8 +571,8 @@ export class Slot {
    * @param startIndex
    * @param endIndex
    */
-  cut(startIndex = 0, endIndex = this.length): Slot {
-    return this.cutTo(new Slot([...this.schema]), startIndex, endIndex)
+  cut(startIndex = 0, endIndex = this.length): Slot<T> {
+    return this.cutTo(new Slot([...this.schema], JSON.parse(JSON.stringify(this.state))), startIndex, endIndex)
   }
 
   /**
@@ -570,7 +581,7 @@ export class Slot {
    * @param startIndex
    * @param endIndex
    */
-  cutTo(slot: Slot, startIndex = 0, endIndex = this.length): Slot {
+  cutTo(slot: Slot<T>, startIndex = 0, endIndex = this.length): Slot<T> {
     if (startIndex < 0) {
       startIndex = 0
     }
@@ -680,7 +691,7 @@ export class Slot {
   /**
    * 把插槽内容转换为 JSON
    */
-  toJSON(): SlotLiteral {
+  toJSON(): SlotLiteral<T> {
     const attrs: Record<string, any> = {}
     this.attributes.forEach((value, key) => {
       attrs[key.name] = value
@@ -689,7 +700,8 @@ export class Slot {
       [...this.schema],
       this.content.toJSON(),
       attrs,
-      this.format.toJSON()
+      this.format.toJSON(),
+      this.state
     )
   }
 
@@ -844,7 +856,7 @@ export class Slot {
                        startIndex: number,
                        offset: number,
                        background: boolean,
-                       canApply: (slot: Slot, formatter: Formatter<any>, value: any) => boolean) {
+                       canApply: (slot: Slot<T>, formatter: Formatter<any>, value: any) => boolean) {
     formats.forEach(keyValue => {
       const key = keyValue[0]
       const value = keyValue[1]
@@ -991,10 +1003,11 @@ export class Slot {
   }
 }
 
-export class SlotJSON implements SlotLiteral {
+export class SlotJSON<T extends Record<string, any> = Record<string, any>> implements SlotLiteral<T> {
   constructor(public schema: ContentType[],
               public content: Array<string | ComponentLiteral>,
               public attributes: Record<string, any>,
-              public formats: FormatLiteral) {
+              public formats: FormatLiteral,
+              public state: T) {
   }
 }
