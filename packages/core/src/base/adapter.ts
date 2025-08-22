@@ -93,8 +93,8 @@ export abstract class Adapter<
              slotHostRender: any,
              renderEnv?: any): ViewElement {
     if (typeof customFormat === 'function') {
-      slotHostRender = customFormat
       renderEnv = slotHostRender
+      slotHostRender = customFormat
       customFormat = null
     }
     const vElement = slot.toTree(slotHostRender, customFormat, renderEnv)
