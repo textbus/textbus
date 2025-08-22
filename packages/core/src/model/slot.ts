@@ -840,9 +840,9 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
     }
     const formatTree = this.format.toTree(0, this.length)
     if (renderEnv !== void 0) {
-      return Slot.toTree(this, slotRenderFactory, formatTree, customFormat)
+      return Slot.toTree(this, slotRenderFactory, formatTree, renderEnv)
     }
-    return Slot.toTree(this, slotRenderFactory, formatTree, renderEnv)
+    return Slot.toTree(this, slotRenderFactory, formatTree, customFormat)
   }
 
   static toTree(slot: Slot, slotRenderFactory: SlotRenderFactory, formatTree: FormatTree, renderEnv?: any): VElement {
