@@ -6,6 +6,7 @@ import { Slot } from '../model/slot'
 import { NodeLocation, VElement, VTextNode } from '../model/element'
 import { createBidirectionalMapping, replaceEmpty } from '../_utils/tools'
 import { invokeListener } from '../model/on-events'
+import { Format } from '../model/format'
 
 export interface ViewMount<ViewComponent, NativeElement> {
   (host: NativeElement, viewComponent: ViewComponent, injector: Injector): (void | (() => void))
@@ -82,8 +83,21 @@ export abstract class Adapter<
 
   slotRender(slot: Slot,
              slotHostRender: (children: Array<VElement | VTextNode | Component>) => VElement,
+             renderEnv?: any): ViewElement;
+  slotRender(slot: Slot,
+             customFormat: Format,
+             slotHostRender: (children: Array<VElement | VTextNode | Component>) => VElement,
+             renderEnv?: any): ViewElement;
+  slotRender(slot: Slot,
+             customFormat: any,
+             slotHostRender: any,
              renderEnv?: any): ViewElement {
-    const vElement = slot.toTree(slotHostRender, renderEnv)
+    if (typeof customFormat === 'function') {
+      slotHostRender = customFormat
+      renderEnv = slotHostRender
+      customFormat = null
+    }
+    const vElement = slot.toTree(slotHostRender, customFormat, renderEnv)
     this.slotRootVElementCaches.set(slot, vElement)
 
     const vNodeToJSX = (vNode: VElement) => {

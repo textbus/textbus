@@ -831,23 +831,36 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
   /**
    * 根据插槽的格式数据，生成格式树
    */
-  toTree(slotRenderFactory: SlotRenderFactory, renderEnv?: any): VElement {
+  toTree(slotRenderFactory: SlotRenderFactory, renderEnv?: any): VElement;
+  toTree(slotRenderFactory: SlotRenderFactory, customFormat: Format | null, renderEnv?: any): VElement;
+  toTree(slotRenderFactory: SlotRenderFactory, customFormat: any, renderEnv?: any): VElement {
+    if (customFormat instanceof Format) {
+      const formatTree = customFormat.toTree(0, this.length)
+      return Slot.toTree(this, slotRenderFactory, formatTree, renderEnv)
+    }
     const formatTree = this.format.toTree(0, this.length)
+    if (renderEnv !== void 0) {
+      return Slot.toTree(this, slotRenderFactory, formatTree, customFormat)
+    }
+    return Slot.toTree(this, slotRenderFactory, formatTree, renderEnv)
+  }
+
+  static toTree(slot: Slot, slotRenderFactory: SlotRenderFactory, formatTree: FormatTree, renderEnv?: any): VElement {
     let children = formatTree.children ?
-      this.createVDomByFormatTree(this, formatTree.children, renderEnv) :
-      this.createVDomByContent(this, formatTree.startIndex, formatTree.endIndex)
+      Slot.createVDomByFormatTree(slot, formatTree.children, renderEnv) :
+      Slot.createVDomByContent(slot, formatTree.startIndex, formatTree.endIndex)
 
     if (formatTree.formats) {
-      children = [this.createVDomByOverlapFormats(formatTree.formats, children, renderEnv)]
+      children = [Slot.createVDomByOverlapFormats(slot, formatTree.formats, children, renderEnv)]
     }
     const root = slotRenderFactory(children)
-    for (const [attribute, value] of this.getAttributes()) {
+    for (const [attribute, value] of slot.getAttributes()) {
       attribute.render(root, value, renderEnv)
     }
     root.location = {
-      slot: this,
+      slot,
       startIndex: 0,
-      endIndex: this.length
+      endIndex: slot.length
     }
     return root
   }
@@ -874,7 +887,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
     })
   }
 
-  private createVDomByFormatTree(
+  private static createVDomByFormatTree(
     slot: Slot,
     formats: FormatTree<any>[],
     renderEnv: any) {
@@ -882,17 +895,18 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
     for (const child of formats) {
       if (child.formats?.length) {
         const children = child.children ?
-          this.createVDomByFormatTree(slot, child.children, renderEnv) :
-          this.createVDomByContent(slot, child.startIndex, child.endIndex)
+          Slot.createVDomByFormatTree(slot, child.children, renderEnv) :
+          Slot.createVDomByContent(slot, child.startIndex, child.endIndex)
 
-        const nextChildren = this.createVDomByOverlapFormats(
+        const nextChildren = Slot.createVDomByOverlapFormats(
+          slot,
           child.formats,
           children,
           renderEnv
         )
         nodes.push(nextChildren)
       } else {
-        nodes.push(...this.createVDomByContent(
+        nodes.push(...Slot.createVDomByContent(
           slot,
           child.startIndex,
           child.endIndex,
@@ -902,7 +916,8 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
     return nodes
   }
 
-  private createVDomByOverlapFormats(
+  private static createVDomByOverlapFormats(
+    slot: Slot,
     formats: (FormatItem<any>)[],
     children: Array<VElement | VTextNode | Component>,
     renderEnv: any
@@ -923,7 +938,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
         continue
       }
       next.location = {
-        slot: this,
+        slot,
         startIndex: item.startIndex,
         endIndex: item.endIndex
       }
@@ -935,7 +950,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
       if (!host) {
         host = new VElement(render.fallbackTagName)
         host.location = {
-          slot: this,
+          slot,
           startIndex: item.startIndex,
           endIndex: item.endIndex
         }
@@ -946,7 +961,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
     return host!
   }
 
-  private createVDomByContent(
+  private static createVDomByContent(
     slot: Slot,
     startIndex: number,
     endIndex: number
@@ -964,7 +979,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
         if (item === '\n') {
           vNode = new VElement('br')
           vNode.location = {
-            slot: this,
+            slot,
             startIndex,
             endIndex: startIndex + 1
           }
