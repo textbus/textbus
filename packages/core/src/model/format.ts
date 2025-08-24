@@ -430,22 +430,51 @@ export class Format {
   }
 
   private static equal(left: FormatValue, right: FormatValue): boolean {
+    // 严格相等检查
     if (left === right) {
       return true
     }
-    if (left === null || right === null) {
+    
+    // null 或 undefined 检查
+    if (left === null || left === undefined || right === null || right === undefined) {
+      return left === right
+    }
+    
+    // 类型不同直接返回 false
+    if (typeof left !== typeof right) {
       return false
     }
-    if (typeof left === 'object' && typeof right === 'object') {
-      const leftKeys = Object.keys(left!)
-      const rightKeys = Object.keys(right!)
-      if (leftKeys.length === rightKeys.length) {
-        return leftKeys.every(key => {
-          return rightKeys.includes(key) && right![key] === left![key]
-        })
-      }
+    
+    // 基本类型比较
+    if (typeof left !== 'object') {
+      return left === right
     }
-    return false
+    
+    // 数组比较
+    if (Array.isArray(left) && Array.isArray(right)) {
+      if (left.length !== right.length) {
+        return false
+      }
+      return left.every((item, index) => Format.equal(item, right[index]))
+    }
+    
+    // 一个是数组一个不是
+    if (Array.isArray(left) || Array.isArray(right)) {
+      return false
+    }
+    
+    // 对象比较
+    const leftKeys = Object.keys(left)
+    const rightKeys = Object.keys(right)
+    
+    if (leftKeys.length !== rightKeys.length) {
+      return false
+    }
+    
+    // 递归比较每个属性
+    return leftKeys.every(key => {
+      return rightKeys.includes(key) && Format.equal(left[key], right[key])
+    })
   }
 
   private static mergeRanges(ranges: FormatRange[], newRange: FormatRange) {
