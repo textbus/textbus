@@ -548,7 +548,6 @@ export class Collaborate {
         if (isDestroyed) {
           return
         }
-        slot.loader.markAsLoaded()
         const subContent = subDocument.getText('content')
         const state = subDocument.getMap('state')
         this.syncSharedMapToLocalMap(state, slot.state as ProxyModel<Record<string, any>>)
@@ -557,6 +556,7 @@ export class Collaborate {
           yDoc: subDocument,
           yType: subContent
         })
+        slot.loader.markAsLoaded()
       })
       slot.__changeMarker__.addDetachCallback(() => {
         isDestroyed = true
@@ -701,13 +701,13 @@ export class Collaborate {
             if (isDestroyed) {
               return
             }
-            (instance as AsyncComponent).loader.markAsLoaded()
             const state = subDocument.getMap('state')
             this.syncComponent(subDocument, state, instance!)
             this.addSubModelEvent.next({
               yType: state,
               yDoc: subDocument
             })
+            ;(instance as AsyncComponent).loader.markAsLoaded()
           })
         state.__changeMarker__.addDetachCallback(() => {
           isDestroyed = true

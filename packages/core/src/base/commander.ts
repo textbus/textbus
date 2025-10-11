@@ -427,7 +427,8 @@ export class Commander {
     if (selection.isCollapsed) {
       if (deleteBefore) {
         const beforeContent = startSlot.getContentAtIndex(startOffset - 1)
-        if (beforeContent instanceof Component && beforeContent.type === ContentType.BlockComponent) {
+        if (beforeContent instanceof Component &&
+          (beforeContent.type === ContentType.BlockComponent || beforeContent.deleteAsWhole)) {
           this.removeComponent(beforeContent)
           return true
         }
@@ -439,7 +440,8 @@ export class Commander {
         startOffset = prevPosition.offset
       } else {
         const content = startSlot.getContentAtIndex(startOffset)
-        if (content instanceof Component && content.type === ContentType.BlockComponent) {
+        if (content instanceof Component &&
+          (content.type === ContentType.BlockComponent || content.deleteAsWhole)) {
           this.removeComponent(content)
           return true
         }
@@ -816,7 +818,7 @@ export class Commander {
       const childComponents: Component[] = []
       let hasInlineContent = false
       contents.forEach(item => {
-        if (typeof item === 'string' || item .type === ContentType.InlineComponent) {
+        if (typeof item === 'string' || item.type === ContentType.InlineComponent) {
           hasInlineContent = true
         } else {
           childComponents.push(item)
@@ -849,7 +851,7 @@ export class Commander {
       const childComponents: Component[] = []
       let hasInlineContent = false
       contents.forEach(item => {
-        if (typeof item === 'string' || item .type === ContentType.InlineComponent) {
+        if (typeof item === 'string' || item.type === ContentType.InlineComponent) {
           hasInlineContent = true
         } else {
           childComponents.push(item)
@@ -876,7 +878,7 @@ export class Commander {
       const childComponents: Component[] = []
       let hasInlineContent = false
       contents.forEach(item => {
-        if (typeof item === 'string' || item .type === ContentType.InlineComponent) {
+        if (typeof item === 'string' || item.type === ContentType.InlineComponent) {
           hasInlineContent = true
         } else {
           childComponents.push(item)

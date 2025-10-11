@@ -36,6 +36,10 @@ export interface ZenCodingGrammarInterceptor<T extends State> {
  */
 export interface Component<T extends State> {
   /**
+   * 当光标在组件右侧向前删除，或光标在组件左侧向后删除时，组件是否作为一个整体进行删除，而不是续接内容到组件内（如果有的话）
+   */
+  deleteAsWhole?: boolean
+  /**
    * 从当前组件拆分出一个新的同类组件
    * @param start 拆分的开始插槽
    * @param end 拆分的结束插槽
