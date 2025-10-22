@@ -28,7 +28,7 @@ import {
   Scheduler,
   Selection, SelectionSnapshot,
   ZEN_CODING_DETECT,
-  Adapter
+  Adapter, SelectionCorrector
 } from './base/_api'
 import { makeError } from './_utils/make-error'
 import { setup } from './model/setup'
@@ -395,6 +395,7 @@ export class Textbus extends ReflectiveInjector {
       Query,
       Selection,
       Registry,
+      SelectionCorrector,
       {
         provide: Textbus,
         useFactory: () => this

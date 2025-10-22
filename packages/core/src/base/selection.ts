@@ -2,7 +2,7 @@ import { Injectable, Prop } from '@viewfly/core'
 import { distinctUntilChanged, map, Observable, share, Subject, Subscription } from '@tanbo/stream'
 
 import { Component, ContentType, Event, GetRangesEvent, invokeListener, Slot, SlotRange } from '../model/_api'
-import { RootComponentRef } from './_injection-tokens'
+import { RootComponentRef, SelectionCorrector } from './_injection-tokens'
 import { Controller } from './controller'
 
 /**
@@ -38,6 +38,12 @@ export interface SelectedSlotRange {
  * 原生选区连接器
  */
 export interface NativeSelectionConnector {
+  /**
+   * 在实际选区应用前修正选区的勾子
+   * @param abstractSelection 当前选区
+   */
+  beforeChange(abstractSelection: AbstractSelection): AbstractSelection | null
+
   /**
    * 当原生选区变化时，生成对应的 Textbus 选区，并传入 Textbus 选区
    * @param abstractSelection 对应原生选区在 Textbus 中的选区
@@ -222,6 +228,9 @@ export class Selection {
   }
 
   private connector: NativeSelectionConnector = {
+    beforeChange: (abstractSelection: AbstractSelection): AbstractSelection | null => {
+      return this.corrector.beforeChange(abstractSelection)
+    },
     setSelection: (range: AbstractSelection | null) => {
       if (range === null) {
         if (null === this.startSlot && null === this.endSlot && null === this.startOffset && null === this.endOffset) {
@@ -263,7 +272,8 @@ export class Selection {
   private changeFromUpdateCustomRanges = false
 
   constructor(private root: RootComponentRef,
-              private controller: Controller) {
+              private controller: Controller,
+              private corrector: SelectionCorrector) {
     let prevFocusComponent: Component | null
     this.onChange = this.changeEvent.asObservable().pipe(
       distinctUntilChanged((previous, current) => {

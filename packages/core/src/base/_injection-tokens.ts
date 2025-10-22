@@ -1,7 +1,8 @@
-import { InjectionToken } from '@viewfly/core'
+import { Injectable, InjectionToken } from '@viewfly/core'
 import { Observable } from '@tanbo/stream'
 
 import { Component, Formatter, ComponentConstructor, Attribute } from '../model/_api'
+import { AbstractSelection } from './selection'
 
 /**
  * 根节点及原生根元素节点引用类
@@ -42,4 +43,11 @@ export const READONLY = new InjectionToken<boolean>('READONLY')
 export abstract class FocusManager {
   abstract onFocus: Observable<void>
   abstract onBlur: Observable<any>
+}
+
+@Injectable()
+export class SelectionCorrector {
+  beforeChange(abstractSelection: AbstractSelection): AbstractSelection | null {
+    return abstractSelection
+  }
 }
