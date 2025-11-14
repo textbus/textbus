@@ -13,7 +13,7 @@ import { objectToJSON } from '../observable/util'
  */
 export interface ComponentLiteral<State = any> {
   name: string
-  state: State
+  state: ToLiteral<State>
 }
 
 export interface AsyncComponentLiteral<State = any> extends ComponentLiteral<State> {
