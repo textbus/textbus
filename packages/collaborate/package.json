@@ -1,6 +1,6 @@
 {
   "name": "@textbus/collaborate",
-  "version": "5.0.0-alpha.11",
+  "version": "5.0.0-alpha.12",
   "description": "Textbus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
   "main": "./bundles/index.js",
   "module": "./bundles/index.esm.js",
@@ -27,7 +27,7 @@
   "dependencies": {
     "@hocuspocus/provider": "^2.15.2",
     "@tanbo/stream": "^1.2.7",
-    "@textbus/core": "^5.0.0-alpha.11",
+    "@textbus/core": "^5.0.0-alpha.12",
     "@viewfly/core": "^2.0.0-alpha.3",
     "y-websocket": "^2.1.0",
     "yjs": "^13.6.23"
