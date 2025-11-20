@@ -96,7 +96,8 @@ export class Registry {
   createSlot(slotLiteral: SlotLiteral): Slot
   createSlot(slotLiteral: SlotLiteral | AsyncSlotLiteral): Slot | AsyncSlot {
     if (isAsyncSlotLiteral(slotLiteral)) {
-      return new AsyncSlot(slotLiteral.schema, slotLiteral.state, slotLiteral.metadata)
+      const slot = new AsyncSlot(slotLiteral.schema, slotLiteral.state, slotLiteral.metadata)
+      return this.loadSlot(slot, slotLiteral)
     }
     const slot = new Slot(slotLiteral.schema, slotLiteral.state)
     return this.loadSlot(slot, slotLiteral)
