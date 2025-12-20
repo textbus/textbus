@@ -18,6 +18,7 @@ let onewayUpdate = false
 export class ChangeMarker {
   onForceChange: Observable<void>
   onChange: Observable<Operation>
+  onChangeBefore: Observable<void>
   onSelfChange: Observable<Action[]>
 
   get irrevocableUpdate() {
@@ -38,15 +39,17 @@ export class ChangeMarker {
   private _irrevocableUpdate = false
   private _dirty = true
   private _changed = true
+  private _changeBefore = true
   private changeEvent = new Subject<Operation>()
   private selfChangeEvent = new Subject<Action[]>()
-  private childComponentRemovedEvent = new Subject<Component>()
   private forceChangeEvent = new Subject<void>()
+  private changeBeforeEvent = new Subject<void>()
 
   constructor(public host: object) {
     this.onChange = this.changeEvent.asObservable()
     this.onSelfChange = this.selfChangeEvent.asObservable()
     this.onForceChange = this.forceChangeEvent.asObservable()
+    this.onChangeBefore = this.changeBeforeEvent.asObservable()
   }
 
   addDetachCallback(callback: () => void) {
@@ -60,6 +63,16 @@ export class ChangeMarker {
       return [...parentPaths, path]
     }
     return []
+  }
+
+  beforeChange() {
+    if (this._changeBefore) {
+      return
+    }
+    this.changeBeforeEvent.next()
+    if (this.parentModel) {
+      this.parentModel.__changeMarker__.beforeChange()
+    }
   }
 
   forceMarkDirtied(source?: Component<any>) {
@@ -119,11 +132,11 @@ export class ChangeMarker {
   }
 
   rendered() {
-    this._dirty = this._changed = false
+    this._dirty = this._changed = this._changeBefore = false
   }
 
   reset() {
-    this._changed = this._dirty = true
+    this._changed = this._dirty = this._changeBefore = true
   }
 
   detach() {

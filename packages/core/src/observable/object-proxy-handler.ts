@@ -16,9 +16,11 @@ export class ObjectProxyHandler<T extends object> implements ProxyHandler<T> {
       return b
     }
 
-    detachModel(oldValue)
     const parentModel = getObserver(target)!
     const changeMarker = parentModel.__changeMarker__
+    changeMarker.beforeChange()
+
+    detachModel(oldValue)
 
     const unApplyAction: Action = has ? {
       type: 'propSet',
@@ -62,10 +64,11 @@ export class ObjectProxyHandler<T extends object> implements ProxyHandler<T> {
   deleteProperty(target: T, p: string | symbol): boolean {
     const has = Reflect.has(target, p)
     const oldValue = (target as any)[p]
+    const changeMarker = getObserver(target)!.__changeMarker__
+    changeMarker.beforeChange()
 
     detachModel(oldValue)
     const b = Reflect.deleteProperty(target, p)
-    const changeMarker = getObserver(target)!.__changeMarker__
     changeMarker.markAsDirtied({
       paths: [],
       apply: [{

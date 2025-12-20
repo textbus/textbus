@@ -114,6 +114,13 @@ export class Scheduler {
     const changeMarker = rootComponent.changeMarker
     let isRendered = true
     this.subs.push(
+      changeMarker.onChangeBefore.subscribe(() => {
+        const from = this.changeFromRemote ? ChangeOrigin.Remote :
+          this.changeFromHistory ? ChangeOrigin.History : ChangeOrigin.Local
+        if (from === ChangeOrigin.Local) {
+          this.localChangeBeforeEvent.next()
+        }
+      }),
       changeMarker.onChange.pipe(
         map(op => {
           const from = this.changeFromRemote ? ChangeOrigin.Remote :
@@ -121,9 +128,6 @@ export class Scheduler {
 
           if (isRendered) {
             isRendered = false
-            if (from === ChangeOrigin.Local) {
-              this.localChangeBeforeEvent.next()
-            }
             this.docChangeEvent.next()
           }
 

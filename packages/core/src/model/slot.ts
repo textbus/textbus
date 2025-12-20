@@ -146,6 +146,8 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
     const has = this.attributes.has(attribute)
     const v = this.attributes.get(attribute)
 
+    this.__changeMarker__.beforeChange()
+
     this.attributes.set(attribute, value)
     const applyActions: Action[] = [{
       type: 'attrSet',
@@ -212,6 +214,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
     if (!has) {
       return
     }
+    this.__changeMarker__.beforeChange()
     const v = this.attributes.get(attribute)
 
     this.attributes.delete(attribute)
@@ -320,6 +323,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
         setup(this.parent.textbus, content)
       }
     }
+    this.__changeMarker__.beforeChange()
     let formats: Formats = []
     const isBlockContent = content instanceof Component && content.type === ContentType.BlockComponent
     if (formatter && !isBlockContent) {
@@ -412,6 +416,8 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
       return true
     }
 
+    this.__changeMarker__.beforeChange()
+
     const startIndex = this._index
     let endIndex = this.content.correctIndex(startIndex + offset, true)
     if (endIndex > len) {
@@ -490,6 +496,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
     if (count <= 0) {
       return false
     }
+    this.__changeMarker__.beforeChange()
     const startIndex = this._index
     let endIndex = this.content.correctIndex(this._index + count, true)
     count = endIndex - startIndex

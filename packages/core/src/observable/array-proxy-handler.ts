@@ -30,6 +30,7 @@ const arrayMethodsHandlers = {
     items = toRaws(items)
     const target = toRaw(this) as any[]
     const changeMarker = getChangeMarker(this)!
+    changeMarker.beforeChange()
     const length = target.length
     const subModels = toSubModels(items, this as Model)
     const result = target.push(...items)
@@ -55,10 +56,11 @@ const arrayMethodsHandlers = {
   },
   pop(this: any): any | undefined {
     const source = toRaw(this) as any[]
+    const changeMarker = getChangeMarker(this)!
+    changeMarker.beforeChange()
     const offset = source.length
     const item = source.pop()
     detachModel(item)
-    const changeMarker = getChangeMarker(this)!
     changeMarker.markAsDirtied({
       paths: [],
       apply: [{
@@ -85,9 +87,10 @@ const arrayMethodsHandlers = {
     if (offset === 0) {
       return
     }
+    const changeMarker = getChangeMarker(this)!
+    changeMarker.beforeChange()
     const item = source.shift()
     detachModel(item)
-    const changeMarker = getChangeMarker(this)!
     changeMarker.markAsDirtied({
       paths: [],
       apply: [{
@@ -111,10 +114,11 @@ const arrayMethodsHandlers = {
   unshift(this: any, ...items: any[]): number {
     const source = toRaw(this) as any[]
     items = toRaws(items)
+    const changeMarker = getChangeMarker(this)!
+    changeMarker.beforeChange()
 
     const subModels = toSubModels(items, this as Model)
     const result = source.unshift(...items)
-    const changeMarker = getChangeMarker(this)!
     changeMarker.markAsDirtied({
       paths: [],
       apply: [{
@@ -148,11 +152,13 @@ const arrayMethodsHandlers = {
       deleteCount = 0
     }
 
+    const changeMarker = getChangeMarker(this)!
+    changeMarker.beforeChange()
+
     items = toRaws(items)
     const subModels = toSubModels(items, this as Model)
     const deletedItems = source.splice(start, deleteCount, ...items)
     detachModel(...deletedItems)
-    const changeMarker = getChangeMarker(this)!
     changeMarker.markAsDirtied({
       paths: [],
       apply: [{
@@ -228,8 +234,9 @@ export class ArrayProxyHandler<T extends Array<any>> extends ObjectProxyHandler<
       if (newValue === oldValue) {
         return b
       }
-      const subModel = observe(newValue)
       const changeMarker = getChangeMarker(target)!
+      changeMarker.beforeChange()
+      const subModel = observe(newValue)
       const parentModel = getObserver(target)!
       attachModel(parentModel, subModel)
       const index = Number(p)
