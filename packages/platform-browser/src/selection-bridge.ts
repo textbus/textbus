@@ -118,8 +118,8 @@ export class SelectionBridge implements NativeSelectionBridge {
     return getLayoutRectByRange(nativeRange)
   }
 
-  restore(abstractSelection: AbstractSelection | null, formLocal: boolean) {
-    this.changeFromUser = formLocal
+  restore(abstractSelection: AbstractSelection | null, fromLocal: boolean) {
+    this.changeFromUser = fromLocal
     if (this.ignoreSelectionChange || !this.connector) {
       return
     }
@@ -177,6 +177,10 @@ export class SelectionBridge implements NativeSelectionBridge {
       if (this.connector) {
         this.listen(this.connector)
       }
+    }
+    if (fromLocal) {
+      Promise.resolve().then(bind)
+      return
     }
     if (typeof requestIdleCallback === 'function') {
       requestIdleCallback(bind)
@@ -380,7 +384,7 @@ export class SelectionBridge implements NativeSelectionBridge {
       this.scheduler.onDocChanged.pipe(delay()).subscribe(() => {
         isUpdating = false
       }),
-      fromEvent(document, 'selectionchange').pipe().subscribe(() => {
+      fromEvent(document, 'selectionchange').subscribe(() => {
         if (isUpdating) {
           return
         }
