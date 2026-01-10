@@ -240,7 +240,7 @@ class ExperimentalCaret implements Caret {
       transform: `rotate(${rotate}deg)`,
     })
 
-    this.caret.style.backgroundColor = color
+    this.caret.style.backgroundColor = color === 'rgba(0, 0, 0, 0)' ? '#000' : color
     this.styleChangeEvent.next({
       height: boxHeight + 'px',
       lineHeight: boxHeight + 'px',
