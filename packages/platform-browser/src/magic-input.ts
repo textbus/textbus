@@ -217,14 +217,15 @@ class ExperimentalCaret implements Caret {
         hackEle.append(pointEle)
         node.append(hackEle)
 
-        const t1 = pointEle.getBoundingClientRect().top
+        const p1 = pointEle.getBoundingClientRect()
         pointEle.style.right = '0'
         pointEle.style.left = ''
-        const t2 = pointEle.getBoundingClientRect().top
+        const p2 = pointEle.getBoundingClientRect()
 
-        if (t2 < t1) {
-          rotate = -rotate
-        }
+        const x = p1.x - p2.x
+        const y = p1.y - p2.y
+
+        rotate = Math.atan2(y, x) * 180 / Math.PI
         hackEle.remove()
       }
     }
