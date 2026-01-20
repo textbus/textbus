@@ -229,7 +229,7 @@ class ExperimentalCaret implements Caret {
         hackEle.remove()
       }
     }
-    if (rotate === 0 && (writingMode === 'vertical-lr' || writingMode === 'vertical-rl')) {
+    if (writingMode === 'vertical-lr' || writingMode === 'vertical-rl') {
       rotate += 90
     }
     Object.assign(this.elementRef.style, {

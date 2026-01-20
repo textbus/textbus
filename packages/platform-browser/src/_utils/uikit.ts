@@ -66,7 +66,7 @@ export function getLayoutRectByRange(range: Range): Rect {
       return {
         left: rect.right,
         top: rect.top,
-        width: range.collapsed ? 0 : rect.width,
+        width: range.collapsed ? 1 : rect.width,
         height: rect.height
       }
     } else if (beforeNode.nodeType === Node.TEXT_NODE) {
@@ -77,7 +77,7 @@ export function getLayoutRectByRange(range: Range): Rect {
       return {
         left: rect.right,
         top: rect.top,
-        width: range.collapsed ? 0 : rect.width,
+        width: range.collapsed ? 1 : rect.width,
         height: rect.height
       }
     }
@@ -91,7 +91,7 @@ export function getLayoutRectByRange(range: Range): Rect {
       return {
         left: rect.right,
         top: rect.top,
-        width: range.collapsed ? 0 : rect.width,
+        width: range.collapsed ? 1 : rect.width,
         height: rect.height
       }
     }
@@ -102,7 +102,7 @@ export function getLayoutRectByRange(range: Range): Rect {
       return {
         left: rect.left,
         top: rect.top,
-        width: range.collapsed ? 0 : rect.width,
+        width: range.collapsed ? 1 : rect.width,
         height: rect.height
       }
     }
@@ -121,7 +121,7 @@ export function getLayoutRectByRange(range: Range): Rect {
   return {
     left: rect.left,
     top: rect.top,
-    width: range.collapsed ? 0 : rect.width,
+    width: range.collapsed ? 1 : rect.width,
     height: rect.height
   }
 }
