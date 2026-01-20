@@ -108,8 +108,8 @@
     "style-loader": "^3.3.1",
     "to-string-loader": "^1.2.0",
     "ts-jest": "^29.1.2",
-    "ts-loader": "^9.5.1",
-    "typescript": "^5.4.5",
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.9.3",
     "webpack": "5.94.0",
     "webpack-cli": "^4.9.1",
     "webpack-dev-server": "^4.7.1"
@@ -118,8 +118,8 @@
     "@tanbo/stream": "^1.2.7",
     "reflect-metadata": "^0.2.2",
     "y-webrtc": "^10.3.0",
-    "y-websocket": "^2.1.0",
-    "yjs": "^13.6.23"
+    "y-websocket": "^3.0.0",
+    "yjs": "^13.6.29"
   },
   "repository": {
     "type": "git",
