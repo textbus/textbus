@@ -69,6 +69,7 @@ export class ChangeMarker {
     if (this._changeBefore) {
       return
     }
+    this._changeBefore = true
     this.changeBeforeEvent.next()
     if (this.parentModel) {
       this.parentModel.__changeMarker__.beforeChange()

@@ -183,7 +183,7 @@ export class Keyboard {
       action: (content: string) => {
         const commonAncestorSlot = selection.commonAncestorSlot!
         const initData = config.createState(content, this.textbus)
-        const newInstance = new component(this.textbus, initData)
+        const newInstance = new component(initData)
         if (commonAncestorSlot.schema.includes(newInstance.type)) {
           selection.selectSlot(commonAncestorSlot)
           commander.delete()
