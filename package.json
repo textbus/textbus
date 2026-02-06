@@ -110,7 +110,7 @@
     "ts-jest": "^29.1.2",
     "ts-loader": "^9.5.4",
     "typescript": "^5.9.3",
-    "webpack": "5.94.0",
+    "webpack": "5.104.1",
     "webpack-cli": "^4.9.1",
     "webpack-dev-server": "^4.7.1"
   },
