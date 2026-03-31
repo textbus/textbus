@@ -12,6 +12,9 @@ export interface ViewMount<ViewComponent, NativeElement> {
   (host: NativeElement, viewComponent: ViewComponent, injector: Injector): (void | (() => void))
 }
 
+/**
+ * 视图渲染器抽象接口
+ */
 export interface Renderer<ViewComponent, ViewElement, NativeElement, NativeTextNode> {
   componentRender(component: Component<any>): ViewComponent
 
