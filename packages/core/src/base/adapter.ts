@@ -103,31 +103,6 @@ export abstract class Adapter<
     const vElement = slot.toTree(slotHostRender, customFormat, renderEnv)
     this.slotRootVElementCaches.set(slot, vElement)
 
-    const vNodeToJSX = (vNode: VElement) => {
-      const children: any[] = []
-      const composition = this.composition
-      if (composition && composition.slot === slot) {
-        this.insertCompositionByIndex(slot, vNode, composition, () => {
-          return this.adapter.createCompositionNode(composition, (compositionNode: any) => {
-            this.compositionNode = compositionNode
-          })
-        })
-      }
-      for (let i = 0; i < vNode.children.length; i++) {
-        const child = vNode.children[i]
-        if (child instanceof VElement) {
-          children.push(vNodeToJSX(child))
-        } else if (child instanceof VTextNode) {
-          children.push(replaceEmpty(child.textContent))
-        } else {
-          children.push(this.componentRender(child))
-          if (!this.firstRending) {
-            invokeListener(child, 'onParentSlotUpdated')
-          }
-        }
-      }
-      return this.adapter.vElementToViewElement(vNode, children)
-    }
     this.adapter.getAndUpdateSlotRootNativeElement(vElement, nativeElement => {
       if (nativeElement) {
         this.slotRootNativeElementCaches.set(slot, nativeElement)
@@ -135,7 +110,7 @@ export abstract class Adapter<
         this.slotRootNativeElementCaches.remove(slot)
       }
     })
-    const jsxNode = vNodeToJSX(vElement)
+    const jsxNode = this.vElementToViewElement(vElement, slot)
     slot.__changeMarker__.rendered()
     return jsxNode
   }
@@ -321,4 +296,31 @@ export abstract class Adapter<
 
   /** 当前平台的复制能力 */
   abstract copy(): void
+
+  /** 将虚拟树节点转换为视图树节点 */
+  vElementToViewElement(vNode: VElement, slot?: Slot): ViewElement {
+    const children: any[] = []
+    const composition = this.composition
+    if (composition && composition.slot === slot) {
+      this.insertCompositionByIndex(slot, vNode, composition, () => {
+        return this.adapter.createCompositionNode(composition, (compositionNode: any) => {
+          this.compositionNode = compositionNode
+        })
+      })
+    }
+    for (let i = 0; i < vNode.children.length; i++) {
+      const child = vNode.children[i]
+      if (child instanceof VElement) {
+        children.push(this.vElementToViewElement(child, slot))
+      } else if (child instanceof VTextNode) {
+        children.push(replaceEmpty(child.textContent))
+      } else {
+        children.push(this.componentRender(child))
+        if (!this.firstRending) {
+          invokeListener(child, 'onParentSlotUpdated')
+        }
+      }
+    }
+    return this.adapter.vElementToViewElement(vNode, children)
+  }
 }

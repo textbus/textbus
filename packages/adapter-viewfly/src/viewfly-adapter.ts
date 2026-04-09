@@ -97,14 +97,16 @@ export class ViewflyAdapter extends DomAdapter<ViewFlyNode, ViewFlyNode> {
         throw adapterError(`cannot found view component \`${component.name}\`!`)
       },
       vElementToViewElement(vNode: VElement, children: Array<JSXNode>): ViewFlyNode {
-        const key = vNode.attrs.get('key')
-        vNode.attrs.delete('key')
-        const props: any = {
-          ...(Array.from(vNode.attrs).reduce((a, b) => {
-            a[b[0]] = b[1]
+        let key: any
+        const props = Array.from(vNode.attrs).reduce((a, b) => {
+          const propName = b[0]
+          if (propName === 'key') {
+            key = b[1]
             return a
-          }, {} as Record<string, any>)),
-        }
+          }
+          a[propName] = b[1]
+          return a
+        }, {} as Record<string, any>)
         if (vNode.classes.size) {
           props.class = Array.from(vNode.classes).join(' ')
         }
