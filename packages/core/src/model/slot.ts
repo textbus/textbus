@@ -923,6 +923,32 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
     return nodes
   }
 
+  static formatsToTree(formats: Formats, children: Array<VElement | VTextNode | Component>, renderEnv: any) {
+    const hostBindings: Array<FormatHostBindingRender> = []
+    let host: VElement | null = null
+    for (let i = formats.length - 1; i > -1; i--) {
+      const [formatter, value] = formats[i]
+      const next = formatter.render(children, value, renderEnv)
+      if (!next) {
+        throw slotError(`Formatter \`${formatter.name}\` must return an VElement!`)
+      }
+      if (!(next instanceof VElement)) {
+        hostBindings.push(next)
+        continue
+      }
+      host = next
+      children = [next]
+    }
+    for (const binding of hostBindings) {
+      if (!host) {
+        host = new VElement(binding.fallbackTagName)
+        host.appendChild(...children)
+      }
+      binding.attach(host)
+    }
+    return host!
+  }
+
   private static createVDomByOverlapFormats(
     slot: Slot,
     formats: (FormatItem<any>)[],
