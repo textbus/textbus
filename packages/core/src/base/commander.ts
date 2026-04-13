@@ -583,9 +583,10 @@ export class Commander {
   insertBefore(newChild: Component, ref: Component): boolean {
     const parentSlot = ref?.parent
     if (parentSlot) {
+      this.selection.selectComponent(newChild)
+      this.delete()
       const index = parentSlot.indexOf(ref)
       this.selection.setBaseAndExtent(parentSlot, index, parentSlot, index)
-      this.delete()
       return this.insert(newChild)
     }
     return false
@@ -599,9 +600,10 @@ export class Commander {
   insertAfter(newChild: Component, ref: Component): boolean {
     const parentSlot = ref?.parent
     if (parentSlot) {
+      this.selection.selectComponent(newChild)
+      this.delete()
       const index = parentSlot.indexOf(ref) + 1
       this.selection.setBaseAndExtent(parentSlot, index, parentSlot, index)
-      this.delete()
       return this.insert(newChild)
     }
     return false
