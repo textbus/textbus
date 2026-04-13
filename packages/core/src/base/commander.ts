@@ -585,6 +585,7 @@ export class Commander {
     if (parentSlot) {
       const index = parentSlot.indexOf(ref)
       this.selection.setBaseAndExtent(parentSlot, index, parentSlot, index)
+      this.delete()
       return this.insert(newChild)
     }
     return false
@@ -600,6 +601,7 @@ export class Commander {
     if (parentSlot) {
       const index = parentSlot.indexOf(ref) + 1
       this.selection.setBaseAndExtent(parentSlot, index, parentSlot, index)
+      this.delete()
       return this.insert(newChild)
     }
     return false
