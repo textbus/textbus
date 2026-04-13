@@ -84,7 +84,10 @@ export class ViewflyAdapter extends DomAdapter<ViewFlyNode, ViewFlyNode> {
             ref = createDynamicRef<Element>(rootNode => {
               this.componentRootElementCaches.set(component, rootNode)
               return () => {
-                this.componentRootElementCaches.remove(component)
+                // 当组件移动层级位置到原位置之前并重新渲染后，由于时序的原因，再删除缓存会导致组件找不到对应视图节点
+                if (this.componentRootElementCaches.get(component) === rootNode) {
+                  this.componentRootElementCaches.remove(component)
+                }
               }
             })
             this.componentRefs.set(component, ref)

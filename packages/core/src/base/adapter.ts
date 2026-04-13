@@ -103,10 +103,12 @@ export abstract class Adapter<
     const vElement = slot.toTree(slotHostRender, customFormat, renderEnv)
     this.slotRootVElementCaches.set(slot, vElement)
 
+    const oldNativeNode = this.slotRootNativeElementCaches.get(slot)
     this.adapter.getAndUpdateSlotRootNativeElement(vElement, nativeElement => {
       if (nativeElement) {
         this.slotRootNativeElementCaches.set(slot, nativeElement)
-      } else {
+      } else if (this.slotRootNativeElementCaches.get(slot) === oldNativeNode) {
+        // 当组件或插槽移动层级位置到原位置之前并重新渲染后，由于时序的原因，再删除缓存会导致组件找不到对应视图节点
         this.slotRootNativeElementCaches.remove(slot)
       }
     })
