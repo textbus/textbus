@@ -49,11 +49,11 @@ importers:
         specifier: ^5.8.0
         version: 5.62.0(eslint@8.56.0)(typescript@5.9.3)
       '@viewfly/core':
-        specifier: ^2.0.0-alpha.6
-        version: 2.0.0-alpha.6
+        specifier: ^2.0.0
+        version: 2.0.0
       '@viewfly/platform-browser':
-        specifier: ^2.0.0-alpha.6
-        version: 2.0.0-alpha.6
+        specifier: ^2.0.0
+        version: 2.0.0
       add-assets-webpack-plugin:
         specifier: ^1.0.0
         version: 1.0.0
@@ -172,11 +172,11 @@ importers:
         specifier: ^1.2.7
         version: 1.2.7
       '@textbus/core':
-        specifier: ^5.0.0-alpha.14
-        version: 5.0.0-alpha.14
+        specifier: ^5.1.1
+        version: 5.1.1
       '@textbus/platform-browser':
-        specifier: ^5.0.0-alpha.16
-        version: 5.0.0-alpha.16
+        specifier: ^5.1.1
+        version: 5.1.1
       react:
         specifier: ^17.0.0 || ^18.0.0
         version: 18.2.0
@@ -206,20 +206,20 @@ importers:
         specifier: ^1.2.7
         version: 1.2.7
       '@textbus/core':
-        specifier: ^5.0.0-alpha.14
-        version: 5.0.0-alpha.14
+        specifier: ^5.1.1
+        version: 5.1.1
       '@textbus/platform-browser':
-        specifier: ^5.0.0-alpha.16
-        version: 5.0.0-alpha.16
+        specifier: ^5.1.1
+        version: 5.1.1
       '@textbus/platform-node':
-        specifier: ^5.0.0-alpha.14
-        version: 5.0.0-alpha.14
+        specifier: ^5.1.1
+        version: 5.1.1
       '@viewfly/core':
-        specifier: ^2.0.0-alpha.6
-        version: 2.0.0-alpha.6
+        specifier: ^2.0.0
+        version: 2.0.0
       '@viewfly/platform-browser':
-        specifier: ^2.0.0-alpha.6
-        version: 2.0.0-alpha.6
+        specifier: ^2.0.0
+        version: 2.0.0
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^28.0.2
@@ -243,11 +243,11 @@ importers:
         specifier: ^1.2.7
         version: 1.2.7
       '@textbus/core':
-        specifier: ^5.0.0-alpha.14
-        version: 5.0.0-alpha.14
+        specifier: ^5.1.1
+        version: 5.1.1
       '@textbus/platform-browser':
-        specifier: ^5.0.0-alpha.16
-        version: 5.0.0-alpha.16
+        specifier: ^5.1.1
+        version: 5.1.1
       vue:
         specifier: ^3.4.28
         version: 3.4.28(typescript@5.9.3)
@@ -271,17 +271,17 @@ importers:
   packages/collaborate:
     dependencies:
       '@hocuspocus/provider':
-        specifier: ^3.4.3
+        specifier: ^2.15.2 || ^3.0.0
         version: 3.4.3(y-protocols@1.0.6(yjs@13.6.29))(yjs@13.6.29)
       '@tanbo/stream':
         specifier: ^1.2.7
         version: 1.2.7
       '@textbus/core':
-        specifier: ^5.0.0-alpha.14
-        version: 5.0.0-alpha.14
+        specifier: ^5.1.1
+        version: 5.1.1
       '@viewfly/core':
-        specifier: ^2.0.0-alpha.6
-        version: 2.0.0-alpha.6
+        specifier: ^2.0.0
+        version: 2.0.0
       y-websocket:
         specifier: ^3.0.0
         version: 3.0.0(yjs@13.6.29)
@@ -311,8 +311,8 @@ importers:
         specifier: ^1.2.7
         version: 1.2.7
       '@viewfly/core':
-        specifier: ^2.0.0-alpha.6
-        version: 2.0.0-alpha.6
+        specifier: ^2.0.0
+        version: 2.0.0
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^28.0.2
@@ -336,11 +336,11 @@ importers:
         specifier: ^1.2.7
         version: 1.2.7
       '@textbus/core':
-        specifier: ^5.0.0-alpha.14
-        version: 5.0.0-alpha.14
+        specifier: ^5.1.1
+        version: 5.1.1
       '@viewfly/core':
-        specifier: ^2.0.0-alpha.6
-        version: 2.0.0-alpha.6
+        specifier: ^2.0.0
+        version: 2.0.0
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^28.0.2
@@ -364,14 +364,14 @@ importers:
         specifier: ^1.2.7
         version: 1.2.7
       '@textbus/core':
-        specifier: ^5.0.0-alpha.14
-        version: 5.0.0-alpha.14
+        specifier: ^5.1.1
+        version: 5.1.1
       '@viewfly/core':
-        specifier: ^2.0.0-alpha.6
-        version: 2.0.0-alpha.6
+        specifier: ^2.0.0
+        version: 2.0.0
       '@viewfly/platform-browser':
-        specifier: ^2.0.0-alpha.6
-        version: 2.0.0-alpha.6
+        specifier: ^2.0.0
+        version: 2.0.0
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^28.0.2
@@ -1849,14 +1849,14 @@ packages:
   '@tanbo/stream@1.2.7':
     resolution: {integrity: sha512-ATKVjpQFmr7x+iCKGOGWFzrtB5ZsNef6UKATWZs1R1eE16pyrBwl2AZrnALi+eQQTxOo5Ol6Rmck2BBBgBAnmA==}
 
-  '@textbus/core@5.0.0-alpha.14':
-    resolution: {integrity: sha512-pBT0tQ2pRIx7UlLvMx3LGrXIMIDjqvp07AVISiCNfs8wBI3HekNYwsv/ygmNeifKU2aPbwqLiBkfnaYEjPnIJA==}
+  '@textbus/core@5.1.1':
+    resolution: {integrity: sha512-QryGLYAOZ0kni1c1XOL30S38fTFdTGCo5VddIrhHPMRGeR4QZ2GVNuszoseFonjtKvpbgDJjCAzokaXKhdGhuw==}
 
-  '@textbus/platform-browser@5.0.0-alpha.16':
-    resolution: {integrity: sha512-fVKq4PrISOSKOQ/3Y8p2dV12dKBpTnq5RUsrMuW9dtYLYnbIL//UsEkHou5R2oYqiFD8fKp08Ix4fHem/jhgpQ==}
+  '@textbus/platform-browser@5.1.1':
+    resolution: {integrity: sha512-edvnghkYdyXCQUZLdEYz1nzp/82XAMJiRq/CBLNZVZL/69YR4zgKcyLzGwJo3CwCHcyJ/rYPSZJcXN75rvBtFA==}
 
-  '@textbus/platform-node@5.0.0-alpha.14':
-    resolution: {integrity: sha512-lP+TB7cPhAHLT4HTE7bfE3u40NdlNdh52dqc17mTLd0n65pX/Ub6j5sbH0Tt4jgvGkoJxMZJ5DgkFW6hBq2HdA==}
+  '@textbus/platform-node@5.1.1':
+    resolution: {integrity: sha512-mniiv0RmMiZ6m7eVoV04TBay4rTjECkxh7koPRqSK5ULNw35UORnIA4LO5TZd/JIWKgPBqvQd3QbpApz00jtbQ==}
 
   '@tootallnate/once@2.0.0':
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
@@ -2078,11 +2078,11 @@ packages:
   '@ungap/structured-clone@1.2.0':
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
 
-  '@viewfly/core@2.0.0-alpha.6':
-    resolution: {integrity: sha512-TmgDT6iiZ/wrQ1++Tqycl9X7FAGcQbcQVNMdkqcc2gtVcmWNghMLKBhgsdK8gdE5GTPUziM183G1OL06AIcIdw==}
+  '@viewfly/core@2.0.0':
+    resolution: {integrity: sha512-ImzUJKTFMrMweCpOGgvYDfzG2VOPkVm6kU124Fu+d/xdRXnqmYeyy9YQRiwmy6E/IuX/1dWdd2poapT5Z+w/Wg==}
 
-  '@viewfly/platform-browser@2.0.0-alpha.6':
-    resolution: {integrity: sha512-BzU2ycGp6bFSZDyyZzekllrP50SpMcMi2HalLCmGkbTKHP9YZwUaGDqfmVRjRmHF8OD2jOh49SL5q7MmkOjMjw==}
+  '@viewfly/platform-browser@2.0.0':
+    resolution: {integrity: sha512-MfVdq4kX2D43YJtZWjBEtZk/vSwMoCj8rkCEKxDhw5HP39a9LT7kn1vUDCEatcWOajXSr7yWinfQRtjlQI+2AA==}
 
   '@vue/compiler-core@3.4.28':
     resolution: {integrity: sha512-yJ6CFFu6qDYB4RrF9LJ1DU7Cq7rgODBrwHoiadvHSBGhMHcROl5AOp9WEPDba5J9OEptUdpSPVZb7q++MO/7vA==}
@@ -9458,23 +9458,23 @@ snapshots:
 
   '@tanbo/stream@1.2.7': {}
 
-  '@textbus/core@5.0.0-alpha.14':
+  '@textbus/core@5.1.1':
     dependencies:
       '@tanbo/stream': 1.2.7
-      '@viewfly/core': 2.0.0-alpha.6
+      '@viewfly/core': 2.0.0
 
-  '@textbus/platform-browser@5.0.0-alpha.16':
+  '@textbus/platform-browser@5.1.1':
     dependencies:
       '@tanbo/stream': 1.2.7
-      '@textbus/core': 5.0.0-alpha.14
-      '@viewfly/core': 2.0.0-alpha.6
+      '@textbus/core': 5.1.1
+      '@viewfly/core': 2.0.0
 
-  '@textbus/platform-node@5.0.0-alpha.14':
+  '@textbus/platform-node@5.1.1':
     dependencies:
       '@tanbo/stream': 1.2.7
-      '@textbus/core': 5.0.0-alpha.14
-      '@viewfly/core': 2.0.0-alpha.6
-      '@viewfly/platform-browser': 2.0.0-alpha.6
+      '@textbus/core': 5.1.1
+      '@viewfly/core': 2.0.0
+      '@viewfly/platform-browser': 2.0.0
 
   '@tootallnate/once@2.0.0': {}
 
@@ -9745,13 +9745,13 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
-  '@viewfly/core@2.0.0-alpha.6':
+  '@viewfly/core@2.0.0':
     dependencies:
       reflect-metadata: 0.2.2
 
-  '@viewfly/platform-browser@2.0.0-alpha.6':
+  '@viewfly/platform-browser@2.0.0':
     dependencies:
-      '@viewfly/core': 2.0.0-alpha.6
+      '@viewfly/core': 2.0.0
       csstype: 3.1.3
 
   '@vue/compiler-core@3.4.28':
