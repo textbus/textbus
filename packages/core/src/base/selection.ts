@@ -635,9 +635,11 @@ export class Selection {
     if (parent) {
       const index = parent.indexOf(componentInstance)
       this.setBaseAndExtent(parent, index, parent, index + 1)
-      if (isRestore) {
-        this.restore()
-      }
+    } else {
+      this.unSelect()
+    }
+    if (isRestore) {
+      this.restore()
     }
   }
 
