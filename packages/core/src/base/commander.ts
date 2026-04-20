@@ -306,7 +306,7 @@ export class Commander {
   write<T extends FormatValue>(content: string | Component, formatter?: Formatter<T> | Formats, value?: T): boolean {
     const selection = this.selection
     const is = selection.isCollapsed ? true : this.delete()
-    if (!is) {
+    if (!is || !selection.isSelected) {
       return false
     }
 
