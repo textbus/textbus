@@ -15,13 +15,13 @@
     "noImplicitOverride": true,
     "baseUrl": "./",
     "paths": {
-      "@textbus/platform-browser": ["./packages/platform-browser/src/public-api.ts"],
-      "@textbus/platform-node": ["./packages/platform-node/src/public-api.ts"],
-      "@textbus/core": ["./packages/core/src/public-api.ts"],
-      "@textbus/collaborate": ["./packages/collaborate/src/public-api.ts"],
-      "@textbus/adapter-viewfly": ["./packages/adapter-viewfly/src/public-api.ts"],
-      "@textbus/adapter-react": ["./packages/adapter-react/src/public-api.ts"],
-      "@textbus/adapter-vue": ["./packages/adapter-vue/src/public-api.ts"]
+      "@textbus/platform-browser": ["../platform-browser/src/public-api.ts"],
+      "@textbus/platform-node": ["../platform-node/src/public-api.ts"],
+      "@textbus/core": ["../core/src/public-api.ts"],
+      "@textbus/collaborate": ["../collaborate/src/public-api.ts"],
+      "@textbus/adapter-viewfly": ["../adapter-viewfly/src/public-api.ts"],
+      "@textbus/adapter-react": ["../adapter-react/src/public-api.ts"],
+      "@textbus/adapter-vue": ["../adapter-vue/src/public-api.ts"]
     },
     "jsx": "react-jsx",
     "jsxImportSource": "@viewfly/core"

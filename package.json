@@ -7,8 +7,9 @@
     "packages/*"
   ],
   "scripts": {
-    "start": "webpack-dev-server",
-    "serve": "npx y-websocket HOST=localhost PORT=1234 ",
+    "start": "webpack-dev-server --config packages/playground/webpack.config.js",
+    "serve": "node packages/playground-server/server.js",
+    "serve:yjs": "npx y-websocket HOST=localhost PORT=1234 ",
     "build:lib": "lerna run build:lib",
     "publish:lib": "lerna publish",
     "lint-staged": "lint-staged",

@@ -15,13 +15,13 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.tsx', '.js'],
     alias: {
-      '@textbus/core$': path.resolve(__dirname, './packages/core/src/public-api.ts'),
-      '@textbus/platform-browser$': path.resolve(__dirname, './packages/platform-browser/src/public-api.ts'),
-      '@textbus/platform-node$': path.resolve(__dirname, './packages/platform-node/src/public-api.ts'),
-      '@textbus/collaborate$': path.resolve(__dirname, './packages/collaborate/src/public-api.ts'),
-      '@textbus/adapter-viewfly': path.resolve(__dirname, './packages/adapter-viewfly/src/public-api.ts'),
-      '@textbus/adapter-react': path.resolve(__dirname, './packages/adapter-react/src/public-api.ts'),
-      '@textbus/adapter-vue': path.resolve(__dirname, './packages/adapter-vue/src/public-api.ts'),
+      '@textbus/core$': path.resolve(__dirname, '../core/src/public-api.ts'),
+      '@textbus/platform-browser$': path.resolve(__dirname, '../platform-browser/src/public-api.ts'),
+      '@textbus/platform-node$': path.resolve(__dirname, '../platform-node/src/public-api.ts'),
+      '@textbus/collaborate$': path.resolve(__dirname, '../collaborate/src/public-api.ts'),
+      '@textbus/adapter-viewfly': path.resolve(__dirname, '../adapter-viewfly/src/public-api.ts'),
+      '@textbus/adapter-react': path.resolve(__dirname, '../adapter-react/src/public-api.ts'),
+      '@textbus/adapter-vue': path.resolve(__dirname, '../adapter-vue/src/public-api.ts'),
     }
   },
   devServer: {
@@ -96,7 +96,7 @@ module.exports = {
       ]
     }),
     new HtmlWebpackPlugin({
-      template: 'index.html'
+      template: path.resolve(__dirname, 'index.html')
     })
   ]
 }
