@@ -78,3 +78,7 @@ npm start
 Textbus 的成长离不开社会的支持，如果 Textbus 为你带来了帮助，并且你也认同为知识付费，同时鼓励我们做的更好，欢迎通过下面的二维码表达你的支持
 
 ![](./_source/wx.jpg) ![](./_source/alipay.jpg)
+
+## 开源协议
+
+Textbus 及其子包均采用 [MIT License](./LICENSE)。

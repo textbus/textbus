@@ -43,7 +43,7 @@
     ]
   },
   "author": "tanbo",
-  "license": "GPL-3.0-only",
+  "license": "MIT",
   "keywords": [
     "textbus",
     "富文本编辑器",
