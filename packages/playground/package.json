@@ -14,8 +14,8 @@
     "@textbus/collaborate": "workspace:^",
     "@textbus/core": "workspace:^",
     "@textbus/platform-browser": "workspace:^",
-    "@viewfly/core": "^2.0.0",
-    "@viewfly/platform-browser": "^2.0.0",
+    "@viewfly/core": "^2.2.0",
+    "@viewfly/platform-browser": "^2.2.0",
     "yjs": "^13.6.29"
   },
   "devDependencies": {

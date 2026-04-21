@@ -41,7 +41,7 @@
     "@tanbo/stream": "^1.2.7",
     "@textbus/core": "workspace:^",
     "@textbus/platform-browser": "workspace:^",
-    "@viewfly/core": "^2.0.0"
+    "@viewfly/core": "^2.2.0"
   },
   "peerDependencies": {
     "vue": "^3.4.28"
