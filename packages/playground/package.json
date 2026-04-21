@@ -3,6 +3,24 @@
   "version": "5.0.0",
   "private": true,
   "scripts": {
-    "start": "webpack-dev-server --config webpack.config.js"
+    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tanbo/stream": "^1.2.7",
+    "@textbus/adapter-viewfly": "workspace:^",
+    "@textbus/collaborate": "workspace:^",
+    "@textbus/core": "workspace:^",
+    "@textbus/platform-browser": "workspace:^",
+    "@viewfly/core": "^2.0.0",
+    "@viewfly/platform-browser": "^2.0.0",
+    "yjs": "^13.6.29"
+  },
+  "devDependencies": {
+    "sass": "^1.70.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.10"
   }
 }

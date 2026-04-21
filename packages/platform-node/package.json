@@ -2,14 +2,27 @@
   "name": "@textbus/platform-node",
   "version": "5.1.6",
   "description": "Textbus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
-  "main": "./bundles/index.js",
-  "module": "./bundles/index.esm.js",
-  "typings": "./bundles/public-api.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "start": "webpack-dev-server",
     "test": "cross-env env=test jest",
     "test-c": "cross-env env=test jest --coverage",
-    "build:lib": "rimraf bundles && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
+    "build:lib": "rimraf dist && vite build",
     "publish:lib": "npm run build:lib && npm publish --access=public"
   },
   "license": "GPL-3.0-only",
@@ -26,15 +39,12 @@
   ],
   "dependencies": {
     "@tanbo/stream": "^1.2.7",
-    "@textbus/core": "^5.1.6",
+    "@textbus/core": "workspace:^",
     "@viewfly/core": "^2.0.0",
     "@viewfly/platform-browser": "^2.0.0"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^28.0.2",
-    "@rollup/plugin-typescript": "^12.1.2",
     "rimraf": "^3.0.2",
-    "rollup": "4.22.4",
     "tslib": "^2.4.1"
   },
   "author": {
@@ -47,6 +57,5 @@
   },
   "bugs": {
     "url": "https://github.com/textbus/textbus.git/issues"
-  },
-  "gitHead": "cf4fd289b73bc777124a32fe42bb58eba05a34f1"
+  }
 }

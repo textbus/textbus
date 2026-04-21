@@ -1,41 +1,19 @@
 {
+  "extends": "../../tsconfig.package.json",
   "compilerOptions": {
-    "declaration": true,
-    "useDefineForClassFields": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "lib": [
-      "esnext",
-      "dom"
-    ],
-    "target": "es6",
-    "strict": true,
-    "module": "es2020",
-    "moduleResolution": "node",
-    "inlineSourceMap": true,
-    "inlineSources": true,
-    "noImplicitAny": true,
-    "outDir": "bundles/",
-    "downlevelIteration": true,
     "paths": {
       "@textbus/core": [
-        "../core/src/public-api.ts"
+        "../core/src/index.ts"
       ],
       "@textbus/platform-browser": [
-        "../platform-browser/src/public-api.ts"
+        "../platform-browser/src/index.ts"
       ],
       "@textbus/platform-node": [
-        "../platform-node/src/public-api.ts"
+        "../platform-node/src/index.ts"
       ]
     }
   },
   "include": [
     "src"
-  ],
-  "ts-node": {
-    "compilerOptions": {
-      "module": "CommonJS"
-    }
-  }
+  ]
 }

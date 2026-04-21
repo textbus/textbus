@@ -295,7 +295,7 @@ class ExperimentalCaret implements Caret {
 export class MagicInput extends Input {
   composition = false
   onReady: Promise<void>
-  caret = new ExperimentalCaret(this.domAdapter, this.scheduler, this.textbus.get(VIEW_MASK))
+  caret: ExperimentalCaret
 
   set disabled(b: boolean) {
     this._disabled = b
@@ -334,6 +334,7 @@ export class MagicInput extends Input {
               private scheduler: Scheduler,
               private textbus: Textbus) {
     super()
+    this.caret = new ExperimentalCaret(this.domAdapter, this.scheduler, this.textbus.get(VIEW_MASK))
     this.onReady = new Promise<void>(resolve => {
       this.subscription.add(
         fromEvent(this.container, 'load').subscribe(() => {

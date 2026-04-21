@@ -4,5 +4,10 @@
   "private": true,
   "scripts": {
     "start": "node server.js"
+  },
+  "dependencies": {
+    "@hocuspocus/server": "^2.13.6",
+    "ip": "^2.0.1",
+    "yjs": "^13.6.29"
   }
 }

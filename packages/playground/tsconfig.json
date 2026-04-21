@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@textbus/platform-browser": ["../platform-browser/src/index.ts"],
+      "@textbus/platform-node": ["../platform-node/src/index.ts"],
+      "@textbus/core": ["../core/src/index.ts"],
+      "@textbus/collaborate": ["../collaborate/src/index.ts"],
+      "@textbus/adapter-viewfly": ["../adapter-viewfly/src/index.ts"],
+      "@textbus/adapter-react": ["../adapter-react/src/index.ts"],
+      "@textbus/adapter-vue": ["../adapter-vue/src/index.ts"]
+    }
+  },
+  "exclude": ["../../dev-test", "../../helper", "../../test"]
+}
