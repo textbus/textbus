@@ -28,7 +28,10 @@ export default defineConfig({
       entryRoot: 'src',
       outDir: 'dist',
       include: ['src'],
-      strictOutput: true
+      strictOutput: true,
+      rollupTypes: false,
+      pathsToAliases: false,
+      insertTypesEntry: false
     })
   ]
 })
