@@ -68,7 +68,7 @@ export class ViewflyAdapter extends DomAdapter<ViewFlyNode, ViewFlyNode> {
             update(null)
           }
         })
-        if (currentRef instanceof DynamicRef) {
+        if (typeof currentRef === 'function') {
           vEle.attrs.set('ref', [currentRef, ref])
         } else if (Array.isArray(currentRef)) {
           currentRef.push(ref)
