@@ -2,7 +2,17 @@
   "$schema": "https://unpkg.com/@changesets/config@3.0.4/schema.json",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "fixed": [],
+  "fixed": [
+    [
+      "@textbus/core",
+      "@textbus/platform-browser",
+      "@textbus/platform-node",
+      "@textbus/collaborate",
+      "@textbus/adapter-react",
+      "@textbus/adapter-vue",
+      "@textbus/adapter-viewfly"
+    ]
+  ],
   "linked": [],
   "access": "public",
   "baseBranch": "main",
