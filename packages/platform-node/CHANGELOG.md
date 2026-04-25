@@ -1,5 +1,13 @@
 # @textbus/platform-node
 
+## 5.2.2
+
+### Patch Changes
+
+- 修复类型错误
+- Updated dependencies
+  - @textbus/core@5.2.2
+
 ## 5.2.1
 
 ### Patch Changes
