@@ -1,5 +1,13 @@
 # @textbus/collaborate
 
+## 5.2.1
+
+### Patch Changes
+
+- 修复打包配置
+- Updated dependencies
+  - @textbus/core@5.2.1
+
 ## 5.2.0
 
 ### Minor Changes

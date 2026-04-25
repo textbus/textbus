@@ -1,5 +1,11 @@
 # @textbus/playground-server
 
+## 5.1.1
+
+### Patch Changes
+
+- 修复打包配置
+
 ## 5.1.0
 
 ### Minor Changes
