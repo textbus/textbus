@@ -1,5 +1,16 @@
 # @textbus/playground
 
+## 5.1.4
+
+### Patch Changes
+
+- 修复构建结果元数据不完整的 bug
+- Updated dependencies
+  - @textbus/platform-browser@5.2.4
+  - @textbus/adapter-viewfly@5.2.4
+  - @textbus/collaborate@5.2.4
+  - @textbus/core@5.2.4
+
 ## 5.1.3
 
 ### Patch Changes

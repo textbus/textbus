@@ -1,5 +1,11 @@
 # @textbus/playground-server
 
+## 5.1.4
+
+### Patch Changes
+
+- 修复构建结果元数据不完整的 bug
+
 ## 5.1.3
 
 ### Patch Changes
