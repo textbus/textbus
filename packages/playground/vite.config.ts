@@ -1,7 +1,38 @@
 import path from 'node:path'
 import { defineConfig } from 'vite'
+import swc from 'vite-plugin-swc-transform'
+import checker from 'vite-plugin-checker'
 
 export default defineConfig({
+  plugins: [
+    checker({
+      typescript: true
+      // eslint: {
+      //   lintCommand: 'eslint "./packages/*/src/**/*.{ts,tsx}"'
+      // }
+    }),
+    swc({
+      swcOptions: {
+        jsc: {
+          parser: {
+            syntax: 'typescript',
+            decorators: true,
+            tsx: true
+          },
+          transform: {
+            legacyDecorator: true,
+            decoratorMetadata: true,
+            useDefineForClassFields: true,
+            react: {
+              runtime: 'automatic',
+              importSource: '@viewfly/core',
+              throwIfNamespace: true
+            }
+          }
+        }
+      }
+    })
+  ],
   resolve: {
     alias: {
       '@textbus/core': path.resolve(__dirname, '../core/src/index.ts'),

@@ -2,6 +2,8 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "baseUrl": "./",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
     "paths": {
       "@textbus/platform-browser": ["../platform-browser/src/index.ts"],
       "@textbus/platform-node": ["../platform-node/src/index.ts"],

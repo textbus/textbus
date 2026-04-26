@@ -1,6 +1,6 @@
 import { InjectionToken } from '@viewfly/core'
 
-import { ViewOptions } from './browser-module'
+import type { ViewOptions } from './browser-module'
 
 /**
  * 编辑器可选项依赖注入 token

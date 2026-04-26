@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@viewfly/core'
 import { Attribute, Component, ContentType, FormatItem, Formatter, FormatValue, Slot, Textbus } from '@textbus/core'
 
 import { EDITOR_OPTIONS } from './injection-tokens'
-import { ViewOptions } from './browser-module'
+import type { ViewOptions } from './browser-module'
 
 /**
  * 插槽解析器

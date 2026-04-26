@@ -16,7 +16,7 @@ import {
 import { EDITOR_OPTIONS, VIEW_DOCUMENT } from './injection-tokens'
 import { getLayoutRectByRange, Rect } from './_utils/uikit'
 import { Input } from './types'
-import { ViewOptions } from './browser-module'
+import type { ViewOptions } from './browser-module'
 import { DomAdapter } from './dom-adapter'
 
 /**

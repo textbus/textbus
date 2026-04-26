@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import { createApp } from '@viewfly/platform-browser'
 import { createRef, onMounted } from '@viewfly/core'
 import { ContentType, Slot, Selection } from '@textbus/core'
@@ -9,9 +10,9 @@ import { RootComponent } from './test-editor/components/root.component'
 
 function App() {
   const textareaRef = createRef<HTMLTextAreaElement>()
-  const editorRef = createRef<HTMLElement>()
+  const editorRef = createRef<HTMLDivElement>()
   const editor = new TestEditor(() => {
-    return editorRef.current as HTMLElement
+    return editorRef.value as HTMLElement
   })
 
   const root = new RootComponent({
@@ -36,12 +37,12 @@ function App() {
             <div>
               <button type="button" onClick={() => {
                 const paths = editor.get(Selection).getPaths()
-                textareaRef.current!.value = JSON.stringify(paths)
+                textareaRef.value!.value = JSON.stringify(paths)
               }}>获取选区路径
               </button>
               <button type="button" onClick={() => {
                 const json = editor.getJSON()
-                textareaRef.current!.value = JSON.stringify(json)
+                textareaRef.value!.value = JSON.stringify(json)
               }}>获取 JSON 内容
               </button>
               {/*<button type="button" onClick={() => {*/}
@@ -51,7 +52,7 @@ function App() {
             </div>
             <div>
               <button type="button" onClick={() => {
-                textareaRef.current!.select()
+                textareaRef.value!.select()
                 document.execCommand('copy')
               }}>复制内容
               </button>

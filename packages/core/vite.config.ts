@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
+import swc from 'vite-plugin-swc-transform'
 import pkg from './package.json'
 
 const external = [
@@ -24,6 +25,22 @@ export default defineConfig({
     }
   },
   plugins: [
+    swc({
+      swcOptions: {
+        jsc: {
+          parser: {
+            syntax: 'typescript',
+            decorators: true,
+            tsx: true
+          },
+          transform: {
+            legacyDecorator: true,
+            decoratorMetadata: true,
+            useDefineForClassFields: true
+          }
+        }
+      }
+    }),
     dts({
       tsconfigPath: './tsconfig.json',
       entryRoot: 'src',
