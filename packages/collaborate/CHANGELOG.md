@@ -1,5 +1,13 @@
 # @textbus/collaborate
 
+## 5.2.3
+
+### Patch Changes
+
+- 构建结果不压缩
+- Updated dependencies
+  - @textbus/core@5.2.3
+
 ## 5.2.2
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @textbus/playground-server
 
+## 5.1.3
+
+### Patch Changes
+
+- 构建结果不压缩
+
 ## 5.1.2
 
 ### Patch Changes
