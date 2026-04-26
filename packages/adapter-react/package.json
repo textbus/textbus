@@ -41,7 +41,7 @@
     "@tanbo/stream": "^1.2.7",
     "@textbus/core": "workspace:^",
     "@textbus/platform-browser": "workspace:^",
-    "@viewfly/core": "^2.2.0 || >=3.0.0-alpha.0 <4"
+    "@viewfly/core": "^2.2.0 || >=3.0.0-alpha.3 <4"
   },
   "peerDependencies": {
     "react": "^17.0.0 || ^18.0.0"
