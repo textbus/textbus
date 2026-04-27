@@ -373,7 +373,6 @@ export class Textbus extends ReflectiveInjector {
       plugins.push(...(module.plugins || []))
     })
     const providers: Provider[] = [
-      ...customProviders,
       {
         provide: READONLY,
         useValue: !!config.readonly
@@ -429,7 +428,8 @@ export class Textbus extends ReflectiveInjector {
         useFactory() {
           throw textbusError('You must implement the `ViewRenderer` interface to start Textbus!')
         }
-      }
+      },
+      ...customProviders,
     ]
     return {
       providers,
