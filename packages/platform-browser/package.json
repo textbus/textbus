@@ -23,6 +23,7 @@
     "test": "cross-env env=test jest",
     "test-c": "cross-env env=test jest --coverage",
     "build:lib": "rimraf dist && vite build",
+    "prepublishOnly": "npm run build:lib",
     "publish:lib": "npm run build:lib && npm publish --access=public"
   },
   "license": "MIT",
