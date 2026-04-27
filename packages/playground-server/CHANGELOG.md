@@ -1,5 +1,11 @@
 # @textbus/playground-server
 
+## 5.1.7
+
+### Patch Changes
+
+- 升级依赖
+
 ## 5.1.6
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @textbus/core
 
+## 5.2.7
+
+### Patch Changes
+
+- 升级依赖
+
 ## 5.2.6
 
 ### Patch Changes

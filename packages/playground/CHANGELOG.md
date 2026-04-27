@@ -1,5 +1,16 @@
 # @textbus/playground
 
+## 5.1.7
+
+### Patch Changes
+
+- 升级依赖
+- Updated dependencies
+  - @textbus/platform-browser@5.2.7
+  - @textbus/adapter-viewfly@5.2.7
+  - @textbus/collaborate@5.2.7
+  - @textbus/core@5.2.7
+
 ## 5.1.6
 
 ### Patch Changes
