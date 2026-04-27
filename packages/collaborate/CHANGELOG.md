@@ -1,5 +1,13 @@
 # @textbus/collaborate
 
+## 5.2.6
+
+### Patch Changes
+
+- 修复 viewfly 兼容问题
+- Updated dependencies
+  - @textbus/core@5.2.6
+
 ## 5.2.5
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@textbus/playground-server",
-  "version": "5.1.5",
+  "version": "5.1.6",
   "private": true,
   "scripts": {
     "start": "node server.js"

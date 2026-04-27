@@ -1,5 +1,16 @@
 # @textbus/playground
 
+## 5.1.6
+
+### Patch Changes
+
+- 修复 viewfly 兼容问题
+- Updated dependencies
+  - @textbus/platform-browser@5.2.6
+  - @textbus/adapter-viewfly@5.2.6
+  - @textbus/collaborate@5.2.6
+  - @textbus/core@5.2.6
+
 ## 5.1.5
 
 ### Patch Changes
