@@ -61,8 +61,8 @@
     "@types/node": "^22.12.0",
     "@typescript-eslint/eslint-plugin": "^5.8.0",
     "@typescript-eslint/parser": "^5.8.0",
-    "@viewfly/core": "^3.0.0-alpha.3",
-    "@viewfly/platform-browser": "^3.0.0-alpha.3",
+    "@viewfly/core": "3.0.0-alpha.7",
+    "@viewfly/platform-browser": "3.0.0-alpha.7",
     "cross-env": "^7.0.3",
     "eslint": "^8.5.0",
     "husky": "^8.0.1",
@@ -82,12 +82,6 @@
   "dependencies": {
     "@tanbo/stream": "^1.2.7",
     "reflect-metadata": "^0.2.2"
-  },
-  "pnpm": {
-    "overrides": {
-      "@viewfly/core": "3.0.0-alpha.3",
-      "@viewfly/platform-browser": "3.0.0-alpha.3"
-    }
   },
   "repository": {
     "type": "git",

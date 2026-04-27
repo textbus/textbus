@@ -70,10 +70,11 @@ export class NodeViewAdapter extends Adapter<VDOMElement, VDOMText, JSX.Element,
             update(null)
           }
         })
-        if (typeof currentRef === 'function') {
-          vEle.attrs.set('ref', [currentRef, ref])
-        } else if (Array.isArray(currentRef)) {
+        if (Array.isArray(currentRef)) {
           currentRef.push(ref)
+        } else if (typeof currentRef === 'function' || typeof currentRef === 'object') {
+          // 两个判断用于兼容 viewfly 2/3
+          vEle.attrs.set('ref', [currentRef, ref])
         } else {
           vEle.attrs.set('ref', ref)
         }

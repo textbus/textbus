@@ -4,10 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  '@viewfly/core': 3.0.0-alpha.3
-  '@viewfly/platform-browser': 3.0.0-alpha.3
-
 importers:
 
   .:
@@ -35,11 +31,11 @@ importers:
         specifier: ^5.8.0
         version: 5.62.0(eslint@8.56.0)(typescript@5.9.3)
       '@viewfly/core':
-        specifier: 3.0.0-alpha.3
-        version: 3.0.0-alpha.3
+        specifier: 3.0.0-alpha.7
+        version: 3.0.0-alpha.7
       '@viewfly/platform-browser':
-        specifier: 3.0.0-alpha.3
-        version: 3.0.0-alpha.3
+        specifier: 3.0.0-alpha.7
+        version: 3.0.0-alpha.7
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -98,8 +94,8 @@ importers:
         specifier: workspace:^
         version: link:../platform-browser
       '@viewfly/core':
-        specifier: 3.0.0-alpha.3
-        version: 3.0.0-alpha.3
+        specifier: 3.0.0-alpha.7
+        version: 3.0.0-alpha.7
       react:
         specifier: ^17.0.0 || ^18.0.0
         version: 18.2.0
@@ -129,11 +125,11 @@ importers:
         specifier: workspace:^
         version: link:../platform-node
       '@viewfly/core':
-        specifier: 3.0.0-alpha.3
-        version: 3.0.0-alpha.3
+        specifier: 3.0.0-alpha.7
+        version: 3.0.0-alpha.7
       '@viewfly/platform-browser':
-        specifier: 3.0.0-alpha.3
-        version: 3.0.0-alpha.3
+        specifier: 3.0.0-alpha.7
+        version: 3.0.0-alpha.7
     devDependencies:
       rimraf:
         specifier: ^3.0.2
@@ -154,8 +150,8 @@ importers:
         specifier: workspace:^
         version: link:../platform-browser
       '@viewfly/core':
-        specifier: 3.0.0-alpha.3
-        version: 3.0.0-alpha.3
+        specifier: 3.0.0-alpha.7
+        version: 3.0.0-alpha.7
       vue:
         specifier: ^3.4.28
         version: 3.4.28(typescript@5.9.3)
@@ -179,8 +175,8 @@ importers:
         specifier: workspace:^
         version: link:../core
       '@viewfly/core':
-        specifier: 3.0.0-alpha.3
-        version: 3.0.0-alpha.3
+        specifier: 3.0.0-alpha.7
+        version: 3.0.0-alpha.7
       y-websocket:
         specifier: ^3.0.0
         version: 3.0.0(yjs@13.6.29)
@@ -201,8 +197,8 @@ importers:
         specifier: ^1.2.7
         version: 1.2.7
       '@viewfly/core':
-        specifier: 3.0.0-alpha.3
-        version: 3.0.0-alpha.3
+        specifier: 3.0.0-alpha.7
+        version: 3.0.0-alpha.7
     devDependencies:
       rimraf:
         specifier: ^3.0.2
@@ -220,8 +216,8 @@ importers:
         specifier: workspace:^
         version: link:../core
       '@viewfly/core':
-        specifier: 3.0.0-alpha.3
-        version: 3.0.0-alpha.3
+        specifier: 3.0.0-alpha.7
+        version: 3.0.0-alpha.7
     devDependencies:
       rimraf:
         specifier: ^3.0.2
@@ -239,11 +235,11 @@ importers:
         specifier: workspace:^
         version: link:../core
       '@viewfly/core':
-        specifier: 3.0.0-alpha.3
-        version: 3.0.0-alpha.3
+        specifier: 3.0.0-alpha.7
+        version: 3.0.0-alpha.7
       '@viewfly/platform-browser':
-        specifier: 3.0.0-alpha.3
-        version: 3.0.0-alpha.3
+        specifier: 3.0.0-alpha.7
+        version: 3.0.0-alpha.7
     devDependencies:
       rimraf:
         specifier: ^3.0.2
@@ -270,11 +266,11 @@ importers:
         specifier: workspace:^
         version: link:../platform-browser
       '@viewfly/core':
-        specifier: 3.0.0-alpha.3
-        version: 3.0.0-alpha.3
+        specifier: 3.0.0-alpha.7
+        version: 3.0.0-alpha.7
       '@viewfly/platform-browser':
-        specifier: 3.0.0-alpha.3
-        version: 3.0.0-alpha.3
+        specifier: 3.0.0-alpha.7
+        version: 3.0.0-alpha.7
       yjs:
         specifier: ^13.6.29
         version: 13.6.29
@@ -1464,11 +1460,11 @@ packages:
   '@ungap/structured-clone@1.2.0':
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
 
-  '@viewfly/core@3.0.0-alpha.3':
-    resolution: {integrity: sha512-vIEjU1kusGe1pkS+SOk3eQfoatU1PMeyJnQBjZW7iRSHd9l0Hm9DP10DYLyEzHPau7YmY1F2+tTloRtSRUGULw==}
+  '@viewfly/core@3.0.0-alpha.7':
+    resolution: {integrity: sha512-w3mN5QstidOqZ+CXQ7z5c3bmFm5fEha18qdkFJK6NhzncO8zbpOVtrYG+9SEcq+Z1nNS9rc9F+LePJnHPKidOQ==}
 
-  '@viewfly/platform-browser@3.0.0-alpha.3':
-    resolution: {integrity: sha512-teK23GToGVpPb0Aw0b/QhqR9H19/nIsjqnCE3ne3lrMoCWf3tG+UrJqH2+tIHBuJ/5WWTEIguaUdiiY8FyAnvg==}
+  '@viewfly/platform-browser@3.0.0-alpha.7':
+    resolution: {integrity: sha512-57FUeLeGLRuTFQ7tRb+gewc2vsjGaW4MfLv+oak5Ew37eQs6fN/PFVTL0sEzH9r27KorbLWPI7Hk/VNX9Y6KeQ==}
 
   '@volar/language-core@2.4.28':
     resolution: {integrity: sha512-w4qhIJ8ZSitgLAkVay6AbcnC7gP3glYM3fYwKV3srj8m494E3xtrCv6E+bWviiK/8hs6e6t1ij1s2Endql7vzQ==}
@@ -1847,6 +1843,9 @@ packages:
 
   csstype@3.1.3:
     resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
+
+  csstype@3.2.3:
+    resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
 
   data-urls@3.0.2:
     resolution: {integrity: sha512-Jy/tj3ldjZJo63sVAvg6LHt2mHvl4V6AgRAmNDtLdm7faqtsx+aJG42rsyCo9JCoRVKwPFzKlIPx3DIibwSIaQ==}
@@ -4847,14 +4846,14 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
-  '@viewfly/core@3.0.0-alpha.3':
+  '@viewfly/core@3.0.0-alpha.7':
     dependencies:
       reflect-metadata: 0.2.2
 
-  '@viewfly/platform-browser@3.0.0-alpha.3':
+  '@viewfly/platform-browser@3.0.0-alpha.7':
     dependencies:
-      '@viewfly/core': 3.0.0-alpha.3
-      csstype: 3.1.3
+      '@viewfly/core': 3.0.0-alpha.7
+      csstype: 3.2.3
 
   '@volar/language-core@2.4.28':
     dependencies:
@@ -5272,6 +5271,8 @@ snapshots:
       cssom: 0.3.8
 
   csstype@3.1.3: {}
+
+  csstype@3.2.3: {}
 
   data-urls@3.0.2:
     dependencies:

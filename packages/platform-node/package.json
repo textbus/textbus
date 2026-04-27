@@ -40,8 +40,8 @@
   "dependencies": {
     "@tanbo/stream": "^1.2.7",
     "@textbus/core": "workspace:^",
-    "@viewfly/core": "^2.2.0 || >=3.0.0-alpha.3 <4",
-    "@viewfly/platform-browser": "^2.2.0 || >=3.0.0-alpha.3 <4"
+    "@viewfly/core": "3.0.0-alpha.7",
+    "@viewfly/platform-browser": "3.0.0-alpha.7"
   },
   "devDependencies": {
     "rimraf": "^3.0.2",

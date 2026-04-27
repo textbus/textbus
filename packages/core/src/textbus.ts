@@ -158,7 +158,15 @@ export class Textbus extends ReflectiveInjector {
     super(new NullInjector(), [], Textbus.diScope)
     const { plugins, providers } = this.mergeModules(config)
     this.plugins = plugins
-    this.normalizedProviders = providers.map(i => normalizeProvider(i))
+    const normalizedProviders = providers.map(i => normalizeProvider(i))
+    // 兼容 Viewfly 版本 2/3
+    if (Array.isArray(this.normalizedProviders)) {
+      this.normalizedProviders = normalizedProviders as any
+    } else {
+      normalizedProviders.forEach(normalizedProvider => {
+        this.normalizedProviders.set(normalizedProvider.provide, normalizedProvider)
+      })
+    }
 
     this.onChange = this.changeEvent.asObservable()
     this.onFocus = this.focusEvent.asObservable()
@@ -326,7 +334,13 @@ export class Textbus extends ReflectiveInjector {
     })
 
     this.recordValues.clear()
-    this.normalizedProviders = []
+
+    // 兼容 Viewfly 版本 2/3
+    if (Array.isArray(this.normalizedProviders)) {
+      this.normalizedProviders = [] as any
+    } else {
+      this.normalizedProviders.clear()
+    }
     this.beforeDestroyCallbacks = []
   }
 
