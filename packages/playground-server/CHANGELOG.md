@@ -1,5 +1,11 @@
 # @textbus/playground-server
 
+## 5.1.5
+
+### Patch Changes
+
+- 修复 viewfly 兼容问题
+
 ## 5.1.4
 
 ### Patch Changes

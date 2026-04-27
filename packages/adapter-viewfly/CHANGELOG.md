@@ -1,5 +1,15 @@
 # @textbus/adapter-viewfly
 
+## 5.2.5
+
+### Patch Changes
+
+- 修复 viewfly 兼容问题
+- Updated dependencies
+  - @textbus/platform-browser@5.2.5
+  - @textbus/platform-node@5.2.5
+  - @textbus/core@5.2.5
+
 ## 5.2.4
 
 ### Patch Changes

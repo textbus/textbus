@@ -1,6 +1,6 @@
 {
   "name": "@textbus/adapter-react",
-  "version": "5.2.4",
+  "version": "5.2.5",
   "description": "Textbus is a rich text editor and framework that is highly customizable and extensible to achieve rich wysiwyg effects.",
   "main": "./dist/index.js",
   "module": "./dist/index.esm.js",
