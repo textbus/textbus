@@ -9,3 +9,5 @@ coverage/
 *.swo
 .vscode/
 yarn.lock
+docs/.vitepress/cache
+docs/.vitepress/dist

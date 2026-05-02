@@ -23,6 +23,10 @@
     "lint": "eslint packages --ext .ts,.tsx --max-warnings 0",
     "test": "cross-env env=test jest",
     "test-c": "cross-env env=test jest --coverage",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "docs:fetch-logo": "mkdir -p docs/public && curl -fsSL \"https://textbus.io/dc01a6c036bc806cab9c.png\" -o docs/public/logo.png",
     "prepare": "husky install"
   },
   "lint-staged": {
@@ -77,6 +81,7 @@
     "vite-plugin-checker": "^0.13.0",
     "vite-plugin-dts": "^4.5.4",
     "vite-plugin-swc-transform": "^1.1.1",
+    "vitepress": "^1.6.4",
     "yjs": "^13.6.29"
   },
   "dependencies": {
