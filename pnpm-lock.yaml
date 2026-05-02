@@ -31,11 +31,11 @@ importers:
         specifier: ^5.8.0
         version: 5.62.0(eslint@8.56.0)(typescript@5.9.3)
       '@viewfly/core':
-        specifier: ^3.0.0-alpha.8
-        version: 3.0.0-alpha.8
+        specifier: ^2.2.0 || ^3.0.0
+        version: 3.0.1
       '@viewfly/platform-browser':
-        specifier: ^3.0.0-alpha.8
-        version: 3.0.0-alpha.8
+        specifier: ^2.2.0 || ^3.0.0
+        version: 3.0.1
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -94,8 +94,8 @@ importers:
         specifier: workspace:^
         version: link:../platform-browser
       '@viewfly/core':
-        specifier: ^3.0.0-alpha.8
-        version: 3.0.0-alpha.8
+        specifier: ^2.2.0 || ^3.0.0
+        version: 3.0.1
       react:
         specifier: ^17.0.0 || ^18.0.0
         version: 18.2.0
@@ -125,11 +125,11 @@ importers:
         specifier: workspace:^
         version: link:../platform-node
       '@viewfly/core':
-        specifier: ^3.0.0-alpha.8
-        version: 3.0.0-alpha.8
+        specifier: ^2.2.0 || ^3.0.0
+        version: 3.0.1
       '@viewfly/platform-browser':
-        specifier: ^3.0.0-alpha.8
-        version: 3.0.0-alpha.8
+        specifier: ^2.2.0 || ^3.0.0
+        version: 3.0.1
     devDependencies:
       rimraf:
         specifier: ^3.0.2
@@ -150,8 +150,8 @@ importers:
         specifier: workspace:^
         version: link:../platform-browser
       '@viewfly/core':
-        specifier: ^3.0.0-alpha.8
-        version: 3.0.0-alpha.8
+        specifier: ^2.2.0 || ^3.0.0
+        version: 3.0.1
       vue:
         specifier: ^3.4.28
         version: 3.4.28(typescript@5.9.3)
@@ -175,8 +175,8 @@ importers:
         specifier: workspace:^
         version: link:../core
       '@viewfly/core':
-        specifier: ^3.0.0-alpha.8
-        version: 3.0.0-alpha.8
+        specifier: ^2.2.0 || ^3.0.0
+        version: 3.0.1
       y-websocket:
         specifier: ^3.0.0
         version: 3.0.0(yjs@13.6.29)
@@ -197,8 +197,8 @@ importers:
         specifier: ^1.2.7
         version: 1.2.7
       '@viewfly/core':
-        specifier: ^3.0.0-alpha.8
-        version: 3.0.0-alpha.8
+        specifier: ^2.2.0 || ^3.0.0
+        version: 3.0.1
     devDependencies:
       rimraf:
         specifier: ^3.0.2
@@ -216,8 +216,8 @@ importers:
         specifier: workspace:^
         version: link:../core
       '@viewfly/core':
-        specifier: ^3.0.0-alpha.8
-        version: 3.0.0-alpha.8
+        specifier: ^2.2.0 || ^3.0.0
+        version: 3.0.1
     devDependencies:
       rimraf:
         specifier: ^3.0.2
@@ -235,11 +235,11 @@ importers:
         specifier: workspace:^
         version: link:../core
       '@viewfly/core':
-        specifier: ^3.0.0-alpha.8
-        version: 3.0.0-alpha.8
+        specifier: ^2.2.0 || ^3.0.0
+        version: 3.0.1
       '@viewfly/platform-browser':
-        specifier: ^3.0.0-alpha.8
-        version: 3.0.0-alpha.8
+        specifier: ^2.2.0 || ^3.0.0
+        version: 3.0.1
     devDependencies:
       rimraf:
         specifier: ^3.0.2
@@ -266,11 +266,11 @@ importers:
         specifier: workspace:^
         version: link:../platform-browser
       '@viewfly/core':
-        specifier: ^3.0.0-alpha.8
-        version: 3.0.0-alpha.8
+        specifier: ^2.2.0 || ^3.0.0
+        version: 3.0.1
       '@viewfly/platform-browser':
-        specifier: ^3.0.0-alpha.8
-        version: 3.0.0-alpha.8
+        specifier: ^2.2.0 || ^3.0.0
+        version: 3.0.1
       yjs:
         specifier: ^13.6.29
         version: 13.6.29
@@ -1460,11 +1460,11 @@ packages:
   '@ungap/structured-clone@1.2.0':
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
 
-  '@viewfly/core@3.0.0-alpha.8':
-    resolution: {integrity: sha512-sZZ0B5gf5CCml+Nb7YxCDsTLJXcrTM/x6c1fYHLIKf1lhyYMcG5zi6InTgvKoVukDKCXodwA106/KHLYQCDoPw==}
+  '@viewfly/core@3.0.1':
+    resolution: {integrity: sha512-BgYwvzO9Q8x6QLZIKQEp/YTP8iRMLqnX6qsnXRvJ/vV9s87WTC+mj/iV3L52AN66mTsUl0cJaYg4sPlTMnVqKQ==}
 
-  '@viewfly/platform-browser@3.0.0-alpha.8':
-    resolution: {integrity: sha512-9MhQMZvXuDhaIPlqIOccMH3z+n4Lzu4IjeoEnZhDe5kazdfnhf2n/BOiw7asTTaKY48KbAz5EesYKIIKYejsLQ==}
+  '@viewfly/platform-browser@3.0.1':
+    resolution: {integrity: sha512-wA7jyvv8Op4FUCu9s/B+ECHOWLTaVFef3OOLO0uRfMauDjI0x4/ZLD6vVuCWU5bUWRWvjB1nfTTIjjohIyud2g==}
 
   '@volar/language-core@2.4.28':
     resolution: {integrity: sha512-w4qhIJ8ZSitgLAkVay6AbcnC7gP3glYM3fYwKV3srj8m494E3xtrCv6E+bWviiK/8hs6e6t1ij1s2Endql7vzQ==}
@@ -4846,13 +4846,13 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
-  '@viewfly/core@3.0.0-alpha.8':
+  '@viewfly/core@3.0.1':
     dependencies:
       reflect-metadata: 0.2.2
 
-  '@viewfly/platform-browser@3.0.0-alpha.8':
+  '@viewfly/platform-browser@3.0.1':
     dependencies:
-      '@viewfly/core': 3.0.0-alpha.8
+      '@viewfly/core': 3.0.1
       csstype: 3.2.3
 
   '@volar/language-core@2.4.28':

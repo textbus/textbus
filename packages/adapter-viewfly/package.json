@@ -43,8 +43,8 @@
     "@textbus/core": "workspace:^",
     "@textbus/platform-browser": "workspace:^",
     "@textbus/platform-node": "workspace:^",
-    "@viewfly/core": "^3.0.0-alpha.8",
-    "@viewfly/platform-browser": "^3.0.0-alpha.8"
+    "@viewfly/core": "^2.2.0 || ^3.0.0",
+    "@viewfly/platform-browser": "^2.2.0 || ^3.0.0"
   },
   "devDependencies": {
     "rimraf": "^3.0.2",
