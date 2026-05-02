@@ -1,5 +1,13 @@
 # API 概览
 
-此处可汇总各 `@textbus/*` 包的导出说明，或链接到自动生成的类型文档。
+各包按主题拆页，与 [简介](/guide/introduction)、[快速开始](/guide/getting-started) 及 [集成](/integrate/adapter-viewfly) 交叉引用；以下为 **`@textbus/*`** 包与文档条目对照。
 
-当前为占位页；你可按模块拆分多页并更新 `.vitepress/config.mts` 中的 `sidebar`。
+| 包 | 说明 |
+|----|------|
+| [@textbus/core](./core) | 内核：组件模型、命令、选区、历史等 |
+| [@textbus/platform-browser](./platform-browser) | 浏览器平台层 |
+| [@textbus/collaborate](./collaborate-pkg) | 协作能力 |
+| [@textbus/adapter-viewfly](./adapter-viewfly) | Viewfly 视图适配 |
+| [@textbus/adapter-vue](./adapter-vue) | Vue 视图适配 |
+| [@textbus/adapter-react](./adapter-react) | React 视图适配 |
+| [@textbus/platform-node](./platform-node) | Node 工具集 |

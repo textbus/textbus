@@ -7,6 +7,9 @@ hero:
   tagline: 组件化、跨平台、数据驱动的富文本框架
   actions:
     - theme: brand
+      text: 简介
+      link: /guide/introduction
+    - theme: alt
       text: 快速开始
       link: /guide/getting-started
     - theme: alt
