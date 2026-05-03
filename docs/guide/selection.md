@@ -7,6 +7,7 @@
 编辑器就绪后：
 
 ```ts
+// Textbus 实例即 DI 容器；需在 render 就绪后获取
 const selection = editor.get(Selection)
 ```
 

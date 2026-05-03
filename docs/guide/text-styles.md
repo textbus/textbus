@@ -30,6 +30,7 @@
 ```ts
 import { Component, createVNode, FormatHostBindingRender, Formatter, VElement, VTextNode } from '@textbus/core'
 
+// name 'bold' 会出现在序列化 formats 中；true 表示启用加粗
 export const boldFormatter = new Formatter<boolean>('bold', {
   render(children: Array<VElement | VTextNode | Component>): VElement | FormatHostBindingRender {
     return createVNode('strong', null, children)
@@ -42,6 +43,7 @@ export const boldFormatter = new Formatter<boolean>('bold', {
 字号需要 **具体的 CSS 值**，故 **`Formatter<string>`**。下面写法把 **`font-size`** 写到宿主 **`VElement.styles`**，便于与邻近格式（如加粗）合并到同一外层节点。
 
 ```ts
+// attach：尽量合并到宿主节点，减少 span 嵌套；无法满足时用 fallbackTagName
 export const fontSizeFormatter = new Formatter<string>('fontSize', {
   render(children: Array<VElement | VTextNode | Component>, formatValue: string): VElement | FormatHostBindingRender {
     return {
@@ -59,6 +61,7 @@ export const fontSizeFormatter = new Formatter<string>('fontSize', {
 格式必须出现在 **`new Textbus({ formatters: [...] })`**（或合并进来的 **`Module.formatters`**）中，**`Registry`** 才能在 **`fromJSON` / 粘贴还原** 等路径里根据名称 **`bold`**、**`fontSize`** 还原区间。
 
 ```ts
+// formatters：Registry 才能按名称还原粘贴 / fromJSON 中的区间格式
 const editor = new Textbus({
   components: [/* ... */],
   formatters: [boldFormatter, fontSizeFormatter],
@@ -83,10 +86,12 @@ const editor = new Textbus({
 
 ```html [index.html]
 <body>
+  <!-- 工具条：id 与下方脚本查询一致 -->
   <div id="toolbar" style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
     <button type="button" id="tb-bold">加粗</button>
     <button type="button" id="tb-size">大字</button>
   </div>
+  <!-- BrowserModule.renderTo 通常指向此节点 -->
   <div id="editor-host" class="tb-editor-host"></div>
   <script type="module" src="/src/App.tsx"></script>
 </body>
@@ -98,6 +103,7 @@ import { boldFormatter, fontSizeFormatter } from './formatters'
 
 void editor.render(docRoot).then(() => {
   const commander = editor.get(Commander)
+  // applyFormat 依赖当前选区：折叠时在光标处承接后续输入格式
   document.getElementById('tb-bold')?.addEventListener('click', () => {
     commander.applyFormat(boldFormatter, true)
   })

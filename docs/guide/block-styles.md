@@ -18,6 +18,7 @@
 ```ts
 import { Attribute, VElement } from '@textbus/core'
 
+// 作用在整段插槽：渲染时写到承载该槽内容的虚拟节点 styles
 export const textAlignAttribute = new Attribute<string>('textAlign', {
   render(node: VElement, formatValue: string) {
     node.styles.set('textAlign', formatValue)
@@ -39,6 +40,7 @@ export const textAlignAttribute = new Attribute<string>('textAlign', {
 与 **`formatters`** 并列，使用 **`attributes`** 数组：
 
 ```ts
+// attributes：与 formatters 并列注册，便于序列化还原 slotLiteral.attributes
 const editor = new Textbus({
   components: [/* ... */],
   formatters: [/* 若已有加粗、字号 */],
@@ -59,6 +61,7 @@ const editor = new Textbus({
 ::: code-group
 
 ```html [index.html 工具条示例]
+<!-- 按钮 id 与 App.tsx 中 getElementById 对应 -->
 <div id="toolbar" style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
   <button type="button" id="tb-left">左对齐</button>
   <button type="button" id="tb-center">居中</button>
@@ -72,6 +75,7 @@ import { textAlignAttribute } from './attributes'
 
 void editor.render(docRoot).then(() => {
   const commander = editor.get(Commander)
+  // applyAttribute 根据选区落在哪个插槽（及跨块规则）写入块级样式
   document.getElementById('tb-left')?.addEventListener('click', () => {
     commander.applyAttribute(textAlignAttribute, 'left')
   })

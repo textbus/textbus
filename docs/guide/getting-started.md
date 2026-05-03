@@ -12,9 +12,10 @@
 
 ## 1. 创建工程并安装依赖
 
-在本地新建 Vite 项目（示例为 **Vanilla + TypeScript**，后续改为 TSX 入口即可）：
+在本地新建 Vite 项目（**Vanilla + TypeScript** 模板）：
 
 ```bash
+# Vanilla + TypeScript 模板，便于接 Viewfly JSX
 npm create vite@latest my-textbus-editor -- --template vanilla-ts
 cd my-textbus-editor
 npm install
@@ -23,6 +24,7 @@ npm install
 安装 Textbus 与 Viewfly 相关包（版本号请与当前 npm 上的 **5.x** 主线对齐，下列为示例区间）：
 
 ```bash
+# reflect-metadata：装饰器元数据；其余为内核、浏览器层、Viewfly 适配与运行时
 npm install reflect-metadata @textbus/core @textbus/platform-browser @textbus/adapter-viewfly @viewfly/core @viewfly/platform-browser
 npm install -D vite typescript @types/node
 ```
@@ -35,17 +37,20 @@ npm install -D vite typescript @types/node
 
 ::: code-group
 
-```json [tsconfig.json]
+```jsonc [tsconfig.json]
 {
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
+    // Viewfly：react-jsx 自动运行时，解析入口 @viewfly/core
     "jsx": "react-jsx",
     "jsxImportSource": "@viewfly/core",
+    // 装饰器 + emitDecoratorMetadata：Textbus 依赖注入所需
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    // 与装饰器字段初始化顺序配套（与仓库示例一致）
     "useDefineForClassFields": false,
     "skipLibCheck": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"]
@@ -59,11 +64,13 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   esbuild: {
+    // 与 tsconfig 中 jsxImportSource 一致
     jsx: 'automatic',
     jsxImportSource: '@viewfly/core'
   },
   optimizeDeps: {
     esbuildOptions: {
+      // 预构建依赖时同样指定 Viewfly JSX
       jsx: 'automatic',
       jsxImportSource: '@viewfly/core'
     }
@@ -77,7 +84,7 @@ export default defineConfig({
 
 ## 3. 页面 HTML
 
-根目录 **`index.html`** 保留挂载点即可：
+根目录 **`index.html`** 提供 Viewfly 挂载点 **`#root`**；**`App.tsx`** 内由组件渲染 **`#editor-host`**（**`.tb-editor-host`** 需有足够 **`min-height`**，示例为 `240px`），否则编辑区不易点击或获得焦点：
 
 ```html
 <!doctype html>
@@ -85,9 +92,23 @@ export default defineConfig({
   <head>
     <meta charset="UTF-8" />
     <title>Textbus 最小示例</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 1rem;
+      }
+      /* 编辑区须有足够高度，否则不易点击或获得焦点 */
+      .tb-editor-host {
+        min-height: 240px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+    </style>
   </head>
   <body>
-    <div id="editor-host" class="tb-editor-host"></div>
+    <!-- Viewfly 挂载点 -->
+    <div id="root"></div>
+    <!-- 入口：App.tsx 第一行须为 import 'reflect-metadata' -->
     <script type="module" src="/src/App.tsx"></script>
   </body>
 </html>
@@ -95,211 +116,16 @@ export default defineConfig({
 
 ## 4. 组件、适配器与入口
 
-工程约定下列文件（均可放在 `src/` 下；以下为完整示例，可按项目习惯微调目录）。
+本篇示例包含三个文件：**`App.tsx`**、**`components/root.component.tsx`**、**`components/paragraph.component.tsx`**（你可放在 `src/` 或习惯的目录下）。视图里：**只有插槽渲染工厂**（传给 **`adapter.slotRender` 的第二个参数**）需要用 **`createVNode`** 包住内核给出的子节点；**插槽以外的 DOM** 可用 **Viewfly JSX**（参见 [组件基础](./component-basics) 中的 **`TodoRowView`**）。
 
-视图里：**只有插槽渲染工厂**（传给 **`adapter.slotRender` 的第二个参数**）需要用 **`createVNode`** 包住内核给出的子节点；**插槽以外的 DOM**（例如待办左侧勾选框、卡片边框等）可以用 **Viewfly JSX** 书写（参见 [组件基础](./component-basics) 中的 **`TodoRowView`**）。
+你可以在下面修改示例并切换到「预览」查看效果；若要与上文本地工程完全一致，仍请将代码拷入你自己的项目并按前文安装依赖、配置 TypeScript 与 Vite。
 
-::: code-group
-
-```tsx [src/App.tsx]
-// 必须在最先执行：为装饰器与依赖注入提供运行时元数据
-import 'reflect-metadata'
-import { createApp } from '@viewfly/platform-browser'
-import { BrowserModule } from '@textbus/platform-browser'
-import { ViewflyAdapter } from '@textbus/adapter-viewfly'
-import { ContentType, Slot, Textbus } from '@textbus/core'
-
-import { RootComponent, RootComponentView } from './components/root.component'
-import { ParagraphComponent, ParagraphComponentView } from './components/paragraph.component'
-
-import './style.css'
-
-// 与 index.html 中编辑区节点对应，Textbus 会把视图挂在这里
-const host = document.getElementById('editor-host') as HTMLElement
-
-// 把「组件类名 → Viewfly 视图函数」交给适配器，并由内核在合适时机创建 / 销毁内层 Viewfly 应用
-const adapter = new ViewflyAdapter(
-  {
-    [RootComponent.componentName]: RootComponentView,
-    [ParagraphComponent.componentName]: ParagraphComponentView
-  },
-  (mountHost, root, context) => {
-    const app = createApp(root, { context })
-    app.mount(mountHost)
-    return () => app.destroy()
-  }
-)
-
-// 浏览器环境：处理输入、选区等与 DOM 相关的逻辑；renderTo 返回编辑容器
-const browserModule = new BrowserModule({
-  adapter,
-  renderTo: () => host
-})
-
-// 注册文档里用到的块级组件，并挂上平台模块
-const editor = new Textbus({
-  components: [RootComponent, ParagraphComponent],
-  imports: [browserModule]
-})
-
-// 空文档：根插槽只接受块级子节点，具体内容在用户输入后由根组件插入段落
-const docRoot = new RootComponent({
-  slot: new Slot([ContentType.BlockComponent])
-})
-
-// 启动内核并把根组件渲染到 host
-void editor.render(docRoot)
-```
-
-```tsx [src/components/root.component.tsx]
-import {
-  Adapter,
-  Component,
-  ComponentStateLiteral,
-  ContentType,
-  createVNode,
-  onContentInsert,
-  Registry,
-  Selection,
-  Slot,
-  Textbus,
-  useContext
-} from '@textbus/core'
-import type { ViewComponentProps } from '@textbus/adapter-viewfly'
-import { inject } from '@viewfly/core'
-import { ParagraphComponent } from './paragraph.component'
-
-/** 根组件状态：仅一块容纳块级子节点的根插槽 */
-export interface RootComponentState {
-  slot: Slot
-}
-
-/** 文档根：类型为块级组件，子节点应为段落等块 */
-export class RootComponent extends Component<RootComponentState> {
-  static componentName = 'RootComponent'
-  static type = ContentType.BlockComponent
-
-  /** 从序列化数据恢复：把字面量插槽交给 Registry 还原成运行时 Slot */
-  static fromJSON(textbus: Textbus, data: ComponentStateLiteral<RootComponentState>) {
-    const slot = textbus.get(Registry).createSlot(data.slot)
-    return new RootComponent({ slot })
-  }
-
-  override getSlots(): Slot[] {
-    return [this.state.slot]
-  }
-
-  override setup() {
-    const selection = useContext(Selection)
-    // 用户向根插槽输入文本类内容时：包一层段落再插入，便于统一用 Paragraph 承载正文与换行
-    onContentInsert(ev => {
-      if (typeof ev.data.content === 'string' || ev.data.content.type !== ContentType.BlockComponent) {
-        const slot = new Slot([ContentType.Text])
-        const p = new ParagraphComponent({ slot })
-        slot.insert(ev.data.content)
-        ev.target.insert(p)
-        selection.setPosition(slot, slot.index)
-        ev.preventDefault()
-      }
-    })
-  }
-}
-
-/** 根节点对应的 DOM：用 div 包住根插槽渲染结果；rootRef 供内核绑定选区与光标 */
-export function RootComponentView(props: ViewComponentProps<RootComponent>) {
-  const adapter = inject(Adapter)
-  return () => {
-    const slot = props.component.state.slot
-    return adapter.slotRender(slot, children =>
-      createVNode('div', { ref: props.rootRef }, children)
-    )
-  }
-}
-```
-
-```tsx [src/components/paragraph.component.tsx]
-import {
-  Adapter,
-  Commander,
-  Component,
-  ComponentStateLiteral,
-  ContentType,
-  createVNode,
-  onBreak,
-  Registry,
-  Selection,
-  Slot,
-  Textbus,
-  useContext,
-  useSelf
-} from '@textbus/core'
-import type { ViewComponentProps } from '@textbus/adapter-viewfly'
-import { inject } from '@viewfly/core'
-
-/** 段落状态：正文写在唯一一块文本插槽里 */
-export interface ParagraphComponentState {
-  slot: Slot
-}
-
-/** 块级段落：内部承载文本，负责「换行拆段」行为 */
-export class ParagraphComponent extends Component<ParagraphComponentState> {
-  static componentName = 'ParagraphComponent'
-  static type = ContentType.BlockComponent
-
-  static fromJSON(textbus: Textbus, data: ComponentStateLiteral<ParagraphComponentState>) {
-    const slot = textbus.get(Registry).createSlot(data.slot)
-    return new ParagraphComponent({ slot })
-  }
-
-  override getSlots(): Slot[] {
-    return [this.state.slot]
-  }
-
-  override setup() {
-    const commander = useContext(Commander)
-    const selection = useContext(Selection)
-    const self = useSelf()
-
-    // 回车：从当前段落截断后半段，插入新段落并把光标移到新段开头
-    onBreak(ev => {
-      ev.preventDefault()
-      const nextContent = ev.target.cut(ev.data.index)
-      const p = new ParagraphComponent({ slot: nextContent })
-      commander.insertAfter(p, self)
-      selection.setPosition(nextContent, 0)
-    })
-  }
-}
-
-/** 段落视图：用原生 p 包住插槽内容 */
-export function ParagraphComponentView(props: ViewComponentProps<ParagraphComponent>) {
-  const adapter = inject(Adapter)
-  return () => {
-    const slot = props.component.state.slot
-    return adapter.slotRender(slot, children => createVNode('p', { ref: props.rootRef }, children))
-  }
-}
-```
-
-:::
-
-新增 **`src/style.css`**，保证编辑区有足够高度可聚焦：
-
-```css
-body {
-  margin: 0;
-  padding: 1rem;
-}
-.tb-editor-host {
-  min-height: 240px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-```
+<TextbusPlayground />
 
 ## 5. 运行与验证
 
 ```bash
+# 浏览器打开终端输出的本地地址，验证编辑区可输入、Enter 换行
 npm run dev
 ```
 

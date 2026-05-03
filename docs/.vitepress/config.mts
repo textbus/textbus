@@ -5,6 +5,15 @@ export default defineConfig({
   description: '组件化、跨平台的富文本框架',
   lang: 'zh-CN',
 
+  vite: {
+    optimizeDeps: {
+      include: ['monaco-editor', 'esbuild-wasm'],
+    },
+    worker: {
+      format: 'es',
+    },
+  },
+
   themeConfig: {
     logo: { src: '/logo.png', alt: 'Textbus' },
     siteTitle: false,

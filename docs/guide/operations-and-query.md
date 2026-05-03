@@ -7,6 +7,7 @@
 **`Textbus`** 实例即内核的依赖注入容器：编辑器 **`render` 就绪**后，可用 **`editor.get(Commander)`**、**`editor.get(Query)`**（类型均来自 **`@textbus/core`**）。
 
 ```ts
+// 写入文档 / 查询格式与属性状态（均依赖当前 Selection）
 const commander = editor.get(Commander)
 const query = editor.get(Query)
 ```
