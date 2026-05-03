@@ -19,19 +19,30 @@ export default defineConfig({
     sidebar: {
       '/guide/': [
         {
-          text: '入门',
+          text: '准备',
           items: [
             { text: '简介', link: '/guide/introduction' },
             { text: '快速开始', link: '/guide/getting-started' },
           ],
         },
         {
-          text: '指南',
+          text: '入门',
+          items: [
+            { text: '组件基础', link: '/guide/component-basics' },
+            { text: '文字样式', link: '/guide/text-styles' },
+            { text: '块级样式', link: '/guide/block-styles' },
+            { text: '基础操作与状态查询', link: '/guide/operations-and-query' },
+            { text: '选区', link: '/guide/selection' },
+            { text: '历史记录', link: '/guide/history' },
+            { text: '快捷键和语法糖', link: '/guide/shortcuts-and-grammar' },
+            { text: '文档解析与兼容处理', link: '/guide/document-parse-compat' },
+          ],
+        },
+        {
+          text: '概念与进阶',
           items: [
             { text: '核心概念', link: '/guide/concepts' },
-            { text: '编辑器与模块', link: '/guide/editor-and-modules' },
-            { text: '选区、命令与查询', link: '/guide/selection-commands-query' },
-            { text: '历史记录与键盘', link: '/guide/history-keyboard' },
+            { text: '模块与扩展（进阶）', link: '/guide/editor-and-modules' },
             { text: '浏览器平台层', link: '/guide/platform-browser' },
           ],
         },

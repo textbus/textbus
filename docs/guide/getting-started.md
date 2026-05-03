@@ -97,6 +97,8 @@ export default defineConfig({
 
 工程约定下列文件（均可放在 `src/` 下；以下为完整示例，可按项目习惯微调目录）。
 
+视图里：**只有插槽渲染工厂**（传给 **`adapter.slotRender` 的第二个参数**）需要用 **`createVNode`** 包住内核给出的子节点；**插槽以外的 DOM**（例如待办左侧勾选框、卡片边框等）可以用 **Viewfly JSX** 书写（参见 [组件基础](./component-basics) 中的 **`TodoRowView`**）。
+
 ::: code-group
 
 ```tsx [src/App.tsx]
@@ -311,7 +313,8 @@ npm run dev
 
 ## 接下来
 
-- 数据模型与名词：[核心概念](./concepts)  
-- 模块与插件：[编辑器与模块](./editor-and-modules)  
+- 在同一工程上继续扩展：按 **入门**顺序从 [组件基础](./component-basics) 读到 [文档解析与兼容处理](./document-parse-compat)  
+- 名词系统整理：[核心概念](./concepts)  
+- 插件与内核扩展细节：[模块与扩展（进阶）](./editor-and-modules)  
 - 协作：[协作编辑](/integrate/collaborate)  
 - 包级 API 索引：[API 概览](/api/)
