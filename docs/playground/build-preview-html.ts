@@ -29,6 +29,20 @@ export function buildPreviewHtml(params: {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style id="tb-preview-base">
+    /* 预览 iframe 与文档站深色模式解耦：编辑区固定白底深色字，避免看不见正文 */
+    html {
+      color-scheme: light;
+    }
+    body {
+      background: #fff;
+      color: rgba(60, 60, 60, 0.92);
+    }
+    .tb-editor-host {
+      background-color: #fff !important;
+      color: rgba(60, 60, 60, 0.92) !important;
+    }
+  </style>
 ${userCssLink}  <script type="importmap">${JSON.stringify(importMap)}</script>
 </head>
 <body>

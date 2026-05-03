@@ -1,10 +1,12 @@
 import type { PlaygroundPreset } from '../preset-types'
 import { componentBasicsPreset } from './component-basics'
 import { gettingStartedPreset } from './getting-started'
+import { textStylesPreset } from './text-styles'
 
 export const PLAYGROUND_PRESETS = {
   'getting-started': gettingStartedPreset,
   'component-basics': componentBasicsPreset,
+  'text-styles': textStylesPreset,
 } as const satisfies Record<string, PlaygroundPreset>
 
 export type PlaygroundPresetId = keyof typeof PLAYGROUND_PRESETS

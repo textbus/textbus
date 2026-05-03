@@ -7,6 +7,7 @@ export const gettingStartedPreset: PlaygroundPreset = {
   files: {
     'style.css': `html {
   box-sizing: border-box;
+  color-scheme: light;
 }
 *,
 *::before,
@@ -21,9 +22,13 @@ body {
 }
 body {
   padding: 12px 16px;
+  background: #fff;
+  color: rgba(60, 60, 60, 0.92);
 }
 .tb-editor-host {
   min-height: min(50vh, 480px);
+  background: #fff;
+  color: rgba(60, 60, 60, 0.92);
 }
 #boot-error {
   color: #b00020;

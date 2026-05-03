@@ -12,9 +12,9 @@
 
 这与作用在 **整段插槽** 上的 **属性（Attribute）** 不同——对齐、段前缩进等「整块外观」见 [块级样式](./block-styles)。
 
-## `Formatter` 配置：`render` 与其它选项
+## `Formatter` 配置：`render`
 
-构造 **`new Formatter<T>(name, config)`** 时，第二个参数的类型是 **`FormatterConfig<T>`**，**`T`** 为格式值的类型（加粗用 **`boolean`**，字号用 **`string`** 等）。下面先给出 **`@textbus/core`** 里的整体形状（升级依赖后以编辑器中的类型为准），再分字段说明。
+构造 **`new Formatter<T>(name, config)`** 时，第二个参数的类型是 **`FormatterConfig<T>`**，**`T`** 为格式值的类型（加粗用 **`boolean`**，字号用 **`string`** 等）。下面先给出类型整体形状（升级依赖后以编辑器中的类型为准），并说明必填的 **`render`**；**`priority`、`inheritable`、`columned`、`checkHost`** 四项可选含义见后文 **[可选字段详解](#optional-formatter-fields)**。
 
 ```ts
 import type { Component, Slot, VElement, VTextNode } from '@textbus/core'
@@ -47,17 +47,6 @@ interface FormatterConfig<T> {
 2. **`FormatHostBindingRender`**：包含 **`fallbackTagName`** 与 **`attach(host)`**。优先通过 **`attach`** 把样式加到 **外层已有节点** 上，减少 **`span` 层层包裹**；做不到时再退回用 **`fallbackTagName`** 包一层。字号示例即用 **`attach` + `host.styles.set('fontSize', …)`**。
 
 第三个参数 **`renderEnv`** 携带当前渲染上下文，需要时再分支；多数自定义格式可以忽略。
-
-### 常用可选字段（`FormatterConfig`）
-
-| 字段 | 含义 |
-|------|------|
-| **`priority`** | 重叠格式并存时的渲染顺序，**数值越小越先渲染**。 |
-| **`inheritable`** | 光标停在格式末尾继续输入时，是否 **继承** 该格式（默认 **`true`**）。 |
-| **`columned`** | 为 **`true`** 时在格式变化处 **强制拆开呈现结构**，适合格式边界必须对应节点边界的场景。 |
-| **`checkHost`** | 返回 **`false`** 时 **不应用** 该格式；可做槽类型、业务规则校验。 |
-
-更细的语义以 **`@textbus/core`** 中 **`FormatterConfig`** 的类型注释为准。
 
 ## 示例：`formatters.ts`（加粗 + 字号）
 
@@ -140,70 +129,88 @@ commander.unApplyFormat(boldFormatter)
 
 ## 工具条：应用格式并同步 `Query`
 
-浏览器里通常在 **`void editor.render(docRoot).then(...)`** 里绑定 DOM，通过 **`editor.get(Commander)`** 写入格式、**`editor.get(Query)`** 读出当前选区下格式是否生效（**`QueryStateType.Enabled`** 等）。选区变化后需再次查询，常用 **`editor.get(Selection).onChange`** 订阅刷新。
+一般在 **`editor.render(docRoot)` 完成以后** 再绑定工具条：**`editor.get(Commander)`** 负责 **`applyFormat` / `unApplyFormat`**，**`editor.get(Query)`** 配合 **`queryFormat`** 判断当前选区是否已带上某种格式；选区一变就 **`editor.get(Selection).onChange`** 里再跑一遍查询，刷新按钮上的 **`data-active`**（样式放在 **`style.css`** 即可）。
 
-::: code-group
+下面沙箱可改源码并切到「预览」试 **加粗**、**大字**；同一按钮再点一次会关掉对应样式。
 
-```html [index.html]
-<body>
-  <!-- 工具条：id 与下方脚本查询一致 -->
-  <div id="toolbar" style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-    <button type="button" id="tb-bold">加粗</button>
-    <button type="button" id="tb-size">大字</button>
-  </div>
-  <!-- 编辑区域容器：须与创建 Textbus 时配置的挂载目标一致 -->
-  <div id="editor-host" class="tb-editor-host"></div>
-  <script type="module" src="/src/App.tsx"></script>
-</body>
-```
+<TextbusPlayground preset="text-styles" />
 
-```tsx [App.tsx 片段]
-import { Commander, Query, QueryStateType, Selection } from '@textbus/core'
-import { boldFormatter, fontSizeFormatter } from './formatters'
-
-void editor.render(docRoot).then(() => {
-  const commander = editor.get(Commander)
-  const query = editor.get(Query)
-  const selection = editor.get(Selection)
-
-  const syncToolbar = () => {
-    const boldState = query.queryFormat(boldFormatter)
-    document.getElementById('tb-bold')?.toggleAttribute(
-      'data-active',
-      boldState.state === QueryStateType.Enabled,
-    )
-    const sizeState = query.queryFormat(fontSizeFormatter)
-    document.getElementById('tb-size')?.toggleAttribute(
-      'data-active',
-      sizeState.state === QueryStateType.Enabled,
-    )
-  }
-
-  // applyFormat 依赖当前选区：折叠时在光标处承接后续输入格式
-  document.getElementById('tb-bold')?.addEventListener('click', () => {
-    commander.applyFormat(boldFormatter, true)
-    syncToolbar()
-  })
-  document.getElementById('tb-size')?.addEventListener('click', () => {
-    commander.applyFormat(fontSizeFormatter, '22px')
-    syncToolbar()
-  })
-
-  selection.onChange.subscribe(() => {
-    syncToolbar()
-  })
-  syncToolbar()
-})
-```
-
-:::
-
-**`data-active`** 仅作示意，样式需在 CSS 里定义（例如 **`button[data-active]`**）。加粗若要做 **切换**（再点取消），可结合 **`queryFormat`** 判断 **`Enabled`** 时改调 **`unApplyFormat`**，逻辑见 [基础操作与状态查询](./operations-and-query)。
+独立工程里若把工具条写在 **`index.html`**、只在 **`App.tsx`** 里绑定事件，写法等价，区别仅是 DOM 归属文件不同。更多 **`Commander` / `Query`** 组合见 [基础操作与状态查询](./operations-and-query)。
 
 ## 与组件结构配合时要注意什么
 
 - **格式只能加在「有文本流的插槽」里**：**Todolist** 的正文槽若为 **`[ContentType.Text]`**，与段落一样支持 **`applyFormat`**。
 - **块级组件节点本身**不能用 **`Formatter`**「包一层」——那是 **组件** 的职责；格式作用于 **组件内部插槽里的字符串区间**。
+
+## 可选字段详解 {#optional-formatter-fields}
+
+下列四项可按需在 **`Formatter`** 配置对象里补充。更细的边界仍以 **`@textbus/core`** 里 **`FormatterConfig`** 的类型注释为准。
+
+### `priority`
+
+**默认 `0`。数字越小越靠前。** 当 **同一段文字上叠了多种格式**、需要决定这几个格式的 **`render` 谁先包谁后包时，会按 **`priority`** 排序后再生成最终的包裹顺序，从而影响页面上的标签嵌套（例如外层是链接还是外层是加粗）。大家都用默认值 **`0`** 时排序仍稳定；若与其它格式的相对次序不符合产品预期，就给其中一方单独调 **`priority`**（常见做法是只差 **`1`**，便于微调）。
+
+### `inheritable`
+
+**默认 `true`。** 表示光标 **贴在某一格式的边缘继续输入** 时，这一段格式是否 **倾向于延伸到新输入的字上**。若为 **`false`**，这类格式一般不会跟着光标「往外长」，更适合只做一次性标记、不希望后续键入自动带上同一格式的场景。是否与 **`applyFormat`**、折叠光标的组合行为有关，边界见 [选区](./selection)。
+
+### `columned`
+
+**默认 `false`，即不启用「列对齐」渲染。** Textbus 在渲染格式时默认按 **最少结构** 原则合并 DOM：例如同一段里既有 **加粗** 又有 **更大的字号**，往往会收成较少的标签层次（外层 **`strong`**、内层一个大字号 **`span`** 等），而不是为每种格式的边界都单独包一层。
+
+**最少结构**（加粗 + 较大字号）——源码与页面效果：
+
+```html
+<p>我是 <strong>Textbus <span style="font-size: 30px">富文本编辑器</span></strong></p>
+```
+
+<div class="tb-doc-html-demo">
+<div class="tb-doc-html-demo__label">效果预览</div>
+<p>我是 <strong>Textbus <span style="font-size: 30px">富文本编辑器</span></strong></p>
+</div>
+
+当某种样式需要和 **每一段文字** 在视觉上 **严格对齐** 时，最少结构可能显得「贴不齐」。文档里常用的例子是 **文字背景色**：若与其它格式挤在同一套合并标签里，容易出现背景区域与逐字范围不完全一致。
+
+下面的 **代码块与预览中的 DOM** 一致，均为 **`background-color` 等内联样式**（与 Formatter 常见输出形式一致）。效果预览放在 **固定的浅色画布** 里展示，对应常见亮色编辑区；站点切换为深色主题时画布仍为浅色，便于看清高亮与字号的对比。
+
+**同一内容再给外层加背景色**（仍是最少结构合并，等价于 **`columned: false`**）——源码与页面效果：
+
+```html
+<p>我是 <strong style="background-color: #8ad9f5">Textbus <span style="font-size: 30px">富文本编辑器</span></strong></p>
+```
+
+<div class="tb-doc-html-demo">
+<div class="tb-doc-html-demo__label">效果预览（合并背景）</div>
+<p>我是 <strong style="background-color: #8ad9f5">Textbus <span style="font-size: 30px">富文本编辑器</span></strong></p>
+</div>
+
+这时可把对应 **`Formatter`**（例如背景色）的 **`columned`** 设为 **`true`**：渲染时会 **按内容把该格式拆成多段，并为各段生成单独的标签**，让背景等与文字一一贴合。拆分后源码与页面效果大致如下：
+
+```html
+<p>我是 <strong><span style="background-color: #8ad9f5">Textbus </span><span style="font-size: 30px; background-color: #8ad9f5">富文本编辑器</span></strong></p>
+```
+
+<div class="tb-doc-html-demo">
+<div class="tb-doc-html-demo__label">效果预览（分段背景，columned）</div>
+<p>我是 <strong><span style="background-color: #8ad9f5">Textbus </span><span style="font-size: 30px; background-color: #8ad9f5">富文本编辑器</span></strong></p>
+</div>
+
+日常 **加粗、字号** 等一般仍可保持 **`columned: false`**，只在需要「按列贴齐」的样式（常见是背景、下划线等）上开启。
+
+### `checkHost`
+
+可选；**不写则不做额外校验**，等价于允许应用。若提供 **`checkHost(host, value)`**，会在 **真正把格式写到槽里之前** 调用：**`host`** 为当前 **`Slot`**，**`value`** 为本次格式值；返回 **`false`** 则 **本次不应用**（命令侧相当于静默不收）。用来约束 **某种格式只允许出现在满足条件的槽里**，或对 **`value`** 做合法性校验。
+
+```ts
+import { ContentType } from '@textbus/core'
+
+// 示例：仅允许在含文本内容的 schema 槽里应用（按业务改写条件）
+checkHost(host, value) {
+  return host.schema.includes(ContentType.Text)
+}
+```
+
+若 **`checkHost`** 写在 **`Formatter` 配置对象内部**，**`ContentType`** 与 **`Formatter`** 可从同一 **`@textbus/core`** 导入。
 
 ## 常见问题
 
