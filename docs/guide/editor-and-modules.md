@@ -2,7 +2,7 @@
 
 给编辑器加 **列表块**、**格式**、**对齐属性** 等可见交互时，请参考 **入门**中的 [组件基础](./component-basics)、[文字样式](./text-styles)、[块级样式](./block-styles)；本篇面向这些情况：**要写 Plugin**、**替换内核默认绑定（`providers`）**、**理解启动与销毁顺序**，或 **排查同名注册到底生效了哪一份**。
 
-前置阅读：[核心概念](./concepts)、[组件基础](./component-basics)、[文字样式](./text-styles)、[块级样式](./block-styles)、[浏览器平台层](./platform-browser)。
+前置阅读：[核心概念](./concepts)、[组件基础](./component-basics)、[组件高级](./component-advanced)、[文字样式](./text-styles)、[块级样式](./block-styles)、[浏览器平台层](./platform-browser)。
 
 ## `Textbus` 配置里常见字段
 
@@ -49,6 +49,6 @@
 
 ## 接下来
 
-- 命令与查询：[基础操作与状态查询](./operations-and-query) · [选区](./selection)  
+- 选区与命令：[选区](./selection) · [状态查询与基础操作](./operations-and-query)  
 - 浏览器集成：[浏览器平台层](./platform-browser)  
 - 包索引：[API 概览](/api/)

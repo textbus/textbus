@@ -135,7 +135,7 @@ commander.unApplyFormat(boldFormatter)
 
 <TextbusPlayground preset="text-styles" />
 
-独立工程里若把工具条写在 **`index.html`**、只在 **`App.tsx`** 里绑定事件，写法等价，区别仅是 DOM 归属文件不同。更多 **`Commander` / `Query`** 组合见 [基础操作与状态查询](./operations-and-query)。
+独立工程里若把工具条写在 **`index.html`**、只在 **`App.tsx`** 里绑定事件，写法等价，区别仅是 DOM 归属文件不同。更多 **`Commander` / `Query`** 组合见 [状态查询与基础操作](./operations-and-query)。
 
 ## 与组件结构配合时要注意什么
 
@@ -144,7 +144,7 @@ commander.unApplyFormat(boldFormatter)
 
 ## 可选字段详解 {#optional-formatter-fields}
 
-下列四项可按需在 **`Formatter`** 配置对象里补充。更细的边界仍以 **`@textbus/core`** 里 **`FormatterConfig`** 的类型注释为准。
+下列四项可按需在 **`Formatter`** 配置对象里补充；细则见本章 **[可选字段详解](#optional-formatter-fields)**。
 
 ### `priority`
 
@@ -216,13 +216,13 @@ checkHost(host, value) {
 
 - **点了按钮没反应**：确认 **`formatters`** 已注册、**`name`** 与保存/粘贴场景下的标识一致；再看选区是否落在 **可编辑文本插槽**（而不是整块组件选区）。
 - **粘贴丢样式**：粘贴管线是否把外部样式映射到你注册的 **`Formatter`** 名称上，取决于 **`platform-browser`** 与 **`Parser`** 配置；未配置的格式会被丢弃。详见 [文档解析与兼容处理](./document-parse-compat)。
-- **重叠格式顺序异常**：调整 **`Formatter`** 的 **`priority`**，或酌情启用 **`columned`**（见类型注释）。
+- **重叠格式顺序异常**：调整 **`Formatter`** 的 **`priority`**（数字 **越小越先包外层**）；需要「按字对齐」的背景等再考虑 **`columned: true`**。
 - **光标后的字没有继承加粗**：检查 **`inheritable`** 是否为 **`false`**；或折叠光标下的输入继承规则是否符合预期（见 [选区](./selection)）。
 
 ## 接下来
 
 - **块级样式（对齐等）**：[块级样式](./block-styles)  
-- **组件示例**：[组件基础](./component-basics)  
-- **`Commander` / `Query` 总览**：[基础操作与状态查询](./operations-and-query)  
 - **选区**：[选区](./selection)  
+- [状态查询与基础操作](./operations-and-query)  
+- **组件示例**：[组件基础](./component-basics)  
 - **名词对照**：[核心概念](./concepts)

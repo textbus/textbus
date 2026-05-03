@@ -10,7 +10,7 @@
 
 - **`name`**（字符串）在当前编辑器实例内 **唯一**，与 **`slotLiteral.attributes`** 里保存的键对应；**载入与粘贴** 时要能在 **`new Textbus({ attributes: [...] })`** 里找到同名 **`Attribute`**。
 - **`render(node, formatValue, renderEnv)`** 在虚拟树上 **改写承载节点**：常见写法是给 **`node.styles`** 设 **`text-align`**、**`paddingLeft`** 等；**不写子节点**，子内容仍由 **`slot.toTree`** 与格式树生成。
-- 运行时用 **`Commander.applyAttribute(attribute, value)`** 按 **当前选区** 写入；用 **`unApplyAttribute(attribute)`** 去掉某一种属性；需要一次清掉多种属性时可用 **`Commander.cleanAttributes`**（见类型说明）。
+- 运行时用 **`Commander.applyAttribute(attribute, value)`** 按 **当前选区** 写入；用 **`unApplyAttribute(attribute)`** 去掉某一种属性；需要一次清掉多种属性时可用 **`Commander.cleanAttributes`**：第一个参数可传 **要保留的属性实例数组**，或 **`(attribute) => boolean`**，返回 **`true`** 表示 **保留** 该属性，其余会被清掉。
 
 ## 与格式的分界（简表）
 
@@ -69,7 +69,7 @@ const editor = new Textbus({
 
 **`applyAttribute(attribute, value)`** 会根据 **选区** 决定写入哪些 **`Slot`**：
 
-- **选区折叠**：对 **`selection.commonAncestorSlot`** 调用 **`slot.setAttribute`**（内部会触发 **`onSlotSetAttribute`** 等钩子，可被阻止）。
+- **选区折叠**：对 **`selection.commonAncestorSlot`** 调用 **`slot.setAttribute`**（内部会触发 **`onSlotSetAttribute`** 等钩子，可被阻止；见 [组件事件与生命周期](./component-events-and-lifecycle)）。
 - **选区展开**：对每个 **选中范围**（**`getSelectedScopes()`**）切出内容——若范围内 **含有文本或行内组件**，则把属性设在 **该范围的宿主插槽** 上；若范围内 **只有块级子组件**，则对 **每个子组件身上的各个插槽** 分别 **`setAttribute`**。
 
 **`value`** 的类型须与 **`Attribute<T>`** 的 **`T`** 一致。
@@ -89,7 +89,7 @@ commander.applyAttribute(textAlignAttribute, 'center')
 commander.unApplyAttribute(textAlignAttribute)
 ```
 
-**`unApplyAttribute`** 与 **`applyAttribute`** 使用相同的选区分支规则，只是改为 **`removeAttribute`**。若要 **一次性去掉当前选区内插槽上的多种属性**，可使用 **`Commander.cleanAttributes`**（可传入排除列表或谓词，详见类型定义）。
+**`unApplyAttribute`** 与 **`applyAttribute`** 使用相同的选区分支规则，只是改为 **`removeAttribute`**。若要 **一次性去掉当前选区内插槽上的多种属性**，可使用 **`Commander.cleanAttributes`**：第一个参数写 **要保留的属性实例数组**，或 **`(attribute) => boolean`**（返回 **`true`** 表示 **保留**）；**不写该参数** 时等价于传入 **空数组**，**当前选区内所有属性都会被清掉**。
 
 ## 工具条：`Query.queryAttribute`
 
@@ -99,7 +99,7 @@ commander.unApplyAttribute(textAlignAttribute)
 
 <TextbusPlayground preset="block-styles" />
 
-独立工程里若把工具条写在 **`index.html`**、在 **`App.tsx`** 里 **`render().then`** 再 **`addEventListener`**，写法等价。更多 **`Commander` / `Query`** 组合见 [基础操作与状态查询](./operations-and-query)。
+独立工程里若把工具条写在 **`index.html`**、在 **`App.tsx`** 里 **`render().then`** 再 **`addEventListener`**，写法等价。更多 **`Commander` / `Query`** 组合见 [状态查询与基础操作](./operations-and-query)。
 
 ## 与组件结构配合时要注意什么
 
@@ -109,7 +109,7 @@ commander.unApplyAttribute(textAlignAttribute)
 
 ## 可选字段详解 {#optional-attribute-fields}
 
-下列两项可按需在 **`Attribute`** 配置对象里补充。更细的边界以 **`@textbus/core`** 里 **`AttributeConfig`** 的类型注释为准。
+下列两项可按需在 **`Attribute`** 配置对象里补充；细则见本章 **[可选字段详解](#optional-attribute-fields)**。
 
 ### `onlySelf`
 
@@ -138,8 +138,8 @@ checkHost(host, value) {
 
 ## 接下来
 
-- **文字样式（格式）**：[文字样式](./text-styles)  
-- **命令与查询总览**：[基础操作与状态查询](./operations-and-query)  
 - **选区**：[选区](./selection)  
+- [状态查询与基础操作](./operations-and-query)  
+- **文字样式（格式）**：[文字样式](./text-styles)  
 - **组件示例**：[组件基础](./component-basics)  
 - **名词对照**：[核心概念](./concepts)

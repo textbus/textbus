@@ -17,7 +17,7 @@
 
 /**
  * 正文内嵌静态 HTML 预览（如 columned 对照）。
- * 固定浅色画布 + 深色正文，与常见亮色编辑区一致；示例 DOM 仅使用内联样式，不设文档专用类名。
+ * 亮色主题为浅色画布；深色主题跟随站点背景，避免整块死白。
  */
 .tb-doc-html-demo {
   margin: 12px 0 20px;
@@ -27,10 +27,15 @@
   background: #ffffff;
   color: #3c3c43;
   line-height: 1.6;
+  /** 表格局部底色（抵消 VP 表格斑马纹），与画布一致 */
+  --tb-doc-cell-bg: #ffffff;
 }
 
 .dark .tb-doc-html-demo {
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-1);
   border-color: rgba(255, 255, 255, 0.14);
+  --tb-doc-cell-bg: var(--vp-c-bg-soft);
 }
 
 .tb-doc-html-demo p {
@@ -46,4 +51,18 @@
 
 .dark .tb-doc-html-demo .tb-doc-html-demo__label {
   color: #8e8e93;
+}
+
+/** 仅修正示意表格：去掉斑马纹，单元格与画布同色（不强行铺满整块示例框） */
+.tb-doc-html-demo table {
+  background: transparent;
+}
+.tb-doc-html-demo table tbody,
+.tb-doc-html-demo table thead,
+.tb-doc-html-demo table tr {
+  background-color: transparent !important;
+}
+.tb-doc-html-demo table td,
+.tb-doc-html-demo table th {
+  background-color: var(--tb-doc-cell-bg) !important;
 }

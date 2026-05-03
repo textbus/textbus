@@ -129,7 +129,7 @@ export default defineConfig({
 npm run dev
 ```
 
-在浏览器中打开本地地址，点击编辑区域应可输入文字；**Enter** 换行会插入新段落（由 `ParagraphComponent` 中 **`onBreak`** 处理）。
+在浏览器中打开本地地址，点击编辑区域应可输入文字；**Enter** 换行会插入新段落（由 `ParagraphComponent` 中 **`onBreak`** 处理；钩子总览见 [组件事件与生命周期](./component-events-and-lifecycle)）。
 
 ## 常见问题
 

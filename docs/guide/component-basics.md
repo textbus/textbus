@@ -64,11 +64,13 @@ override getSlots(): Slot[] {
 
 **选区**与对部分文档树结构的遍历，都会依赖 **`getSlots()`** 所声明的「块下面有哪些 **`Slot`**」。Todolist 只有一个正文槽，因此返回单元素数组；若以后拆成「标题槽 + 正文槽」，须按它们在 **文档中渲染的先后顺序** 在 **`getSlots()`** 里 **全部列出**，内核才能一致地对待它们。
 
+多槽块的 **`separate`**、**`removeSlot`**、**`deleteAsWhole`** 等可选能力与 **`transform`** / **`paste`** 的协作说明见 [组件高级](./component-advanced)。
+
 ---
 
 ## 三、`setup`：块内的生命周期与「换行」语义
 
-**`setup`** 在块挂载进文档树后执行，适合做事件订阅。下面节选 **`TodolistComponent`** 中与 **`onBreak`** 相关的部分（完整 **`import`** 见沙箱 **`components/todolist.component.tsx`**）：
+**`setup`** 在块挂载进文档树后执行，适合做事件订阅。**常用钩子一览、`preventDefault` 语义及与其它命令的关系**见 [组件事件与生命周期](./component-events-and-lifecycle)。下面节选 **`TodolistComponent`** 中与 **`onBreak`** 相关的部分（完整 **`import`** 见沙箱 **`components/todolist.component.tsx`**）：
 
 ```tsx
 override setup() {
@@ -202,7 +204,7 @@ const rootSlot = docRoot.state.slot
 
 1. **适配器组件表**：**`[TodolistComponent.componentName]: TodolistView`**，与 **`ParagraphComponent`**、根组件并列。
 2. **`Textbus({ components: [...] })`**：把 **`TodolistComponent`** 注册进内核，**`fromJSON` / 粘贴** 等才能找到类型定义。
-3. **初始文档里的 `insert`**：演示块级槽里 **`TodolistComponent`** 与普通 **`ParagraphComponent`** 混排；日常也可由 **`RootComponent`** 的 **`onContentInsert`** 等逻辑插入（沙箱根组件仍会把手敲的非块内容收成段落）。
+3. **初始文档里的 `insert`**：演示块级槽里 **`TodolistComponent`** 与普通 **`ParagraphComponent`** 混排；日常也可由 **`RootComponent`** 的 **`onContentInsert`** 等逻辑插入（沙箱根组件仍会把手敲的非块内容收成段落；钩子索引见 [组件事件与生命周期](./component-events-and-lifecycle)）。
 
 ## 常见问题
 
@@ -212,6 +214,8 @@ const rootSlot = docRoot.state.slot
 
 ## 接下来
 
+- [组件事件与生命周期](./component-events-and-lifecycle)  
+- [组件高级](./component-advanced)（**`separate`**、**`removeSlot`** 等，写多槽块时查阅）  
 - [文字样式](./text-styles)  
 - [块级样式](./block-styles)  
 - [核心概念](./concepts)

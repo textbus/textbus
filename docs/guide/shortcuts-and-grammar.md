@@ -18,7 +18,8 @@
 
 ## 接下来
 
+- **组件钩子与 `setup`**：[组件事件与生命周期](./component-events-and-lifecycle)  
 - **历史记录**：[历史记录](./history)  
-- **命令与选区**：[基础操作与状态查询](./operations-and-query)、[选区](./selection)  
+- **选区与命令**：[选区](./selection)、[状态查询与基础操作](./operations-and-query)  
 - **浏览器层输入**：[浏览器平台层](./platform-browser)  
 - **模块扩展**：[模块与扩展（进阶）](./editor-and-modules)
