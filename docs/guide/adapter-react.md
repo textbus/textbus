@@ -236,5 +236,5 @@ export function RootComponentView(props: ViewComponentProps<RootComponent>) {
 ## 接下来
 
 - [Viewfly 适配器](./adapter-viewfly)、[Vue 适配器](./adapter-vue)  
-- [浏览器平台层](./platform-browser)  
+- [浏览器模块](./platform-browser)  
 - 导出与类型：[@textbus/adapter-react](./package-adapter-react)

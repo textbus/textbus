@@ -74,7 +74,7 @@ const editor = new Textbus({
 
 **构造**：**`new YWebsocketConnector(url, roomName, yDoc)`** — **`url`**、**`roomName`** 须与你的服务配置一致；**`yDoc`** 为 **`createConnector`** 传入的 **`Y.Doc`**。
 
-**`SyncConnector` 对外行为**：首次与远端同步完成后触发 **`onLoad`**；协同状态变化时触发 **`onStateChange`**；**`setLocalStateField`** 用于更新本端要广播的 awareness 字段；销毁编辑器时由模块调用 **`onDestroy()`**。
+**`SyncConnector` 对外行为**：首次与远端同步完成后触发 **`onLoad`**；协同状态变化时触发 **`onStateChange`**；**`setLocalStateField`** 用于更新本端要向其它端广播的状态；销毁编辑器时会 **自动断开连接**（无需在业务里再调 **`onDestroy()`**）。
 
 
 ## `HocuspocusConnector` {#hocuspocusconnector}
@@ -83,9 +83,9 @@ const editor = new Textbus({
 
 **构造**：**`new HocuspocusConnector(config)`**，**`config`** 类型为 **`HocuspocusProviderConfiguration`**。其中 **`document`** 必须为 **`createConnector`** 收到的 **`yDoc`**。
 
-**`SyncConnector` 对外行为**：与远端首次同步完成后触发 **`onLoad`**；awareness 更新时触发 **`onStateChange`**；**`setLocalStateField`** 对应 **`setAwarenessField`**；**`onDestroy()`** 断开并释放 provider。
+**`SyncConnector` 对外行为**：与远端首次同步完成后触发 **`onLoad`**；协同状态变化时触发 **`onStateChange`**；**`setLocalStateField`** 用于写入本端要广播的状态；销毁编辑器时会 **自动断开连接**（业务侧不必再调 **`onDestroy()`**）。
 
-其余字段（**`token`**、**`parameters`** 等）按官方文档填写：[Configure Hocuspocus Provider](https://tiptap.dev/docs/hocuspocus/provider/configuration)。若在 **`config`** 中传入 **`onSynced` / `onAwarenessUpdate`**，请避免长时间阻塞或抛错，以免影响编辑器就绪与状态分发。
+其余字段（**`token`**、**`parameters`** 等）按官方文档填写：[Configure Hocuspocus Provider](https://tiptap.dev/docs/hocuspocus/provider/configuration)。若在 **`config`** 中传入 **同步 / 状态更新** 相关的回调，请避免长时间阻塞或抛错，以免影响编辑器就绪与状态分发。
 
 
 ## `SyncConnector` 约定
@@ -93,11 +93,11 @@ const editor = new Textbus({
 自定义连接器须继承 **`SyncConnector`**，并实现：
 
 - **`onLoad`**：首次与远端同步完成时发出（见 **`onlyLoad`**）。
-- **`onStateChange`**：协同状态（如 awareness）变化时发出。
+- **`onStateChange`**：与其它客户端的 **协同状态** 变化时发出。
 - **`setLocalStateField(key, data)`**：写入本端要广播的状态字段。
 - **`onDestroy()`**：释放连接与订阅。
 
-若通过 **`providers`** 注册了 [**`MessageBus`**](#message-bus)，协作模块会把 **`get`** 的返回值经连接器写入协同 **awareness**，并在状态变化时调用 **`consume`**；未注册则只做文档协同。
+若通过 **`providers`** 注册了 [**`MessageBus`**](#message-bus)，协作会把 **`get`** 的返回值 **作为本端协同载荷对外同步**，并在其它端变化时调用 **`consume`**；未注册则 **只同步文档**。
 
 
 ## `CollaborateConfig`：`onlyLoad`
@@ -118,7 +118,7 @@ const editor = new Textbus({
 - **`loader`**：**`AsyncModelLoader`** 实例。
   - **`load()`**：由业务在合适时机调用，表示「可以开始加载子内容」；会触发 **`onRequestLoad`**，进而走到协作侧的 **`loadSubModelBySlot`**（若 **`getLoadedModelBySlot`** 为 **`null`**）。
   - **`onRequestLoad` / `onLoaded`**：可订阅；用于 UI 状态（加载中 / 已完成）。
-  - **`isLoaded`**：是否已由加载流程标记为完成（协作层在绑定子 **`Y.Doc`** 后会调用 **`markAsLoaded()`**）。
+  - **`isLoaded`**：子内容是否 **已就绪**；**`markAsLoaded()`** 由框架在 **子文档与插槽绑定完成** 后调用。
 
 多文档协同下，**`AsyncSlot`** 与 **`SubModelLoader`** 的 **`…BySlot`** 方法一一对应；根文档仍用 **`CollaborateModule`** 时 **不要**在协同树里使用 **`AsyncSlot`**（会触发不支持异步子模型的错误）。
 
@@ -148,7 +148,7 @@ slot.loader.onLoaded.subscribe(() => {
 - **`metadata`**：可观察；语义与 **`AsyncSlot.metadata`** 类似，供 **`loadSubModelByComponent`** 等解析远端子文档。
 - **`loader`**：同为 **`AsyncModelLoader`**；**`load()`**、**`onRequestLoad` / `onLoaded` / `isLoaded`** 行为与插槽侧一致，对应 **`SubModelLoader`** 的 **`…ByComponent`** 路径。
 
-**`Registry`** 从 **`AsyncComponentLiteral`** 还原实例时，会 **优先** 调用组件类上的 **`static fromJSONAndMetadata(textbus, state, metadata)`**。若 **只**实现 **`fromJSON(textbus, state)`**，**`metadata` 不会传入**，无法与异步子文档、协同侧约定对齐。因此凡参与 **协同 / 反序列化** 的异步组件，**必须**提供 **`fromJSONAndMetadata`**，并把 **`state` + `metadata`** 一并传入构造函数；**不要**再依赖仅含 **`state`** 的 **`fromJSON`** 作为恢复入口。
+从 **带 `metadata` 的字面量** 恢复 **`AsyncComponent`** 时，应使用 **`static fromJSONAndMetadata(textbus, state, metadata)`**，以便 **同时拿到 `state` 与 `metadata`**。若 **只**实现 **`fromJSON(textbus, state)`**，**`metadata` 会丢失**，无法与异步子文档、协同侧约定对齐。因此凡参与 **协同 / 反序列化** 的异步组件，**必须**提供 **`fromJSONAndMetadata`**，并把 **`state` + `metadata`** 一并传入构造函数；**不要**再依赖仅含 **`state`** 的 **`fromJSON`** 作为唯一恢复入口。
 
 多文档协同下，**`AsyncComponent`** 与 **`SubModelLoader`** 的 **`…ByComponent`** 方法对应；单文档 **`CollaborateModule`** 下 **不要**在协同树里使用 **`AsyncComponent`** 作为异步子模型。
 
@@ -171,7 +171,7 @@ interface MyBlockState {
 export class MyAsyncBlock extends AsyncComponent<MyBlockMeta, MyBlockState> {
   static componentName = 'MyAsyncBlock'
 
-  /** 必须提供：Registry 用其恢复带 metadata 的异步块，勿仅用 fromJSON */
+  /** 必须提供：用于从 JSON 恢复带 metadata 的实例，勿仅用 fromJSON */
   static fromJSONAndMetadata(
     _textbus: Textbus,
     data: ComponentStateLiteral<MyBlockState>,
@@ -250,14 +250,14 @@ export class MySubModelLoader extends SubModelLoader {
 
 ## `MessageBus` 与跨端数据 {#message-bus}
 
-**`MessageBus<T>`**（**`@textbus/collaborate`**）用来在 **文档之外** 同步一份 **结构化载荷 `T`**（例如当前用户昵称、头像色、角色标签等），与各端 **awareness** 中的对等字段联动。启用 **`CollaborateModule`**（或 **`MultipleDocumentCollaborateModule`**）并 **注册 `MessageBus`** 后：
+**`MessageBus<T>`**（**`@textbus/collaborate`**）用来在 **文档之外** 同步一份 **结构化载荷 `T`**（例如当前用户昵称、头像色、角色标签等），使 **各客户端** 都能收到 **同一份对等数据**。启用 **`CollaborateModule`**（或 **`MultipleDocumentCollaborateModule`**）并 **注册 `MessageBus`** 后：
 
-- **`get(textbus)`**：协作层在适当时机调用，返回值会作为 **`message`** 写入本端 awareness（经 **`SyncConnector#setLocalStateField`**），其它客户端可见。
-- **`consume(messages, textbus)`**：连接器汇总各端的 awareness 后调用；**`messages`** 为 **`Message<T>[]`**，每项含 **`clientId`**（对端连接内标识）与 **`message`**（该端的 **`T`**）。
-- **`onSync`**：可订阅；业务在 **`sync()`** 时会发出，协作层也会据此 **立刻** 把 **`get`** 结果再推送到 awareness。
-- **`sync()`**：当你 **主动改写了要广播的数据**（例如用户刚改了昵称）且希望 **马上** 同步时调用；**选区变化**时协作层也会自动刷新 **`message`**，不必事事手动 **`sync()`**。
+- **`get(textbus)`**：在需要 **把本端状态发给其它端** 时由协作调用；返回值即 **当前要广播的 `T`**。
+- **`consume(messages, textbus)`**：当 **各端协同状态更新** 时调用；**`messages`** 为 **`Message<T>[]`**，每项含 **`clientId`**（用于区分连接上的不同客户端）与 **`message`**（该客户端当前的 **`T`**）。
+- **`onSync`**：可订阅；调用 **`sync()`** 时会发出，协作也会 **立刻** 再推送一次 **`get`** 的结果。
+- **`sync()`**：当你 **刚改了要广播的数据**（例如昵称）并希望 **马上** 同步时调用；**选区变化** 时协作也会 **自动刷新对外载荷**，一般不必每次选区变化都手动 **`sync()`**。
 
-未注册 **`MessageBus`** 时，上述链路关闭，仅同步 **`Y.Doc`**。若还要绘制 **其它用户的选区 / 虚拟光标**，可把 **`T`** 设计成包含选区摘要字段，并与 **`@textbus/platform-browser`** 中协作展示相关类型一起使用。
+未注册 **`MessageBus`** 时，**只做文档协同**。若还要绘制 **其它用户的选区 / 虚拟光标**，可把 **`T`** 设计成包含 **选区摘要** 等字段，并与 **`@textbus/platform-browser`** 提供的 **协作展示** 能力对齐（见 [浏览器模块](./platform-browser)）。
 
 
 ### 示例：同步协作用户信息
@@ -302,7 +302,7 @@ export class PresenceMessageBus extends MessageBus<UserPresence> {
     // 此处可 next 到 Rx 流、或 setState 触发 React/Vue 重绘「在线成员」列表
   }
 
-  /** 用户改名、换主题色等：更新 local 后立刻推 awareness */
+  /** 用户改名、换主题色等：更新 local 后立刻同步到其它端 */
   setLocalPresence(patch: Partial<UserPresence>): void {
     Object.assign(this.local, patch)
     this.sync()
@@ -310,7 +310,7 @@ export class PresenceMessageBus extends MessageBus<UserPresence> {
 }
 ```
 
-在 **`new Textbus({ ... })`** 里与其它 **`Provider`** 一起注册（**`MessageBus`** 为 **抽象类 token**，**`useClass`** 指向你的实现）：
+在 **`new Textbus({ ... })`** 里与其它 **`Provider`** 一起注册（**`provide: MessageBus`**，**`useClass`** 为你的实现类）：
 
 ```ts
 import { MessageBus } from '@textbus/collaborate'
@@ -322,12 +322,12 @@ const editor = new Textbus({
 })
 ```
 
-**`consume`** 收到的 **`clientId`** 与 **`Yjs` / 连接器** 的 awareness 实现一致，可与 **`CollaborateCursor`** 等组件约定「同一 **`clientId`** 表示同一连接上的用户」。
+**`consume`** 里的 **`clientId`** 用于 **区分不同在线客户端**；可与 **`CollaborateCursor`** 等展示约定为 **同一用户标识**。
 
 
 ## 可选：`CustomUndoManagerConfig`
 
-向 **`providers`** 注册 **`CustomUndoManagerConfig`** 的实现，可按类型声明收窄进入撤销栈的协同事务（见 **`@textbus/collaborate`** 中该抽象类的可选方法）。
+向 **`providers`** 注册 **`CustomUndoManagerConfig`** 的实现，可 **控制哪些协同事务会进入撤销栈**（见 **`@textbus/collaborate`** 中该抽象类的可选方法）。
 
 
 ## 在代码中访问 `Collaborate`

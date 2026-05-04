@@ -518,5 +518,5 @@ const scopes = Selection.getSelectedScopes(
 - [状态查询与基础操作](./operations-and-query)  
 - **组件钩子**：[组件事件与生命周期](./component-events-and-lifecycle)  
 - **快捷键与按键绑定**：[快捷键和语法糖](./shortcuts-and-grammar)  
-- **浏览器与选区桥接**：[浏览器平台层](./platform-browser)  
+- **浏览器与选区桥接**：[浏览器模块](./platform-browser)  
 - **名词与数据模型**：[核心概念](./concepts)

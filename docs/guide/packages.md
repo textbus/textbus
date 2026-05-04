@@ -5,7 +5,7 @@
 | 包 | 说明 |
 |----|------|
 | [@textbus/core](./package-core) | 内核：组件模型、命令、选区、历史等 |
-| [@textbus/platform-browser](./package-platform-browser) | 浏览器平台层 |
+| [@textbus/platform-browser](./package-platform-browser) | 浏览器侧能力与指南 [浏览器模块](./platform-browser) |
 | [@textbus/collaborate](./package-collaborate) | 协作能力 |
 | [@textbus/adapter-viewfly](./package-adapter-viewfly) | Viewfly 视图适配 |
 | [@textbus/adapter-vue](./package-adapter-vue) | Vue 视图适配 |

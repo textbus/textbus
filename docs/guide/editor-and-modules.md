@@ -1,13 +1,13 @@
 # 模块与扩展
 
-在已熟悉 [核心概念](./concepts)、[组件基础](./component-basics) 与 [浏览器平台层](./platform-browser) 的前提下，本篇说明如何把 **`BrowserModule`**、协作包、自定义 **`providers`** 等 **拼进同一个 `Textbus` 实例**：**`Module` / `imports` / `Plugin`** 的职责、**启动与销毁顺序**，以及 **`Registry` 同名注册**、**`providers` 覆盖** 的常见结论与排错。
+在已熟悉 [核心概念](./concepts)、[组件基础](./component-basics) 与 [浏览器模块](./platform-browser) 的前提下，本篇说明如何把 **`BrowserModule`**、协作包、自定义 **`providers`** 等 **拼进同一个 `Textbus` 实例**：**`Module` / `imports` / `Plugin`** 的职责、**启动与销毁顺序**，以及 **`Registry` 同名注册**、**`providers` 覆盖** 的常见结论与排错。
 
 若当前需求只是增加块类型、格式或属性，请优先查阅 **入门** 与 [组件高级](./component-advanced)；本篇侧重 **配置合并与扩展点时机**。
 
 
 ## `TextbusConfig` 与 `Module`
 
-**`TextbusConfig`**（**`new Textbus({ ... })`** 的参数类型）**继承 `Module`**：根配置本身就可以带 **`components` / `formatters` / `attributes` / `providers` / `plugins`** 以及 **`Module`** 的生命周期钩子。另有 **`imports?: Module[]`**，用于把 **`BrowserModule`**、**`CollaborateModule`** 等预打包模块与根配置 **合并到同一容器**。
+**`TextbusConfig`**（**`new Textbus({ ... })`** 的参数类型）**继承 `Module`**：根配置本身就可以带 **`components` / `formatters` / `attributes` / `providers` / `plugins`** 以及 **`Module`** 的生命周期钩子。另有 **`imports?: Module[]`**，用于把 **`BrowserModule`**、**`CollaborateModule`** 等预打包模块与根配置 **合并进同一编辑器实例**。
 
 **`Module`** 是 **普通对象**（类实例或字面量均可），描述「一批注册项 + 可选钩子」；**不是**必须继承某个基类。
 
@@ -28,34 +28,34 @@
 
 ## `imports` 与列表合并
 
-合并时大致规则如下（**组件 / 格式 / 属性** 与 **`providers` / `plugins`** 的「谁覆盖谁」**不完全相同**，请分条记忆）：
+**效果**上可记住（**组件 / 格式 / 属性** 与 **`providers` / `plugins`** 规则不同）：
 
-- **`components` / `formatters` / `attributes`**：根 **`TextbusConfig`** 上的列表 **在前**，随后按 **`imports` 数组顺序** 追加各模块的列表。最终交给 **`Registry`** 时，**同名以「合并结果中更靠前」的条目为准**（因此 **根配置优先于任意 `import`**；仅在 **`imports` 之间** 比较时，**数组靠前的模块优先**）。
-- **`providers`**：根 **`providers`** 先入队，再按 **`imports` 顺序** 追加各模块的 **`providers`**，整段再接到内核默认 **`providers` 之后**。对 **同一 `provide` token**，通常以 **合并结果中更靠后者** 为准（**更晚出现的 `Module` / 更靠后的 `Provider` 条目** 往往覆盖先前绑定；与 **`@viewfly/core`** 版本相关，引入冲突时建议用最小配置验证）。
-- **`plugins`**：根与各 **`import` 的 `plugins`** 按相同顺序 **拼成一条数组**，在 **`render` 末尾** 依次 **`setup`**。
+- **`components` / `formatters` / `attributes`**：根配置里的项 **先于** 各 **`import` 模块** 参与合并；**同名时，根配置里的实现优先**；若只在 **`imports` 之间** 有冲突，**`imports` 数组里靠前的模块优先**。
+- **`providers`**：根与各模块的 **`providers`** 按 **根在前、随后按 `imports` 顺序** 参与合并；**同一 token 多次提供时，通常后出现的覆盖先前的**（若与预期不符，用最小配置验证或调整 **`imports` 顺序**）。
+- **`plugins`**：根与各模块的 **`plugins`** 按顺序 **排成一条**，在 **主视图就绪之后** 依次执行 **`setup`**。
 
-**`formatters` / `attributes`** 中的 **工厂写法** **`(textbus) => 实例`** 会在合并时 **`bind` 到当前 `Textbus` 实例** 后再收集。
+**`formatters` / `attributes`** 使用 **`(textbus) => 实例`** 时，工厂会在 **绑定到当前编辑器实例** 后再得到最终实例列表。
 
 
 ## `Module` 生命周期（顺序要点）
 
 ### `beforeEach`
 
-在 **`Textbus` 构造函数** 内调用：先按 **`imports` 顺序** 调用各模块的 **`beforeEach`**，再调用 **根 `config.beforeEach`**（若有）。适合做 **不依赖完整容器** 的注册前逻辑。
+在 **创建编辑器实例** 时调用：先按 **`imports` 顺序** 调用各模块的 **`beforeEach`**，再调用 **根 `config.beforeEach`**（若有）。适合在 **正式注册前** 做轻量准备。
 
 ### `setup`
 
-在 **`render`** 流程中 **`await`**：先按 **`imports` 顺序** 调用各模块的 **`setup`**，再调用 **根 `config.setup`**。可返回 **销毁回调**（或返回 **`Promise`**，解析值为回调）；返回值会进入 **`beforeDestroyCallbacks`**，在 **`destroy()`** 时执行。
+在 **`render`** 流程中 **`await`**：先按 **`imports` 顺序** 调用各模块的 **`setup`**，再调用 **根 `config.setup`**。可返回 **销毁回调**（或返回 **`Promise`**，解析值为回调）；**`destroy()`** 时会执行这些回调以释放你在 **`setup`** 里挂接的资源。
 
 多个 **`setup`** 以 **`Promise.all`** 等待，**彼此之间没有固定先后顺序**（仅保证全部完成后再继续后续启动步骤）。
 
 ### `onAfterStartup`
 
-在 **`History.listen()`**、**`scheduler.run()`**、主 **`Adapter.render`** 完成之后，先按 **`imports` 顺序**、再调用根 **`onAfterStartup`**。适合 **依赖调度器已运行、主视图已挂载** 的逻辑（例如自动聚焦、埋点）。
+在 **编辑器完成初始化且主视图已就绪** 之后，先按 **`imports` 顺序**、再调用根 **`onAfterStartup`**。适合 **依赖 DOM 已存在或编辑循环已运转** 的逻辑（例如自动聚焦、埋点）。
 
 ### `onDestroy`
 
-在 **`textbus.destroy()`** 中，大致顺序为：根 **`config.onDestroy`** → 各 **`plugins` 的 `onDestroy`** → 各 **`imports` 模块的 `onDestroy`** → **`setup` 返回的清理函数** → 再断开根组件与 **`History` / `Selection` / `Scheduler`** 等。编写 **`onDestroy`** 时不要假设 **`plugins` 仍可用**，按上述顺序释放资源。
+在 **`textbus.destroy()`** 中，会先走 **根配置与插件的 `onDestroy`**，再通知各 **`import` 模块**，随后执行 **`setup` 返回的清理函数**，最后 **结束文档视图与内核相关服务**。编写 **`onDestroy`** 时 **不要假设插件仍可用**，按 **由外到内** 释放自定义资源。
 
 **页面卸载时务必调用 `destroy()`**，避免输入层与订阅泄漏。
 
@@ -69,7 +69,7 @@
 
 ## `Registry` 与同名解析
 
-**`textbus.get(Registry)`** 根据 **`componentName`**、格式名、属性名解析字面量并 **`createComponent` / `createSlot`** 等。同名项的 **有效实现** 由上一节 **「`components` / `formatters` / `attributes` 合并顺序」** 决定：需要 **覆盖** 某内置块或格式时，把 **自己的类或实例** 写在 **`new Textbus` 根配置** 上，或把 **`Module` 放在 `imports` 更前**（在 **仅调整 `imports` 顺序** 时）。
+**`textbus.get(Registry)`** 根据 **`componentName`**、格式名、属性名 **解析字面量并创建组件或插槽**。同名项 **最终生效的是哪一份**，由上一节 **「`components` / `formatters` / `attributes` 合并顺序」** 决定：需要 **覆盖** 某内置块或格式时，把 **自己的类或实例** 写在 **`new Textbus` 根配置** 上，或把 **`Module` 放在 `imports` 更前**（在 **仅调整 `imports` 顺序** 时）。
 
 
 ## `providers` 自定义与覆盖
@@ -80,7 +80,7 @@
 - 由协作等模块 **替换 `History`** 等 token；
 - 由业务 **注册 `MessageBus`**、**`CustomUndoManagerConfig`** 等（见 [协作编辑](./collaborate)）。
 
-覆盖某 token 时，必须 **与内核或模块使用的 `provide` 符号完全一致**；不确定时可在类型提示中查找 **`provide: Xxx`** 的 **`Xxx`**。
+覆盖某能力时，**`provide` 必须与目标 token 完全一致**；不确定时以 **类型定义** 或 **[协作编辑](./collaborate)** 等专题文档中的 **`provide` 写法** 为准。
 
 
 ## 示例：自定义 `Module` 与 `Plugin`
@@ -123,7 +123,7 @@ const editor = new Textbus({
 })
 ```
 
-实际工程须再并入 **`BrowserModule`**（或自行提供 **`Adapter`** 与 **`NativeSelectionBridge`**），见 [浏览器平台层](./platform-browser)。
+实际工程须再并入 **`BrowserModule`**（或自行提供 **`Adapter`** 与 **`NativeSelectionBridge`**），见 [浏览器模块](./platform-browser)。
 
 :::
 
@@ -139,6 +139,6 @@ const editor = new Textbus({
 ## 接下来
 
 - 选区与命令：[选区](./selection)、[状态查询与基础操作](./operations-and-query)
-- 浏览器集成：[浏览器平台层](./platform-browser)
+- 浏览器集成：[浏览器模块](./platform-browser)
 - 协作与 **`providers`**：[协作编辑](./collaborate)
 - 包索引：[包参考概览](./packages)

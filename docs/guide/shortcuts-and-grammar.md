@@ -20,7 +20,7 @@ const keyboard = editor.get(Keyboard)
 
 - **`keymap`**：**`Keymap`**
   - **`key`**：**`string`**、**`string[]`**，或 **`Key`**（含 **`match`**、**`name`**，用于更复杂的键位匹配）。
-  - **`modKey`**、**`shiftKey`**、**`altKey`**：可选；未写视为 **`false`**。**`modKey`** 在桌面环境通常对应 **Ctrl**（Windows / Linux）或 **Command**（macOS），具体以当前平台层为准（见 [浏览器平台层](./platform-browser)）。
+  - **`modKey`**、**`shiftKey`**、**`altKey`**：可选；未写视为 **`false`**。**`modKey`** 在桌面环境通常对应 **Ctrl**（Windows / Linux）或 **Command**（macOS），具体以当前平台层为准（见 [浏览器模块](./platform-browser)）。
 - **`action`**：**`(key: string) => boolean | void`**。返回 **`false`** 时表示不视为已处理，键盘逻辑可能继续尝试其它快捷键。
 
 下列 **`interface`** 与 **`@textbus/core`** 导出类型一致（摘录自类型定义，便于一眼看清字段）：
@@ -287,5 +287,5 @@ keyboard.execShortcut({
 - **静态 `zenCoding` 与块结构**：[组件高级](./component-advanced)
 - **钩子与输入**： [组件事件与生命周期](./component-events-and-lifecycle)
 - **撤销 / 重做**：[历史记录](./history)
-- **浏览器输入与桥接**：[浏览器平台层](./platform-browser)
+- **浏览器输入与桥接**：[浏览器模块](./platform-browser)
 - **模块与配置合并**：[模块与扩展](./editor-and-modules)

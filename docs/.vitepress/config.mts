@@ -63,7 +63,7 @@ export default defineConfig({
             },
             { text: '协作编辑', link: '/guide/collaborate' },
             { text: '模块与扩展', link: '/guide/editor-and-modules' },
-            { text: '浏览器平台层', link: '/guide/platform-browser' },
+            { text: '浏览器模块', link: '/guide/platform-browser' },
           ],
         },
         {

@@ -244,11 +244,11 @@ const TextAlignFromStyleLoader: AttributeLoader<'left' | 'center' | 'right' | 'j
 3. **`attributeLoaders`**：**所有 `match` 成功的都会 `setAttribute`**，执行顺序与 **`attributeLoaders` 数组顺序**一致（与 **`componentLoaders`「先到先得」不同**）。
 4. **`schema` 一致**：解析用的 **`Slot`** **`schema`** 与文档里真实插槽一致，否则 **`insert` 可能失败**，插入会退化为按 **`getNextInsertPosition`** 寻找下一可写位再继续。
 5. **未匹配的节点**：不会自动变成「未知组件」，多数情况会 **当作普通容器** 递归；完全没有 Loader 认领时，最终往往只剩 **文本或结构丢失**，必要时在 **`FormatLoader`** 层兜底。
-6. **浏览器集成**：在浏览器里如何把 **`BrowserModule`**、视图与内核拼在一起，见 [浏览器平台层](./platform-browser)；多个 **`imports` 如何合并见 [模块与扩展](./editor-and-modules)。
+6. **浏览器集成**：在浏览器里如何把 **`BrowserModule`**、视图与内核拼在一起，见 [浏览器模块](./platform-browser)；多个 **`imports` 如何合并见 [模块与扩展](./editor-and-modules)。
 
 ## 接下来
 
-- [浏览器平台层](./platform-browser)  
+- [浏览器模块](./platform-browser)  
 - [状态查询与基础操作](./operations-and-query)（**`paste`**、**`insert`**）  
 - [组件事件与生命周期](./component-events-and-lifecycle)（**`onPaste`**）  
 - [文字样式](./text-styles)、[块级样式](./block-styles)  
