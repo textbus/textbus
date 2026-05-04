@@ -142,5 +142,5 @@ npm run dev
 - 在同一工程上继续扩展：按 **入门**顺序从 [组件基础](./component-basics) 读到 [文档解析与兼容处理](./document-parse-compat)  
 - 名词系统整理：[核心概念](./concepts)  
 - 插件与内核扩展细节：[模块与扩展（进阶）](./editor-and-modules)  
-- 协作：[协作编辑](/integrate/collaborate)  
-- 包级 API 索引：[API 概览](/api/)
+- 协作：[协作编辑](./collaborate)  
+- 包级导出索引：[包参考概览](./packages)

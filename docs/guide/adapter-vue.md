@@ -252,4 +252,4 @@ export default defineComponent({
 
 - [Viewfly 适配器](./adapter-viewfly)、[React 适配器](./adapter-react)  
 - [浏览器平台层](./platform-browser)  
-- 导出与类型：[API · adapter-vue](/api/adapter-vue)
+- 导出与类型：[@textbus/adapter-vue](./package-adapter-vue)

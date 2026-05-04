@@ -176,4 +176,4 @@ history.onForward.subscribe(() => {})
 
 - **快捷键**：[快捷键和语法糖](./shortcuts-and-grammar)
 - **写入与选区**：[状态查询与基础操作](./operations-and-query)、[选区](./selection)
-- **协作**：[协作编辑](/integrate/collaborate)
+- **协作**：[协作编辑](./collaborate)

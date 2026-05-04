@@ -51,4 +51,4 @@
 
 - 选区与命令：[选区](./selection) · [状态查询与基础操作](./operations-and-query)  
 - 浏览器集成：[浏览器平台层](./platform-browser)  
-- 包索引：[API 概览](/api/)
+- 包索引：[包参考概览](./packages)
