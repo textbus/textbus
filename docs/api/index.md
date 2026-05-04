@@ -1,6 +1,6 @@
 # API 概览
 
-各包按主题拆页，与 [简介](/guide/introduction)、[快速开始](/guide/getting-started) 及 [集成](/integrate/adapter-viewfly) 交叉引用；以下为 **`@textbus/*`** 包与文档条目对照。
+各包按主题拆页，与 [简介](/guide/introduction)、[快速开始](/guide/getting-started) 及 [Viewfly 适配器](/guide/adapter-viewfly) 等指南交叉引用；以下为 **`@textbus/*`** 包与文档条目对照。
 
 | 包 | 说明 |
 |----|------|

@@ -2,7 +2,7 @@
 
 若尚未阅读产品定位与模块划分，建议先看 [简介](./introduction)。
 
-本篇用 **Vite + TypeScript + Viewfly** 搭一个可输入、可换行的最小编辑器：**`@textbus/core`** 提供模型与内核，**`@textbus/platform-browser`** 负责浏览器侧挂载与输入，**`@textbus/adapter-viewfly`** 把文档渲染成 Viewfly 视图。使用 **Vue** 或 **React** 时无需 Viewfly 依赖，接入方式见 [Vue 适配器](/integrate/adapter-vue)、[React 适配器](/integrate/adapter-react)。
+本篇用 **Vite + TypeScript + Viewfly** 搭一个可输入、可换行的最小编辑器：**`@textbus/core`** 提供模型与内核，**`@textbus/platform-browser`** 负责浏览器侧挂载与输入，**`@textbus/adapter-viewfly`** 把文档渲染成 Viewfly 视图。使用 **Vue** 或 **React** 时无需 Viewfly 依赖，接入方式见 [Vue 适配器](./adapter-vue)、[React 适配器](./adapter-react)。
 
 ## 你会学到什么
 

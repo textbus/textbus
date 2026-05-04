@@ -13,8 +13,8 @@ hero:
       text: 快速开始
       link: /guide/getting-started
     - theme: alt
-      text: 在线演示
-      link: https://textbus.io/playground
+      text: 文档内示例
+      link: /guide/getting-started
 
 features:
   - title: 组件化

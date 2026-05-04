@@ -721,7 +721,7 @@ console.log(slot.toString())
 
 ### `toTree(slotRenderFactory, customFormat?, renderEnv?)`
 
-根据当前槽上的格式与内容生成 **`VElement`**：区间格式走各 **`Formatter.render`**，槽级 **`Attribute`** 再渲染到 **`slotRenderFactory`** 返回的根节点上。**`slotRenderFactory`** 负责把子虚拟节点列表包成一层宿主元素。与浏览器视图对接时见 [浏览器平台层](./platform-browser) 与各 [适配器集成](/integrate/adapter-viewfly)。
+根据当前槽上的格式与内容生成 **`VElement`**：区间格式走各 **`Formatter.render`**，槽级 **`Attribute`** 再渲染到 **`slotRenderFactory`** 返回的根节点上。**`slotRenderFactory`** 负责把子虚拟节点列表包成一层宿主元素。与浏览器视图对接时见 [浏览器平台层](./platform-browser) 与 [Viewfly 适配器](./adapter-viewfly)（或 [Vue](./adapter-vue)、[React](./adapter-react)）。
 
 ```ts
 import { ContentType, Slot } from '@textbus/core'
