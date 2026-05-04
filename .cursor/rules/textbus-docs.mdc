@@ -60,7 +60,7 @@ alwaysApply: false
 - **推荐写法**：一层展示 `docs/` 下路径（目录用 `/` 结尾），叶子为 `.md` 文件名或路由含义；每个节点后用 **冒号或括号** 跟 **一句话职责**（可选侧栏分组名用 `[侧栏: xxx]` 标在分支上）。
 - **字符**：优先使用 **ASCII 树形线**（`├──` `└──` `│`）写在 Markdown 代码块或等宽排版中；若环境不便显示，可用 **缩进 + `-`** 模拟同等深度的缩进树（每层固定 2～4 空格，严禁深度错乱）。
 - 未确认提纲前不批量新建空页面。
-- **由浅入深**：**准备**（简介、快速开始）之后接 **入门**（**`component-basics.md`** → **`text-styles.md`** → **`block-styles.md`** → **`selection.md`** → **`operations-and-query.md`**（侧栏 / 标题：**状态查询与基础操作**，正文先 **`Query`** 再 **`Commander`**）→ **`history.md`** → **`shortcuts-and-grammar.md`** → **`component-events-and-lifecycle.md`** → **`document-parse-compat.md`**），每页写清动机、概念与步骤；**`concepts.md`** 作名词对齐；**`component-advanced.md`**（**`separate`**、**`removeSlot`**、**`deleteAsWhole`**、**`getSlots()`** 顺序与命令协作）列在 **概念与进阶**，供多槽块作者查阅；Registry、插件、`providers` 等放进阶页。**`docs/` 正文不向读者描述站点目录策划、侧栏分组或撰稿意图**（维护说明写在仓库根目录提纲 / 本规则即可）。
+- **由浅入深**：**准备**（简介、快速开始）之后接 **入门**（**`component-basics.md`** → **`text-styles.md`** → **`block-styles.md`** → **`selection.md`** → **`operations-and-query.md`**（侧栏 / 标题：**状态查询与基础操作**，正文先 **`Query`** 再 **`Commander`**）→ **`history.md`** → **`shortcuts-and-grammar.md`** → **`component-events-and-lifecycle.md`** → **`document-parse-compat.md`**），每页写清动机、概念与步骤；**`concepts.md`** 作名词对齐；**`component-advanced.md`**（**`separate`**、**`removeSlot`**、**`deleteAsWhole`**、**`getSlots()`** 顺序与命令协作）列在 **概念与进阶**，供多插槽块作者查阅；Registry、插件、`providers` 等放进阶页。**`docs/` 正文不向读者描述站点目录策划、侧栏分组或撰稿意图**（维护说明写在仓库根目录提纲 / 本规则即可）。
 
 **全站提纲树示例（形式示意）：**
 

@@ -1,12 +1,12 @@
 # 块级样式
 
-本篇说明如何用 **属性（Attribute）** 给 **整个插槽** 设定外观——内核把这类「包住整块内容」的元数据挂在 **`Slot`** 上，渲染时通过 **`Attribute.render`** 写到 **承载该插槽内容的虚拟节点**（例如段落外包的 **`p`**）。你需要已按 [快速开始](./getting-started) 搭好最小编辑器；若已有 [组件基础](./component-basics) 里的 **段落** 或 **Todolist**，属性同样可以作用在其 **正文槽**（任意承载文档流的 **`Slot`** 均可参与 **`applyAttribute`**）。
+本篇说明如何用 **属性（Attribute）** 给 **整个插槽** 设定外观——内核把这类「包住整块内容」的元数据挂在 **`Slot`** 上，渲染时通过 **`Attribute.render`** 写到 **承载该插槽内容的虚拟节点**（例如段落外包的 **`p`**）。你需要已按 [快速开始](./getting-started) 搭好最小编辑器；若已有 [组件基础](./component-basics) 里的 **段落** 或 **Todolist**，属性同样可以作用在其 **正文插槽**（任意承载文档流的 **`Slot`** 均可参与 **`applyAttribute`**）。
 
-与 [文字样式](./text-styles) 的分工：**格式（Formatter）** 标在 **连续文本区间**（某几个字加粗）；**属性** 作用在 **插槽整体**（整段对齐、整槽业务标记等）。概念对照见 [核心概念](./concepts)。
+与 [文字样式](./text-styles) 的分工：**格式（Formatter）** 标在 **连续文本区间**（某几个字加粗）；**属性** 作用在 **插槽整体**（整段对齐、整插槽业务标记等）。概念对照见 [核心概念](./concepts)。
 
 ## 属性解决什么问题
 
-若每种块级外观都做成单独组件类型，树会变碎、协作合并也更繁。Textbus 用 **`Attribute`** 表达「**这一槽** 上的整块设定」：
+若每种块级外观都做成单独组件类型，树会变碎、协作合并也更繁。Textbus 用 **`Attribute`** 表达「**这一插槽** 上的整块设定」：
 
 - **`name`**（字符串）在当前编辑器实例内 **唯一**，与 **`slotLiteral.attributes`** 里保存的键对应；**载入与粘贴** 时要能在 **`new Textbus({ attributes: [...] })`** 里找到同名 **`Attribute`**。
 - **`render(node, formatValue, renderEnv)`** 在虚拟树上 **改写承载节点**：常见写法是给 **`node.styles`** 设 **`text-align`**、**`paddingLeft`** 等；**不写子节点**，子内容仍由 **`slot.toTree`** 与格式树生成。
@@ -17,7 +17,7 @@
 | | **格式（Formatter）** | **属性（Attribute）** |
 | --- | --- | --- |
 | 作用范围 | 插槽内 **一段文本** | **整个插槽** |
-| 典型用途 | 加粗、字号、链接 | 对齐、缩进、整槽标记 |
+| 典型用途 | 加粗、字号、链接 | 对齐、缩进、整插槽标记 |
 | 写入 API | **`applyFormat` / `unApplyFormat`** | **`applyAttribute` / `unApplyAttribute`** |
 | 查询 API | **`Query.queryFormat`** | **`Query.queryAttribute`** |
 
@@ -113,13 +113,13 @@ commander.unApplyAttribute(textAlignAttribute)
 
 ### `onlySelf`
 
-**默认 `false`。** 对某一 **`Slot`** 调用 **`setAttribute`** 时，若 **`onlySelf` 为 `false`**，内核会在设置本槽之后，**递归地对本槽内嵌套块级子组件的各个子插槽** 再次 **`setAttribute`**，使嵌套结构在数据上也带上同一属性（常见用于希望 **标题里的强调块** 等与外层 **对齐一致**）。
+**默认 `false`。** 对某一 **`Slot`** 调用 **`setAttribute`** 时，若 **`onlySelf` 为 `false`**，内核会在设置本插槽之后，**递归地对本插槽内嵌套块级子组件的各个子插槽** 再次 **`setAttribute`**，使嵌套结构在数据上也带上同一属性（常见用于希望 **标题里的强调块** 等与外层 **对齐一致**）。
 
-**`onlySelf: true`** 时 **只修改当前这一槽**，不再自动向下级插槽复制。
+**`onlySelf: true`** 时 **只修改当前这一插槽**，不再自动向下级插槽复制。
 
 ### `checkHost`
 
-可选；**不写则不做额外校验**。若提供 **`checkHost(host, value)`**，会在 **写入前** 调用：**`host`** 为当前 **`Slot`**；返回 **`false`** 则 **本次不应用**（命令侧相当于静默不收）。可用来限制 **某种属性只允许出现在特定 schema 的槽里**，或对 **`value`** 做合法性校验。
+可选；**不写则不做额外校验**。若提供 **`checkHost(host, value)`**，会在 **写入前** 调用：**`host`** 为当前 **`Slot`**；返回 **`false`** 则 **本次不应用**（命令侧相当于静默不收）。可用来限制 **某种属性只允许出现在特定 schema 的插槽里**，或对 **`value`** 做合法性校验。
 
 ```ts
 import { ContentType } from '@textbus/core'

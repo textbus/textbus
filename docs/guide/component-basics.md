@@ -49,22 +49,22 @@ static fromJSON(textbus: Textbus, data: ComponentStateLiteral<TodolistState>) {
 沙箱 **`todolist.component.tsx`** 里 **`TodolistState`** 描述这份实例持久化时要带上场的两件事：
 
 - **`checked`**：是否完成；视图里 **`input`** 的 **`checked`** 与它绑定。
-- **`slot`**：正文 **`Slot`**，示例里 schema 为 **`ContentType.Text`**，与段落一致，槽内走文本流（格式能力可在后续章节再扩展）。
+- **`slot`**：正文 **`Slot`**，示例里 schema 为 **`ContentType.Text`**，与段落一致，插槽内走文本流（格式能力可在后续章节再扩展）。
 
 运行时类型是 **`Component<TodolistState>`**，当前实例上的文档状态即 **`component.state`**。勾选框用 **`onChange`**，把 **`(e.target as HTMLInputElement).checked`** 写回 **`c.state.checked`**，与原生勾选行为一致。对组件 **`state`** 与插槽内容的修改都会纳入 Textbus 的 **`History`**，可按编辑器配置做撤销与重做（参见 [历史](./history)）。
 
-### `getSlots()`：向内核声明「文档里有哪些子槽」
+### `getSlots()`：向内核声明「文档里有哪些子插槽」
 
 ```ts
-// 列出所有子槽，顺序须与文档中的渲染顺序一致（选区与子槽遍历等依赖）
+// 列出所有子插槽，顺序须与文档中的渲染顺序一致（选区与子插槽遍历等依赖）
 override getSlots(): Slot[] {
   return [this.state.slot]
 }
 ```
 
-**选区**与对部分文档树结构的遍历，都会依赖 **`getSlots()`** 所声明的「块下面有哪些 **`Slot`**」。Todolist 只有一个正文槽，因此返回单元素数组；若以后拆成「标题槽 + 正文槽」，须按它们在 **文档中渲染的先后顺序** 在 **`getSlots()`** 里 **全部列出**，内核才能一致地对待它们。
+**选区**与对部分文档树结构的遍历，都会依赖 **`getSlots()`** 所声明的「块下面有哪些 **`Slot`**」。Todolist 只有一个正文插槽，因此返回单元素数组；若以后拆成「标题插槽 + 正文插槽」，须按它们在 **文档中渲染的先后顺序** 在 **`getSlots()`** 里 **全部列出**，内核才能一致地对待它们。
 
-多槽块的 **`separate`**、**`removeSlot`**、**`deleteAsWhole`** 等可选能力与 **`transform`** / **`paste`** 的协作说明见 [组件高级](./component-advanced)。
+多插槽块的 **`separate`**、**`removeSlot`**、**`deleteAsWhole`** 等可选能力与 **`transform`** / **`paste`** 的协作说明见 [组件高级](./component-advanced)。
 
 ---
 
@@ -79,7 +79,7 @@ override setup() {
 
   onBreak(ev => {
     ev.preventDefault() // 换行不走内核默认行为，由下列分支定义
-    const slot = ev.target // 触发换行的槽，此处即正文槽
+    const slot = ev.target // 触发换行的插槽，此处即正文插槽
 
     // 正文为空时回车：用段落替换当前待办
     if (slot.isEmpty) {
@@ -104,7 +104,7 @@ override setup() {
 
 **`Commander`** 负责改文档结构，**`Selection`** 负责事后把光标落到合适位置。 **`ev.preventDefault()`** 表示换行不走内核默认行为，后面的分支才是本组件定义的语义。
 
-- **`slot.isEmpty`** 时：**`replaceComponent(this, p)`** 把当前待办整块换成空 **`ParagraphComponent`**，光标进新段落槽，避免空待办壳一直占着块级位。
+- **`slot.isEmpty`** 时：**`replaceComponent(this, p)`** 把当前待办整块换成空 **`ParagraphComponent`**，光标进新段落插槽，避免空待办壳一直占着块级位。
 - 否则：**`slot.cut(ev.data.index)`** 从光标处切开，后半段 **`nextSlot`** 装进 **`new TodolistComponent`**，**`insertAfter`** 插在 **`this`** 后面，新条 **`checked`** 与 **`this.state.checked`** 一致。
 
 同预设里的 **`ParagraphComponent`** 只做「切开 + 新段落」，可作对照（节选）：
@@ -116,7 +116,7 @@ override setup() {
 
   onBreak(ev => {
     ev.preventDefault()
-    const nextContent = ev.target.cut(ev.data.index) // 光标后内容 → 新段正文槽
+    const nextContent = ev.target.cut(ev.data.index) // 光标后内容 → 新段正文插槽
     const p = new ParagraphComponent({ slot: nextContent })
     commander.insertAfter(p, this) // 回车：当前段之后插入新段落
     selection.setPosition(nextContent, 0)
@@ -153,7 +153,7 @@ export function TodolistView(props: ViewComponentProps<TodolistComponent>) {
           }}
           style={{ marginTop: '2px' }}
         />
-        {/* 槽内子树由内核算出 children，须 createVNode 包一层再放入 Viewfly */}
+        {/* 插槽内子树由内核算出 children，须 createVNode 包一层再放入 Viewfly */}
         {adapter.slotRender(slot, children =>
           createVNode('div', { style: { flex: '1', minWidth: 0 } }, children),
         )}
@@ -165,7 +165,7 @@ export function TodolistView(props: ViewComponentProps<TodolistComponent>) {
 
 - 最外层 **`div`** 上的 **`ref={props.rootRef}`**：适配器用它来绑定这一块的可编辑根节点。
 - **`input[type=checkbox]`**：壳层 UI，**`checked`** / **`onChange`** 与 **`c.state.checked`** 同步，勾选写入 **`state`** 后仍走 Textbus 的历史等机制。
-- **`adapter.slotRender(slot, …)`**：槽内文档树由内核算子节点；回调里拿到的 **`children`** 须用 **`createVNode('div', …, children)`** 包一层再放进 Viewfly 树，不能像普通 JSX 那样直接把 **`children`** 当兄弟节点拼进去。
+- **`adapter.slotRender(slot, …)`**：插槽内文档树由内核算子节点；回调里拿到的 **`children`** 须用 **`createVNode('div', …, children)`** 包一层再放进 Viewfly 树，不能像普通 JSX 那样直接把 **`children`** 当兄弟节点拼进去。
 
 ---
 
@@ -194,7 +194,7 @@ const editor = new Textbus({
   imports: [browserModule],
 })
 
-// 根块持有「只接受块级子节点」的槽，再往 rootSlot insert 各 BlockComponent
+// 根块持有「只接受块级子节点」的插槽，再往 rootSlot insert 各 BlockComponent
 const docRoot = new RootComponent({
   slot: new Slot([ContentType.BlockComponent]),
 })
@@ -204,7 +204,7 @@ const rootSlot = docRoot.state.slot
 
 1. **适配器组件表**：**`[TodolistComponent.componentName]: TodolistView`**，与 **`ParagraphComponent`**、根组件并列。
 2. **`Textbus({ components: [...] })`**：把 **`TodolistComponent`** 注册进内核，**`fromJSON` / 粘贴** 等才能找到类型定义。
-3. **初始文档里的 `insert`**：演示块级槽里 **`TodolistComponent`** 与普通 **`ParagraphComponent`** 混排；日常也可由 **`RootComponent`** 的 **`onContentInsert`** 等逻辑插入（沙箱根组件仍会把手敲的非块内容收成段落；钩子索引见 [组件事件与生命周期](./component-events-and-lifecycle)）。
+3. **初始文档里的 `insert`**：演示块级插槽里 **`TodolistComponent`** 与普通 **`ParagraphComponent`** 混排；日常也可由 **`RootComponent`** 的 **`onContentInsert`** 等逻辑插入（沙箱根组件仍会把手敲的非块内容收成段落；钩子索引见 [组件事件与生命周期](./component-events-and-lifecycle)）。
 
 ## 常见问题
 
@@ -215,7 +215,7 @@ const rootSlot = docRoot.state.slot
 ## 接下来
 
 - [组件事件与生命周期](./component-events-and-lifecycle)  
-- [组件高级](./component-advanced)（**`separate`**、**`removeSlot`** 等，写多槽块时查阅）  
+- [组件高级](./component-advanced)（**`separate`**、**`removeSlot`** 等，写多插槽块时查阅）  
 - [文字样式](./text-styles)  
 - [块级样式](./block-styles)  
 - [核心概念](./concepts)

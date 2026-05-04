@@ -43,7 +43,7 @@
 
 | 钩子 | 时机简述 |
 | --- | --- |
-| **`onBreak`** | 用户在槽内触发 **回车语义**；载荷 **`BreakEventData`** 含触发位置 **`index`**。自定义列表项、待办拆条等多在此处 **`preventDefault`** 后自行 **`cut` / `insertAfter`**。示例见 [组件基础](./component-basics)。 |
+| **`onBreak`** | 用户在插槽内触发 **回车语义**；载荷 **`BreakEventData`** 含触发位置 **`index`**。自定义列表项、待办拆条等多在此处 **`preventDefault`** 后自行 **`cut` / `insertAfter`**。示例见 [组件基础](./component-basics)。 |
 | **`onPaste`** | **`Commander.paste`** 向 **当前选区的公共祖先组件** 派发；载荷含结构化 **`data`**（**`Slot`**）与 **`text`**。阻止后可完全自定义粘贴结果（与 [状态查询与基础操作](./operations-and-query) 中的 **`paste`** 一节对照阅读）。 |
 
 ---
@@ -69,7 +69,7 @@
 
 ## 输入法、右键菜单与其它
 
-- **`onCompositionStart`**、**`onCompositionUpdate`**、**`onCompositionEnd`**：组合输入（如中文 IME）在槽内的阶段回调。
+- **`onCompositionStart`**、**`onCompositionUpdate`**、**`onCompositionEnd`**：组合输入（如中文 IME）在插槽内的阶段回调。
 - **`onContextMenu`**：右键菜单组装（与 **`triggerContextMenu`** 协作）。
 - **`onParentSlotUpdated`**：父插槽数据更新通知。
 - **`onDetach`**：组件从模型上 **剥离** 时触发； **`invokeListener`** 处理 **`onDetach`** 后会自 **`EventCache`** 中移除该组件缓存。
@@ -86,6 +86,6 @@
 
 - **动手示例**：[组件基础](./component-basics)（**`onBreak`**）、[快速开始](./getting-started)（段落默认换行）  
 - **命令如何触发钩子**：[状态查询与基础操作](./operations-and-query)  
-- **多槽拆分与删除语义**：[组件高级](./component-advanced)  
+- **多插槽拆分与删除语义**：[组件高级](./component-advanced)  
 - **按键绑定**：[快捷键和语法糖](./shortcuts-and-grammar)  
 - **名词总览**：[核心概念](./concepts)

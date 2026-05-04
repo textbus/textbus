@@ -1,10 +1,10 @@
 import type { PlaygroundPreset } from '../preset-types'
 
 /**
- * 《组件基础》专用：在快速开始示例基础上增加 Todolist，不影响 getting-started 预设。
+ * 《快捷键和语法糖》静态 zenCoding：段落内输入 `-` 再按空格 → Todolist（与组件基础共用 Todolist 形态）。
  */
-export const componentBasicsPreset: PlaygroundPreset = {
-  id: 'component-basics',
+export const zenCodingTodolistPreset: PlaygroundPreset = {
+  id: 'zen-coding-todolist',
   defaultOpenPath: 'components/todolist.component.tsx',
   files: {
     'style.css': `html {
@@ -75,24 +75,17 @@ function App() {
   })
 
   const editor = new Textbus({
+    zenCoding: true,
     components: [RootComponent, ParagraphComponent, TodolistComponent],
-    imports: [browserModule]
+    imports: [browserModule],
   })
 
   const docRoot = new RootComponent({
-    slot: new Slot([ContentType.BlockComponent])
+    slot: new Slot([ContentType.BlockComponent]),
   })
 
-  // 初始文档：两条待办 + 一段段落（可与快速开始对照行为）
   const rootSlot = docRoot.state.slot
-  const todo1 = new Slot([ContentType.Text])
-  todo1.insert('第一条待办')
-  rootSlot.insert(new TodolistComponent({ checked: false, slot: todo1 }))
-  const todo2 = new Slot([ContentType.Text])
-  todo2.insert('第二条待办')
-  rootSlot.insert(new TodolistComponent({ checked: true, slot: todo2 }))
   const paraSlot = new Slot([ContentType.Text])
-  paraSlot.insert('这是一段普通段落，可与待办混排。')
   rootSlot.insert(new ParagraphComponent({ slot: paraSlot }))
 
   onMounted(() => {
@@ -255,6 +248,16 @@ export class TodolistComponent extends Component<TodolistState> {
   static componentName = 'Todolist'
   // 块级：在父插槽里作为一整块与段落并列
   static type = ContentType.BlockComponent
+
+  // Zen Coding：在段落正文只有「-」时按空格，整段替换为空白待办（见键盘语法糖文档）
+  static zenCoding = {
+    match: /^-$/,
+    key: ' ',
+    createState(_content: string, _textbus: Textbus): TodolistState {
+      const slot = new Slot([ContentType.Text])
+      return { checked: false, slot }
+    },
+  }
 
   // 反序列化：把字面量 slot / checked 还原为运行时 Slot 与组件实例
   static fromJSON(textbus: Textbus, data: ComponentStateLiteral<TodolistState>) {

@@ -85,7 +85,7 @@ if (bold.state === QueryStateType.Enabled && bold.value) {
 
 ### 属性：`queryAttribute` / `queryAttributeByRange`
 
-查询 **插槽属性**。折叠时在公共祖先槽上按 **整槽** 判断；展开时对各个 **`getSelectedScopes`** 分段合并，分支规则见 [块级样式](./block-styles)。合并失败为 **`Normal`**；一致则为 **`Enabled`**，**`value`** 为属性值。
+查询 **插槽属性**。折叠时在公共祖先插槽上按 **整个插槽** 判断；展开时对各个 **`getSelectedScopes`** 分段合并，分支规则见 [块级样式](./block-styles)。合并失败为 **`Normal`**；一致则为 **`Enabled`**，**`value`** 为属性值。
 
 ```ts
 const align = query.queryAttribute(TextAlignAttribute)
@@ -375,7 +375,7 @@ commander.removeComponent(card)
 
 **`transform`** 用来在 **当前选区** 上做一次 **批量「改结构」**：按你给出的 **`TransformRule`**，把选中范围内的文字与嵌套内容 **搬到新造的插槽里**，再 **组装成新的块级组件** 放回文档。典型场景是 **段落 ↔ 列表项**、**一段收成多块** 等；若你的块本身很复杂（多插槽、表格、可拆分列表），还要在组件一侧把 **插槽能接收什么**、**多块之间如何拆开** 约定清楚（见 [组件高级](./component-advanced) 中的 **`getSlots()`**、**`separate`**），否则很容易出现「只改了一半」「拆得很碎」的视觉结果。
 
-与多次调用 **`cut` / `replaceComponent`** 相比，**`transform`** 在同一次调用中完成「读出选中范围 → 按需建新槽 → 生成新组件并写回文档」。
+与多次调用 **`cut` / `replaceComponent`** 相比，**`transform`** 在同一次调用中完成「读出选中范围 → 按需建新插槽 → 生成新组件并写回文档」。
 
 ### 前置条件与返回值
 
@@ -388,10 +388,10 @@ commander.removeComponent(card)
 | 字段 | 说明 |
 | --- | --- |
 | **`targetType`** | **`ContentType`**，取 **`stateFactory`** 所产出目标组件的 **`static type`**。例如转成 **`ParagraphComponent`**（段落）时组件 **`type`** 为 **`ContentType.BlockComponent`**，此处填 **`ContentType.BlockComponent`**；转成行内组件则填 **`ContentType.InlineComponent`**。段落正文等子 **`Slot`** 的 **`schema`**（如 **`ContentType.Text`**）由 **`slotFactory`** 给出，与 **`targetType`** 区分。 |
-| **`slotFactory(from)`** | 每当需要 **新开一个空插槽** 来装正文时，会通过此回调创建；参数 **`from`** 是当前所在的 **父组件**，方便你在 **同一层级** 下创建列表项正文槽、表格单元槽等。搬过去时，原来附着在片段上的 **插槽级样式（属性）** 一般会尽量保留到新槽上（边界行为以实际运行与类型说明为准）。 |
-| **`stateFactory(slots, textbus)`** | 已有一组准备好的插槽时，由调用方把它们变成最终要出现的块（例如每个槽一个段落，或多个槽组成一条列表项）。返回值按顺序写回文档。 |
+| **`slotFactory(from)`** | 每当需要 **新开一个空插槽** 来装正文时，会通过此回调创建；参数 **`from`** 是当前所在的 **父组件**，方便你在 **同一层级** 下创建列表项正文插槽、表格单元插槽等。搬过去时，原来附着在片段上的 **插槽级样式（属性）** 一般会尽量保留到新插槽上（边界行为以实际运行与类型说明为准）。 |
+| **`stateFactory(slots, textbus)`** | 已有一组准备好的插槽时，由调用方把它们变成最终要出现的块（例如每个插槽一个段落，或多个插槽组成一条列表项）。返回值按顺序写回文档。 |
 
-**`TransformRule`** 包含：**`targetType`**（目标组件类型）、**`slotFactory`**（承载内容的槽）、**`stateFactory`**（组装出的组件）。
+**`TransformRule`** 包含：**`targetType`**（目标组件类型）、**`slotFactory`**（承载内容的插槽）、**`stateFactory`**（组装出的组件）。
 
 转换会改写选区附近的文档树，并可能改变光标位置。结果异常时，常见原因是规则与父组件、插槽 **`schema`**、**`separate`** 等约定不一致（见 [组件高级](./component-advanced)）。多插槽父组件若在模型层未明确相邻插槽如何拆成同级块，批量转换更容易表现为分段插入，而非整块替换。**`transform`** 与其它写入命令一样走编辑管线；拦截或改写依赖各 **`Component`** 在 **`setup`** 中注册的钩子（见 [组件事件与生命周期](./component-events-and-lifecycle)）。
 
@@ -422,7 +422,7 @@ commander.transform(paragraphTransform)
 ### 异常表现与相关约束
 
 - **`targetType`**、**`slotFactory`** 与 **`schema`** 不一致：常见表现为 **只改写局部** 或 **块被拆碎**。
-- **表格、多槽列表**：**`separate`**、**`getSlots()`** 顺序等见 [组件高级](./component-advanced)，须先与产品设计对齐。
+- **表格、多插槽列表**：**`separate`**、**`getSlots()`** 顺序等见 [组件高级](./component-advanced)，须先与产品设计对齐。
 - **钩子**：粘贴、换行等与 **`transform`** 同属编辑管线，见 [组件事件与生命周期](./component-events-and-lifecycle)。
 
 ---

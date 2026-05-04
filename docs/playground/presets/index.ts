@@ -3,10 +3,12 @@ import { blockStylesPreset } from './block-styles'
 import { componentBasicsPreset } from './component-basics'
 import { gettingStartedPreset } from './getting-started'
 import { textStylesPreset } from './text-styles'
+import { zenCodingTodolistPreset } from './zen-coding-todolist'
 
 export const PLAYGROUND_PRESETS = {
   'getting-started': gettingStartedPreset,
   'component-basics': componentBasicsPreset,
+  'zen-coding-todolist': zenCodingTodolistPreset,
   'text-styles': textStylesPreset,
   'block-styles': blockStylesPreset,
 } as const satisfies Record<string, PlaygroundPreset>

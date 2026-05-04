@@ -1,6 +1,6 @@
 # 文字样式
 
-本篇说明如何在 Textbus 里为 **同一插槽中的一段文字** 叠加样式——内核里称为 **格式（Formatter）**。你需要已按 [快速开始](./getting-started) 搭好最小编辑器；若已有 [组件基础](./component-basics) 里的 **Todolist**，格式同样可以作用在其 **正文槽**（与段落类似，schema 为 **`ContentType.Text`** 的槽即可）。
+本篇说明如何在 Textbus 里为 **同一插槽中的一段文字** 叠加样式——内核里称为 **格式（Formatter）**。你需要已按 [快速开始](./getting-started) 搭好最小编辑器；若已有 [组件基础](./component-basics) 里的 **Todolist**，格式同样可以作用在其 **正文插槽**（与段落类似，schema 为 **`ContentType.Text`** 的插槽即可）。
 
 ## 格式解决什么问题
 
@@ -139,7 +139,7 @@ commander.unApplyFormat(boldFormatter)
 
 ## 与组件结构配合时要注意什么
 
-- **格式只能加在「有文本流的插槽」里**：**Todolist** 的正文槽若为 **`[ContentType.Text]`**，与段落一样支持 **`applyFormat`**。
+- **格式只能加在「有文本流的插槽」里**：**Todolist** 的正文插槽若为 **`[ContentType.Text]`**，与段落一样支持 **`applyFormat`**。
 - **块级组件节点本身**不能用 **`Formatter`**「包一层」——那是 **组件** 的职责；格式作用于 **组件内部插槽里的字符串区间**。
 
 ## 可选字段详解 {#optional-formatter-fields}
@@ -199,12 +199,12 @@ commander.unApplyFormat(boldFormatter)
 
 ### `checkHost`
 
-可选；**不写则不做额外校验**，等价于允许应用。若提供 **`checkHost(host, value)`**，会在 **真正把格式写到槽里之前** 调用：**`host`** 为当前 **`Slot`**，**`value`** 为本次格式值；返回 **`false`** 则 **本次不应用**（命令侧相当于静默不收）。用来约束 **某种格式只允许出现在满足条件的槽里**，或对 **`value`** 做合法性校验。
+可选；**不写则不做额外校验**，等价于允许应用。若提供 **`checkHost(host, value)`**，会在 **真正把格式写到插槽里之前** 调用：**`host`** 为当前 **`Slot`**，**`value`** 为本次格式值；返回 **`false`** 则 **本次不应用**（命令侧相当于静默不收）。用来约束 **某种格式只允许出现在满足条件的插槽里**，或对 **`value`** 做合法性校验。
 
 ```ts
 import { ContentType } from '@textbus/core'
 
-// 示例：仅允许在含文本内容的 schema 槽里应用（按业务改写条件）
+// 示例：仅允许在含文本内容的 schema 插槽里应用（按业务改写条件）
 checkHost(host, value) {
   return host.schema.includes(ContentType.Text)
 }
