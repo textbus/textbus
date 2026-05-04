@@ -66,20 +66,6 @@ export default defineConfig({
             { text: '浏览器模块', link: '/guide/platform-browser' },
           ],
         },
-        {
-          text: '包参考',
-          collapsed: false,
-          items: [
-            { text: '概览', link: '/guide/packages' },
-            { text: '@textbus/core', link: '/guide/package-core' },
-            { text: '@textbus/platform-browser', link: '/guide/package-platform-browser' },
-            { text: '@textbus/collaborate', link: '/guide/package-collaborate' },
-            { text: '@textbus/adapter-viewfly', link: '/guide/package-adapter-viewfly' },
-            { text: '@textbus/adapter-vue', link: '/guide/package-adapter-vue' },
-            { text: '@textbus/adapter-react', link: '/guide/package-adapter-react' },
-            { text: '@textbus/platform-node', link: '/guide/package-platform-node' },
-          ],
-        },
       ],
     },
 

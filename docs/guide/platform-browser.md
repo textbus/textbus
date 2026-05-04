@@ -89,4 +89,3 @@ npm install @textbus/platform-browser
 
 - 模块合并与 **`providers`**：[模块与扩展](./editor-and-modules)
 - 解析与粘贴：[文档解析与兼容处理](./document-parse-compat)
-- 包导出索引：[@textbus/platform-browser](./package-platform-browser)

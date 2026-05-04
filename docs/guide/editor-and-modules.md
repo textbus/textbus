@@ -141,4 +141,3 @@ const editor = new Textbus({
 - 选区与命令：[选区](./selection)、[状态查询与基础操作](./operations-and-query)
 - 浏览器集成：[浏览器模块](./platform-browser)
 - 协作与 **`providers`**：[协作编辑](./collaborate)
-- 包索引：[包参考概览](./packages)
