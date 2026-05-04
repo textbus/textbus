@@ -4,6 +4,8 @@
 
 若你尚未跑通最小工程，可先跟 [快速开始](./getting-started) 配好 **依赖、TypeScript / Vite 与 Viewfly JSX**；本篇默认你已能写 **`RootComponent` / `ParagraphComponent`** 等模型与 **`RootComponentView`** 等块视图。
 
+**`Component` / `Slot` 与 DOM 的查询 API** 见 [适配器](./adapter)。
+
 ## 依赖
 
 在 **`@textbus/core`**、**`@textbus/platform-browser`** 之外，至少安装 **`@textbus/adapter-viewfly`**、**`@viewfly/core`**、**`@viewfly/platform-browser`** 与 **`reflect-metadata`**（须在所有 **`@textbus/*`** 导入之前执行，见 [快速开始](./getting-started)）。

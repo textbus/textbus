@@ -2,6 +2,8 @@
 
 **`@textbus/adapter-vue`** 用 **Vue 3** 的 **`defineComponent` + `setup`**（或等价写法）渲染 **`Component`** 块视图，并与 **`BrowserModule`** 一起接入浏览器。下列示例与 [快速开始](./getting-started) 中 **`VueAdapter` + `BrowserModule` + `Textbus`** 的接线顺序一致，并按 **当前 5.x** 写法编写（例如 **`new RootComponent({ slot })`** 仅传入初始化数据、**`fromJSON`** 使用 **`Registry.createSlot`**）。
 
+**`Component` / `Slot` 与 DOM 的查询 API** 见 [适配器](./adapter)。
+
 完整工程示例见 [textbus/vue-demo](https://github.com/textbus/vue-demo)，便于对照目录与构建配置。
 
 ## 依赖

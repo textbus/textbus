@@ -61,6 +61,7 @@ export default defineConfig({
                 { text: 'React', link: '/guide/adapter-react' },
               ],
             },
+            { text: '适配器与 DOM 查询', link: '/guide/adapter' },
             { text: '协作编辑', link: '/guide/collaborate' },
             { text: '模块与扩展', link: '/guide/editor-and-modules' },
             { text: '浏览器模块', link: '/guide/platform-browser' },

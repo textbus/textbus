@@ -2,6 +2,8 @@
 
 **`@textbus/adapter-react`** 用 **React** 编写块视图，并与 **`BrowserModule`** 一起接入浏览器。下列示例与 [快速开始](./getting-started) 中 **`ReactAdapter` + `BrowserModule` + `Textbus`** 的接线顺序一致，并按 **5.x** 编写（**`ReactAdapter`**、**`new RootComponent({ slot })`** 等）。
 
+**`Component` / `Slot` 与 DOM 的查询 API** 见 [适配器](./adapter)。
+
 完整工程示例见 [textbus/react-demo](https://github.com/textbus/react-demo)，便于对照目录与构建配置。
 
 ::: warning React 与性能
