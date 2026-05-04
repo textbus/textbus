@@ -288,4 +288,4 @@ keyboard.execShortcut({
 - **钩子与输入**： [组件事件与生命周期](./component-events-and-lifecycle)
 - **撤销 / 重做**：[历史记录](./history)
 - **浏览器输入与桥接**：[浏览器平台层](./platform-browser)
-- **模块与配置合并**：[模块与扩展（进阶）](./editor-and-modules)
+- **模块与配置合并**：[模块与扩展](./editor-and-modules)

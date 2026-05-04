@@ -346,4 +346,4 @@ const editor = new Textbus({
 
 - 包级导出与类型索引：[**`@textbus/collaborate`**](./package-collaborate)
 - 撤销 / 重做 API 说明：[历史记录](./history)
-- 模块与 **`providers`** 合并顺序：[模块与扩展（进阶）](./editor-and-modules)
+- 模块与 **`providers`** 合并顺序：[模块与扩展](./editor-and-modules)

@@ -16,7 +16,7 @@ const history = editor.get(History)
 
 ## `TextbusConfig`：与历史相关的配置
 
-下列项写在 **`new Textbus({ ... })`** 或与 **`imports`** 合并的 **`Module`** 里（合并顺序见 [模块与扩展（进阶）](./editor-and-modules)）。
+下列项写在 **`new Textbus({ ... })`** 或与 **`imports`** 合并的 **`Module`** 里（合并顺序见 [模块与扩展](./editor-and-modules)）。
 
 ### `historyStackSize`
 

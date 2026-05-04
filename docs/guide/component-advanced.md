@@ -141,4 +141,4 @@ class Card extends Component<{ body: Slot }> {
 - [状态查询与基础操作](./operations-and-query)  
 - [核心概念](./concepts)  
 - [Viewfly 适配器](./adapter-viewfly)、[Vue 适配器](./adapter-vue)、[React 适配器](./adapter-react)  
-- [模块与扩展（进阶）](./editor-and-modules)
+- [模块与扩展](./editor-and-modules)
