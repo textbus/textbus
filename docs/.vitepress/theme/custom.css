@@ -1,6 +1,12 @@
 /**
  * Textbus 文档主题色（品牌色 #07baf3）
  */
+/** 旧 textbus.io 首页整页布局（layout: TextbusIoHome）占满内容区宽度 */
+#VPContent:has(.tb-io-home) {
+  width: 100%;
+  max-width: 100%;
+}
+
 :root {
   --vp-c-brand-1: #07baf3;
   --vp-c-brand-2: #47ccf9;

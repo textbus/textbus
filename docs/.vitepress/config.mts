@@ -7,7 +7,10 @@ export default defineConfig({
 
   vite: {
     optimizeDeps: {
-      include: ['monaco-editor', 'esbuild-wasm'],
+      include: ['monaco-editor', 'esbuild-wasm', '@textbus/xnote'],
+    },
+    ssr: {
+      noExternal: ['@textbus/xnote', '@viewfly/ui-components', '@viewfly/ui-icons', '@tanbo/color'],
     },
     worker: {
       format: 'es',

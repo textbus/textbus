@@ -18,6 +18,9 @@ importers:
       '@changesets/cli':
         specifier: ^2.29.7
         version: 2.31.0(@types/node@22.19.17)
+      '@textbus/xnote':
+        specifier: ^1.2.3
+        version: 1.2.3(@textbus/adapter-viewfly@5.2.7)(@textbus/collaborate@5.2.7(y-protocols@1.0.6(yjs@13.6.29)))(@textbus/core@5.2.7)(@textbus/platform-browser@5.2.7)(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)
       '@types/jest':
         specifier: ^27.0.3
         version: 27.5.2
@@ -36,6 +39,9 @@ importers:
       '@viewfly/platform-browser':
         specifier: ^2.2.0 || ^3.0.0
         version: 3.0.1
+      bootstrap-icons:
+        specifier: ^1.13.1
+        version: 1.13.1
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -1596,8 +1602,36 @@ packages:
   '@swc/types@0.1.26':
     resolution: {integrity: sha512-lyMwd7WGgG79RS7EERZV3T8wMdmPq3xwyg+1nmAM64kIhx5yl+juO2PYIHb7vTiPgPCj8LYjsNV2T5wiQHUEaw==}
 
+  '@tanbo/color@0.1.1':
+    resolution: {integrity: sha512-at2A3rju+rl7bayn62k6sp05bSrRPKOu/L5HefuF6VNeZtu3670mnggFh1xKa+rsVacAiVYM8f2WTtwBBohPgg==}
+
   '@tanbo/stream@1.2.7':
     resolution: {integrity: sha512-ATKVjpQFmr7x+iCKGOGWFzrtB5ZsNef6UKATWZs1R1eE16pyrBwl2AZrnALi+eQQTxOo5Ol6Rmck2BBBgBAnmA==}
+
+  '@textbus/adapter-viewfly@5.2.7':
+    resolution: {integrity: sha512-cpIwi4Wmh9Ni9wRxH1jYe8NVtr/C243GtKnouYSCc1D8TGMQPvNRmh/bHO1jLh9QGUpKFr8i/WZWfAhN0Asfsw==}
+
+  '@textbus/collaborate@5.2.7':
+    resolution: {integrity: sha512-eZNjCZBu3WZ58cQIoGrjx8bU5gQCw4Xc9rRKEhugKxqiQ5hGD1MDbOJ9YCN2nM6To9iAkXFYtq4FYtNXrHssMw==}
+
+  '@textbus/core@5.2.7':
+    resolution: {integrity: sha512-ZaQP4668d+5kknMTWx8VTPyPHLhbFR8hY1VL1/HJjGihmI08EWTqj/e9tNiPqh+2IjS+HzFNfPoxora4Zdh44w==}
+
+  '@textbus/platform-browser@5.2.7':
+    resolution: {integrity: sha512-ltT0Gp/fcN8CJRLUvEgD6l5yE25RggpL0uEnrKvmoxJwGzI2gdBIiL9p9B1wnNPc02L8JvqlRlvoPTwa7n64CQ==}
+
+  '@textbus/platform-node@5.2.7':
+    resolution: {integrity: sha512-KYL1Xxe1Xph1t1SpbaerJj9KK3KhY6rrF+Jx014zrvc0W57NBG0Jx18nkqHRWMXnyCQrdsom7fvPS+bxSUWKVw==}
+
+  '@textbus/xnote@1.2.3':
+    resolution: {integrity: sha512-IbO6LAS67RkSi/IsvY44OweIl3KoMhQAa28g5FFQ1ljN1NcScw/tZsCZxtZvI5ZetQJa8qaL7FNBDaRgbrq7qA==}
+    peerDependencies:
+      '@textbus/adapter-viewfly': ^5.2.7
+      '@textbus/collaborate': ^5.2.7
+      '@textbus/core': ^5.2.7
+      '@textbus/platform-browser': ^5.2.7
+      '@viewfly/core': ^3.0.1
+      '@viewfly/platform-browser': ^3.0.1
 
   '@tootallnate/once@2.0.0':
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
@@ -1762,6 +1796,19 @@ packages:
 
   '@viewfly/platform-browser@3.0.1':
     resolution: {integrity: sha512-wA7jyvv8Op4FUCu9s/B+ECHOWLTaVFef3OOLO0uRfMauDjI0x4/ZLD6vVuCWU5bUWRWvjB1nfTTIjjohIyud2g==}
+
+  '@viewfly/ui-components@0.0.15':
+    resolution: {integrity: sha512-rUbt0uYC78oa2WfS2+B+xE/B2DkUDVCvgBW1NVGcYlU4lx5FEiY9Ak4nhCfzMYUmwiQB6zxlOWnhyr3ePQLaow==}
+    peerDependencies:
+      '@viewfly/core': ^3.0.0
+      '@viewfly/platform-browser': ^3.0.0
+      '@viewfly/ui-icons': ^0.0.15
+
+  '@viewfly/ui-icons@0.0.15':
+    resolution: {integrity: sha512-AeHhQEhHFB4oGsKnvnay1386t1bri8M8nLuaOExrxtNoKg1lJaynjufidvZmwJo1jINLI81yc9R0AiX3AWmiQg==}
+    peerDependencies:
+      '@viewfly/core': ^3.0.0
+      '@viewfly/platform-browser': ^3.0.0
 
   '@vitejs/plugin-vue@5.2.4':
     resolution: {integrity: sha512-7Yx/SXSOcQq5HiiV3orevHUFn+pmMB4cgbEkDYgnkUWb0WfeQ/wa2yFv6D5ICiCQOVpjA7vYDXrC7AGO8yjDHA==}
@@ -2070,6 +2117,9 @@ packages:
   birpc@2.9.0:
     resolution: {integrity: sha512-KrayHS5pBi69Xi9JmvoqrIgYGDkD6mcSe/i6YKi3w5kekCLzrX4+nawcXqrj2tIp50Kw/mT/s3p+GVK0A0sKxw==}
 
+  bootstrap-icons@1.13.1:
+    resolution: {integrity: sha512-ijombt4v6bv5CLeXvRWKy7CuM3TRTuPEuGaGKvTV5cz65rQSY8RQ2JcHt6b90cBBAC7s8fsf2EkQDldzCoXUjw==}
+
   brace-expansion@1.1.11:
     resolution: {integrity: sha512-iCuPHDFgrHX7H2vEI/5xpz07zSHB00TpugqhmYtVmMO6518mCuRMoOYFldEBl0g187ufozdaHgWKcYFb61qGiA==}
 
@@ -2205,6 +2255,10 @@ packages:
 
   commander@2.20.3:
     resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
+
+  commander@8.3.0:
+    resolution: {integrity: sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==}
+    engines: {node: '>= 12'}
 
   compare-versions@6.1.1:
     resolution: {integrity: sha512-4hm4VPpIecmlg59CHXnRDnqGplJFrbLG4aFEl5vl6cK1u76ws3LLvX7ikFnTDl5vo39sjWD6AaDPYodJp/NNHg==}
@@ -2652,6 +2706,10 @@ packages:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
 
+  highlight.js@11.11.1:
+    resolution: {integrity: sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w==}
+    engines: {node: '>=12.0.0'}
+
   hookable@5.5.3:
     resolution: {integrity: sha512-Yc+BQe8SvoXH1643Qez1zqLRmbA5rCL+sSmk6TVos0LWVfNIB7PGncdlId77WzLGSIB5KaWgTaNTs2lNVEI6VQ==}
 
@@ -3029,6 +3087,10 @@ packages:
   jsonfile@6.1.0:
     resolution: {integrity: sha512-5dgndWOriYSm5cnYaJNhalLNDKOqFwyDB/rr1E9ZsGciGvKPs8R2xYGCacuf3z6K1YKDz182fd+fY3cn3pMqXQ==}
 
+  katex@0.16.45:
+    resolution: {integrity: sha512-pQpZbdBu7wCTmQUh7ufPmLr0pFoObnGUoL/yhtwJDgmmQpbkg/0HSVti25Fu4rmd1oCR6NGWe9vqTWuWv3GcNA==}
+    hasBin: true
+
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
@@ -3072,6 +3134,9 @@ packages:
 
   lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
+
+  linkify-it@5.0.0:
+    resolution: {integrity: sha512-5aHCbzQRADcdP+ATqnDuhhJ/MRIqDkZX5pyjFHRRysS8vZ5AbqGEoFIb6pYHPZ+L/OC2Lc+xT8uHVVR5CAK/wQ==}
 
   lint-staged@13.3.0:
     resolution: {integrity: sha512-mPRtrYnipYYv1FEE134ufbWpeggNTo+O/UPzngoaKzbzHAthvR55am+8GfHTnqNRQVRRrYQLGW9ZyUoD7DsBHQ==}
@@ -3142,8 +3207,15 @@ packages:
   mark.js@8.11.1:
     resolution: {integrity: sha512-1I+1qpDt4idfgLQG+BNWmrqku+7/2bi5nLf4YwF8y8zXvmfiTBY3PV3ZibfrjBueCByROpuBjLLFCajqkgYoLQ==}
 
+  markdown-it@14.1.1:
+    resolution: {integrity: sha512-BuU2qnTti9YKgK5N+IeMubp14ZUKUUw7yeJbkjtosvHiP0AZ5c8IAgEMk79D0eC8F23r4Ac/q8cAIFdm2FtyoA==}
+    hasBin: true
+
   mdast-util-to-hast@13.2.1:
     resolution: {integrity: sha512-cctsq2wp5vTsLIcaymblUriiTcZd0CwWtCbLvrOzYCDZoWyMNV8sZ7krj09FSnsiJi3WVsHLM4k6Dq/yaPyCXA==}
+
+  mdurl@2.0.0:
+    resolution: {integrity: sha512-Lf+9+2r+Tdp5wXDXC4PcIBjTDtq4UKjCPMQhKIuzpJNW0b96kVqSwW0bT7FhRSfmAiFYgP+SCRvdrDozfh0U5w==}
 
   merge-stream@2.0.0:
     resolution: {integrity: sha512-abv/qOcuPfk3URPfDzmZU1LKmuw8kT+0nIHvKrKgFrwifol/doWcdA4ZqsWQ8ENrFKkd67Mfpo/LovbIUsbt3w==}
@@ -3450,6 +3522,10 @@ packages:
 
   psl@1.9.0:
     resolution: {integrity: sha512-E/ZsdU4HLs/68gYzgGTkMicWTLPdAftJLfJFlLUAAKZGkStNU72sZjT66SnMDVOfOWY/YAoiD7Jxa9iHvngcag==}
+
+  punycode.js@2.3.1:
+    resolution: {integrity: sha512-uxFIHU0YlHYhDQtV4R9J6a52SLx28BCjT+4ieh7IGbgwVJWO+km431c4yRlREUAsAmt/uMjQUyQHNEPf0M39CA==}
+    engines: {node: '>=6'}
 
   punycode@2.3.1:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
@@ -3831,6 +3907,9 @@ packages:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
     hasBin: true
+
+  uc.micro@2.1.0:
+    resolution: {integrity: sha512-ARDJmphmdvUk6Glw7y9DQ2bFkKBHwQHLi2lsaH6PPmz/Ka9sFOBsBluozhDltWmnv9u/cF6Rt87znRTPV+yp/A==}
 
   ufo@1.6.3:
     resolution: {integrity: sha512-yDJTmhydvl5lJzBmy/hyOAA0d+aqCBuwl818haVdYCRrWV84o7YyeVm4QlVHStqNrrJSTb6jKuFAVqAFsr+K3Q==}
@@ -5536,7 +5615,65 @@ snapshots:
     dependencies:
       '@swc/counter': 0.1.3
 
+  '@tanbo/color@0.1.1': {}
+
   '@tanbo/stream@1.2.7': {}
+
+  '@textbus/adapter-viewfly@5.2.7':
+    dependencies:
+      '@tanbo/stream': 1.2.7
+      '@textbus/core': 5.2.7
+      '@textbus/platform-browser': 5.2.7
+      '@textbus/platform-node': 5.2.7
+      '@viewfly/core': 3.0.1
+      '@viewfly/platform-browser': 3.0.1
+
+  '@textbus/collaborate@5.2.7(y-protocols@1.0.6(yjs@13.6.29))':
+    dependencies:
+      '@hocuspocus/provider': 3.4.3(y-protocols@1.0.6(yjs@13.6.29))(yjs@13.6.29)
+      '@tanbo/stream': 1.2.7
+      '@textbus/core': 5.2.7
+      '@viewfly/core': 3.0.1
+      y-websocket: 3.0.0(yjs@13.6.29)
+      yjs: 13.6.29
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+      - y-protocols
+
+  '@textbus/core@5.2.7':
+    dependencies:
+      '@tanbo/stream': 1.2.7
+      '@viewfly/core': 3.0.1
+
+  '@textbus/platform-browser@5.2.7':
+    dependencies:
+      '@tanbo/stream': 1.2.7
+      '@textbus/core': 5.2.7
+      '@viewfly/core': 3.0.1
+
+  '@textbus/platform-node@5.2.7':
+    dependencies:
+      '@tanbo/stream': 1.2.7
+      '@textbus/core': 5.2.7
+      '@viewfly/core': 3.0.1
+      '@viewfly/platform-browser': 3.0.1
+
+  '@textbus/xnote@1.2.3(@textbus/adapter-viewfly@5.2.7)(@textbus/collaborate@5.2.7(y-protocols@1.0.6(yjs@13.6.29)))(@textbus/core@5.2.7)(@textbus/platform-browser@5.2.7)(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)':
+    dependencies:
+      '@tanbo/color': 0.1.1
+      '@textbus/adapter-viewfly': 5.2.7
+      '@textbus/collaborate': 5.2.7(y-protocols@1.0.6(yjs@13.6.29))
+      '@textbus/core': 5.2.7
+      '@textbus/platform-browser': 5.2.7
+      '@viewfly/core': 3.0.1
+      '@viewfly/platform-browser': 3.0.1
+      '@viewfly/ui-components': 0.0.15(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)(@viewfly/ui-icons@0.0.15(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1))
+      '@viewfly/ui-icons': 0.0.15(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)
+      highlight.js: 11.11.1
+      katex: 0.16.45
+      markdown-it: 14.1.1
+      uuid: 10.0.0
 
   '@tootallnate/once@2.0.0': {}
 
@@ -5737,6 +5874,19 @@ snapshots:
     dependencies:
       '@viewfly/core': 3.0.1
       csstype: 3.2.3
+
+  '@viewfly/ui-components@0.0.15(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)(@viewfly/ui-icons@0.0.15(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1))':
+    dependencies:
+      '@tanbo/color': 0.1.1
+      '@tanbo/stream': 1.2.7
+      '@viewfly/core': 3.0.1
+      '@viewfly/platform-browser': 3.0.1
+      '@viewfly/ui-icons': 0.0.15(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)
+
+  '@viewfly/ui-icons@0.0.15(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)':
+    dependencies:
+      '@viewfly/core': 3.0.1
+      '@viewfly/platform-browser': 3.0.1
 
   '@vitejs/plugin-vue@5.2.4(vite@5.4.21(@types/node@22.19.17)(sass@1.99.0)(terser@5.39.0))(vue@3.5.33(typescript@5.9.3))':
     dependencies:
@@ -6112,6 +6262,8 @@ snapshots:
 
   birpc@2.9.0: {}
 
+  bootstrap-icons@1.13.1: {}
+
   brace-expansion@1.1.11:
     dependencies:
       balanced-match: 1.0.2
@@ -6232,6 +6384,8 @@ snapshots:
 
   commander@2.20.3:
     optional: true
+
+  commander@8.3.0: {}
 
   compare-versions@6.1.1: {}
 
@@ -6730,6 +6884,8 @@ snapshots:
       '@types/hast': 3.0.4
 
   he@1.2.0: {}
+
+  highlight.js@11.11.1: {}
 
   hookable@5.5.3: {}
 
@@ -7298,6 +7454,10 @@ snapshots:
     optionalDependencies:
       graceful-fs: 4.2.11
 
+  katex@0.16.45:
+    dependencies:
+      commander: 8.3.0
+
   keyv@4.5.4:
     dependencies:
       json-buffer: 3.0.1
@@ -7330,6 +7490,10 @@ snapshots:
   lilconfig@2.1.0: {}
 
   lines-and-columns@1.2.4: {}
+
+  linkify-it@5.0.0:
+    dependencies:
+      uc.micro: 2.1.0
 
   lint-staged@13.3.0(enquirer@2.4.1):
     dependencies:
@@ -7418,6 +7582,15 @@ snapshots:
 
   mark.js@8.11.1: {}
 
+  markdown-it@14.1.1:
+    dependencies:
+      argparse: 2.0.1
+      entities: 4.5.0
+      linkify-it: 5.0.0
+      mdurl: 2.0.0
+      punycode.js: 2.3.1
+      uc.micro: 2.1.0
+
   mdast-util-to-hast@13.2.1:
     dependencies:
       '@types/hast': 3.0.4
@@ -7429,6 +7602,8 @@ snapshots:
       unist-util-position: 5.0.0
       unist-util-visit: 5.1.0
       vfile: 6.0.3
+
+  mdurl@2.0.0: {}
 
   merge-stream@2.0.0: {}
 
@@ -7706,6 +7881,8 @@ snapshots:
   property-information@7.1.0: {}
 
   psl@1.9.0: {}
+
+  punycode.js@2.3.1: {}
 
   punycode@2.3.1: {}
 
@@ -8057,6 +8234,8 @@ snapshots:
   type-fest@1.4.0: {}
 
   typescript@5.9.3: {}
+
+  uc.micro@2.1.0: {}
 
   ufo@1.6.3: {}
 
