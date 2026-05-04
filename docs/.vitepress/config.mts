@@ -20,8 +20,6 @@ export default defineConfig({
 
     nav: [
       { text: '指南', link: '/guide/introduction' },
-      { text: '集成', link: '/integrate/adapter-viewfly' },
-      { text: 'API', link: '/api/' },
       { text: '在线演示', link: 'https://textbus.io/playground' },
     ],
 
@@ -52,9 +50,20 @@ export default defineConfig({
           text: '概念与进阶',
           items: [
             { text: '核心概念', link: '/guide/concepts' },
+            { text: '插槽', link: '/guide/slot' },
             { text: '组件高级', link: '/guide/component-advanced' },
             { text: '模块与扩展（进阶）', link: '/guide/editor-and-modules' },
             { text: '浏览器平台层', link: '/guide/platform-browser' },
+            {
+              text: '适配器集成',
+              collapsed: false,
+              items: [
+                { text: 'Viewfly', link: '/integrate/adapter-viewfly' },
+                { text: 'Vue', link: '/integrate/adapter-vue' },
+                { text: 'React', link: '/integrate/adapter-react' },
+              ],
+            },
+            { text: '协作编辑', link: '/integrate/collaborate' },
           ],
         },
       ],
