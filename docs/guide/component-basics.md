@@ -6,7 +6,7 @@
 
 <TextbusPlayground preset="component-basics" />
 
-上文里你已经能看到 **Todolist** 的完整写法以及在预览里的交互（勾选、回车拆条、空条退回段落）。这些改动都会记入 Textbus 的 **History**，预览里同样支持 **撤销 / 重做**（详见 [历史](./history)）。下面结合源码细读实现要点。
+上文里你已经能看到 **Todolist** 的完整写法以及在预览里的交互（勾选、回车拆条、空条退回段落）。这些改动都会记入 Textbus 的 **History**，预览里同样支持 **撤销 / 重做**（详见 [历史](./history)）。下面逐项说明实现要点。
 
 ---
 

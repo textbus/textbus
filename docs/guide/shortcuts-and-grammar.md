@@ -130,7 +130,7 @@ const editor = new Textbus({
 
 在 **组件类**上声明 **`static zenCoding`**：**`ZenCodingGrammarInterceptor<ComponentState>`** 单条，或该类型的**数组**（类型由 **`@textbus/core`** 导出）。启用 **`TextbusConfig.zenCoding`** 后，**`Keyboard`** 会在启动时从 **`new Textbus({ components: [...] })`** 已注册的组件类上读取这些配置。
 
-下面三个字段共同描述一条规则：**先**检查本次按键是不是 **`key`**，**再**用 **`match`** 看插槽里已有正文；都通过则调用 **`createState`** 得到 **`state`**，并 **`new` 当前组件类** 完成替换。**`RawKeyAgent`**（ **`key`**、**`code`** 等）类型见 **`@textbus/core`**。
+下面三个字段共同描述一条规则：**先**检查本次按键是不是 **`key`**，**再**用 **`match`** 看插槽里已有正文；都通过则调用 **`createState`** 得到 **`state`**，并 **`new` 当前组件类** 完成替换。**`RawKeyAgent`** 描述本次按键事件，常见字段含 **`key`**、**`code`** 等。
 
 ### `match`
 

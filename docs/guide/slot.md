@@ -22,7 +22,7 @@ caption.state.label = '图 1'
 
 ### `Slot.placeholder`
 
-零宽字符 **`'\u200b'`**。**`insert`** 等路径在游标紧邻占位片段时会先合并 / 替换占位，再写入实际内容；**`Slot.placeholder`** 本身只是该占位符的常量引用。
+零宽字符 **`'\u200b'`**。**`insert`** 在游标紧邻占位片段时会先合并 / 替换占位，再写入实际内容；**`Slot.placeholder`** 本身只是该占位符的常量引用。
 
 ```ts
 import { Slot } from '@textbus/core'
@@ -67,7 +67,7 @@ slot.state.hint = '标题'
 
 ### `changeMarker`
 
-**`ChangeMarker`**：挂在 **`Slot`** 上的变更标记器，用来记录 **是否发生过修改**（如 **`dirty` / `changed`**），在 **`markAsDirtied` / `markAsChanged`** 等路径里向 **`onChange`、`onSelfChange`、`onChangeBefore`** 等 Observable 推送 **`Operation` / `Action[]`**，并沿父 **`parentModel`** 冒泡。**业务代码一般不必直接读写**，多由 **`Slot`** 在插入、删除、改格式等操作内部维护。
+**`ChangeMarker`**：挂在 **`Slot`** 上的变更标记器，用来记录 **是否发生过修改**（如 **`dirty` / `changed`**）。**`markAsDirtied` / `markAsChanged`** 等触发时，会向 **`onChange`、`onSelfChange`、`onChangeBefore`** 等 Observable 推送 **`Operation` / `Action[]`**，并沿父 **`parentModel`** 冒泡。**业务代码一般不必直接读写**，多由 **`Slot`** 在插入、删除、改格式等操作内部维护。
 
 ```ts
 import { ContentType, Slot } from '@textbus/core'

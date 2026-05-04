@@ -1,74 +1,141 @@
 # 组件高级
 
-本篇面向已在 [组件基础](./component-basics) 里写过 **`state`**、**`getSlots()`**、**`setup`** 的读者，补充 **`Component`** 上一组 **可选** 能力：**多块结构如何声明**、**如何从一块里拆出同级新块**、**删除插槽与整块删除**、**静态 `zenCoding`（语法糖前缀）** 等与 **`Commander`**（如 **`transform`**、**`paste`**）共用的约定。钩子总览仍见 [组件事件与生命周期](./component-events-and-lifecycle)。
+本篇说明 **`Component`** 上的一组 **可选** 扩展：**`getSlots()`**、**`separate`**、**`removeSlot`**、**`deleteAsWhole`**，以及类静态 **`zenCoding`**。它们与 **`Commander`**（如 **`delete`**、**`paste`**、**`transform`**）、**`Selection`** 及事件钩子共同约束「多插槽块」在编辑时的行为。
 
----
+前置阅读：[组件基础](./component-basics)、[组件事件与生命周期](./component-events-and-lifecycle)、[状态查询与基础操作](./operations-and-query)、[快捷键和语法糖](./shortcuts-and-grammar)。
 
-## `getSlots()` 与顺序
+## `getSlots(): Slot[]`
 
-子插槽通过 **`getSlots()`** 暴露给内核时，须 **按文档中的渲染顺序** 排列（从前到后、从上到下与你的产品一致）。**选区遍历**、**范围计算**、**批量改结构** 都会依赖这一顺序；顺序与视图不一致时，容易出现光标乱跳、转换只作用一半等问题。
+**作用**：列出当前组件实例在 **文档模型** 上的 **所有子 `Slot`**，顺序必须与 **视图里从上到下、从前到后的渲染顺序** 一致。
 
----
+**返回值**：**`Slot[]`**。组件实例上的 **`slots`** 访问器 **内部就是调用 `getSlots()`**；在 **选区计算**、**`Commander.delete`** 在块边界回溯、**粘贴** 或 **`transform`** 需要拆开多槽结构时，内核都会按 **`slots`** 暴露的顺序读取子槽。
 
-## `separate`
+**约定**：若你实现 **`removeSlot`** 且可能返回 **`true`**，或下文 **`removeSlot`** / **`separate`** 会让内核对 **`slots` 数组** 做 **`splice`**，**`getSlots()` 应长期返回同一数组引用**（例如 **`state` 里持有一个 `Slot[]`，`getSlots` 直接返回它**），否则 **`splice`** 只会作用在临时数组上，**`state` 与内核所见顺序会脱节**。
 
-可选实现 **`separate(start?, end?)`**：**从当前组件实例拆出一个新的同类组件**，通常对应「尾部若干子 **`Slot`** 提成旁边一块兄弟节点」。**粘贴**、**`transform`** 等命令在遇到 **多插槽父组件** 时，会借助 **`separate`** 决定能不能干净地切开结构；未实现时，同类操作更容易退化成 **分段插入** 或形态碎片化。
+```ts
+import { Component, ContentType, Slot } from '@textbus/core'
 
-拆分语义由业务定义：若有参数，起止子 **`Slot`** 应对应交给新实例的那一段；返回值为新的同类 **`Component`** 实例。边界以当前工程行为与测试为准。
+type RowState = { cells: Slot[] }
 
----
+abstract class RowLike extends Component<RowState> {
+  override getSlots(): Slot[] {
+    return this.state.cells
+  }
+}
+```
 
-## `removeSlot`
+## `separate(start?, end?): Component`
 
-可选实现 **`removeSlot(slot)`**：当内核按默认路径尝试删除某个子 **`Slot`** 时调用。返回 **`true`** 表示删除已由组件自行完成（含 **`state`**、其它插槽归属等）；返回 **`false`** 或未实现则走默认处理。适用于表格、复杂列表等需要自定义删格语义的场景。
+**作用**：从 **当前组件** 上切出一段 **连续的子 `Slot` 区间**，生成 **一块新的、同类的 `Component` 实例**；切分后原实例不再包含这段 **`Slot`**（由你在实现里搬移 **`state`** / 引用）。
 
----
+**参数**（均为 **`Slot` 引用**，不是下标数字）：
 
-## `deleteAsWhole`
+- **`start`**：区间 **第一个**要被拆走的子 **`Slot`**（含）。
+- **`end`**：区间 **最后一个**要被拆走的子 **`Slot`**（含）。省略时语义以当前 **`Commander`** 调用处为准（常见为与 **`start` 同槽或单槽拆分**）。
 
-可选字段 **`deleteAsWhole`**：**折叠光标** 下用退格 / Delete 划过块边界时，是否 **把整个组件当成一格删掉**，而不是把光标接进组件内部。块级卡片、独立控件常用 **`true`**；希望光标能钻进内部的块则不设或 **`false`**。
+**返回值**：新的 **`Component`** 实例，类型与 **`this` 相同**；内核会把该实例 **`insertAfter`** 到原组件之后。**`paste`** 与 **`transform`** 在需要把尾部槽提成兄弟块时都会用到这一步（与上文 **何时会调用** 所列一致）。
 
----
+**何时会调用**：
 
-## 静态 `zenCoding`（语法糖）
+- **`paste`**：当粘贴片段无法直接 **`insert`** 进当前选区时，若父组件实现了 **`separate`**，会取 **当前选区所在槽的下一个槽 `nextSlot`**，调用 **`parentComponent.separate(nextSlot)`**，把尾部结构拆成新块再继续插入。
+- **`transform`**：当多槽父组件需要把 **尾部若干子槽** 提成兄弟节点时，会对 **`parentComponent.slots`** 做区间 **`splice`**，再 **`separate(deletedSlots[0], deletedSlots[deletedSlots.length - 1])`**，并把返回的组件 **`insertAfter`**。
 
-用户在正文插槽里输入 **一行文本前缀**，再按 **`key`** 约定的键时，可把 **当前块** 换成 **本组件的一个新实例**（由 **`createState`** 给出 **`state`**）。总开关 **`TextbusConfig.zenCoding`**、运行时 **`keyboard.addZenCodingInterceptor`** 及 **`Keyboard`** 行为见 [快捷键和语法糖](./shortcuts-and-grammar)。
+未实现 **`separate`** 时，上述路径更容易退化为 **只插入一部分**、**结构残留不符合预期** 等；多列表、表格行等你需要 **「从中间/尾部再长一块同级」** 时，应实现并与 **`getSlots()`** 顺序对齐。
 
-### 声明位置
+```ts
+import { Component, ContentType, Slot } from '@textbus/core'
 
-写在 **组件类**（**`ComponentConstructor`**）上的 **`static zenCoding`**：
+type GridState = { rows: Slot[] }
 
-- 赋值为 **单个** **`ZenCodingGrammarInterceptor<YourState>`**，或 **数组**（多条规则依次注册）。
-- 该类必须出现在 **`new Textbus({ components: [...] })`**（或模块合并进来的列表）里，**`Keyboard`** 才能在启动时读到配置。
+declare class GridRow extends Component<GridState> {
+  static componentName = 'GridRow'
+  static type = ContentType.BlockComponent
+}
 
-### 三个字段怎么配合
+// 示意：从某行切出从第 2 个单元格起到末尾的 Slot，生成新行组件
+function exampleSeparate(row: GridRow, start: Slot, end: Slot) {
+  const idx = row.state.rows.indexOf(start)
+  const endIdx = row.state.rows.indexOf(end)
+  const moved = row.state.rows.splice(idx, endIdx - idx + 1)
+  return new GridRow({ rows: moved })
+}
+```
 
-- **`match`**：看 **当前插槽里第一段内容** 是否是你要的前缀（正则或函数）；插槽内已是多块混合内容时往往不满足语法糖假设，需自行试是否符合你的产品形态。
-- **`key`**：空格、回车等 **触发替换** 的那颗键；也可写成数组、正则或自定义 **`(key, agent) => boolean`**。
-- **`createState(content, textbus)`**：返回 **`new YourComponent(...)`** 所需的 **`state`**。 **`content`** 为触发前插槽内已匹配的文本；需要 **`Registry`**、**`Slot`** 等时用第二个参数 **`textbus`** 取用 **`textbus.get(Registry)`** 等 API。
+（**`GridRow`**、**`state` 形状**仅为占位；真实项目里须与 **`fromJSON`、视图、`schema`** 一致。）
 
-### 与父插槽 `schema` 的关系
+## `removeSlot(slot): boolean`
 
-替换后的新实例 **`type`**（块级 / 行内等）必须 **能被当前父 **`Slot`** 接受**。父插槽 **`schema`** 不认你的 **`Component.type`** 时，语法糖会失败或无法插入。设计前缀与 **`createState`** 时要与根文档、段落等 **谁在容纳这一块** 对齐。
+**作用**：当 **`Commander.delete`** 在 **折叠选区** 下从某个 **非首子槽** 往回删、需要 **删掉整块子槽** 时，内核会先问父组件：**`parentComponent.removeSlot(slot)`**。
 
-### 示例（Todolist）
+**参数**：**`slot`** —— 即将从 **「父组件子槽列表」** 中移除的那一个 **`Slot`** 引用。
 
-与 [组件基础](./component-basics) 相同的 **`TodolistComponent`**，在段落内 **`-` + 空格** 触发整块替换为待办的完整说明、**`match` / `key` 时机** 与 **可运行沙箱**（**`zen-coding-todolist`** 预设）见 [快捷键和语法糖](./shortcuts-and-grammar) 中的 **「组件类静态属性：`zenCoding`」**。
+**返回值**：
 
-多条规则仍使用 **`static zenCoding = [ { ... }, { ... } ]`**。
+- **`true`**：**你已自行完成删除**（更新 **`state`**、断开其它引用等）。内核随后会对 **`parentComponent.slots`（即 `getSlots()` 的返回值）执行 `splice`，从数组里去掉该槽对应的项**。
+- **`false`** 或未实现：内核 **不会**替你改 **`state`**；删除语义退回默认（光标仍可能落在原 **`Slot`** 上）。
 
----
+因此：**返回 `true` 时，必须与 `getSlots()` 所暴露数组一致地更新模型**；否则会出现「内核 **`splice`** 了数组，但 **`state` 里仍指向旧 `Slot`**」之类不一致。
 
-## 与命令、文档的关系
+```ts
+import { Component, ContentType, Slot } from '@textbus/core'
 
-- **`transform`**、**`paste`** 等会读写多插槽结构；规则见 [状态查询与基础操作](./operations-and-query) 中的 **`transform`**，并与本篇 **`separate`**、**`getSlots()`** 约定一并校验。
-- **事件钩子**（**`onPaste`**、**`onBreak`** 等）与上述可选方法作用于同一文档树；协作方式见 [组件事件与生命周期](./component-events-and-lifecycle)。
+type RowState = { cells: Slot[] }
 
----
+class TableRow extends Component<RowState> {
+  static componentName = 'TableRow'
+  static type = ContentType.BlockComponent
+
+  getSlots(): Slot[] {
+    return this.state.cells
+  }
+
+  removeSlot(slot: Slot): boolean {
+    const i = this.state.cells.indexOf(slot)
+    if (i <= 0) {
+      return false
+    }
+    this.state.cells.splice(i, 1)
+    return true
+  }
+}
+```
+
+## `deleteAsWhole?: boolean`
+
+**作用**：实例上的 **可选布尔字段**（不是方法）。当 **`Commander.delete`** 在 **折叠选区** 下，光标一侧相邻内容是 **`Component`** 时：
+
+- 若该组件 **`type === BlockComponent`**，或 **`deleteAsWhole === true`**：本次删除会 **整颗 `removeComponent` 掉该块**，光标 **不会**先进入块内部。
+- 否则：删除会继续按 **「进入子内容」** 的默认规则走。
+
+**`false` 或不写**：行内块、需要光标钻进内部的块级结构，保持默认即可。
+
+```ts
+import { Component, ContentType, Slot } from '@textbus/core'
+
+class Card extends Component<{ body: Slot }> {
+  static componentName = 'Card'
+  static type = ContentType.BlockComponent
+
+  constructor(init: { body: Slot }) {
+    super(init)
+    this.deleteAsWhole = true
+  }
+}
+```
+
+## 静态 `zenCoding`
+
+写在 **组件类** 上的 **`static zenCoding`**，与 **`TextbusConfig.zenCoding`**、**`keyboard.addZenCodingInterceptor`** 等一起构成 **语法糖**。**`match` / `key` / `createState`** 的语义、触发时机、与父 **`Slot.schema`** 的关系，以及 **Todolist** 可运行示例，集中在 [快捷键和语法糖](./shortcuts-and-grammar) 的 **「组件类静态属性：`zenCoding`」** 一节，本篇不重复展开。
+
+## 与 `Commander`、事件的关系
+
+- **`transform`**、**`paste`**、**`delete`** 会按选区与公共祖先，调用 **`separate` / `removeSlot` / `deleteAsWhole`** 等扩展点；命令参数与失败回退见 [状态查询与基础操作](./operations-and-query)。
+- **`onPaste`**、**`onBreak`**、**`onContentDelete`** 等钩子与上述方法作用于 **同一棵文档树**；事件顺序与 **`preventDefault`** 见 [组件事件与生命周期](./component-events-and-lifecycle)。
 
 ## 接下来
 
 - [组件基础](./component-basics)  
+- [插槽](./slot)  
 - [组件事件与生命周期](./component-events-and-lifecycle)  
 - [快捷键和语法糖](./shortcuts-and-grammar)  
 - [状态查询与基础操作](./operations-and-query)  

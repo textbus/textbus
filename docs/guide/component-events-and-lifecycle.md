@@ -1,6 +1,6 @@
 # 组件事件与生命周期
 
-内核在通过 **`Commander`** **插入与删除文字、换行、粘贴、应用格式与属性** 等改动文档的路径上，以及在 **`Selection`** **移动选区** 等路径上，会向 **`Component`** 派发钩子（如 **`onContentInsert`**、**`onBreak`**）。你在 **`setup()`** 里用 **`@textbus/core`** 导出的 **`onXxx`** 注册监听后，既能 **`preventDefault`** 拦截默认行为，也能只做日志或联动业务。**快捷键**不在本篇，见 [快捷键和语法糖](./shortcuts-and-grammar)。
+当 **`Commander`** 做 **插入与删除文字、换行、粘贴、应用格式与属性** 等 **文档改动**，或 **`Selection`** **调整选区** 时，内核会向 **`Component`** 派发钩子（如 **`onContentInsert`**、**`onBreak`**）。你在 **`setup()`** 里用 **`@textbus/core`** 导出的 **`onXxx`** 注册监听后，既能 **`preventDefault`** 拦截默认行为，也能只做日志或联动业务。**快捷键**不在本篇，见 [快捷键和语法糖](./shortcuts-and-grammar)。
 
 阅读前建议已读过 [组件基础](./component-basics)、[状态查询与基础操作](./operations-and-query)、[选区](./selection)、[块级样式](./block-styles)。
 
@@ -35,7 +35,7 @@ class MyBlock extends Component<MyState> {
 
 ### `onContentInsert`
 
-**时机**：**`Commander.insert`** 等路径在真正把内容写入插槽 **之前**。
+**时机**：**`Commander.insert`** 等 **写入命令** 在真正把内容写入插槽 **之前**。
 
 **参数**：**`event: Event<Slot, InsertEventData>`**。
 
@@ -413,7 +413,7 @@ onSelectionFromEnd(event => {
 **参数**：**`event: ContextMenuEvent<Component>`**。
 
 - **`event.target`**：当前这一层处理的组件。
-- **`event.useMenus(menuConfigs)`**：把 **`ContextMenuConfig[]`** 交给内核汇总（类型含 **`ContextMenuItem`**、**`ContextMenuGroup`** 等，见 **`@textbus/core`**）。
+- **`event.useMenus(menuConfigs)`**：把 **`ContextMenuConfig[]`** 交给内核汇总；其中菜单项类型含 **`ContextMenuItem`**、**`ContextMenuGroup`** 等，字段以类型声明为准。
 - **`event.stopPropagation()`**：不再向上层组件继续收集菜单。
 
 ```ts
