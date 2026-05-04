@@ -7,6 +7,32 @@
   max-width: 100%;
 }
 
+/** `/playground` 产品页：无右侧大纲、主内容居中 */
+#VPContent:has(.tb-playground-page) {
+  width: 100%;
+  max-width: 100%;
+}
+
+#VPContent:has(.tb-playground-page) .VPDoc {
+  padding-top: 24px;
+}
+
+#VPContent:has(.tb-playground-page) .VPDoc:not(.has-sidebar) .container {
+  max-width: 1200px;
+  margin-inline: auto;
+}
+
+#VPContent:has(.tb-playground-page) .VPDoc:not(.has-sidebar) .content,
+#VPContent:has(.tb-playground-page) .VPDoc:not(.has-sidebar) .content-container {
+  max-width: 100%;
+}
+
+#VPContent:has(.tb-playground-page) .VPDoc .main {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 960px;
+}
+
 :root {
   --vp-c-brand-1: #07baf3;
   --vp-c-brand-2: #47ccf9;

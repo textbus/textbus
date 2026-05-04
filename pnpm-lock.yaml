@@ -18,9 +18,12 @@ importers:
       '@changesets/cli':
         specifier: ^2.29.7
         version: 2.31.0(@types/node@22.19.17)
+      '@textbus/collaborate':
+        specifier: workspace:^
+        version: link:packages/collaborate
       '@textbus/xnote':
         specifier: ^1.2.3
-        version: 1.2.3(@textbus/adapter-viewfly@5.2.7)(@textbus/collaborate@5.2.7(y-protocols@1.0.6(yjs@13.6.29)))(@textbus/core@5.2.7)(@textbus/platform-browser@5.2.7)(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)
+        version: 1.2.3(@textbus/adapter-viewfly@5.2.7)(@textbus/collaborate@packages+collaborate)(@textbus/core@5.2.7)(@textbus/platform-browser@5.2.7)(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)
       '@types/jest':
         specifier: ^27.0.3
         version: 27.5.2
@@ -1610,9 +1613,6 @@ packages:
 
   '@textbus/adapter-viewfly@5.2.7':
     resolution: {integrity: sha512-cpIwi4Wmh9Ni9wRxH1jYe8NVtr/C243GtKnouYSCc1D8TGMQPvNRmh/bHO1jLh9QGUpKFr8i/WZWfAhN0Asfsw==}
-
-  '@textbus/collaborate@5.2.7':
-    resolution: {integrity: sha512-eZNjCZBu3WZ58cQIoGrjx8bU5gQCw4Xc9rRKEhugKxqiQ5hGD1MDbOJ9YCN2nM6To9iAkXFYtq4FYtNXrHssMw==}
 
   '@textbus/core@5.2.7':
     resolution: {integrity: sha512-ZaQP4668d+5kknMTWx8VTPyPHLhbFR8hY1VL1/HJjGihmI08EWTqj/e9tNiPqh+2IjS+HzFNfPoxora4Zdh44w==}
@@ -5628,19 +5628,6 @@ snapshots:
       '@viewfly/core': 3.0.1
       '@viewfly/platform-browser': 3.0.1
 
-  '@textbus/collaborate@5.2.7(y-protocols@1.0.6(yjs@13.6.29))':
-    dependencies:
-      '@hocuspocus/provider': 3.4.3(y-protocols@1.0.6(yjs@13.6.29))(yjs@13.6.29)
-      '@tanbo/stream': 1.2.7
-      '@textbus/core': 5.2.7
-      '@viewfly/core': 3.0.1
-      y-websocket: 3.0.0(yjs@13.6.29)
-      yjs: 13.6.29
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-      - y-protocols
-
   '@textbus/core@5.2.7':
     dependencies:
       '@tanbo/stream': 1.2.7
@@ -5659,11 +5646,11 @@ snapshots:
       '@viewfly/core': 3.0.1
       '@viewfly/platform-browser': 3.0.1
 
-  '@textbus/xnote@1.2.3(@textbus/adapter-viewfly@5.2.7)(@textbus/collaborate@5.2.7(y-protocols@1.0.6(yjs@13.6.29)))(@textbus/core@5.2.7)(@textbus/platform-browser@5.2.7)(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)':
+  '@textbus/xnote@1.2.3(@textbus/adapter-viewfly@5.2.7)(@textbus/collaborate@packages+collaborate)(@textbus/core@5.2.7)(@textbus/platform-browser@5.2.7)(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)':
     dependencies:
       '@tanbo/color': 0.1.1
       '@textbus/adapter-viewfly': 5.2.7
-      '@textbus/collaborate': 5.2.7(y-protocols@1.0.6(yjs@13.6.29))
+      '@textbus/collaborate': link:packages/collaborate
       '@textbus/core': 5.2.7
       '@textbus/platform-browser': 5.2.7
       '@viewfly/core': 3.0.1

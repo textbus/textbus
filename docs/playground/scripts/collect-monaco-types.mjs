@@ -40,12 +40,13 @@ function buildTextbusIfNeeded() {
     'packages/platform-browser/dist/index.d.ts',
     'packages/platform-node/dist/index.d.ts',
     'packages/adapter-viewfly/dist/index.d.ts',
+    'packages/collaborate/dist/index.d.ts',
   ]
   const missing = targets.some((p) => !fs.existsSync(path.join(ROOT, p)))
   if (missing) {
     console.info('[collect-monaco-types] building @textbus/* packages (dist missing)…')
     execSync(
-      'pnpm --filter @textbus/core --filter @textbus/platform-browser --filter @textbus/platform-node --filter @textbus/adapter-viewfly build:lib',
+      'pnpm --filter @textbus/core --filter @textbus/platform-browser --filter @textbus/platform-node --filter @textbus/adapter-viewfly --filter @textbus/collaborate build:lib',
       { cwd: ROOT, stdio: 'inherit' },
     )
   }

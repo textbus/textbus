@@ -63,6 +63,7 @@
   ],
   "devDependencies": {
     "@changesets/cli": "^2.29.7",
+    "@textbus/collaborate": "workspace:^",
     "@textbus/xnote": "^1.2.3",
     "@types/jest": "^27.0.3",
     "@types/node": "^22.12.0",

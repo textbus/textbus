@@ -11,4 +11,4 @@ coverage/
 yarn.lock
 docs/.vitepress/cache
 docs/.vitepress/dist
-docs/public/playground/*.mjs
+docs/public/tb-playground/*.mjs

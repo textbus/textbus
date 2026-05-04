@@ -411,8 +411,8 @@ async function compileAndRun(): Promise<void> {
     }
 
     const html = assemblePreviewHtml({
-      vendorAbs: assetUrl('/playground/vendor.mjs'),
-      viewflyAbs: assetUrl('/playground/viewfly.mjs'),
+      vendorAbs: assetUrl('/tb-playground/vendor.mjs'),
+      viewflyAbs: assetUrl('/tb-playground/viewfly.mjs'),
       userModuleUrl: userModUrl,
       userStylesheetUrl: userCssUrl,
     })

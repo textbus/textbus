@@ -14,7 +14,7 @@ export default defineConfig({
       formats: ['es'],
       fileName: () => 'viewfly',
     },
-    outDir: path.join(repoRoot, 'docs/public/playground'),
+    outDir: path.join(repoRoot, 'docs/public/tb-playground'),
     emptyOutDir: false,
     sourcemap: false,
     minify: false,

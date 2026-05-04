@@ -1,16 +1,45 @@
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitepress'
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 
 export default defineConfig({
   title: 'Textbus',
   description: '组件化、跨平台的富文本框架',
   lang: 'zh-CN',
+  /** 生成与导航使用无 `.html` 后缀的路径（如 `/playground`）；静态托管需支持目录索引或回写规则 */
+  cleanUrls: true,
 
   vite: {
+    resolve: {
+      alias: {
+        /**
+         * 必须指向各包 **已构建的 dist ESM**（含 design:paramtypes 等 DI 元数据）。
+         * 若指向 workspace **源码**，Vite 默认编译会丢装饰器元数据，Viewfly 在 resolveClassParams 处会报错。
+         */
+        '@textbus/core': path.join(repoRoot, 'packages/core/dist/index.esm.js'),
+        '@textbus/platform-browser': path.join(repoRoot, 'packages/platform-browser/dist/index.esm.js'),
+        '@textbus/platform-node': path.join(repoRoot, 'packages/platform-node/dist/index.esm.js'),
+        '@textbus/adapter-viewfly': path.join(repoRoot, 'packages/adapter-viewfly/dist/index.esm.js'),
+        '@textbus/collaborate': path.join(repoRoot, 'packages/collaborate/dist/index.esm.js'),
+      },
+    },
     optimizeDeps: {
-      include: ['monaco-editor', 'esbuild-wasm', '@textbus/xnote'],
+      include: ['monaco-editor', 'esbuild-wasm', '@textbus/xnote', '@textbus/collaborate'],
     },
     ssr: {
-      noExternal: ['@textbus/xnote', '@viewfly/ui-components', '@viewfly/ui-icons', '@tanbo/color'],
+      noExternal: [
+        '@textbus/core',
+        '@textbus/platform-browser',
+        '@textbus/platform-node',
+        '@textbus/adapter-viewfly',
+        '@textbus/xnote',
+        '@textbus/collaborate',
+        '@viewfly/ui-components',
+        '@viewfly/ui-icons',
+        '@tanbo/color',
+      ],
     },
     worker: {
       format: 'es',
@@ -23,7 +52,7 @@ export default defineConfig({
 
     nav: [
       { text: '指南', link: '/guide/introduction' },
-      { text: '文档内示例', link: '/guide/getting-started' },
+      { text: '在线协作', link: '/playground' },
     ],
 
     sidebar: {
