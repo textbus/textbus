@@ -1,91 +1,463 @@
 # 组件事件与生命周期
 
-富文本里许多行为并不是「调一次 **`Commander`** 就结束」：内核在 **改插槽、换行、粘贴、应用格式** 等路径上，会沿着 **组件树** 向相关 **`Component`** 派发 **钩子**（在源码里多命名为 **`onXxx`**）。你在 **`setup`** 里用 **`onContentInsert`**、**`onBreak`** 等函数注册监听后，就能 **改写默认流程** 或 **接入业务逻辑**。本篇列出常用钩子分组与 **`Event`** 上的 **`preventDefault`** 语义；**快捷键绑定**仍见 [快捷键和语法糖](./shortcuts-and-grammar)。
+内核在通过 **`Commander`** **插入与删除文字、换行、粘贴、应用格式与属性** 等改动文档的路径上，以及在 **`Selection`** **移动选区** 等路径上，会向 **`Component`** 派发钩子（如 **`onContentInsert`**、**`onBreak`**）。你在 **`setup()`** 里用 **`@textbus/core`** 导出的 **`onXxx`** 注册监听后，既能 **`preventDefault`** 拦截默认行为，也能只做日志或联动业务。**快捷键**不在本篇，见 [快捷键和语法糖](./shortcuts-and-grammar)。
 
-阅读本篇前建议已读过 [组件基础](./component-basics)（含 **`setup`** 示例）与 [状态查询与基础操作](./operations-and-query)（**`Commander`** 如何触发这些钩子）。
+阅读前建议已读过 [组件基础](./component-basics)、[状态查询与基础操作](./operations-and-query)、[选区](./selection)、[块级样式](./block-styles)。
 
----
+
+## 如何注册
+
+在组件类的 **`setup()`** 里 **同步** 调用导入的注册函数，传入回调；不要在 **`await`、`Promise.then`、`setTimeout`** 之后再注册。
+
+```ts
+import { Component, onBreak, onContentInsert } from '@textbus/core'
+
+class MyBlock extends Component<MyState> {
+  override setup() {
+    onContentInsert(ev => {
+      // ...
+    })
+    onBreak(ev => {
+      ev.preventDefault()
+    })
+  }
+}
+```
+
 
 ## `setup` 何时执行
 
-在 **`Textbus`** 完成 **`render`** 时会先对 **根组件** 做一次 **`setup`**：调用组件可选实现的 **`setup()`**，再 **递归** 对子组件执行相同流程，保证树上节点在进入编辑交互前都已挂上监听。
+首次 **`editor.render(root)`** 时，内核先对 **根组件** 调用 **`setup()`**，再递归遍历各 **子插槽** 里已有的 **子组件**，逐个执行 **`setup`**。之后若有新的 **`Component`** 挂到某 **`Slot`** 下并完成挂载，会为该子树再执行一次 **`setup`**。与 **`getSlots()`**、**`separate()`** 等配合见 [组件高级](./component-advanced)。
 
-钩子注册函数（例如 **`onBreak`**）只能在当前组件 **`setup`** 的执行栈内调用：它们会把回调记入该组件的 **`EventCache`**，供内核后续 **`invokeListener`**。
+读各钩子下面的 **`event.target`**：当它是 **`Component`** 时，就是 **当前组件实例**（本 **`setup`**、**`onXxx`** 所在的那块），不会在甲组件里注册却收到乙组件。当它是 **`Slot`** 时，一定是 **当前组件的某一个子插槽**（与 **`getSlots()`** 暴露给内核的那几条 **`Slot`** 同一批），表示本次操作落在该插槽上。
 
-组件还可选实现 **`getSlots()`**、**`removeSlot()`**、**`separate()`** 等，与换行、删除、拆分结构配合使用；说明见 [组件高级](./component-advanced)，名词见 [核心概念](./concepts)。
+## 插槽内容
 
----
+### `onContentInsert`
 
-## `Event` 与 **`preventDefault`**
+**时机**：**`Commander.insert`** 等路径在真正把内容写入插槽 **之前**。
 
-钩子回调收到的 **`event`** 可 **`preventDefault()`**：表示 **拦截内核在这条路径上的默认后续步骤**。例如 **`Commander.break()`** 在非折叠删除选中后，若父组件对 **`onBreak`** 发出的 **`Event`** 未被阻止，才会继续默认的 **`write`** 换行（详见 [状态查询与基础操作](./operations-and-query) 中的 **`break`** 小节）。
+**参数**：**`event: Event<Slot, InsertEventData>`**。
 
-若 **`event.isPrevented`** 已为 **`true`**，对应 **`Commander`** 方法常返回 **`false`** 或中止管线——调试「命令不生效」时，宜同时检查业务钩子里是否误 **`preventDefault`**。
+- **`event.target`**：即将写入的 **`Slot`**。
+- **`event.data.index`**：插入起点下标。
+- **`event.data.content`**：待插入的字符串或 **`Component`**。
+- **`event.data.formats`**：随插入携带的格式列表（**`Formats`**）。
 
----
+调用 **`event.preventDefault()`** 后，本次插入放弃，相关命令通常返回 **`false`**。根组件、段落组件常用它把手敲字符收成块等，示例见 [组件基础](./component-basics)。
 
-## 插槽内容：插入与删除
+```ts
+import { onContentInsert } from '@textbus/core'
 
-与 **`Slot`** 内 **增删内容** 相关的一对钩子：
+onContentInsert(event => {
+  const slot = event.target
+  const { index, content, formats } = event.data
+  // 例如：禁止某种插入时 event.preventDefault()
+})
+```
 
-| 钩子 | 时机简述 |
-| --- | --- |
-| **`onContentInsert`** | 插入 **即将发生**；可 **`preventDefault`** 阻止本次插入。载荷含 **`index`、`content`、`formats`**（见 **`InsertEventData`**）。 |
-| **`onContentInserted`** | 插入 **已完成**；多用于观测或二次处理。 |
-| **`onContentDelete`** | 删除 **即将发生**；可阻止。载荷含位置、长度、方向 **`toEnd`**、**`actionType`**（**`'delete'`** 或 **`'move'`**）等（见 **`DeleteEventData`**）。 |
-| **`onContentDeleted`** | 删除 **已完成**。 |
+### `onContentInserted`
 
-根组件或块级组件常在此接管「手敲内容如何收成段落」等策略（示例用语见 [组件基础](./component-basics) 中的 **`onContentInsert`**）。
+**时机**：内容 **已经** 写入 **`Slot`** 之后。
 
----
+**参数**：**`event: Event<Slot, InsertEventData>`**，字段含义与 **`onContentInsert`** 相同（描述的是刚完成的那次插入）。
 
-## 换行与粘贴
+若对 **`onContentInserted`** 调用 **`preventDefault()`**，会影响插入完成后是否把选区收到插入位置附近（与默认 **`insert`** 管线有关）。多用于观测或微调选区。
 
-| 钩子 | 时机简述 |
-| --- | --- |
-| **`onBreak`** | 用户在插槽内触发 **回车语义**；载荷 **`BreakEventData`** 含触发位置 **`index`**。自定义列表项、待办拆条等多在此处 **`preventDefault`** 后自行 **`cut` / `insertAfter`**。示例见 [组件基础](./component-basics)。 |
-| **`onPaste`** | **`Commander.paste`** 向 **当前选区的公共祖先组件** 派发；载荷含结构化 **`data`**（**`Slot`**）与 **`text`**。阻止后可完全自定义粘贴结果（与 [状态查询与基础操作](./operations-and-query) 中的 **`paste`** 一节对照阅读）。 |
+```ts
+import { onContentInserted } from '@textbus/core'
 
----
+onContentInserted(event => {
+  const slot = event.target
+  const { index, content } = event.data
+  // 插入已落盘；可同步 UI。若不希望默认收选区可 event.preventDefault()
+})
+```
 
-## 格式与属性写入前的校验
+### `onContentDelete`
 
-| 钩子 | 时机简述 |
-| --- | --- |
-| **`onSlotApplyFormat`** | **`Commander.applyFormat`** 在写入格式前，于 **承载插槽的父组件** 上触发；可阻止本次应用。**`Formatter`** 与 **`value`** 见 **`SlotApplyFormatEventData`**。 |
-| **`onSlotSetAttribute`** | **`slot.setAttribute`** / **`Commander.applyAttribute`** 等路径上触发；可阻止。**`Attribute`** 与 **`value`** 见 **`SlotSetAttributeEventData`**。 |
+**时机**：从插槽里 **删除或搬移** 一段内容 **之前**（例如 **`Commander.delete`** 展开选区后的分段删除）。
 
-与 **`applyAttribute`** 在折叠 / 展开选区下的分支说明见 [块级样式](./block-styles)。
+**参数**：**`event: Event<Slot, DeleteEventData>`**。
 
----
+- **`event.target`**：将被切的 **`Slot`**。
+- **`event.data.index`**：删除起点。
+- **`event.data.count`**：删除长度。
+- **`event.data.toEnd`**：删除方向是否与「向文档末尾」一侧一致（与向前 / 向后删有关）。
+- **`event.data.actionType`**：**`'delete'`** 表示纯删除；**`'move'`** 表示跨插槽搬移等场景下的切断。
 
-## 选区与焦点相关（节选）
+**`preventDefault()`** 会阻止本次删除片段，命令返回 **`false`**。
 
-下列钩子用于 **选中整块组件**、**焦点进出**、**从一侧进入组件** 等交互；在 **`toNext` / `toPrevious`** 等移动选区时，组件也可在自身监听里 **`preventDefault`** 拦截本次穿越（细节配合 [选区](./selection)）：
+```ts
+import { onContentDelete } from '@textbus/core'
 
-**`onSelected`**、**`onUnselect`**、**`onSelectionFromFront`**、**`onSelectionFromEnd`**、**`onGetRanges`**、**`onFocus`**、**`onBlur`**、**`onFocusIn`**、**`onFocusOut`**。
+onContentDelete(event => {
+  const { index, count, toEnd, actionType } = event.data
+  // actionType 为 'delete' | 'move'；不允许删改时 event.preventDefault()
+})
+```
 
----
+### `onContentDeleted`
 
-## 输入法、右键菜单与其它
+**时机**：对应片段已从 **`Slot`** 里切出之后。
 
-- **`onCompositionStart`**、**`onCompositionUpdate`**、**`onCompositionEnd`**：组合输入（如中文 IME）在插槽内的阶段回调。
-- **`onContextMenu`**：右键菜单组装（与 **`triggerContextMenu`** 协作）。
-- **`onParentSlotUpdated`**：父插槽数据更新通知。
-- **`onDetach`**：组件从模型上 **剥离** 时触发； **`invokeListener`** 处理 **`onDetach`** 后会自 **`EventCache`** 中移除该组件缓存。
+**参数**：**`event: Event<Slot>`**，**`event.data`** 为 **`null`**，仅用 **`event.target`** 指明是哪个 **`Slot`**。
 
----
+**`preventDefault()`** 在部分删除流程里仍会被检查：若阻止，内核会 **按分支改选区的焦点或锚点**，并让 **`delete`** 返回 **`false`**（用于删完后仍要打断后续默认收尾时）。多数场景只做观测或统计即可。
 
-## 与 **`Selection.destroy`** 的区别
+```ts
+import { onContentDeleted } from '@textbus/core'
 
-**`Selection.destroy()`** 取消选区对象的 **`onChange`** 等订阅，用于 **`Textbus` 生命周期末尾** 防止泄漏（见 [选区](./selection) **「销毁」**）。它描述的是 **选区服务本身**，不是单个 **`Component`** 的 **`onDetach`**；二者常在同一卸载流程里先后出现。
+onContentDeleted(event => {
+  const slot = event.target
+  // 删后观测；少数流程里也可 event.preventDefault() 打断后续默认收拾
+})
+```
 
----
+
+## 换行
+
+### `onBreak`
+
+**时机**：**`Commander.break()`**。若选区非折叠，会先删选区再派发；折叠时直接派发。
+
+**参数**：**`event: Event<Slot, BreakEventData>`**。
+
+- **`event.target`**：发生换行的 **`Slot`**（即 **`startSlot`**）。
+- **`event.data.index`**：换行触发位置下标。
+
+默认未拦截时，内核会向插槽 **`write`** 换行符。自定义列表拆条、待办拆行等常在 **`preventDefault()`** 后自行 **`cut` / `insertAfter`**。示例见 [组件基础](./component-basics)。
+
+```ts
+import { onBreak } from '@textbus/core'
+
+onBreak(event => {
+  const slot = event.target
+  const { index } = event.data
+  // 自定义拆条：event.preventDefault() 后用 Commander 自行 cut / insertAfter
+})
+```
+
+
+## 粘贴
+
+### `onPaste`
+
+**时机**：**`Commander.paste(pasteSlot, text)`** 在按默认策略把 **`delta`** 写回文档 **之前**。
+
+**参数**：**`event: Event<Slot, PasteEventData>`**。
+
+- **`event.target`**：派发时使用的 **`Slot`**（与选区公共祖先插槽相关）。
+- **`event.data.index`**：粘贴插入意向位置下标。
+- **`event.data.data`**：结构化剪贴 **`Slot`**（已解析好的片段树）。
+- **`event.data.text`**：并行提供的纯文本。
+
+**`preventDefault()`** 后走你自己的粘贴逻辑；否则内核按 **`pasteSlot.toDelta()`** 循环 **`insert`**，并与 **`separate`** 等多插槽行为配合。详见 [状态查询与基础操作](./operations-and-query) **`paste`**。
+
+```ts
+import { onPaste } from '@textbus/core'
+
+onPaste(event => {
+  const { index, data, text } = event.data
+  // 完全自定义粘贴：event.preventDefault()，再用 data（片段树）或 text 自行插入
+})
+```
+
+
+## 格式与属性（写入前）
+
+### `onSlotApplyFormat`
+
+**时机**：**`Commander.applyFormat`** 真正把格式写到 **`Slot`** 上 **之前**。
+
+**参数**：**`event: Event<Slot, SlotApplyFormatEventData>`**。
+
+- **`event.target`**：将要接收格式的 **`Slot`**。
+- **`event.data.formatter`**：本次 **`Formatter`** 实例。
+- **`event.data.value`**：格式值。
+
+**`preventDefault()`** 取消本次应用。
+
+```ts
+import { onSlotApplyFormat } from '@textbus/core'
+
+onSlotApplyFormat(event => {
+  const { formatter, value } = event.data
+  // 校验不通过则 event.preventDefault()
+})
+```
+
+### `onSlotSetAttribute`
+
+**时机**：**`slot.setAttribute`**、**`Commander.applyAttribute`** 等给插槽挂属性 **之前**。
+
+**参数**：**`event: Event<Slot, SlotSetAttributeEventData>`**。
+
+- **`event.target`**：目标 **`Slot`**。
+- **`event.data.attribute`**：**`Attribute`** 实例。
+- **`event.data.value`**：属性值。
+
+**`preventDefault()`** 取消本次设置。选区分支见 [块级样式](./block-styles)。
+
+```ts
+import { onSlotSetAttribute } from '@textbus/core'
+
+onSlotSetAttribute(event => {
+  const { attribute, value } = event.data
+  // 不允许写入该属性时 event.preventDefault()
+})
+```
+
+
+## 输入法（IME）
+
+### `onCompositionStart`
+
+**时机**：组合输入开始。
+
+**参数**：**`event: Event<Slot, CompositionStartEventData>`**。
+
+- **`event.target`**：**`Slot`**。
+- **`event.data.index`**：组合起始下标。
+
+```ts
+import { onCompositionStart } from '@textbus/core'
+
+onCompositionStart(event => {
+  const slot = event.target
+  const { index } = event.data
+  // 组合输入从 slot 的 index 处开始
+})
+```
+
+### `onCompositionUpdate`
+
+**时机**：组合输入过程中内容变化。
+
+**参数**：**`event: Event<Slot, CompositionUpdateEventData>`**。
+
+- **`event.data.index`**：当前位置。
+- **`event.data.data`**：本轮 IME 字符串。
+
+```ts
+import { onCompositionUpdate } from '@textbus/core'
+
+onCompositionUpdate(event => {
+  const { index, data } = event.data
+  // index 处 IME 更新为字符串 data
+})
+```
+
+### `onCompositionEnd`
+
+**时机**：组合输入结束。
+
+**参数**：**`event: Event<Slot>`**，无 **`data`** 载荷（视为 **`null`**），用 **`event.target`** 可知是哪个 **`Slot`**。
+
+```ts
+import { onCompositionEnd } from '@textbus/core'
+
+onCompositionEnd(event => {
+  const slot = event.target
+  // 组合输入在 slot 上结束
+})
+```
+
+
+## 选区与范围
+
+### `onGetRanges`
+
+**时机**：选区变化后，内核要向 **`Selection`** 询问「当前应用 **`getRanges()`** 时是否改用自定义多段范围」。
+
+**参数**：**`event: GetRangesEvent<Component>`**。
+
+- **`event.target`**：**当前组件**。
+- 在回调里调用 **`event.useRanges([{ slot, startIndex, endIndex }, ...])`** 给出 **`SlotRange[]`**；不写则沿用默认连续范围。表格框选等见 [选区](./selection)。
+
+```ts
+import { onGetRanges } from '@textbus/core'
+
+onGetRanges(event => {
+  event.useRanges([])
+})
+```
+
+### `onSelected`
+
+**时机**：选区变为恰好 **整块选中一个组件节点**（拖选或 **`selectComponent`** 等，对应某一个 **`Component`** 实例）。
+
+**参数**：无；签名为 **`() => void`**。
+
+用于高亮块工具栏、启用块级操作等。
+
+```ts
+import { onSelected } from '@textbus/core'
+
+onSelected(() => {
+  // 当前组件整块被选中
+})
+```
+
+### `onUnselect`
+
+**时机**：原先整块选中失效，或选区不再只包住这一块组件。
+
+**参数**：无；**`() => void`**。
+
+```ts
+import { onUnselect } from '@textbus/core'
+
+onUnselect(() => {
+  // 整块选中状态结束
+})
+```
+
+### `onFocus`
+
+**时机**：起始 **`Slot`** 与结束 **`Slot`** 的 **`parent`** 是同一块 **`Component`**，且这块 **`Component`** 与上一轮不同时，在新 **`parent`** 上触发。折叠光标时，等价于光标所在 **`Slot`** 的 **`parent`**。
+
+**参数**：无；**`() => void`**。
+
+常用于给「当前编辑块」加焦点样式。
+
+```ts
+import { onFocus } from '@textbus/core'
+
+onFocus(() => {
+  // 选区锚点/焦点落在本组件的直接子插槽集合内
+})
+```
+
+### `onBlur`
+
+**时机**：与 **`onFocus`** 成对；当上述 **`parent`** 换成另一块组件时，对 **上一轮** 的 **`parent`** 触发。
+
+**参数**：无；**`() => void`**。
+
+```ts
+import { onBlur } from '@textbus/core'
+
+onBlur(() => {
+  // 编辑语境离开本组件（相对 onFocus 语义）
+})
+```
+
+### `onFocusIn`
+
+**时机**：选区 **公共祖先组件** 变化后，沿 **从新祖先到根** 的路径，对每个 **`Component`** 触发一次，表示选区已进入该子树语境。
+
+**参数**：无；**`() => void`**。
+
+```ts
+import { onFocusIn } from '@textbus/core'
+
+onFocusIn(() => {
+  // 选区公共祖先链包含本组件
+})
+```
+
+### `onFocusOut`
+
+**时机**：与 **`onFocusIn`** 成对清理：对上一轮记录的链路上的组件触发，表示离开对应语境。
+
+**参数**：无；**`() => void`**。
+
+```ts
+import { onFocusOut } from '@textbus/core'
+
+onFocusOut(() => {
+  // 上一轮 focus-in 语境收尾
+})
+```
+
+### `onSelectionFromFront`
+
+**时机**：例如 **`Selection.toNext()`**：光标从某一 **`Component`** 的 **前缘** 跨入时，内核可先问该组件是否接管。
+
+**参数**：**`event: Event<Component>`**，无 **`data`**（**`null`**）。**`event.target`** 即该组件。
+
+**`preventDefault()`** 可阻止默认「若组件无子插槽则 **`selectComponent`**」等行为；若阻止，选区会维持调用前的位置。
+
+```ts
+import { onSelectionFromFront } from '@textbus/core'
+
+onSelectionFromFront(event => {
+  // event.target 为被跨入的组件；不需要默认「跨入即整块选中」时 event.preventDefault()
+})
+```
+
+### `onSelectionFromEnd`
+
+**时机**：例如 **`Selection.toPrevious()`**：从 **后缘** 跨入 **`Component`** 时对称触发。
+
+**参数**：同为 **`Event<Component>`**，**`event.target`** 为被跨入组件。**`preventDefault()`** 语义与 **`onSelectionFromFront`** 对称。
+
+```ts
+import { onSelectionFromEnd } from '@textbus/core'
+
+onSelectionFromEnd(event => {
+  // 与 onSelectionFromFront 对称；event.target 为被跨入的组件
+})
+```
+
+若出现「光标一跳又回去」，可检查这两个钩子里是否误 **`preventDefault()`**。
+
+
+## 右键菜单与模型通知
+
+### `onContextMenu`
+
+**时机**：业务调用 **`triggerContextMenu(component)`**（**`@textbus/core`** 导出）时，从 **`component`** 开始沿 **`parentComponent`** 向上逐层询问。
+
+**参数**：**`event: ContextMenuEvent<Component>`**。
+
+- **`event.target`**：当前这一层处理的组件。
+- **`event.useMenus(menuConfigs)`**：把 **`ContextMenuConfig[]`** 交给内核汇总（类型含 **`ContextMenuItem`**、**`ContextMenuGroup`** 等，见 **`@textbus/core`**）。
+- **`event.stopPropagation()`**：不再向上层组件继续收集菜单。
+
+```ts
+import { onContextMenu } from '@textbus/core'
+
+onContextMenu(event => {
+  event.useMenus([])
+  // event.stopPropagation()
+})
+```
+
+### `onParentSlotUpdated`
+
+**时机**：父 **`Slot`** 一侧数据更新并通知子树时（例如适配层同步后）。
+
+**参数**：无；**`() => void`**。适合刷新仅依赖父插槽状态的本地视图或缓存。
+
+```ts
+import { onParentSlotUpdated } from '@textbus/core'
+
+onParentSlotUpdated(() => {
+  // 父插槽已更新
+})
+```
+
+### `onDetach`
+
+**时机**：当前组件实例即将从文档模型上剥离（删除、整块替换等）。
+
+**参数**：无；**`() => void`**。用于取消订阅、清定时器等。处理完成后内核会清除该实例上的钩子登记。
+
+```ts
+import { onDetach } from '@textbus/core'
+
+onDetach(() => {
+  // 清理副作用
+})
+```
+
 
 ## 接下来
 
-- **动手示例**：[组件基础](./component-basics)（**`onBreak`**）、[快速开始](./getting-started)（段落默认换行）  
-- **命令如何触发钩子**：[状态查询与基础操作](./operations-and-query)  
-- **多插槽拆分与删除语义**：[组件高级](./component-advanced)  
-- **按键绑定**：[快捷键和语法糖](./shortcuts-and-grammar)  
-- **名词总览**：[核心概念](./concepts)
+- [组件基础](./component-basics)（**`onBreak`**、**`onContentInsert`**）  
+- [状态查询与基础操作](./operations-and-query)（命令与钩子）  
+- [组件高级](./component-advanced)（**`separate`**、多插槽）  
+- [快捷键和语法糖](./shortcuts-and-grammar)  
+- [核心概念](./concepts)
