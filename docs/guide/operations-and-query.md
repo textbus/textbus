@@ -254,7 +254,7 @@ commander.unApplyFormat(BoldFormatter)
 
 ## `cleanFormats`：清除文字格式
 
-清除当前选区内的文字格式。可选参数 **`excludeFormatters`** 默认 **`[]`**：文档含义是 **清除时要排除的对象**，即列在排除列表里的 **`Formatter`** 不会被清掉。有两种写法：
+清除当前选区内的文字格式。可选参数 **`remainFormats`** 默认 **`[]`**：**要保留的** **`Formatter`**（可为格式类数组或谓词）；命中保留条件的格式不会被清除。有两种写法：
 
 - 由 **`Formatter`** 实例组成的数组：列在数组里的格式 **不清除**。
 - **`(formatter: Formatter) => boolean`** 形式的谓词：对某个 **`formatter`** 返回 **`true`** 时该格式 **不清除**（与数组语义一致）。
@@ -295,7 +295,7 @@ commander.unApplyAttribute(TextAlignAttribute)
 
 ## `cleanAttributes`：清除插槽属性
 
-清除当前选区涉及的插槽属性。可选参数 **`excludeAttributes`** 与 **`cleanFormats`** 对称：可为 **`Attribute`** 实例组成的数组，或 **`(attribute: Attribute) => boolean`** 形式的谓词；用于指定 **保留** 的属性。
+清除当前选区涉及的插槽属性。可选参数 **`remainAttributes`** 与 **`cleanFormats`** 对称：可为 **`Attribute`** 实例组成的数组，或 **`(attribute: Attribute) => boolean`** 形式的谓词；用于指定 **保留** 的属性。
 
 **不传参**：
 

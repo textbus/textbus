@@ -716,9 +716,9 @@ export class Commander {
 
   /**
    * 清除当前选区的所有格式
-   * @param excludeFormatters 在清除格式时，排除的格式
+   * @param remainFormats 要保留的格式；可为格式类数组，或 `(formatter) => boolean` 谓词
    */
-  cleanFormats(excludeFormatters: Formatter<any>[] | ((formatter: Formatter<any>) => boolean) = []) {
+  cleanFormats(remainFormats: Formatter<any>[] | ((formatter: Formatter<any>) => boolean) = []) {
     this.selection.getSelectedScopes().forEach(scope => {
       const slot = scope.slot
       if (scope.startIndex === 0) {
@@ -729,7 +729,7 @@ export class Commander {
           }
         }
       }
-      slot.cleanFormats(excludeFormatters, scope.startIndex, scope.endIndex)
+      slot.cleanFormats(remainFormats, scope.startIndex, scope.endIndex)
     })
   }
 
@@ -875,8 +875,9 @@ export class Commander {
 
   /**
    * 根据选区清除属性
+   * @param remainAttributes 要保留的属性；可为属性类数组，或 `(attribute) => boolean` 谓词
    */
-  cleanAttributes(excludeAttributes: Attribute<any>[] | ((attribute: Attribute<any>) => boolean) = []) {
+  cleanAttributes(remainAttributes: Attribute<any>[] | ((attribute: Attribute<any>) => boolean) = []) {
     this.selection.getSelectedScopes().forEach(i => {
       const contents = i.slot.sliceContent(i.startIndex, i.endIndex)
       const childComponents: Component[] = []
@@ -889,11 +890,11 @@ export class Commander {
         }
       })
       if (hasInlineContent) {
-        i.slot.cleanAttributes(excludeAttributes)
+        i.slot.cleanAttributes(remainAttributes)
       } else {
         childComponents.forEach(i => {
           i.slots.forEach(slot => {
-            slot.cleanAttributes(excludeAttributes)
+            slot.cleanAttributes(remainAttributes)
           })
         })
       }

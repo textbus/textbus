@@ -145,7 +145,7 @@ export interface AttributeConfig<T> {
 
 /**
  * Textbus 动态属性扩展接口
- * Attribute 可以在任意插槽的整体生效，常用于块级样式或给事个插槽附加信息的情况
+ * Attribute 可以在任意插槽的整体生效，常用于块级样式或给整个插槽附加信息的情况
  */
 export class Attribute<T = FormatValue> {
   readonly onlySelf: boolean

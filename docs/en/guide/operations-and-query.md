@@ -259,7 +259,7 @@ commander.unApplyFormat(BoldFormatter)
 
 ## `cleanFormats`: clear text formats
 
-Clears formats in the current selection. Optional **`excludeFormatters`** defaults **`[]`**: **formats listed are kept** (not cleared). Two forms:
+Clears formats in the current selection. Optional **`remainFormats`** defaults **`[]`**: **formats listed are kept** (not cleared). Two forms:
 
 - Array of **`Formatter`** instances: those formats **stay**.
 - Predicate **`(formatter: Formatter) => boolean`**: **`true`** means **keep** that format.
@@ -300,7 +300,7 @@ commander.unApplyAttribute(TextAlignAttribute)
 
 ## `cleanAttributes`: clear slot attributes
 
-Clears attributes on slots touched by the selection. Optional **`excludeAttributes`** mirrors **`cleanFormats`**: array of **`Attribute`** instances or **`(attribute: Attribute) => boolean`** predicate listing **what to keep**.
+Clears attributes on slots touched by the selection. Optional **`remainAttributes`** mirrors **`cleanFormats`**: array of **`Attribute`** instances or **`(attribute: Attribute) => boolean`** predicate listing **what to keep**.
 
 **No args**:
 

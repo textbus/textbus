@@ -165,7 +165,7 @@ export class Selection {
     return this._endSlot
   }
 
-  /** 选区结束位置在线束插槽中的索引 */
+  /** 选区结束位置在结束插槽中的索引 */
   get endOffset() {
     return this._endOffset
   }
