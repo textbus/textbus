@@ -106,6 +106,72 @@ export default defineConfig({
       { icon: 'github', link: 'https://github.com/textbus/textbus' },
     ],
 
+    /** 右侧大纲 / 移动端「本页」下拉标题（默认英文 On this page） */
+    outline: {
+      label: '本页目录',
+    },
+
+    /** 移动端侧栏按钮文案（默认 Menu） */
+    sidebarMenuLabel: '菜单',
+
+    /** 移动端顶部「返回顶部」 */
+    returnToTopLabel: '返回顶部',
+
+    /** 移动端全屏菜单里深浅色区块标题（默认 Appearance） */
+    darkModeSwitchLabel: '外观',
+
+    lightModeSwitchTitle: '切换到浅色主题',
+    darkModeSwitchTitle: '切换到深色主题',
+
+    /** 键盘导航「跳到正文」 */
+    skipToContentLabel: '跳到正文',
+
+    /** 多语言站点时有语言切换按钮时的 aria 文案 */
+    langMenuLabel: '切换语言',
+
+    /** 文档底部上一篇 / 下一篇区域标题 */
+    docFooter: {
+      prev: '上一页',
+      next: '下一页',
+    },
+
+    /** 文档底部「最近更新时间」前缀 */
+    lastUpdated: {
+      text: '更新于',
+    },
+
+    /** 默认主题需显式开启；本地索引构建产物随站点部署，无需 Algolia */
+    search: {
+      provider: 'local',
+      options: {
+        locales: {
+          root: {
+            translations: {
+              button: {
+                buttonText: '搜索',
+                buttonAriaLabel: '搜索文档',
+              },
+              modal: {
+                displayDetails: '显示详细列表',
+                resetButtonTitle: '清除查询条件',
+                backButtonTitle: '关闭搜索',
+                noResultsText: '无法找到相关结果',
+                footer: {
+                  selectText: '跳转',
+                  selectKeyAriaLabel: 'Enter',
+                  navigateText: '切换',
+                  navigateUpKeyAriaLabel: '向上',
+                  navigateDownKeyAriaLabel: '向下',
+                  closeText: '关闭',
+                  closeKeyAriaLabel: 'Escape',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+
     footer: {
       message: '基于 MIT 许可发布',
       copyright: 'Copyright © Textbus',
