@@ -411,3 +411,160 @@ export function ParagraphComponentView(props: ViewComponentProps<ParagraphCompon
     { path: 'components/paragraph.component.tsx', label: 'paragraph.component.tsx' },
   ],
 }
+
+const STYLE_CSS_EN = textStylesPreset.files['style.css'].replace(
+  '/* 与文档站品牌色、Playground 所用变量名对齐（预览 iframe 内固定浅色，不受文档站深色模式影响） */',
+  '/* Match docs site tokens; preview iframe stays light (not affected by docs dark mode) */',
+)
+
+/** Same as {@link textStylesPreset}; English toolbar labels, sample paragraph, and comments for EN docs. */
+export const textStylesPresetEn: PlaygroundPreset = {
+  ...textStylesPreset,
+  id: 'text-styles-en',
+  files: {
+    ...textStylesPreset.files,
+    'style.css': STYLE_CSS_EN,
+    'App.tsx': `// Must run first: runtime metadata for decorators and dependency injection
+import 'reflect-metadata'
+import { createApp } from '@viewfly/platform-browser'
+import { createRef, onMounted } from '@viewfly/core'
+import { BrowserModule } from '@textbus/platform-browser'
+import { ViewflyAdapter } from '@textbus/adapter-viewfly'
+import { ContentType, Slot, Textbus } from '@textbus/core'
+
+import { RootComponent, RootComponentView } from './components/root.component'
+import { ParagraphComponent, ParagraphComponentView } from './components/paragraph.component'
+import { FormatToolbar } from './ui/format-toolbar'
+import { boldFormatter, fontSizeFormatter } from './formatters'
+
+function App() {
+  const editorHostRef = createRef<HTMLDivElement>()
+
+  const adapter = new ViewflyAdapter(
+    {
+      [RootComponent.componentName]: RootComponentView,
+      [ParagraphComponent.componentName]: ParagraphComponentView,
+    },
+    (mountHost, root, context) => {
+      const vf = createApp(root, { context })
+      vf.mount(mountHost)
+      return () => vf.destroy()
+    },
+  )
+
+  const browserModule = new BrowserModule({
+    adapter,
+    renderTo: () => editorHostRef.value as HTMLElement,
+  })
+
+  const editor = new Textbus({
+    components: [RootComponent, ParagraphComponent],
+    formatters: [boldFormatter, fontSizeFormatter],
+    imports: [browserModule],
+  })
+
+  const docRoot = new RootComponent({
+    slot: new Slot([ContentType.BlockComponent]),
+  })
+  const rootSlot = docRoot.state.slot
+  const paraSlot = new Slot([ContentType.Text])
+  paraSlot.insert('Select text or place the caret in a sentence, then use Bold or Large below; click again to remove.')
+  rootSlot.insert(new ParagraphComponent({ slot: paraSlot }))
+
+  onMounted(() => {
+    void editor.render(docRoot)
+  })
+
+  return () => (
+    <FormatToolbar editor={editor} editorHostRef={editorHostRef} />
+  )
+}
+
+createApp(<App />).mount(document.getElementById('root') as HTMLElement)
+`,
+    'ui/format-toolbar.tsx': `import { createRef, onMounted } from '@viewfly/core'
+import {
+  Commander,
+  Query,
+  QueryStateType,
+  Selection,
+  Textbus,
+} from '@textbus/core'
+import { boldFormatter, fontSizeFormatter } from '../formatters'
+
+export interface FormatToolbarProps {
+  editor: Textbus
+  editorHostRef: { value: HTMLDivElement | null }
+}
+
+/** Viewfly shell: toolbar + editor host; bind commands after editor.render completes (onReady) */
+export function FormatToolbar(props: FormatToolbarProps) {
+  const boldBtnRef = createRef<HTMLButtonElement>()
+  const sizeBtnRef = createRef<HTMLButtonElement>()
+
+  onMounted(() => {
+    const bindToolbar = () => {
+      const commander = props.editor.get(Commander)
+      const query = props.editor.get(Query)
+      const selection = props.editor.get(Selection)
+
+      const syncToolbar = () => {
+        const boldState = query.queryFormat(boldFormatter)
+        boldBtnRef.value?.toggleAttribute('data-active', boldState.state === QueryStateType.Enabled)
+        const sizeState = query.queryFormat(fontSizeFormatter)
+        sizeBtnRef.value?.toggleAttribute('data-active', sizeState.state === QueryStateType.Enabled)
+      }
+
+      boldBtnRef.value?.addEventListener('click', () => {
+        const st = query.queryFormat(boldFormatter)
+        if (st.state === QueryStateType.Enabled) {
+          commander.unApplyFormat(boldFormatter)
+        } else {
+          commander.applyFormat(boldFormatter, true)
+        }
+        syncToolbar()
+      })
+
+      sizeBtnRef.value?.addEventListener('click', () => {
+        const st = query.queryFormat(fontSizeFormatter)
+        if (st.state === QueryStateType.Enabled) {
+          commander.unApplyFormat(fontSizeFormatter)
+        } else {
+          commander.applyFormat(fontSizeFormatter, '22px')
+        }
+        syncToolbar()
+      })
+
+      selection.onChange.subscribe(() => {
+        syncToolbar()
+      })
+      syncToolbar()
+    }
+
+    if (props.editor.isReady) {
+      bindToolbar()
+    } else {
+      props.editor.onReady.subscribe(() => {
+        bindToolbar()
+      })
+    }
+  })
+
+  return () => (
+    <div class="text-styles-shell">
+      <div class="format-toolbar" role="toolbar" aria-label="Text formatting">
+        <button ref={boldBtnRef} type="button" class="tb-format-btn" data-variant="bold">
+          <span class="tb-format-btn__label">Bold</span>
+        </button>
+        <button ref={sizeBtnRef} type="button" class="tb-format-btn" data-variant="size">
+          <span class="tb-format-btn__label">Large</span>
+          <span class="tb-format-btn__hint">22px</span>
+        </button>
+      </div>
+      <div ref={props.editorHostRef} id="editor-host" class="tb-editor-host" />
+    </div>
+  )
+}
+`,
+  },
+}

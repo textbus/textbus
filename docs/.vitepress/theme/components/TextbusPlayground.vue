@@ -22,12 +22,73 @@ const props = withDefaults(
   },
 )
 
-const { site } = useData()
+const { site, localeIndex } = useData()
 
-const presetResolved = computed(() => getPlaygroundPreset(props.preset))
+/** English locale: use `*-en` preset when available (comments + sample strings). */
+const EN_PRESET_BY_ID: Readonly<Record<string, string>> = {
+  'getting-started': 'getting-started-en',
+  'component-basics': 'component-basics-en',
+  'text-styles': 'text-styles-en',
+  'block-styles': 'block-styles-en',
+  'zen-coding-todolist': 'zen-coding-todolist-en',
+}
+
+const presetResolved = computed(() => {
+  const raw = props.preset
+  if (localeIndex.value === 'en' && typeof raw === 'string' && EN_PRESET_BY_ID[raw]) {
+    return getPlaygroundPreset(EN_PRESET_BY_ID[raw])
+  }
+  return getPlaygroundPreset(raw)
+})
+
+const playgroundUi = computed(() => {
+  const en = localeIndex.value === 'en'
+  if (en) {
+    return {
+      sourceTab: 'Source',
+      previewTab: 'Preview',
+      resetSample: 'Reset sample',
+      explorer: 'Explorer',
+      explorerAria: 'Sample files',
+      splitterAria: 'Drag to resize the explorer',
+      iframeTitle: 'Textbus preview',
+      compileFailed: 'Build failed:',
+      expandDir: (name: string) => `Expand ${name}`,
+      collapseDir: (name: string) => `Collapse ${name}`,
+      statusLoading: 'Loading compiler…',
+      statusCompiling: 'Compiling…',
+      statusRunning: 'Preview updated',
+      statusIdle: 'Ready',
+      compilerBusy: 'Compiler is still loading. Try again in a moment.',
+      workerNotReady: 'Worker is not ready.',
+      workerInitTimeout: 'esbuild worker failed to start in time.',
+      missingModel: 'Playground: missing initial file model.',
+    }
+  }
+  return {
+    sourceTab: '源码',
+    previewTab: '预览',
+    resetSample: '重置示例',
+    explorer: '资源管理器',
+    explorerAria: '示例文件',
+    splitterAria: '拖动调整资源管理器宽度',
+    iframeTitle: 'Textbus 预览',
+    compileFailed: '编译失败：',
+    expandDir: (name: string) => `展开 ${name}`,
+    collapseDir: (name: string) => `折叠 ${name}`,
+    statusLoading: '加载编译器…',
+    statusCompiling: '编译中…',
+    statusRunning: '预览已更新',
+    statusIdle: '就绪',
+    compilerBusy: '编译器仍在加载，请稍后重试。',
+    workerNotReady: 'Worker 未就绪。',
+    workerInitTimeout: 'esbuild Worker 初始化超时。',
+    missingModel: 'Playground: 缺少初始文件 Model。',
+  }
+})
 
 const mainTab = ref<'code' | 'preview'>('code')
-const fileTab = ref<string>(initialOpenPath(getPlaygroundPreset(props.preset)))
+const fileTab = ref<string>(initialOpenPath(presetResolved.value))
 
 /** 目录默认展开；仅当显式设为 false 时折叠 */
 const dirExpanded = ref<Record<string, boolean>>({})
@@ -178,7 +239,7 @@ async function initEditor(): Promise<void> {
 
   const startModel = fileModels.get(fileTab.value)
   if (!startModel) {
-    throw new Error('Playground: 缺少初始文件 Model')
+    throw new Error(playgroundUi.value.missingModel)
   }
 
   editor = monacoMod.editor.create(editorHost.value, {
@@ -301,7 +362,7 @@ const scheduleCompile = debounce(() => {
 
 function initBundlerWorker(): Promise<void> {
   return new Promise((resolve, reject) => {
-    const to = setTimeout(() => reject(new Error('esbuild Worker 初始化超时')), 12000)
+    const to = setTimeout(() => reject(new Error(playgroundUi.value.workerInitTimeout)), 12000)
     void (async () => {
       try {
         const { default: BundlerWorkerCtor } = await import(
@@ -337,7 +398,7 @@ function initBundlerWorker(): Promise<void> {
 function postBundle(files: Record<string, string>): Promise<string> {
   return new Promise((resolve, reject) => {
     if (!bundlerWorker || !workerReady) {
-      reject(new Error('Worker 未就绪'))
+      reject(new Error(playgroundUi.value.workerNotReady))
       return
     }
     const id = ++bundleSeq
@@ -384,7 +445,7 @@ async function compileAndRun(): Promise<void> {
   compileError.value = ''
 
   if (!bundlerWorker || !workerReady) {
-    compileError.value = '编译器仍在加载，请稍后重试。'
+    compileError.value = playgroundUi.value.compilerBusy
     return
   }
 
@@ -450,15 +511,16 @@ async function compileAndRun(): Promise<void> {
 }
 
 const statusLabel = computed(() => {
+  const ui = playgroundUi.value
   switch (status.value) {
     case 'loading-worker':
-      return '加载编译器…'
+      return ui.statusLoading
     case 'compiling':
-      return '编译中…'
+      return ui.statusCompiling
     case 'running':
-      return '预览已更新'
+      return ui.statusRunning
     default:
-      return '就绪'
+      return ui.statusIdle
   }
 })
 
@@ -533,7 +595,7 @@ function resetSources(): void {
           :class="{ 'tb-playground__tab--active': mainTab === 'code' }"
           @click="mainTab = 'code'"
         >
-          源码
+          {{ playgroundUi.sourceTab }}
         </button>
         <button
           type="button"
@@ -543,13 +605,13 @@ function resetSources(): void {
           :class="{ 'tb-playground__tab--active': mainTab === 'preview' }"
           @click="mainTab = 'preview'"
         >
-          预览
+          {{ playgroundUi.previewTab }}
         </button>
       </div>
       <div class="tb-playground__actions">
         <span class="tb-playground__status" :data-state="status">{{ statusLabel }}</span>
         <button type="button" class="tb-playground__btn tb-playground__btn--ghost" @click="resetSources">
-          重置示例
+          {{ playgroundUi.resetSample }}
         </button>
       </div>
     </div>
@@ -559,8 +621,8 @@ function resetSources(): void {
       ref="codePaneRef"
       class="tb-playground__pane tb-playground__pane--code"
     >
-      <aside class="tb-playground__explorer" aria-label="示例文件" :style="explorerAsideStyle">
-        <div class="tb-playground__explorer-head">资源管理器</div>
+      <aside class="tb-playground__explorer" :aria-label="playgroundUi.explorerAria" :style="explorerAsideStyle">
+        <div class="tb-playground__explorer-head">{{ playgroundUi.explorer }}</div>
         <nav class="tb-playground__tree" role="tree">
           <template v-for="(row, idx) in explorerRows" :key="row.kind === 'file' ? row.path : `d:${row.dirKey}:${idx}`">
             <div
@@ -573,7 +635,7 @@ function resetSources(): void {
               <button
                 type="button"
                 class="tb-playground__tree-chevron"
-                :aria-label="row.expanded ? `折叠 ${row.name}` : `展开 ${row.name}`"
+                :aria-label="row.expanded ? playgroundUi.collapseDir(row.name) : playgroundUi.expandDir(row.name)"
                 @click.stop="toggleDir(row.dirKey)"
               >
                 <span class="tb-playground__chevron" :class="{ 'tb-playground__chevron--open': row.expanded }" aria-hidden="true" />
@@ -600,7 +662,7 @@ function resetSources(): void {
         class="tb-playground__splitter"
         role="separator"
         aria-orientation="vertical"
-        aria-label="拖动调整资源管理器宽度"
+        :aria-label="playgroundUi.splitterAria"
         :aria-valuenow="explorerWidthPx"
         :aria-valuemin="EXPLORER_WIDTH_MIN"
         tabindex="0"
@@ -611,10 +673,10 @@ function resetSources(): void {
     </div>
 
     <div v-show="mainTab === 'preview'" class="tb-playground__pane tb-playground__pane--preview">
-      <iframe ref="iframeRef" class="tb-playground__iframe" title="Textbus 预览" />
+      <iframe ref="iframeRef" class="tb-playground__iframe" :title="playgroundUi.iframeTitle" />
     </div>
 
-    <p v-if="compileError" class="tb-playground__error">编译失败：{{ compileError }}</p>
+    <p v-if="compileError" class="tb-playground__error">{{ playgroundUi.compileFailed }}{{ compileError }}</p>
   </div>
 </template>
 

@@ -336,3 +336,180 @@ export function TodolistView(props: ViewComponentProps<TodolistComponent>) {
     { path: 'components/paragraph.component.tsx', label: 'paragraph.component.tsx' },
   ],
 }
+
+/** Same as {@link componentBasicsPreset}; English comments and sample strings for EN docs. */
+export const componentBasicsPresetEn: PlaygroundPreset = {
+  ...componentBasicsPreset,
+  id: 'component-basics-en',
+  files: {
+    ...componentBasicsPreset.files,
+    'App.tsx': `// Must run first: runtime metadata for decorators and dependency injection
+import 'reflect-metadata'
+import { createApp } from '@viewfly/platform-browser'
+import { createRef, onMounted } from '@viewfly/core'
+import { BrowserModule } from '@textbus/platform-browser'
+import { ViewflyAdapter } from '@textbus/adapter-viewfly'
+import { ContentType, Slot, Textbus } from '@textbus/core'
+
+import { RootComponent, RootComponentView } from './components/root.component'
+import { ParagraphComponent, ParagraphComponentView } from './components/paragraph.component'
+import { TodolistComponent, TodolistView } from './components/todolist.component'
+
+function App() {
+  const editorRef = createRef<HTMLDivElement>()
+
+  const adapter = new ViewflyAdapter(
+    {
+      [RootComponent.componentName]: RootComponentView,
+      [ParagraphComponent.componentName]: ParagraphComponentView,
+      [TodolistComponent.componentName]: TodolistView,
+    },
+    (mountHost, root, context) => {
+      const vf = createApp(root, { context })
+      vf.mount(mountHost)
+      return () => vf.destroy()
+    }
+  )
+
+  const browserModule = new BrowserModule({
+    adapter,
+    renderTo: () => editorRef.value as HTMLElement
+  })
+
+  const editor = new Textbus({
+    components: [RootComponent, ParagraphComponent, TodolistComponent],
+    imports: [browserModule]
+  })
+
+  const docRoot = new RootComponent({
+    slot: new Slot([ContentType.BlockComponent])
+  })
+
+  // Initial document: two todos + one paragraph (compare with Getting started)
+  const rootSlot = docRoot.state.slot
+  const todo1 = new Slot([ContentType.Text])
+  todo1.insert('First todo item')
+  rootSlot.insert(new TodolistComponent({ checked: false, slot: todo1 }))
+  const todo2 = new Slot([ContentType.Text])
+  todo2.insert('Second todo item')
+  rootSlot.insert(new TodolistComponent({ checked: true, slot: todo2 }))
+  const paraSlot = new Slot([ContentType.Text])
+  paraSlot.insert('This is a normal paragraph; it can sit alongside todos.')
+  rootSlot.insert(new ParagraphComponent({ slot: paraSlot }))
+
+  onMounted(() => {
+    void editor.render(docRoot)
+  })
+
+  return () => (
+    <div>
+      <div ref={editorRef} id="editor-host" class="tb-editor-host" />
+    </div>
+  )
+}
+
+createApp(<App />).mount(document.getElementById('root') as HTMLElement)
+`,
+    'components/todolist.component.tsx': `import {
+  Adapter,
+  Commander,
+  Component,
+  ComponentStateLiteral,
+  ContentType,
+  createVNode,
+  onBreak,
+  Registry,
+  Selection,
+  Slot,
+  Textbus,
+  useContext,
+} from '@textbus/core'
+import type { ViewComponentProps } from '@textbus/adapter-viewfly'
+import { inject } from '@viewfly/core'
+import { ParagraphComponent } from './paragraph.component'
+
+/** Document state in the kernel: checkbox + body slot (schema is text-only, same as a paragraph) */
+export interface TodolistState {
+  checked: boolean
+  slot: Slot
+}
+
+export class TodolistComponent extends Component<TodolistState> {
+  // Unique within the editor; used for JSON, adapter map, debugging
+  static componentName = 'Todolist'
+  // Block: occupies one cell in the parent slot, alongside paragraphs
+  static type = ContentType.BlockComponent
+
+  // Deserialize: restore literal slot / checked to runtime Slot and component instance
+  static fromJSON(textbus: Textbus, data: ComponentStateLiteral<TodolistState>) {
+    const slot = textbus.get(Registry).createSlot(data.slot)
+    return new TodolistComponent({
+      checked: !!data.checked,
+      slot,
+    })
+  }
+
+  // Declare child slots; list in document render order for selection and tree walks along blocks
+  override getSlots(): Slot[] {
+    return [this.state.slot]
+  }
+
+  override setup() {
+    const commander = useContext(Commander)
+    const selection = useContext(Selection)
+
+    onBreak(ev => {
+      ev.preventDefault()
+      const slot = ev.target
+
+      // Empty body + Enter: replace this todo with a paragraph so the caret can leave the todo shell
+      if (slot.isEmpty) {
+        const body = new Slot([ContentType.Text])
+        const p = new ParagraphComponent({ slot: body })
+        commander.replaceComponent(this, p)
+        selection.setPosition(body, 0)
+        return
+      }
+
+      // Non-empty: cut after the caret, insert a new Todolist (same checked as current row)
+      const nextSlot = slot.cut(ev.data.index)
+      const next = new TodolistComponent({
+        checked: this.state.checked,
+        slot: nextSlot,
+      })
+      commander.insertAfter(next, this)
+      selection.setPosition(nextSlot, 0)
+    })
+  }
+}
+
+export function TodolistView(props: ViewComponentProps<TodolistComponent>) {
+  const adapter = inject(Adapter)
+  return () => {
+    const c = props.component
+    const slot = c.state.slot
+    return (
+      <div
+        ref={props.rootRef}
+        style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', margin: '0.35em 0' }}
+      >
+        {/* checked comes from component state; view syncs to native checkbox */}
+        <input
+          type="checkbox"
+          checked={c.state.checked}
+          onChange={(e: Event) => {
+            c.state.checked = (e.target as HTMLInputElement).checked
+          }}
+          style={{ marginTop: '2px' }}
+        />
+        {/* Slot document tree via slotRender + createVNode; chrome uses Viewfly JSX */}
+        {adapter.slotRender(slot, children =>
+          createVNode('div', { style: { flex: '1', minWidth: 0 } }, children),
+        )}
+      </div>
+    )
+  }
+}
+`,
+  },
+}

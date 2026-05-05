@@ -1,33 +1,33 @@
 /**
  * Textbus 文档主题色（品牌色 #07baf3）
  */
-/** 旧 textbus.io 首页整页布局（layout: TextbusIoHome）占满内容区宽度 */
-#VPContent:has(.tb-io-home) {
+/** 旧 textbus.io 首页整页布局（layout: TextbusIoHome）占满内容区宽度 — 类名由 theme/index.ts 写入 #VPContent */
+#VPContent.tb-layout-home {
   width: 100%;
   max-width: 100%;
 }
 
 /** `/playground` 产品页：无右侧大纲、主内容居中 */
-#VPContent:has(.tb-playground-page) {
+#VPContent.tb-layout-playground {
   width: 100%;
   max-width: 100%;
 }
 
-#VPContent:has(.tb-playground-page) .VPDoc {
+#VPContent.tb-layout-playground .VPDoc {
   padding-top: 24px;
 }
 
-#VPContent:has(.tb-playground-page) .VPDoc:not(.has-sidebar) .container {
+#VPContent.tb-layout-playground .VPDoc:not(.has-sidebar) .container {
   max-width: 1200px;
   margin-inline: auto;
 }
 
-#VPContent:has(.tb-playground-page) .VPDoc:not(.has-sidebar) .content,
-#VPContent:has(.tb-playground-page) .VPDoc:not(.has-sidebar) .content-container {
+#VPContent.tb-layout-playground .VPDoc:not(.has-sidebar) .content,
+#VPContent.tb-layout-playground .VPDoc:not(.has-sidebar) .content-container {
   max-width: 100%;
 }
 
-#VPContent:has(.tb-playground-page) .VPDoc .main {
+#VPContent.tb-layout-playground .VPDoc .main {
   margin-inline: auto;
   width: 100%;
   max-width: 960px;

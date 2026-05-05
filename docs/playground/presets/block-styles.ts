@@ -396,3 +396,156 @@ export function ParagraphComponentView(props: ViewComponentProps<ParagraphCompon
     { path: 'components/paragraph.component.tsx', label: 'paragraph.component.tsx' },
   ],
 }
+
+/** Same as {@link blockStylesPreset}; English sample paragraph, toolbar labels, and aria for EN docs. */
+export const blockStylesPresetEn: PlaygroundPreset = {
+  ...blockStylesPreset,
+  id: 'block-styles-en',
+  files: {
+    ...blockStylesPreset.files,
+    'App.tsx': `// Must run first: runtime metadata for decorators and dependency injection
+import 'reflect-metadata'
+import { createApp } from '@viewfly/platform-browser'
+import { createRef, onMounted } from '@viewfly/core'
+import { BrowserModule } from '@textbus/platform-browser'
+import { ViewflyAdapter } from '@textbus/adapter-viewfly'
+import { ContentType, Slot, Textbus } from '@textbus/core'
+
+import { RootComponent, RootComponentView } from './components/root.component'
+import { ParagraphComponent, ParagraphComponentView } from './components/paragraph.component'
+import { AlignToolbar } from './ui/align-toolbar'
+import { textAlignAttribute } from './attributes'
+
+function App() {
+  const editorHostRef = createRef<HTMLDivElement>()
+
+  const adapter = new ViewflyAdapter(
+    {
+      [RootComponent.componentName]: RootComponentView,
+      [ParagraphComponent.componentName]: ParagraphComponentView,
+    },
+    (mountHost, root, context) => {
+      const vf = createApp(root, { context })
+      vf.mount(mountHost)
+      return () => vf.destroy()
+    },
+  )
+
+  const browserModule = new BrowserModule({
+    adapter,
+    renderTo: () => editorHostRef.value as HTMLElement,
+  })
+
+  const editor = new Textbus({
+    components: [RootComponent, ParagraphComponent],
+    attributes: [textAlignAttribute],
+    imports: [browserModule],
+  })
+
+  const docRoot = new RootComponent({
+    slot: new Slot([ContentType.BlockComponent]),
+  })
+  const rootSlot = docRoot.state.slot
+  const paraSlot = new Slot([ContentType.Text])
+  paraSlot.insert(
+    'Place the caret in this paragraph or select text, then use the buttons for horizontal alignment; Clear removes textAlign on this block.',
+  )
+  rootSlot.insert(new ParagraphComponent({ slot: paraSlot }))
+
+  onMounted(() => {
+    void editor.render(docRoot)
+  })
+
+  return () => (
+    <AlignToolbar editor={editor} editorHostRef={editorHostRef} />
+  )
+}
+
+createApp(<App />).mount(document.getElementById('root') as HTMLElement)
+`,
+    'ui/align-toolbar.tsx': `import { createRef, onMounted } from '@viewfly/core'
+import {
+  Commander,
+  Query,
+  QueryStateType,
+  Selection,
+  Textbus,
+} from '@textbus/core'
+import { textAlignAttribute } from '../attributes'
+
+export interface AlignToolbarProps {
+  editor: Textbus
+  editorHostRef: { value: HTMLDivElement | null }
+}
+
+export function AlignToolbar(props: AlignToolbarProps) {
+  const leftRef = createRef<HTMLButtonElement>()
+  const centerRef = createRef<HTMLButtonElement>()
+  const rightRef = createRef<HTMLButtonElement>()
+  const clearRef = createRef<HTMLButtonElement>()
+
+  onMounted(() => {
+    const bindToolbar = () => {
+      const commander = props.editor.get(Commander)
+      const query = props.editor.get(Query)
+      const selection = props.editor.get(Selection)
+
+      const syncToolbar = () => {
+        const st = query.queryAttribute(textAlignAttribute)
+        const v = st.state === QueryStateType.Enabled ? st.value : null
+        leftRef.value?.toggleAttribute('data-active', v === 'left')
+        centerRef.value?.toggleAttribute('data-active', v === 'center')
+        rightRef.value?.toggleAttribute('data-active', v === 'right')
+      }
+
+      const apply = (align: string) => () => {
+        commander.applyAttribute(textAlignAttribute, align)
+        syncToolbar()
+      }
+
+      leftRef.value?.addEventListener('click', apply('left'))
+      centerRef.value?.addEventListener('click', apply('center'))
+      rightRef.value?.addEventListener('click', apply('right'))
+      clearRef.value?.addEventListener('click', () => {
+        commander.unApplyAttribute(textAlignAttribute)
+        syncToolbar()
+      })
+
+      selection.onChange.subscribe(() => {
+        syncToolbar()
+      })
+      syncToolbar()
+    }
+
+    if (props.editor.isReady) {
+      bindToolbar()
+    } else {
+      props.editor.onReady.subscribe(() => {
+        bindToolbar()
+      })
+    }
+  })
+
+  return () => (
+    <div class="block-styles-shell">
+      <div class="align-toolbar" role="toolbar" aria-label="Paragraph alignment">
+        <button ref={leftRef} type="button" class="tb-align-btn">
+          Left
+        </button>
+        <button ref={centerRef} type="button" class="tb-align-btn">
+          Center
+        </button>
+        <button ref={rightRef} type="button" class="tb-align-btn">
+          Right
+        </button>
+        <button ref={clearRef} type="button" class="tb-align-btn" data-variant="clear">
+          Clear
+        </button>
+      </div>
+      <div ref={props.editorHostRef} id="editor-host" class="tb-editor-host" />
+    </div>
+  )
+}
+`,
+  },
+}

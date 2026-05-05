@@ -1,16 +1,21 @@
 import type { PlaygroundPreset } from '../preset-types'
-import { blockStylesPreset } from './block-styles'
-import { componentBasicsPreset } from './component-basics'
-import { gettingStartedPreset } from './getting-started'
-import { textStylesPreset } from './text-styles'
-import { zenCodingTodolistPreset } from './zen-coding-todolist'
+import { blockStylesPreset, blockStylesPresetEn } from './block-styles'
+import { componentBasicsPreset, componentBasicsPresetEn } from './component-basics'
+import { gettingStartedPreset, gettingStartedPresetEn } from './getting-started'
+import { textStylesPreset, textStylesPresetEn } from './text-styles'
+import { zenCodingTodolistPreset, zenCodingTodolistPresetEn } from './zen-coding-todolist'
 
 export const PLAYGROUND_PRESETS = {
   'getting-started': gettingStartedPreset,
+  'getting-started-en': gettingStartedPresetEn,
   'component-basics': componentBasicsPreset,
+  'component-basics-en': componentBasicsPresetEn,
   'zen-coding-todolist': zenCodingTodolistPreset,
+  'zen-coding-todolist-en': zenCodingTodolistPresetEn,
   'text-styles': textStylesPreset,
+  'text-styles-en': textStylesPresetEn,
   'block-styles': blockStylesPreset,
+  'block-styles-en': blockStylesPresetEn,
 } as const satisfies Record<string, PlaygroundPreset>
 
 export type PlaygroundPresetId = keyof typeof PLAYGROUND_PRESETS

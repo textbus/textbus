@@ -217,3 +217,65 @@ export function ParagraphComponentView(props: ViewComponentProps<ParagraphCompon
     { path: 'components/paragraph.component.tsx', label: 'paragraph.component.tsx' },
   ],
 }
+
+/** Same sample as {@link gettingStartedPreset}; English comments in `App.tsx` for EN docs. */
+export const gettingStartedPresetEn: PlaygroundPreset = {
+  ...gettingStartedPreset,
+  id: 'getting-started-en',
+  files: {
+    ...gettingStartedPreset.files,
+    'App.tsx': `// Must run first: runtime metadata for decorators and dependency injection
+import 'reflect-metadata'
+import { createApp } from '@viewfly/platform-browser'
+import { createRef, onMounted } from '@viewfly/core'
+import { BrowserModule } from '@textbus/platform-browser'
+import { ViewflyAdapter } from '@textbus/adapter-viewfly'
+import { ContentType, Slot, Textbus } from '@textbus/core'
+
+import { RootComponent, RootComponentView } from './components/root.component'
+import { ParagraphComponent, ParagraphComponentView } from './components/paragraph.component'
+
+function App() {
+  const editorRef = createRef<HTMLDivElement>()
+
+  const adapter = new ViewflyAdapter(
+    {
+      [RootComponent.componentName]: RootComponentView,
+      [ParagraphComponent.componentName]: ParagraphComponentView
+    },
+    (mountHost, root, context) => {
+      const vf = createApp(root, { context })
+      vf.mount(mountHost)
+      return () => vf.destroy()
+    }
+  )
+
+  const browserModule = new BrowserModule({
+    adapter,
+    renderTo: () => editorRef.value as HTMLElement
+  })
+
+  const editor = new Textbus({
+    components: [RootComponent, ParagraphComponent],
+    imports: [browserModule]
+  })
+
+  const docRoot = new RootComponent({
+    slot: new Slot([ContentType.BlockComponent])
+  })
+
+  onMounted(() => {
+    void editor.render(docRoot)
+  })
+
+  return () => (
+    <div>
+      <div ref={editorRef} id="editor-host" class="tb-editor-host" />
+    </div>
+  )
+}
+
+createApp(<App />).mount(document.getElementById('root') as HTMLElement)
+`,
+  },
+}
