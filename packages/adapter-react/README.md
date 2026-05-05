@@ -1,3 +1,5 @@
+**[English](README.en.md)**
+
 Textbus（React）适配器
 ================================
 

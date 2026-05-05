@@ -1,4 +1,6 @@
-Textbus
+**[English](README.en.md)**
+
+@textbus/collaborate
 =====================
 
 Textbus 是一套用于构建富交互的富文本编辑框架。和大多数富文本编辑器不同的是，Textbus 以组件为核心，格式为辅助，并大幅简化了富文本编辑器开发中常见

@@ -1,3 +1,5 @@
+**[English](README.en.md)**
+
 Textbus PC 浏览器支持模块
 =====================
 

@@ -1,5 +1,7 @@
 <h1 align="center">Textbus</h1>
 
+<p align="center"><a href="README.en.md">English</a></p>
+
 🚀 Textbus 是一个组件化、跨平台、数据驱动的富文本框架，支持使用 [Viewfly](https://github.com/viewfly/viewfly)、Vue、React 渲染富文本内容，并坚定的支持在线**多人协作**。你可以在 Textbus 中轻松创建出类似钉钉文档、石墨文档、飞书文档等完全自定义的编辑器。
 
 <p align="center">
@@ -45,7 +47,7 @@ XNote 是 Textbus 官方基于最新 4.0 版本开发的一个无头的、高性
 | @textbus/core             | 核心模块，提供了组件、插槽、格式、属性的数据模型抽象和选区、格式变换、渲染、组件生命周期管理、编辑器控制、历史记录、快捷键管理、语法糖管理、输出转换等富文本核心能力的实现 |
 | @textbus/platform-browser | 浏览器支持中间层，提供了基本的视图层，桥接了选区、光标、和 DOM 渲染能力                                                |
 | @textbus/collaborate      | 协作支持模块，提供了基于 Yjs 的协作对接能力                                                              |
-| @textbus/adapter-viewfly  | Textbus 视图渲染 Viewlfy 适配器，可使用 Viewfly 渲染富文本内容                                          |
+| @textbus/adapter-viewfly  | Textbus 视图渲染 Viewfly 适配器，可使用 Viewfly 渲染富文本内容                                          |
 | @textbus/adapter-vue      | Textbus 视图渲染 vue 适配器，可使用 vue 渲染富文本内容                                                  |
 | @textbus/adapter-react    | Textbus 视图渲染 react 适配器，可使用 react 渲染富文本内容                                              |
 | @textbus/platform-node    | 适用于 node 后台运行的 Textbus 的实用工具集                                                         |

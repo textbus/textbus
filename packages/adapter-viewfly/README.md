@@ -1,3 +1,5 @@
+**[English](README.en.md)**
+
 Textbus（Viewfly）适配器
 ================================
 
