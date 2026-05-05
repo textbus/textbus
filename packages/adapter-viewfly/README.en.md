@@ -11,4 +11,4 @@ Bridges Textbus to [Viewfly](https://github.com/viewfly/viewfly) for rendering r
 npm install @textbus/adapter-viewfly
 ```
 
-Documentation: [textbus.io](https://textbus.io) · [English](https://textbus.io/en/)
+Documentation: [textbus.io](https://textbus.io) · [English](https://textbus.io/en/index.html)

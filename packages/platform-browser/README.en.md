@@ -7,4 +7,4 @@ Textbus is a framework for highly interactive rich text editing. Unlike many edi
 
 ### Documentation
 
-More docs: [textbus.io](https://textbus.io) · [English](https://textbus.io/en/)
+More docs: [textbus.io](https://textbus.io) · [English](https://textbus.io/en/index.html)

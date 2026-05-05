@@ -15,4 +15,4 @@ npm install @textbus/core
 
 ## Documentation
 
-[textbus.io](https://textbus.io) · [English](https://textbus.io/en/)
+[textbus.io](https://textbus.io) · [English](https://textbus.io/en/index.html)

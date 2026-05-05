@@ -1,6 +1,45 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitepress'
+import type { HeadConfig } from 'vitepress'
+
+const GA_ID = 'G-YWJ01PL356'
+
+/** 全站统计（含英文文档） */
+const gtagHead: HeadConfig[] = [
+  ['script', { async: '', src: `https://www.googletagmanager.com/gtag/js?id=${GA_ID}` }],
+  [
+    'script',
+    {},
+    `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${GA_ID}');`,
+  ],
+]
+
+const zhSiteKeywords =
+  'Textbus, 富文本编辑器, 协同文档, 多人协作, 富文本框架, 富文本组件, wysiwyg, rich text editor, 所见即所得富文本编辑器'
+
+const zhSiteDescription =
+  'Textbus 是一个支持多人在线协同编辑、组件化、数据驱动的富文本开发框架，同时也可以作为一个开箱即用的富文本编辑器，拥有非常好的扩展性和可定制性，是构建复杂富文本的不二之选！'
+
+/** 中文首页 SEO（仅中文版路由注入） */
+const zhDocHead: HeadConfig[] = [
+  ['meta', { name: 'keywords', content: zhSiteKeywords }],
+  ['meta', { name: 'description', content: zhSiteDescription }],
+]
+
+const enSiteKeywords =
+  'Textbus, rich text editor, collaborative editing, WYSIWYG, rich text framework, rich text components, wysiwyg'
+
+const enSiteDescription =
+  'Textbus is a component-based, data-driven rich text framework with real-time collaboration. Use it as a library or as an editor shell—highly extensible for complex rich text.'
+
+const enDocHead: HeadConfig[] = [
+  ['meta', { name: 'keywords', content: enSiteKeywords }],
+  ['meta', { name: 'description', content: enSiteDescription }],
+]
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 
@@ -186,8 +225,11 @@ const searchLocales = {
 } as const
 
 export default defineConfig({
-  cleanUrls: true,
+  /** `false`：构建产物与站内链接使用 `.html` 后缀（如 `/guide/introduction.html`）；`true` 则为无后缀的“清爽”URL。 */
+  cleanUrls: false,
   vite: viteShared,
+
+  head: [...gtagHead],
 
   /** Local search plugin initializes only when `provider` exists on shared themeConfig; i18n strings live in `options.locales`. */
   themeConfig: {
@@ -205,8 +247,9 @@ export default defineConfig({
     root: {
       label: '简体中文',
       lang: 'zh-CN',
-      title: 'Textbus',
-      description: '组件化、跨平台的富文本框架',
+      title: 'Textbus 富文本编辑器',
+      description: zhSiteDescription,
+      head: [...zhDocHead],
       themeConfig: {
         logo: { src: '/logo.png', alt: 'Textbus' },
         siteTitle: false,
@@ -238,7 +281,8 @@ export default defineConfig({
       lang: 'en-US',
       link: '/en/',
       title: 'Textbus',
-      description: 'A component-based, cross-platform rich text framework.',
+      description: enSiteDescription,
+      head: [...enDocHead],
       themeConfig: {
         logo: { src: '/logo.png', alt: 'Textbus' },
         siteTitle: false,

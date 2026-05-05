@@ -9,4 +9,4 @@ This package adds **multi-user collaborative editing** for Textbus (including Yj
 
 ### Documentation
 
-More docs: [textbus.io](https://textbus.io) · [English](https://textbus.io/en/)
+More docs: [textbus.io](https://textbus.io) · [English](https://textbus.io/en/index.html)

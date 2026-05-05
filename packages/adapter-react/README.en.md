@@ -11,4 +11,4 @@ Bridges Textbus to **React** for rendering rich text views.
 npm install @textbus/adapter-react
 ```
 
-Documentation: [textbus.io](https://textbus.io) · [English](https://textbus.io/en/)
+Documentation: [textbus.io](https://textbus.io) · [English](https://textbus.io/en/index.html)

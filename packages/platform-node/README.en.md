@@ -9,4 +9,4 @@ This package provides **Node.js** adapters and helpers for Textbus—for example
 
 ### Documentation
 
-More docs: [textbus.io](https://textbus.io) · [English](https://textbus.io/en/)
+More docs: [textbus.io](https://textbus.io) · [English](https://textbus.io/en/index.html)

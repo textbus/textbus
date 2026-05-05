@@ -11,4 +11,4 @@ Bridges Textbus to **Vue** for rendering rich text views.
 npm install @textbus/adapter-vue
 ```
 
-Documentation: [textbus.io](https://textbus.io) · [English](https://textbus.io/en/)
+Documentation: [textbus.io](https://textbus.io) · [English](https://textbus.io/en/index.html)
