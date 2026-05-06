@@ -144,13 +144,14 @@ async function bootstrap(): Promise<void> {
     return
   }
 
+  /** 装饰器元数据须在 XNote 模块求值前就绪 */
   await import('reflect-metadata')
 
-  const [{ default: iconsCssHref }, { default: xnoteCssHref }] = await Promise.all([
-    import('bootstrap-icons/font/bootstrap-icons.css?url'),
+  /** 在 reflect-metadata 之后，并行拉取 XNote 样式与主包，缩短首屏可交互时间 */
+  const [{ default: xnoteCssHref }, xnoteMod] = await Promise.all([
     import('@textbus/xnote/style.css?url'),
+    import('@textbus/xnote'),
   ])
-  injectStylesheet(iconsCssHref)
   injectStylesheet(xnoteCssHref)
 
   if (cancelled) {
@@ -158,7 +159,7 @@ async function bootstrap(): Promise<void> {
     return
   }
 
-  const { Editor, StaticToolbarPlugin, Organization } = await import('@textbus/xnote')
+  const { Editor, StaticToolbarPlugin, Organization } = xnoteMod
 
   if (cancelled) {
     removeInjectedStylesheets()
@@ -253,28 +254,97 @@ async function bootstrap(): Promise<void> {
         <div class="ui-row group">
           <div class="ui-col-sm-12 ui-col-lg-6">
             <div class="icon">
-              <i class="bi bi-lightning-charge-fill"/>
+              <span class="tb-io-home__feat-icon" aria-hidden="true">
+                <svg class="tb-io-home__feat-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"
+                  />
+                </svg>
+              </span>
               <h3>{{ homeCopy.feat1h }}</h3>
             </div>
             <p v-html="homeCopy.feat1p" />
           </div>
           <div class="ui-col-sm-12 ui-col-lg-6">
             <div class="icon">
-              <i class="bi bi-shield-fill-check"/>
+              <span class="tb-io-home__feat-icon" aria-hidden="true">
+                <svg class="tb-io-home__feat-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"
+                  />
+                  <path
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="m9 12 2 2 4-4"
+                  />
+                </svg>
+              </span>
               <h3>{{ homeCopy.feat2h }}</h3>
             </div>
             <p>{{ homeCopy.feat2p }}</p>
           </div>
           <div class="ui-col-sm-12 ui-col-lg-6">
             <div class="icon">
-              <i class="bi bi-brightness-high-fill"/>
+              <span class="tb-io-home__feat-icon" aria-hidden="true">
+                <svg class="tb-io-home__feat-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+                  />
+                  <circle cx="9" cy="7" r="4" fill="none" stroke="currentColor" stroke-width="2" />
+                  <path
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
+                  />
+                </svg>
+              </span>
               <h3>{{ homeCopy.feat3h }}</h3>
             </div>
             <p>{{ homeCopy.feat3p }}</p>
           </div>
           <div class="ui-col-sm-12 ui-col-lg-6">
             <div class="icon">
-              <i class="bi bi-cursor-fill"/>
+              <span class="tb-io-home__feat-icon" aria-hidden="true">
+                <svg class="tb-io-home__feat-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"
+                  />
+                  <path
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="m13 13 6 6"
+                  />
+                </svg>
+              </span>
               <h3>{{ homeCopy.feat4h }}</h3>
             </div>
             <p>{{ homeCopy.feat4p }}</p>
@@ -520,11 +590,18 @@ async function bootstrap(): Promise<void> {
   align-items: center;
 }
 
-.desc .icon i {
-  font-size: 40px;
+.desc .icon .tb-io-home__feat-icon {
+  display: inline-flex;
   margin-right: 0.5em;
   color: var(--vp-c-text-2);
   opacity: 0.9;
+  flex-shrink: 0;
+}
+
+.desc .icon .tb-io-home__feat-svg {
+  width: 40px;
+  height: 40px;
+  display: block;
 }
 
 .desc .group > div {

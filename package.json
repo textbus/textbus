@@ -69,7 +69,6 @@
     "@typescript-eslint/parser": "^5.8.0",
     "@viewfly/core": "^2.2.0 || ^3.0.0",
     "@viewfly/platform-browser": "^2.2.0 || ^3.0.0",
-    "bootstrap-icons": "^1.13.1",
     "cross-env": "^7.0.3",
     "esbuild-wasm": "^0.27.2",
     "eslint": "^8.5.0",
