@@ -22,8 +22,8 @@ importers:
         specifier: workspace:^
         version: link:packages/collaborate
       '@textbus/xnote':
-        specifier: ^1.2.3
-        version: 1.2.3(@textbus/adapter-viewfly@5.2.7)(@textbus/collaborate@packages+collaborate)(@textbus/core@5.2.7)(@textbus/platform-browser@5.2.7)(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)
+        specifier: ^1.2.4
+        version: 1.2.4(@textbus/adapter-viewfly@5.2.7)(@textbus/collaborate@packages+collaborate)(@textbus/core@5.2.7)(@textbus/platform-browser@5.2.7)(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)
       '@types/jest':
         specifier: ^27.0.3
         version: 27.5.2
@@ -1623,8 +1623,8 @@ packages:
   '@textbus/platform-node@5.2.7':
     resolution: {integrity: sha512-KYL1Xxe1Xph1t1SpbaerJj9KK3KhY6rrF+Jx014zrvc0W57NBG0Jx18nkqHRWMXnyCQrdsom7fvPS+bxSUWKVw==}
 
-  '@textbus/xnote@1.2.3':
-    resolution: {integrity: sha512-IbO6LAS67RkSi/IsvY44OweIl3KoMhQAa28g5FFQ1ljN1NcScw/tZsCZxtZvI5ZetQJa8qaL7FNBDaRgbrq7qA==}
+  '@textbus/xnote@1.2.4':
+    resolution: {integrity: sha512-aMwxkVOjl+M/T6cGm/n+CwM/ETxPT3AnaLKPycl0mFIoqZkOuuFle/ZRfQ1xShBNZ+xkGnG2B++aSUzPBTKi7A==}
     peerDependencies:
       '@textbus/adapter-viewfly': ^5.2.7
       '@textbus/collaborate': ^5.2.7
@@ -5646,7 +5646,7 @@ snapshots:
       '@viewfly/core': 3.0.1
       '@viewfly/platform-browser': 3.0.1
 
-  '@textbus/xnote@1.2.3(@textbus/adapter-viewfly@5.2.7)(@textbus/collaborate@packages+collaborate)(@textbus/core@5.2.7)(@textbus/platform-browser@5.2.7)(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)':
+  '@textbus/xnote@1.2.4(@textbus/adapter-viewfly@5.2.7)(@textbus/collaborate@packages+collaborate)(@textbus/core@5.2.7)(@textbus/platform-browser@5.2.7)(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)':
     dependencies:
       '@tanbo/color': 0.1.1
       '@textbus/adapter-viewfly': 5.2.7
