@@ -7,27 +7,49 @@
   max-width: 100%;
 }
 
-/** `/playground` 产品页：无右侧大纲、主内容居中 */
-#VPContent.tb-layout-playground {
+/**
+ * `/playground`：画布色与主内容宽度。
+ * 必须用 `frontmatter.pageClass`（挂在 `.Layout` 上）：`theme/index.ts` 里在 `onAfterRouteChange`
+ * 同步 `#VPContent` 类名时，首屏 `router.go()` 尚未 `app.mount()`，`#VPContent` 不存在，JS 永远不会加上类。
+ * `cleanUrls: false` 时路由还可能为 `/playground.html`，不能只对 `/playground` 做字符串相等。
+ */
+.Layout.tb-page-playground {
+  --tb-playground-canvas: #f2f4f8;
+  background-color: var(--tb-playground-canvas);
+}
+
+.dark .Layout.tb-page-playground {
+  --tb-playground-canvas: #1c1c1f;
+}
+
+.Layout.tb-page-playground .VPDoc,
+.Layout.tb-page-playground .VPDoc .container,
+.Layout.tb-page-playground .VPDoc .content,
+.Layout.tb-page-playground .VPDoc .content-container,
+.Layout.tb-page-playground .VPDoc .main {
+  background-color: var(--tb-playground-canvas);
+}
+
+.Layout.tb-page-playground #VPContent {
   width: 100%;
   max-width: 100%;
 }
 
-#VPContent.tb-layout-playground .VPDoc {
+.Layout.tb-page-playground .VPDoc {
   padding-top: 24px;
 }
 
-#VPContent.tb-layout-playground .VPDoc:not(.has-sidebar) .container {
+.Layout.tb-page-playground .VPDoc:not(.has-sidebar) .container {
   max-width: 1200px;
   margin-inline: auto;
 }
 
-#VPContent.tb-layout-playground .VPDoc:not(.has-sidebar) .content,
-#VPContent.tb-layout-playground .VPDoc:not(.has-sidebar) .content-container {
+.Layout.tb-page-playground .VPDoc:not(.has-sidebar) .content,
+.Layout.tb-page-playground .VPDoc:not(.has-sidebar) .content-container {
   max-width: 100%;
 }
 
-#VPContent.tb-layout-playground .VPDoc .main {
+.Layout.tb-page-playground .VPDoc .main {
   margin-inline: auto;
   width: 100%;
   max-width: 960px;

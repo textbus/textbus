@@ -4,9 +4,17 @@ import TextbusIoHome from './components/TextbusIoHome.vue'
 import TextbusPlayground from './components/TextbusPlayground.vue'
 import './custom.css'
 
-function normalizeRoutePath(path: string): string {
-  const p = path.replace(/\/$/, '') || '/'
-  return p === '/en' ? '/en' : p
+/** `cleanUrls: false` 时为 `*.html`；去掉尾部 `/` 与 `.html` 再比较逻辑路径。 */
+function logicalRoutePath(path: string): string {
+  let p = path.replace(/\/$/, '') || '/'
+  p = p.replace(/\.html$/i, '')
+  if (p.endsWith('/index')) {
+    p = p.slice(0, -6) || '/'
+  }
+  if (p === '/index') {
+    p = '/'
+  }
+  return p
 }
 
 /** Wide layout flags on #VPContent — avoid `:has()` in CSS (older browsers / strict parsers). */
@@ -15,11 +23,9 @@ function syncVpLayoutClasses(routePath: string): void {
   if (!el) {
     return
   }
-  const p = normalizeRoutePath(routePath)
+  const p = logicalRoutePath(routePath)
   const isHome = p === '/' || p === '/en'
-  const isPlayground = p === '/playground' || p === '/en/playground'
   el.classList.toggle('tb-layout-home', isHome)
-  el.classList.toggle('tb-layout-playground', isPlayground)
 }
 
 export default {
@@ -32,8 +38,9 @@ export default {
       const prev = router.onAfterRouteChange
       router.onAfterRouteChange = async (to) => {
         await prev?.(to)
-        // VitePress Router updates `route` before this hook runs (see `go` / `popstate`).
-        requestAnimationFrame(() => syncVpLayoutClasses(router.route.path))
+        const path = router.route.path
+        // `onAfterRouteChange` 在首次 `router.go()` 里早于 `app.mount()`，`#VPContent` 尚不存在；推迟到宏任务再同步。
+        setTimeout(() => syncVpLayoutClasses(path), 0)
       }
     }
   },
