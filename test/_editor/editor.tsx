@@ -8,6 +8,9 @@ import { RootComponent, RootComponentView } from './components/root.component'
 import { ParagraphComponent, ParagraphComponentView } from './components/paragraph.component'
 import { InlineComponent, InlineComponentView } from './components/inline.component'
 import { ZenBlock, ZenBlockView } from './components/zen-block.component'
+import { JsonProbeInline, JsonProbeInlineView } from './components/json-probe-inline.component'
+import { JsonProbeBlock, JsonProbeBlockView } from './components/json-probe-block.component'
+import { JsonAsyncProbe, JsonAsyncProbeView } from './components/json-async-probe.component'
 import { boldFormatter } from './formatters/bold.formatter'
 import { fontSizeFormatter } from './formatters/font-size.formatter'
 import { textAlignAttribute } from './attributes/text-align.attribute'
@@ -21,7 +24,10 @@ export class Editor extends Textbus {
       [RootComponent.componentName]: RootComponentView,
       [ParagraphComponent.componentName]: ParagraphComponentView,
       [InlineComponent.componentName]: InlineComponentView,
-      [ZenBlock.componentName]: ZenBlockView
+      [ZenBlock.componentName]: ZenBlockView,
+      [JsonProbeInline.componentName]: JsonProbeInlineView,
+      [JsonProbeBlock.componentName]: JsonProbeBlockView,
+      [JsonAsyncProbe.componentName]: JsonAsyncProbeView
     }, (host, root, textbus) => {
       const app = createApp(root, {
         context: textbus
@@ -43,7 +49,10 @@ export class Editor extends Textbus {
       [RootComponent.componentName]: RootComponentView,
       [ParagraphComponent.componentName]: ParagraphComponentView,
       [InlineComponent.componentName]: InlineComponentView,
-      [ZenBlock.componentName]: ZenBlockView
+      [ZenBlock.componentName]: ZenBlockView,
+      [JsonProbeInline.componentName]: JsonProbeInlineView,
+      [JsonProbeBlock.componentName]: JsonProbeBlockView,
+      [JsonAsyncProbe.componentName]: JsonAsyncProbeView
     } as any, (host, root, injector) => {
       const appInjector = new ReflectiveInjector(injector, [{
         provide: DomAdapter,
@@ -71,7 +80,10 @@ export class Editor extends Textbus {
         RootComponent,
         ParagraphComponent,
         InlineComponent,
-        ZenBlock
+        ZenBlock,
+        JsonProbeInline,
+        JsonProbeBlock,
+        JsonAsyncProbe
       ],
       formatters: [
         boldFormatter,
