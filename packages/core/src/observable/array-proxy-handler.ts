@@ -1,6 +1,6 @@
 import { ObjectProxyHandler } from './object-proxy-handler'
 import { Model, observe, toRaw, toRaws } from './observe'
-import { attachModel, detachModel, getChangeMarker, getObserver } from './help'
+import { attachModel, detachModel, getChangeMarker, getObserver, isModel } from './help'
 import { valueToJSON } from './util'
 
 function toSubModels(items: any[], parentModel: Model) {
@@ -11,9 +11,104 @@ function toSubModels(items: any[], parentModel: Model) {
   })
 }
 
+/** 从 oldArr 中多出的引用（相对 newArr 多重集）执行 detach */
+function detachMultisetsDifference(oldArr: readonly any[], newArr: readonly any[]) {
+  const counts = new Map<any, number>()
+  for (const item of newArr) {
+    const r = toRaw(item)
+    counts.set(r, (counts.get(r) || 0) + 1)
+  }
+  for (const item of oldArr) {
+    const r = toRaw(item)
+    const c = counts.get(r) || 0
+    if (c <= 0) {
+      detachModel(item)
+    } else {
+      counts.set(r, c - 1)
+    }
+  }
+}
+
+function defaultSortCompare(a: unknown, b: unknown): number {
+  const sa = String(a)
+  const sb = String(b)
+  return sa < sb ? -1 : sa > sb ? 1 : 0
+}
+
+function markArrayFullReplace(
+  self: Model,
+  changeMarker: NonNullable<ReturnType<typeof getChangeMarker>>,
+  source: any[],
+  beforeSnapshot: any[]
+) {
+  const lenBefore = beforeSnapshot.length
+  const lenAfter = source.length
+  const beforeJSON = valueToJSON(beforeSnapshot)
+  const subModels = source.map(item => {
+    const m = observe(item)
+    attachModel(self, m)
+    return m
+  })
+  changeMarker.markAsDirtied({
+    paths: [],
+    apply: [{
+      type: 'retain',
+      offset: 0
+    }, {
+      type: 'delete',
+      count: lenBefore
+    }, {
+      type: 'insert',
+      data: valueToJSON(source),
+      ref: subModels,
+    }],
+    unApply: [{
+      type: 'retain',
+      offset: 0
+    }, {
+      type: 'delete',
+      count: lenAfter
+    }, {
+      type: 'insert',
+      data: beforeJSON,
+      ref: null
+    }]
+  })
+}
+
+function asObservableReturn<T>(v: T): T {
+  if (v === null || v === undefined) {
+    return v
+  }
+  if (typeof v !== 'object') {
+    return v
+  }
+  return observe(v as object) as T
+}
+
+/** 普通数组，元素中的对象/数组/模型转为可观察引用（数组本身不 observe） */
+function plainArrayWithObservableMembers(items: any[]): any[] {
+  const len = items.length
+  const out: any[] = new Array(len)
+  for (let i = 0; i < len; i++) {
+    if (i in items) {
+      out[i] = asObservableReturn(items[i])
+    }
+  }
+  return out
+}
+
 function applySearchMethod(self: any, methodName: string, args: unknown[]) {
   const target = toRaw(self)
   return target[methodName](...args.map(toRaw))
+}
+
+/** 原生 reduce 传入的 previousValue 可能是底层 raw，若在缓存中有对应 proxy 则换成可观察引用 */
+function wrapAccumulator(acc: any): any {
+  if (acc === null || typeof acc !== 'object') {
+    return acc
+  }
+  return getObserver(toRaw(acc as object)) ?? acc
 }
 
 const arrayMethodsHandlers = {
@@ -26,6 +121,214 @@ const arrayMethodsHandlers = {
   includes(...args: unknown[]) {
     return applySearchMethod(this, 'includes', args)
   },
+  toString(this: any) {
+    return applySearchMethod(this, 'toString', [])
+  },
+  toLocaleString(this: any, ...args: unknown[]) {
+    return applySearchMethod(this, 'toLocaleString', args)
+  },
+
+  slice(...args: unknown[]) {
+    return plainArrayWithObservableMembers(applySearchMethod(this, 'slice', args))
+  },
+  concat(...args: unknown[]) {
+    return plainArrayWithObservableMembers(applySearchMethod(this, 'concat', args))
+  },
+  flat(...args: unknown[]) {
+    return plainArrayWithObservableMembers(applySearchMethod(this, 'flat', args))
+  },
+  flatMap(this: any, callbackfn: (...args: any[]) => any, thisArg?: any) {
+    const t = toRaw(this) as any[]
+    const self = this
+    const raw = Array.prototype.flatMap.call(t, function (x: any, i: number) {
+      if (!(i in t)) {
+        return []
+      }
+      return callbackfn.call(thisArg, asObservableReturn(x), i, self)
+    })
+    return plainArrayWithObservableMembers(raw)
+  },
+  map(this: any, callbackfn: (...args: any[]) => any, thisArg?: any) {
+    const t = toRaw(this) as any[]
+    const self = this
+    const out = new Array(t.length)
+    for (let i = 0; i < t.length; i++) {
+      const v = i in t ? t[i] : undefined
+      out[i] = callbackfn.call(thisArg, asObservableReturn(v as any), i, self)
+    }
+    return plainArrayWithObservableMembers(out)
+  },
+  filter(this: any, predicate: (...args: any[]) => unknown, thisArg?: any) {
+    const t = toRaw(this) as any[]
+    const self = this
+    const picked: any[] = []
+    for (let i = 0; i < t.length; i++) {
+      if (i in t && predicate.call(thisArg, asObservableReturn(t[i]), i, self)) {
+        picked.push(t[i])
+      }
+    }
+    return plainArrayWithObservableMembers(picked)
+  },
+  find(this: any, predicate: (...args: any[]) => unknown, thisArg?: any) {
+    const t = toRaw(this) as any[]
+    const self = this
+    for (let i = 0; i < t.length; i++) {
+      if (i in t && predicate.call(thisArg, asObservableReturn(t[i]), i, self)) {
+        return asObservableReturn(t[i])
+      }
+    }
+    return undefined
+  },
+  findIndex(this: any, predicate: (...args: any[]) => unknown, thisArg?: any) {
+    const t = toRaw(this) as any[]
+    const self = this
+    for (let i = 0; i < t.length; i++) {
+      if (i in t && predicate.call(thisArg, asObservableReturn(t[i]), i, self)) {
+        return i
+      }
+    }
+    return -1
+  },
+  findLast(this: any, predicate: (...args: any[]) => unknown, thisArg?: any) {
+    const t = toRaw(this) as any[]
+    const self = this
+    for (let i = t.length - 1; i >= 0; i--) {
+      if (i in t && predicate.call(thisArg, asObservableReturn(t[i]), i, self)) {
+        return asObservableReturn(t[i])
+      }
+    }
+    return undefined
+  },
+  findLastIndex(this: any, predicate: (...args: any[]) => unknown, thisArg?: any) {
+    const t = toRaw(this) as any[]
+    const self = this
+    for (let i = t.length - 1; i >= 0; i--) {
+      if (i in t && predicate.call(thisArg, asObservableReturn(t[i]), i, self)) {
+        return i
+      }
+    }
+    return -1
+  },
+  at(this: any, ...args: unknown[]) {
+    return asObservableReturn(applySearchMethod(this, 'at', args))
+  },
+  forEach(this: any, callbackfn: (...args: any[]) => void, thisArg?: any) {
+    const t = toRaw(this) as any[]
+    const self = this
+    for (let i = 0; i < t.length; i++) {
+      const v = i in t ? t[i] : undefined
+      callbackfn.call(thisArg, asObservableReturn(v as any), i, self)
+    }
+  },
+  every(this: any, predicate: (...args: any[]) => unknown, thisArg?: any) {
+    const t = toRaw(this) as any[]
+    const self = this
+    for (let i = 0; i < t.length; i++) {
+      if (i in t && !predicate.call(thisArg, asObservableReturn(t[i]), i, self)) {
+        return false
+      }
+    }
+    return true
+  },
+  some(this: any, predicate: (...args: any[]) => unknown, thisArg?: any) {
+    const t = toRaw(this) as any[]
+    const self = this
+    for (let i = 0; i < t.length; i++) {
+      if (i in t && predicate.call(thisArg, asObservableReturn(t[i]), i, self)) {
+        return true
+      }
+    }
+    return false
+  },
+  reduce(this: any, callbackfn: (p: any, c: any, i: number, a: any) => any, ...initial: any[]) {
+    const t = toRaw(this) as any[]
+    const self = this
+    const wrap = (acc: any, cur: any, i: number, _arr: any[]) =>
+      callbackfn(wrapAccumulator(acc), i in t ? asObservableReturn(cur) : cur, i, self)
+    const reduceFn = Array.prototype.reduce as (
+      this: any[],
+      callbackfn: (previousValue: any, currentValue: any, currentIndex: number, array: any[]) => any,
+      initialValue?: any
+    ) => any
+    return initial.length === 0
+      ? reduceFn.call(t, wrap)
+      : reduceFn.call(t, wrap, initial[0])
+  },
+  reduceRight(this: any, callbackfn: (p: any, c: any, i: number, a: any) => any, ...initial: any[]) {
+    const t = toRaw(this) as any[]
+    const self = this
+    const wrap = (acc: any, cur: any, i: number, _arr: any[]) =>
+      callbackfn(wrapAccumulator(acc), i in t ? asObservableReturn(cur) : cur, i, self)
+    const reduceRightFn = Array.prototype.reduceRight as (
+      this: any[],
+      callbackfn: (previousValue: any, currentValue: any, currentIndex: number, array: any[]) => any,
+      initialValue?: any
+    ) => any
+    return initial.length === 0
+      ? reduceRightFn.call(t, wrap)
+      : reduceRightFn.call(t, wrap, initial[0])
+  },
+  * entries(this: any): IterableIterator<[number, any]> {
+    const t = toRaw(this) as any[]
+    const len = t.length
+    for (let i = 0; i < len; i++) {
+      const v = i in t ? t[i] : undefined
+      yield [i, asObservableReturn(v as any)]
+    }
+  },
+  * values(this: any): IterableIterator<any> {
+    const t = toRaw(this) as any[]
+    const len = t.length
+    for (let i = 0; i < len; i++) {
+      const v = i in t ? t[i] : undefined
+      yield asObservableReturn(v as any)
+    }
+  },
+  * [Symbol.iterator](this: any): IterableIterator<any> {
+    const t = toRaw(this) as any[]
+    const len = t.length
+    for (let i = 0; i < len; i++) {
+      const v = i in t ? t[i] : undefined
+      yield asObservableReturn(v as any)
+    }
+  },
+  toReversed(this: any) {
+    const t = toRaw(this) as any[]
+    const raw = typeof (Array.prototype as any).toReversed === 'function'
+      ? (Array.prototype as any).toReversed.call(t)
+      : [...t].reverse()
+    return plainArrayWithObservableMembers(raw)
+  },
+  toSorted(this: any, compareFn?: (a: any, b: any) => number) {
+    const t = toRaw(this) as any[]
+    const raw = typeof (Array.prototype as any).toSorted === 'function'
+      ? (Array.prototype as any).toSorted.call(t, compareFn)
+      : [...t].sort(compareFn)
+    return plainArrayWithObservableMembers(raw)
+  },
+  toSpliced(this: any, start: number, deleteCount: number, ...items: any[]) {
+    const t = toRaw(this) as any[]
+    const raw = typeof (Array.prototype as any).toSpliced === 'function'
+      ? (Array.prototype as any).toSpliced.call(t, start, deleteCount, ...toRaws(items))
+      : (() => {
+        const c = [...t]
+        c.splice(start, deleteCount, ...toRaws(items))
+        return c
+      })()
+    return plainArrayWithObservableMembers(raw)
+  },
+  with(this: any, index: number, value: any) {
+    const t = toRaw(this) as any[]
+    const raw = typeof (Array.prototype as any).with === 'function'
+      ? (Array.prototype as any).with.call(t, index, toRaw(value))
+      : (() => {
+        const c = [...t]
+        c[index] = toRaw(value)
+        return c
+      })()
+    return plainArrayWithObservableMembers(raw)
+  },
+
   push(this: any, ...items: any[]): number {
     items = toRaws(items)
     const target = toRaw(this) as any[]
@@ -79,7 +382,7 @@ const arrayMethodsHandlers = {
         ref: null
       }]
     })
-    return item
+    return asObservableReturn(item)
   },
   shift(this: any): any | undefined {
     const source = toRaw(this) as any[]
@@ -109,7 +412,7 @@ const arrayMethodsHandlers = {
         ref: null,
       }]
     })
-    return item
+    return asObservableReturn(item)
   },
   unshift(this: any, ...items: any[]): number {
     const source = toRaw(this) as any[]
@@ -167,21 +470,6 @@ const arrayMethodsHandlers = {
       }, {
         type: 'delete',
         count: deletedItems.length
-      }],
-      unApply: [{
-        type: 'retain',
-        offset: start
-      }, {
-        type: 'insert',
-        data: valueToJSON(deletedItems),
-        ref: null,
-      }]
-    })
-    changeMarker.markAsDirtied({
-      paths: [],
-      apply: [{
-        type: 'retain',
-        offset: start
       }, {
         type: 'insert',
         data: valueToJSON(items),
@@ -193,42 +481,156 @@ const arrayMethodsHandlers = {
       }, {
         type: 'delete',
         count: items.length
+      }, {
+        type: 'insert',
+        data: valueToJSON(deletedItems),
+        ref: null
       }]
     })
-    return deletedItems
+    return deletedItems.map(asObservableReturn)
   },
-  // sort(compareFn?: (a: T, b: T) => number): this {
-  // },
-  // reverse(): T[] {
-  // },
-  // fill(value: T, start?: number, end?: number): this {
-  // },
-  // copyWithin(target: number, start: number, end?: number): this {
-  // }
+  sort(this: any, compareFn?: (a: any, b: any) => number): any {
+    const source = toRaw(this) as any[]
+    const before = [...source]
+    const self = this as Model
+    const wrapForCompare = (x: any) => {
+      if (x === null || typeof x !== 'object') {
+        return x
+      }
+      const m = observe(x)
+      if (isModel(m)) {
+        attachModel(self, m)
+      }
+      return m
+    }
+    if (compareFn) {
+      Array.prototype.sort.call(source, (a, b) => compareFn(wrapForCompare(a), wrapForCompare(b)))
+    } else {
+      Array.prototype.sort.call(source, (a, b) => defaultSortCompare(toRaw(a), toRaw(b)))
+    }
+    if (valueToJSON(before) === valueToJSON(source)) {
+      return this
+    }
+    const changeMarker = getChangeMarker(this)!
+    changeMarker.beforeChange()
+    detachMultisetsDifference(before, source)
+    markArrayFullReplace(self, changeMarker, source, before)
+    return this
+  },
+  reverse(this: any): any {
+    const source = toRaw(this) as any[]
+    const before = [...source]
+    Array.prototype.reverse.call(source)
+    if (valueToJSON(before) === valueToJSON(source)) {
+      return this
+    }
+    const changeMarker = getChangeMarker(this)!
+    changeMarker.beforeChange()
+    detachMultisetsDifference(before, source)
+    markArrayFullReplace(this as Model, changeMarker, source, before)
+    return this
+  },
+  fill(this: any, value: any, start?: number, end?: number): any {
+    const source = toRaw(this) as any[]
+    const before = [...source]
+    Array.prototype.fill.call(source, toRaw(value), start, end)
+    if (valueToJSON(before) === valueToJSON(source)) {
+      return this
+    }
+    const changeMarker = getChangeMarker(this)!
+    changeMarker.beforeChange()
+    detachMultisetsDifference(before, source)
+    markArrayFullReplace(this as Model, changeMarker, source, before)
+    return this
+  },
+  copyWithin(this: any, target: number, start: number, end?: number): any {
+    const source = toRaw(this) as any[]
+    const before = [...source]
+    Array.prototype.copyWithin.call(source, target, start, end)
+    if (valueToJSON(before) === valueToJSON(source)) {
+      return this
+    }
+    const changeMarker = getChangeMarker(this)!
+    changeMarker.beforeChange()
+    detachMultisetsDifference(before, source)
+    markArrayFullReplace(this as Model, changeMarker, source, before)
+    return this
+  }
 }
 
 export class ArrayProxyHandler<T extends Array<any>> extends ObjectProxyHandler<T> {
   override set(target: T, p: string | symbol, newValue: any, receiver: any): boolean {
     if (p === 'length') {
-      return Reflect.set(target, p, newValue, receiver)
-      // if (typeof newValue !== 'number' || Number.isNaN(newValue)) {
-      //   return Reflect.set(target, p, newValue, receiver)
-      // }
-      // const length = target.length
-      // const changeMarker = getObserver(target)!.__changeMarker__
-      // if (newValue > length) {
-      //   target.push(...new Array(newValue - length).fill(undefined))
-      //   changeMarker.markAsChanged({
-      //     paths: [],
-      //     apply: [{
-      //
-      //     }]
-      //   })
-      // }
+      const num = Number(newValue)
+      if (!Number.isFinite(num) || num < 0) {
+        return Reflect.set(target, p, newValue, receiver)
+      }
+      const newLen = num >>> 0
+      const oldLen = target.length
+      if (newLen === oldLen) {
+        return Reflect.set(target, p, newValue, receiver)
+      }
+      const changeMarker = getChangeMarker(target)!
+      changeMarker.beforeChange()
+      const parentModel = getObserver(target)!
+      const removedForUndo = newLen < oldLen ? target.slice(newLen) : []
+      if (newLen < oldLen) {
+        removedForUndo.forEach(el => detachModel(el))
+      }
+      const ok = Reflect.set(target, p, newValue, receiver)
+      if (!ok) {
+        return false
+      }
+      if (newLen < oldLen) {
+        changeMarker.markAsDirtied({
+          paths: [],
+          apply: [{
+            type: 'retain',
+            offset: newLen
+          }, {
+            type: 'delete',
+            count: oldLen - newLen
+          }],
+          unApply: [{
+            type: 'retain',
+            offset: newLen
+          }, {
+            type: 'insert',
+            data: valueToJSON(removedForUndo),
+            ref: null
+          }]
+        })
+      } else {
+        const newTail: any[] = []
+        for (let i = oldLen; i < newLen; i++) {
+          newTail.push((target as any)[i])
+        }
+        const subModels = toSubModels(newTail, parentModel)
+        changeMarker.markAsDirtied({
+          paths: [],
+          apply: [{
+            type: 'retain',
+            offset: oldLen
+          }, {
+            type: 'insert',
+            data: valueToJSON(newTail),
+            ref: subModels,
+          }],
+          unApply: [{
+            type: 'retain',
+            offset: oldLen
+          }, {
+            type: 'delete',
+            count: newLen - oldLen
+          }]
+        })
+      }
+      return ok
     }
     if (/^(0|[1-9]\d*)$/.test(p as string)) {
       newValue = toRaw(newValue)
       const oldValue = Reflect.get(target, p)
+      const lengthBefore = target.length
       detachModel(oldValue)
       const b = Reflect.set(target, p, newValue, receiver)
       if (newValue === oldValue) {
@@ -252,11 +654,12 @@ export class ArrayProxyHandler<T extends Array<any>> extends ObjectProxyHandler<
         unApply: [{
           type: 'setIndex',
           index,
-          afterLength: length,
+          afterLength: lengthBefore,
           value: valueToJSON(oldValue),
           ref: null
         }]
       })
+      return b
     }
 
     return super.set(target, p, newValue, receiver)
