@@ -7,6 +7,7 @@ import { ReflectiveInjector } from '@viewfly/core'
 import { RootComponent, RootComponentView } from './components/root.component'
 import { ParagraphComponent, ParagraphComponentView } from './components/paragraph.component'
 import { InlineComponent, InlineComponentView } from './components/inline.component'
+import { ZenBlock, ZenBlockView } from './components/zen-block.component'
 import { boldFormatter } from './formatters/bold.formatter'
 import { fontSizeFormatter } from './formatters/font-size.formatter'
 import { textAlignAttribute } from './attributes/text-align.attribute'
@@ -20,6 +21,7 @@ export class Editor extends Textbus {
       [RootComponent.componentName]: RootComponentView,
       [ParagraphComponent.componentName]: ParagraphComponentView,
       [InlineComponent.componentName]: InlineComponentView,
+      [ZenBlock.componentName]: ZenBlockView
     }, (host, root, textbus) => {
       const app = createApp(root, {
         context: textbus
@@ -41,6 +43,7 @@ export class Editor extends Textbus {
       [RootComponent.componentName]: RootComponentView,
       [ParagraphComponent.componentName]: ParagraphComponentView,
       [InlineComponent.componentName]: InlineComponentView,
+      [ZenBlock.componentName]: ZenBlockView
     } as any, (host, root, injector) => {
       const appInjector = new ReflectiveInjector(injector, [{
         provide: DomAdapter,
@@ -67,7 +70,8 @@ export class Editor extends Textbus {
       components: [
         RootComponent,
         ParagraphComponent,
-        InlineComponent
+        InlineComponent,
+        ZenBlock
       ],
       formatters: [
         boldFormatter,
