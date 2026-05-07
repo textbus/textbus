@@ -4,9 +4,15 @@ module.exports = {
     '<rootDir>/test'
   ],
   setupFiles: ['jest-canvas-mock'],
+  setupFilesAfterEnv: ['<rootDir>/test/jest-polyfills.ts'],
   testRegex: 'test/(.+)\\.spec\\.(jsx?|tsx?)$',
   transform: {
-    '^.+\\.tsx?$': 'ts-jest'
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        tsconfig: '<rootDir>/tsconfig.test.json'
+      }
+    ]
   },
   testEnvironment: 'jsdom',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],

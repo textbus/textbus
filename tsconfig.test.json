@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "paths": {
+      "@textbus/platform-browser": ["./packages/platform-browser/src/index.ts"],
+      "@textbus/platform-node": ["./packages/platform-node/src/index.ts"],
+      "@textbus/core": ["./packages/core/src/index.ts"],
+      "@textbus/collaborate": ["./packages/collaborate/src/index.ts"],
+      "@textbus/adapter-viewfly": ["./packages/adapter-viewfly/src/index.ts"],
+      "@textbus/adapter-react": ["./packages/adapter-react/src/index.ts"],
+      "@textbus/adapter-vue": ["./packages/adapter-vue/src/index.ts"],
+      "@viewfly/core/jsx-runtime": ["./node_modules/@viewfly/core/dist/jsx-runtime/index.d.ts"],
+      "@viewfly/core/jsx-dev-runtime": ["./node_modules/@viewfly/core/dist/jsx-runtime/index.d.ts"]
+    }
+  },
+  "include": ["test/**/*", "packages/**/*.ts", "packages/**/*.tsx"],
+  "exclude": ["**/node_modules/**", "**/dist/**"]
+}
