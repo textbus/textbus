@@ -10,6 +10,8 @@ import {
 import { Collaborate, CollaborateHistorySelectionPosition, CursorPosition } from './collaborate'
 
 export abstract class CustomUndoManagerConfig {
+  abstract captureTimeout?: number
+
   abstract captureTransaction?(arg0: Transaction): boolean
 
   abstract deleteFilter?(arg0: Item): boolean
@@ -62,6 +64,7 @@ export class CollabHistory implements History {
 
     const undoManagerConfig = this.undoManagerConfig || {}
     const manager = new UndoManager(root, {
+      captureTimeout: typeof undoManagerConfig.captureTimeout === 'number' ? undoManagerConfig.captureTimeout : 500,
       trackedOrigins: new Set<any>([this.collaborate.yDoc]),
       captureTransaction(arg) {
         if (undoManagerConfig.captureTransaction) {

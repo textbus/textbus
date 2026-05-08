@@ -65,7 +65,7 @@ export class MultipleDocCollabHistory implements History {
     this.listenItem(root, this.collaborate.yDoc)
 
     this.subscription.add(
-      this.collaborate.onAddSubModel.subscribe(({ yType, yDoc }) => {
+      this.collaborate.onAddSubModel.subscribe(({yType, yDoc}) => {
         if (this.subDocs.has(yType)) {
           return
         }
@@ -195,7 +195,7 @@ export class MultipleDocCollabHistory implements History {
             this.stackItem = null
             this.pushEvent.next()
             this.changeEvent.next()
-          }, 500)
+          }, typeof undoManagerConfig.captureTimeout === 'number' ? undoManagerConfig.captureTimeout : 500)
         }
 
         this.stackItem.undoManagers.push(undoManager)
