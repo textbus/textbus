@@ -15,6 +15,8 @@ import { DomAdapter } from '@textbus/platform-browser'
 export interface JsonAsyncProbeMeta extends Metadata {
   rev: number
   source: string
+  /** 多子文档测试中由 SubModelLoader 写入，用于缓存子 Y.Doc */
+  docId?: string
 }
 
 export interface JsonAsyncProbeState {
@@ -31,7 +33,10 @@ export class JsonAsyncProbe extends AsyncComponent<JsonAsyncProbeMeta, JsonAsync
 
   static fromJSONAndMetadata(textbus: Textbus, data: JsonAsyncProbeStateLiteral, metadata: JsonAsyncProbeMeta) {
     const slot = textbus.get(Registry).createSlot(data.slot as SlotLiteral)
-    return new JsonAsyncProbe({ slot, title: data.title }, { rev: metadata.rev, source: metadata.source })
+    return new JsonAsyncProbe(
+      { slot, title: data.title },
+      { rev: metadata.rev, source: metadata.source, docId: metadata.docId ?? '' },
+    )
   }
 
   override getSlots(): Slot[] {

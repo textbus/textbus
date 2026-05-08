@@ -12,15 +12,24 @@ import { JsonProbeInline, JsonProbeInlineView } from './components/json-probe-in
 import { JsonProbeBlock, JsonProbeBlockView } from './components/json-probe-block.component'
 import { JsonAsyncProbe, JsonAsyncProbeView } from './components/json-async-probe.component'
 import { StateProbe, StateProbeView } from './components/state-probe.component'
+import { AsyncSlotHolder, AsyncSlotHolderView } from './components/async-slot-holder.component'
 import { boldFormatter } from './formatters/bold.formatter'
 import { fontSizeFormatter } from './formatters/font-size.formatter'
 import { textAlignAttribute } from './attributes/text-align.attribute'
+
+export type TestEditorConfig = TextbusConfig & {
+  /**
+   * true 时使用 {@link NativeInput}，`BrowserModule.setup` 不再等待 iframe `load`。
+   * Jest/jsdom 下单测 iframe 的 load 有时永不触发，会导致 `render()` 卡在 `await Input.onReady`。
+   */
+  useContentEditable?: boolean
+}
 
 export class Editor extends Textbus {
   translator = new OutputTranslator()
   private vDomAdapter: ViewflyVDomAdapter
 
-  constructor(host: HTMLElement, config: TextbusConfig = {}, modules: Module[] = []) {
+  constructor(host: HTMLElement, config: TestEditorConfig = {}, modules: Module[] = []) {
     const adapter = new ViewflyAdapter({
       [RootComponent.componentName]: RootComponentView,
       [ParagraphComponent.componentName]: ParagraphComponentView,
@@ -29,7 +38,8 @@ export class Editor extends Textbus {
       [JsonProbeInline.componentName]: JsonProbeInlineView,
       [JsonProbeBlock.componentName]: JsonProbeBlockView,
       [JsonAsyncProbe.componentName]: JsonAsyncProbeView,
-      [StateProbe.componentName]: StateProbeView
+      [StateProbe.componentName]: StateProbeView,
+      [AsyncSlotHolder.componentName]: AsyncSlotHolderView
     }, (host, root, textbus) => {
       const app = createApp(root, {
         context: textbus
@@ -44,7 +54,8 @@ export class Editor extends Textbus {
       adapter,
       renderTo(): HTMLElement {
         return host
-      }
+      },
+      useContentEditable: Boolean(config.useContentEditable),
     })
 
     const vDomAdapter = new ViewflyVDomAdapter({
@@ -55,7 +66,8 @@ export class Editor extends Textbus {
       [JsonProbeInline.componentName]: JsonProbeInlineView,
       [JsonProbeBlock.componentName]: JsonProbeBlockView,
       [JsonAsyncProbe.componentName]: JsonAsyncProbeView,
-      [StateProbe.componentName]: StateProbeView
+      [StateProbe.componentName]: StateProbeView,
+      [AsyncSlotHolder.componentName]: AsyncSlotHolderView
     } as any, (host, root, injector) => {
       const appInjector = new ReflectiveInjector(injector, [{
         provide: DomAdapter,
@@ -73,6 +85,8 @@ export class Editor extends Textbus {
       }
     })
 
+    const { useContentEditable: _uce, ...textbusConfig } = config
+
     super({
       imports: [
         browserModule,
@@ -87,7 +101,8 @@ export class Editor extends Textbus {
         JsonProbeInline,
         JsonProbeBlock,
         JsonAsyncProbe,
-        StateProbe
+        StateProbe,
+        AsyncSlotHolder
       ],
       formatters: [
         boldFormatter,
@@ -96,7 +111,7 @@ export class Editor extends Textbus {
       attributes: [
         textAlignAttribute
       ],
-      ...config
+      ...textbusConfig
     })
 
     this.vDomAdapter = vDomAdapter
