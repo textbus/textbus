@@ -22,7 +22,9 @@
       "@textbus/collaborate": ["./packages/collaborate/src/index.ts"],
       "@textbus/adapter-viewfly": ["./packages/adapter-viewfly/src/index.ts"],
       "@textbus/adapter-react": ["./packages/adapter-react/src/index.ts"],
-      "@textbus/adapter-vue": ["./packages/adapter-vue/src/index.ts"]
+      "@textbus/adapter-vue": ["./packages/adapter-vue/src/index.ts"],
+      "@viewfly/core/jsx-runtime": ["./node_modules/@viewfly/core/dist/jsx-runtime/index.d.ts"],
+      "@viewfly/core/jsx-dev-runtime": ["./node_modules/@viewfly/core/dist/jsx-runtime/index.d.ts"]
     },
     "jsx": "react-jsx",
     "jsxImportSource": "@viewfly/core"

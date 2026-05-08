@@ -11,6 +11,7 @@ import { ZenBlock, ZenBlockView } from './components/zen-block.component'
 import { JsonProbeInline, JsonProbeInlineView } from './components/json-probe-inline.component'
 import { JsonProbeBlock, JsonProbeBlockView } from './components/json-probe-block.component'
 import { JsonAsyncProbe, JsonAsyncProbeView } from './components/json-async-probe.component'
+import { StateProbe, StateProbeView } from './components/state-probe.component'
 import { boldFormatter } from './formatters/bold.formatter'
 import { fontSizeFormatter } from './formatters/font-size.formatter'
 import { textAlignAttribute } from './attributes/text-align.attribute'
@@ -27,7 +28,8 @@ export class Editor extends Textbus {
       [ZenBlock.componentName]: ZenBlockView,
       [JsonProbeInline.componentName]: JsonProbeInlineView,
       [JsonProbeBlock.componentName]: JsonProbeBlockView,
-      [JsonAsyncProbe.componentName]: JsonAsyncProbeView
+      [JsonAsyncProbe.componentName]: JsonAsyncProbeView,
+      [StateProbe.componentName]: StateProbeView
     }, (host, root, textbus) => {
       const app = createApp(root, {
         context: textbus
@@ -52,7 +54,8 @@ export class Editor extends Textbus {
       [ZenBlock.componentName]: ZenBlockView,
       [JsonProbeInline.componentName]: JsonProbeInlineView,
       [JsonProbeBlock.componentName]: JsonProbeBlockView,
-      [JsonAsyncProbe.componentName]: JsonAsyncProbeView
+      [JsonAsyncProbe.componentName]: JsonAsyncProbeView,
+      [StateProbe.componentName]: StateProbeView
     } as any, (host, root, injector) => {
       const appInjector = new ReflectiveInjector(injector, [{
         provide: DomAdapter,
@@ -83,7 +86,8 @@ export class Editor extends Textbus {
         ZenBlock,
         JsonProbeInline,
         JsonProbeBlock,
-        JsonAsyncProbe
+        JsonAsyncProbe,
+        StateProbe
       ],
       formatters: [
         boldFormatter,

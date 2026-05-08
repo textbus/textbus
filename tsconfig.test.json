@@ -1,8 +1,11 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "@viewfly/core",
     "moduleResolution": "bundler",
     "noEmit": true,
+    "skipLibCheck": true,
     "paths": {
       "@textbus/platform-browser": ["./packages/platform-browser/src/index.ts"],
       "@textbus/platform-node": ["./packages/platform-node/src/index.ts"],
