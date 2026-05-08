@@ -1,27 +1,11 @@
 import { ContentType, NativeSelectionBridge, RootComponentRef, Slot } from '@textbus/core'
 import { NodeSelectionBridge } from '@textbus/platform-node'
-import { Collaborate, CollaborateModule, SyncConnector } from '@textbus/collaborate'
-import { Map as YMap, Text as YText } from 'yjs'
+import { Collaborate, CollaborateModule, LocalConnector, SyncConnector } from '@textbus/collaborate'
+import { Doc as YDoc, Map as YMap, Text as YText } from 'yjs'
 
 import { Editor } from '../_editor/editor'
 import { RootComponent } from '../_editor/components/root.component'
 import { sleep } from '../util'
-
-class MockSyncConnector extends SyncConnector {
-  constructor() {
-    super()
-    Promise.resolve().then(() => {
-      this.loadEvent.next()
-    })
-  }
-  override setLocalStateField() {
-    //
-  }
-
-  override onDestroy() {
-    //
-  }
-}
 
 describe('ObservableSync', () => {
   let editor!: Editor
@@ -35,8 +19,8 @@ describe('ObservableSync', () => {
         }
       ]
     }, [new CollaborateModule({
-      createConnector(): SyncConnector {
-        return new MockSyncConnector()
+      createConnector(yDoc: YDoc): SyncConnector {
+        return new LocalConnector(yDoc)
       }
     })])
     const root = new RootComponent({
