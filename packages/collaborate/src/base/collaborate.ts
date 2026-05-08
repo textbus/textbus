@@ -13,7 +13,8 @@ import {
   AsyncComponent,
   AbstractSelection,
   observe,
-  ProxyModel
+  ProxyModel,
+  toRaw,
 } from '@textbus/core'
 import {
   AbstractType,
@@ -26,10 +27,14 @@ import {
   UndoManager,
   YArrayEvent,
   YMapEvent,
-  YTextEvent
+  YTextEvent,
+  XmlElement,
 } from 'yjs'
 
 import { SubModelLoader } from './sub-model-loader'
+
+/** 与本地稀疏数组「空洞」对应的 YXmlElement，仅放入 YArray，不作通用 XML 节点使用 */
+const ARRAY_HOLE_ELEMENT_NODE = 'tb-array-hole'
 
 export interface RelativePositionRecord {
   doc: YDoc,
@@ -425,8 +430,15 @@ export class Collaborate {
   }
 
   private createLocalArrayBySharedArray(sharedArray: YArray<any>): ProxyModel<any[]> {
-    const localArray = observe<any[]>([]) as ProxyModel<any[]>
-    localArray.push(...sharedArray.map(item => this.createLocalModelBySharedByModel(item)))
+    const raw: any[] = []
+    for (let i = 0; i < sharedArray.length; i++) {
+      const item = sharedArray.get(i)
+      if (!this.isArrayHoleElement(item)) {
+        raw[i] = this.createLocalModelBySharedByModel(item)
+      }
+    }
+    raw.length = sharedArray.length
+    const localArray = observe(raw) as ProxyModel<any[]>
     this.syncArray(sharedArray, localArray)
     return localArray
   }
@@ -446,9 +458,14 @@ export class Collaborate {
 
   private createSharedArrayByLocalArray(localArray: ProxyModel<any[]>): YArray<any> {
     const sharedArray = new YArray<any>()
-    localArray.forEach(value => {
-      sharedArray.push([this.createSharedModelByLocalModel(value)])
-    })
+    const raw = toRaw(localArray) as any[]
+    for (let i = 0; i < raw.length; i++) {
+      if (i in raw) {
+        sharedArray.push([this.sharedModelForArraySlot(raw[i])])
+      } else {
+        sharedArray.push([this.createArrayHoleXmlElement()])
+      }
+    }
     this.syncArray(sharedArray, localArray)
     return sharedArray
   }
@@ -727,6 +744,45 @@ export class Collaborate {
     throw collaborateErrorFn(`cannot find component factory \`${componentName}\`.`)
   }
 
+  private createArrayHoleXmlElement() {
+    return new XmlElement(ARRAY_HOLE_ELEMENT_NODE)
+  }
+
+  private isArrayHoleElement(sharedModel: any): boolean {
+    return sharedModel instanceof XmlElement && sharedModel.nodeName === ARRAY_HOLE_ELEMENT_NODE
+  }
+
+  /**
+   * 仅用于 YArray ↔ 可观察数组：本地 `undefined` 槽位用 XmlElement 占位同步到 Yjs（不与对象字面量同步混用）。
+   */
+  private sharedModelForArraySlot(localItem: any) {
+    if (localItem === undefined) {
+      return this.createArrayHoleXmlElement()
+    }
+    return this.createSharedModelByLocalModel(localItem)
+  }
+
+  /**
+   * 在可观察数组中插入稀疏空洞（与 YArray 中 XmlElement 占位对齐）。
+   * 仅在远端同步路径调用；直接操作 raw，避免走插入 undefined 的可观察路径。
+   */
+  private insertSparseHole(localArray: ProxyModel<any[]>, atIndex: number) {
+    const raw = toRaw(localArray) as any[]
+    const len = raw.length
+    if (atIndex >= len) {
+      raw.length = atIndex + 1
+      return
+    }
+    for (let i = len; i > atIndex; i--) {
+      if ((i - 1) in raw) {
+        raw[i] = raw[i - 1]
+      } else {
+        delete raw[i]
+      }
+    }
+    delete raw[atIndex]
+  }
+
   /**
    * 双向同步数组
    * @param sharedArray
@@ -752,7 +808,7 @@ export class Collaborate {
                 throw collaborateErrorFn('The insertion action must have a reference value.')
               }
               const data = ref.map(item => {
-                return this.createSharedModelByLocalModel(item)
+                return this.sharedModelForArraySlot(item)
               })
               if (index <= sharedArray.length) {
                 sharedArray.insert(index, data)
@@ -775,9 +831,9 @@ export class Collaborate {
             case 'setIndex':
               if (action.index < sharedArray.length) {
                 sharedArray.delete(action.index, 1)
-                sharedArray.insert(action.index, [this.createSharedModelByLocalModel(action.ref)])
+                sharedArray.insert(action.index, [this.sharedModelForArraySlot(action.ref)])
               } else {
-                sharedArray.insert(sharedArray.length, [this.createSharedModelByLocalModel(action.ref)])
+                sharedArray.insert(sharedArray.length, [this.sharedModelForArraySlot(action.ref)])
                 logError('setIndex')
               }
               break
@@ -793,11 +849,16 @@ export class Collaborate {
           if (Reflect.has(action, 'retain')) {
             index += action.retain as number
           } else if (action.insert) {
-            const data = (action.insert as Array<any>).map((item) => {
-              return this.createLocalModelBySharedByModel(item)
-            })
-            localArray.splice(index, 0, ...data)
-            index += data.length
+            let at = index
+            for (const item of action.insert as Array<any>) {
+              if (this.isArrayHoleElement(item)) {
+                this.insertSparseHole(localArray, at)
+              } else {
+                localArray.splice(at, 0, this.createLocalModelBySharedByModel(item))
+              }
+              at++
+            }
+            index = at
           } else if (action.delete) {
             localArray.splice(index, action.delete)
           }
