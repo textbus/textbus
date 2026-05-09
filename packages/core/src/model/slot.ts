@@ -67,8 +67,8 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
   get parent(): Component | null {
     let parentModel = this.__changeMarker__.parentModel
     while (parentModel) {
-      if (parentModel.__changeMarker__.host instanceof Component) {
-        return parentModel.__changeMarker__.host
+      if (parentModel instanceof Component) {
+        return parentModel
       }
       parentModel = parentModel.__changeMarker__.parentModel
     }
@@ -119,8 +119,10 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
     this._index = 0
     this.state = observe(state)
 
-    const dataChangeMarker = this.state.__changeMarker__ as ChangeMarker
-    const sub = dataChangeMarker.onChange.subscribe(() => {
+    const stateChangeMarker = this.state.__changeMarker__ as ChangeMarker
+    stateChangeMarker.parentModel = this
+
+    const sub = stateChangeMarker.onChange.subscribe(() => {
       this.changeMarker.forceMarkDirtied()
     })
 
@@ -955,7 +957,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
     children: Array<VElement | VTextNode | Component>,
     renderEnv: any
   ): VElement {
-    const hostBindings: Array<{render: FormatHostBindingRender, item: FormatItem<any>}> = []
+    const hostBindings: Array<{ render: FormatHostBindingRender, item: FormatItem<any> }> = []
     let host: VElement | null = null
     for (let i = formats.length - 1; i > -1; i--) {
       const item = formats[i]
@@ -979,7 +981,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
       children = [next]
     }
     for (const binding of hostBindings) {
-      const { render, item } = binding
+      const {render, item} = binding
       if (!host) {
         host = new VElement(render.fallbackTagName)
         host.location = {

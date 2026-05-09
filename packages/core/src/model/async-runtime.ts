@@ -1,13 +1,20 @@
 import { Observable, Subject } from '@tanbo/stream'
 
 import { State } from './types'
-import { AsyncComponentLiteral, Component, ComponentConstructor, ComponentLiteral, ComponentStateLiteral } from './component'
-import { ContentType, Slot, SlotJSON, SlotLiteral } from './slot'
+import { Component, ComponentLiteral } from './component'
+import { ContentType, Slot, SlotJSON } from './slot'
 import { FormatLiteral } from './format'
-import { Textbus } from '../textbus'
-import { observe } from '../observable/observe'
+import { observe, ProxyModel, toRaw } from '../observable/observe'
 import { detachModel } from '../observable/help'
-import { ChangeMarker } from '../observable/change-marker'
+import {
+  ChangeMarker,
+  type ChangeMarkerPathResolution,
+} from '../observable/change-marker'
+import type {
+  AsyncComponentLiteral,
+  AsyncSlotLiteral,
+  Metadata,
+} from './async-literals'
 
 export class AsyncModelLoader {
   onRequestLoad: Observable<void>
@@ -39,10 +46,6 @@ export class AsyncModelLoader {
   }
 }
 
-export interface Metadata {
-  [key: string]: any
-}
-
 /**
  * 异步加载组件
  *
@@ -55,9 +58,29 @@ export abstract class AsyncComponent<M extends Metadata = Metadata,
   constructor(state: T, metadata: M) {
     super(state)
     this.metadata = observe(metadata)
-    this.changeMarker.addDetachCallback(() => {
-      detachModel(this.metadata)
+    const changeMarker = (this.metadata as ProxyModel<M>).__changeMarker__
+    changeMarker.parentModel = this
+
+    const sub = changeMarker.onChange.subscribe(() => {
+      this.changeMarker.forceMarkDirtied()
     })
+
+    this.changeMarker.addDetachCallback(() => {
+      sub.unsubscribe()
+      detachModel(this.state)
+    })
+
+    this.changeMarker.hostHooks = {
+      resolvePathSegment: (childHost: object): ChangeMarkerPathResolution => {
+        if (childHost === toRaw(this.metadata)) {
+          return { resolved: true, segment: 'metadata' }
+        }
+        return { resolved: false }
+      },
+      detachHostedMarkers: () => {
+        this.metadata.__changeMarker__.detach()
+      },
+    }
   }
 
   loader = new AsyncModelLoader()
@@ -69,25 +92,6 @@ export abstract class AsyncComponent<M extends Metadata = Metadata,
       metadata: this.metadata
     }
   }
-}
-
-export interface AsyncComponentConstructor<
-  M extends Metadata = Metadata,
-  T extends State = State> extends ComponentConstructor<T> {
-  /**
-   * 通过 JSON 创建组件实例
-   * @param textbus
-   * @param data 组件状态字面量
-   * @param metadata 异步组件元数据
-   */
-  fromJSONAndMetadata?(textbus: Textbus, data: ComponentStateLiteral<T>, metadata: M): AsyncComponent<M, T>
-}
-
-export interface AsyncSlotLiteral<
-  T extends Record<string, any> = Record<string, any>,
-  U = any> extends SlotLiteral<T> {
-  async: true
-  metadata: U
 }
 
 export class AsyncSlotJSON<
@@ -122,6 +126,7 @@ export class AsyncSlot<
     this.metadata = observe(metadata)
 
     const metadataChangeMarker = this.metadata.__changeMarker__ as ChangeMarker
+    metadataChangeMarker.parentModel = this
 
     const sub = metadataChangeMarker.onChange.subscribe(() => {
       this.changeMarker.forceMarkDirtied()
@@ -131,6 +136,18 @@ export class AsyncSlot<
       sub.unsubscribe()
       detachModel(this.metadata)
     })
+
+    this.changeMarker.hostHooks = {
+      resolvePathSegment: (childHost: object): ChangeMarkerPathResolution => {
+        if (childHost === toRaw(this.metadata)) {
+          return { resolved: true, segment: 'metadata' }
+        }
+        return { resolved: false }
+      },
+      detachHostedMarkers: () => {
+        this.metadata.__changeMarker__.detach()
+      },
+    }
   }
 
   override toJSON(): AsyncSlotJSON<U, M> {

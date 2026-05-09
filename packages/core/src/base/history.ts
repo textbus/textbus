@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@viewfly/core'
 import { map, Observable, Subject, Subscription } from '@tanbo/stream'
 
-import { AsyncSlotJSON, Component, ComponentLiteral, Formats, Operation, Slot, SlotJSON } from '../model/_api'
+import { AsyncComponent, AsyncSlot, AsyncSlotJSON, Component, ComponentLiteral, Formats, Operation, Slot, SlotJSON } from '../model/_api'
 import { Selection } from './selection'
 import { Registry } from './registry'
 import { HISTORY_STACK_SIZE, RootComponentRef } from './_injection-tokens'
@@ -196,7 +196,7 @@ export class LocalHistory extends History {
           if (item.from !== ChangeOrigin.Local) {
             continue
           }
-          const { apply, unApply, paths } = item.operation;
+          const {apply, unApply, paths} = item.operation;
           [...apply, ...unApply].forEach(i => {
             if (i.type === 'insert' || i.type === 'propSet') {
               i.ref = null
@@ -354,10 +354,14 @@ export class LocalHistory extends History {
     if (this.selection.isSelected) {
       anchor = this.selection.anchorSlot!.__changeMarker__.getPaths()
       focus = this.selection.focusSlot!.__changeMarker__.getPaths()
+      return {
+        anchor: [...anchor, this.selection.anchorOffset!],
+        focus: [...focus, this.selection.focusOffset!]
+      }
     }
     return {
-      anchor: [...anchor, this.selection.anchorOffset!],
-      focus: [...focus, this.selection.focusOffset!]
+      anchor,
+      focus
     }
   }
 
@@ -385,11 +389,23 @@ export class LocalHistory extends History {
     while (paths.length) {
       const path = paths.shift()
       if (currentModel instanceof Component) {
-        currentModel = currentModel.state[path as string]
+        if (currentModel instanceof AsyncComponent && path === 'metadata') {
+          currentModel = currentModel.metadata
+        } else if (path === 'state') {
+          currentModel = currentModel.state
+        } else {
+          throw historyErrorFn(`'${path}' is not a legal property of a component`)
+        }
         continue
       }
       if (currentModel instanceof Slot) {
-        currentModel = currentModel.getContentAtIndex(path as number) as Component
+        if (currentModel instanceof AsyncSlot && path === 'metadata') {
+          currentModel = currentModel.metadata
+        } else if (path === 'state') {
+          currentModel = currentModel.state
+        } else {
+          currentModel = currentModel.getContentAtIndex(path as number) as Component
+        }
         continue
       }
       if (Array.isArray(currentModel)) {

@@ -1,4 +1,4 @@
-import { Component, ComponentLiteral } from './component'
+import type { Component, ComponentLiteral } from './component'
 
 export interface InsertAction {
   type: 'insert'
@@ -105,3 +105,4 @@ export interface RawKeyAgent {
    */
   keyCode: number
 }
+

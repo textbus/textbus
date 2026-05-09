@@ -1,12 +1,13 @@
 import { Type } from '@viewfly/core'
 
-import { ContentType, Slot, SlotLiteral } from './slot'
+import { ContentType, Slot } from './slot'
 import { ChangeMarker } from '../observable/change-marker'
+import type { ToLiteral } from './to-literal'
 import { Shortcut, State, RawKeyAgent } from './types'
 import { Textbus } from '../textbus'
-import { AsyncSlot, AsyncSlotLiteral } from './async-model'
-import { observe, ProxyModel } from '../observable/observe'
+import { observe } from '../observable/observe'
 import { objectToJSON } from '../observable/util'
+import { detachModel } from '../observable/help'
 
 /**
  * 组件 JSON 字面量接口
@@ -14,11 +15,6 @@ import { objectToJSON } from '../observable/util'
 export interface ComponentLiteral<State = any> {
   name: string
   state: ToLiteral<State>
-}
-
-export interface AsyncComponentLiteral<State = any> extends ComponentLiteral<State> {
-  async: true
-  metadata: any
 }
 
 export interface ZenCodingGrammarInterceptor<T extends State> {
@@ -39,6 +35,7 @@ export interface Component<T extends State> {
    * 当光标在组件右侧向前删除，或光标在组件左侧向后删除时，组件是否作为一个整体进行删除，而不是续接内容到组件内（如果有的话）
    */
   deleteAsWhole?: boolean
+
   /**
    * 从当前组件拆分出一个新的同类组件
    * @param start 拆分的开始插槽
@@ -108,21 +105,26 @@ export abstract class Component<T extends State = State> {
   readonly state: T
 
   /** 组件变化标识器 */
-  readonly changeMarker: ChangeMarker
-  readonly __changeMarker__: ChangeMarker
+  readonly changeMarker = new ChangeMarker(this)
+  readonly __changeMarker__ = this.changeMarker
 
   textbus: Textbus | null = null
 
   constructor(initData: T) {
-
-    const { componentName, type } = this.constructor as ComponentConstructor
+    const {componentName, type} = this.constructor as ComponentConstructor
     this.name = componentName
     this.type = type
-    const state = observe(initData)
-    this.state = state
-    this.changeMarker = (state as ProxyModel<T>).__changeMarker__
-    this.__changeMarker__ = (state as ProxyModel<T>).__changeMarker__
-    this.changeMarker.host = this
+    this.state = observe(initData)
+    const stateChangeMarker = this.state.__changeMarker__ as ChangeMarker
+    stateChangeMarker.parentModel = this
+
+    const sub = stateChangeMarker.onChange.subscribe(() => {
+      this.changeMarker.forceMarkDirtied()
+    })
+    this.changeMarker.addDetachCallback(() => {
+      sub.unsubscribe()
+      detachModel(this.state)
+    })
   }
 
   /**
@@ -144,13 +146,6 @@ export abstract class Component<T extends State = State> {
     }).join('')
   }
 }
-
-
-export type ToLiteral<T> = T extends AsyncSlot<infer A, infer B> ? AsyncSlotLiteral<A, B> :
-  T extends Slot<infer C> ? SlotLiteral<C> :
-    T extends [infer First, ...infer Rest] ? [ToLiteral<First>, ...Rest] :
-      T extends Array<infer Item> ? Array<ToLiteral<Item>> :
-        T extends Record<string, any> ? ComponentStateLiteral<T> : T;
 
 
 export type ComponentStateLiteral<T extends State> = {

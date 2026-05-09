@@ -1,5 +1,6 @@
-import { Textbus } from '../textbus'
 import { AbstractType, InjectFlags, InjectionToken, Type } from '@viewfly/core'
+
+import { Textbus } from '../textbus'
 import { Shortcut } from './types'
 import { Component } from './component'
 

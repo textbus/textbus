@@ -2,13 +2,48 @@ import { Observable, Subject } from '@tanbo/stream'
 
 import { Action, DestroyCallbacks, Operation } from '../model/types'
 import { Component } from '../model/component'
+import { invokeListener } from '../model/on-events'
 import { Slot } from '../model/slot'
 import { Model, toRaw } from './observe'
 import { isType } from './util'
-import { getObserver } from './help'
-import { invokeListener } from '../model/on-events'
+import { getChangeMarker } from './help'
 
 export type Paths = Array<string | number>
+
+/**
+ * 与 host（Component / Slot）相关、由宿主在构造函数里挂在 {@link ChangeMarker.hostHooks} 上的协作逻辑。
+ */
+export type ChangeMarkerPathResolution =
+  | { resolved: true; segment: string | number }
+  | { resolved: false }
+
+export interface ChangeMarkerHostHooks {
+  resolvePathSegment(childHost: object): ChangeMarkerPathResolution
+
+  detachHostedMarkers?(): void
+}
+
+function pathSegmentInComponent(parent: Component<any>, childHost: object): string | number | null {
+  const viaHooks = parent.changeMarker.hostHooks?.resolvePathSegment(childHost)
+  if (viaHooks?.resolved) {
+    return viaHooks.segment
+  }
+  if (childHost === toRaw(parent.state)) {
+    return 'state'
+  }
+  return null
+}
+
+function pathSegmentInSlot(parent: Slot<any>, childHost: object): string | number | null {
+  const viaHooks = parent.changeMarker.hostHooks?.resolvePathSegment(childHost)
+  if (viaHooks?.resolved) {
+    return viaHooks.segment
+  }
+  if (childHost === toRaw(parent.state)) {
+    return 'state'
+  }
+  return parent.indexOf(childHost as Component)
+}
 
 let onewayUpdate = false
 
@@ -34,6 +69,11 @@ export class ChangeMarker {
   }
 
   parentModel: Model | null = null
+
+  /**
+   * 宿主模型可在此挂上与路径解析、detach 相关的扩展（默认未设置），与 {@link parentModel} 类似由外部赋值。
+   */
+  hostHooks?: ChangeMarkerHostHooks
 
   private detachCallbacks: DestroyCallbacks = []
   private _irrevocableUpdate = false
@@ -66,7 +106,7 @@ export class ChangeMarker {
   }
 
   beforeChange() {
-    if (this._changeBefore) {
+    if (this._changeBefore && (this.host instanceof Slot || this.host instanceof Component)) {
       return
     }
     this._changeBefore = true
@@ -91,13 +131,10 @@ export class ChangeMarker {
     this._changed = true
     this.forceChangeEvent.next()
     if (this.parentModel) {
-      if (!source) {
-        source = this.host instanceof Component ? this.host : source
-      }
-      if (source) {
-        this.parentModel.__changeMarker__.forceMarkChanged(source)
-      } else {
+      if (!source && this.host instanceof Component) {
         this.parentModel.__changeMarker__.forceMarkDirtied(source)
+      } else {
+        this.parentModel.__changeMarker__.forceMarkChanged(source)
       }
     }
   }
@@ -148,28 +185,33 @@ export class ChangeMarker {
           i.changeMarker.detach()
         }
       })
-    } else if (Array.isArray(this.host)) {
+      this.host.changeMarker.hostHooks?.detachHostedMarkers?.()
+      this.host.state.__changeMarker__.detach()
+      this.detachCallbacks = []
+      return
+    }
+    if (this.host instanceof Component) {
+      this.host.changeMarker.hostHooks?.detachHostedMarkers?.()
+      this.host.state.__changeMarker__.detach()
+      invokeListener(this.host, 'onDetach')
+      this.detachCallbacks = []
+      return
+    }
+    if (Array.isArray(this.host)) {
       this.host.forEach(i => {
-        const proxy = getObserver(i) as Model
+        const proxy = getChangeMarker(i) as ChangeMarker
         if (proxy) {
-          proxy.__changeMarker__.detach()
+          proxy.detach()
         }
       })
-    } else if (isType(this.host, 'Object')) {
-      const state = this.host instanceof Component ? this.host.state : this.host
-      const values = Object.values(state)
-      for (const value of values) {
-        if (value instanceof Slot) {
-          value.__changeMarker__.detach()
-        } else {
-          const proxy = getObserver(toRaw(value as any)) as Model
-          if (proxy) {
-            proxy.__changeMarker__.detach()
-          }
-        }
-      }
-      if (this.host instanceof Component) {
-        invokeListener(this.host, 'onDetach')
+      this.detachCallbacks = []
+      return
+    }
+    const values = Object.values(this.host)
+    for (const value of values) {
+      const proxy = getChangeMarker(value)
+      if (proxy) {
+        proxy.detach()
       }
     }
     this.detachCallbacks = []
@@ -180,16 +222,18 @@ export class ChangeMarker {
     if (!parentModel) {
       return null
     }
+    if (parentModel instanceof Component) {
+      return pathSegmentInComponent(parentModel, this.host)
+    }
+
     if (parentModel instanceof Slot) {
-      return parentModel.indexOf(this.host as Component<any>)
+      return pathSegmentInSlot(parentModel, this.host)
     }
     if (Array.isArray(parentModel)) {
       return (parentModel.__changeMarker__.host as any[]).indexOf(this.host)
     }
     if (isType(parentModel, 'Object')) {
-      const host = parentModel.__changeMarker__.host
-      const raw = host instanceof Component ? host.state : host
-      const entries = Object.entries(raw)
+      const entries = Object.entries(parentModel.__changeMarker__.host)
       for (const [key, value] of entries) {
         if (toRaw(value as any) === this.host) {
           return key
