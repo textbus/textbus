@@ -1,5 +1,16 @@
 # @textbus/playground
 
+## 5.2.1
+
+### Patch Changes
+
+- 修复多渲染器下死循环的 bug
+- Updated dependencies
+  - @textbus/platform-browser@5.3.1
+  - @textbus/adapter-viewfly@5.3.1
+  - @textbus/collaborate@5.3.1
+  - @textbus/core@5.3.1
+
 ## 5.2.0
 
 ### Minor Changes
