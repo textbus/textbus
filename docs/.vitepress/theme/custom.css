@@ -70,6 +70,15 @@ html.tb-layout-home .VPNavBar.top .divider-line {
   max-width: 960px;
 }
 
+/**
+ * VitePress 正文 `.vp-doc ul, .vp-doc ol`（padding / margin）会命中所有后代。
+ * Playground（Monaco）、协作页、内嵌编辑器等里的列表应由组件或 UA 样式控制，在此抵消误伤。
+ */
+.vp-doc :is(.tb-playground, .tb-playground-page, .tb-collab) :where(ul, ol) {
+  margin: 8px 0;
+  padding: 0;
+}
+
 :root {
   --vp-c-brand-1: #07baf3;
   --vp-c-brand-2: #47ccf9;
