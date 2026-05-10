@@ -490,6 +490,58 @@ export class ArrayProxyHandler<T extends Array<any>> extends ObjectProxyHandler<
     return super.set(target, p, newValue, receiver)
   }
 
+  override defineProperty(target: T, p: string | symbol, desc: PropertyDescriptor): boolean {
+    if (typeof desc.get === 'function' || typeof desc.set === 'function') {
+      return Reflect.defineProperty(target, p, desc)
+    }
+    if (!('value' in desc)) {
+      return super.defineProperty(target, p, desc)
+    }
+    // Array exotic：Reflect.set(proxy, 'length', n) 时引擎会再调 defineProperty(length)；
+    // 变更记录与 detach 已在 set 陷阱里处理，这里只写回 target，避免重复 propSet。
+    if (p === 'length') {
+      return Reflect.defineProperty(target, p, { ...desc, value: toRaw(desc.value as any) })
+    }
+    if (/^(0|[1-9]\d*)$/.test(p as string)) {
+      const newValue = toRaw(desc.value as any)
+      const oldValue = Reflect.get(target, p)
+      const lengthBefore = target.length
+      const ok = Reflect.defineProperty(target, p, { ...desc, value: newValue })
+      if (!ok) {
+        return false
+      }
+      if (newValue === oldValue) {
+        return true
+      }
+      const changeMarker = getChangeMarker(target)!
+      changeMarker.beforeChange()
+      detachModel(oldValue)
+      const subModel = observe(newValue)
+      const parentModel = getObserver(target)!
+      attachModel(parentModel, subModel)
+      const index = Number(p)
+      changeMarker.markAsDirtied({
+        paths: [],
+        apply: [{
+          type: 'setIndex',
+          index,
+          afterLength: target.length,
+          value: valueToJSON(newValue),
+          ref: subModel,
+        }],
+        unApply: [{
+          type: 'setIndex',
+          index,
+          afterLength: lengthBefore,
+          value: valueToJSON(oldValue),
+          ref: null
+        }]
+      })
+      return true
+    }
+    return super.defineProperty(target, p, desc)
+  }
+
   override get(target: T, p: string | symbol, receiver: any): any {
     if (p in target) {
       if (Reflect.has(arrayMethodsHandlers, p)) {
