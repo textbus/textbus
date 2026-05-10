@@ -1071,7 +1071,7 @@ export class Commander {
       if (position!) {
         selection.setPosition(position.slot, position.offset)
       }
-      if (scope.slot === stoppedScope.slot && scope.endIndex === stoppedScope.offset) {
+      if (scope.slot === stoppedScope.slot && scope.startIndex === stoppedScope.offset) {
         break
       }
     }
