@@ -121,15 +121,6 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
 
     const stateChangeMarker = this.state.__changeMarker__ as ChangeMarker
     stateChangeMarker.parentModel = this
-
-    const sub = stateChangeMarker.onChange.subscribe(() => {
-      this.changeMarker.forceMarkDirtied()
-    })
-
-    this.changeMarker.addDetachCallback(() => {
-      sub.unsubscribe()
-      detachModel(this.state)
-    })
   }
 
   /**
@@ -537,7 +528,6 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
           }
         }
         item.textbus = null
-        item.changeMarker.parentModel = null
         item.changeMarker.detach()
         return {
           type: 'contentInsert',

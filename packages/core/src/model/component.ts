@@ -117,14 +117,6 @@ export abstract class Component<T extends State = State> {
     this.state = observe(initData)
     const stateChangeMarker = this.state.__changeMarker__ as ChangeMarker
     stateChangeMarker.parentModel = this
-
-    const sub = stateChangeMarker.onChange.subscribe(() => {
-      this.changeMarker.forceMarkDirtied()
-    })
-    this.changeMarker.addDetachCallback(() => {
-      sub.unsubscribe()
-      detachModel(this.state)
-    })
   }
 
   /**

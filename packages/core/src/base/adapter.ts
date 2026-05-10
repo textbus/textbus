@@ -5,7 +5,6 @@ import { Component } from '../model/component'
 import { Slot } from '../model/slot'
 import { NodeLocation, VElement, VTextNode } from '../model/element'
 import { createBidirectionalMapping, replaceEmpty } from '../_utils/tools'
-import { invokeListener } from '../model/on-events'
 import { Format } from '../model/format'
 
 export interface ViewMount<ViewComponent, NativeElement> {
@@ -57,8 +56,6 @@ export abstract class Adapter<
   abstract onViewUpdated: Observable<void>
   abstract host: NativeElement
 
-  protected firstRending = true
-
   protected slotRootVElementCaches = new WeakMap<Slot, VElement>()
   protected slotRootNativeElementCaches = createBidirectionalMapping<Slot, NativeElement>(a => {
     return a instanceof Slot
@@ -76,7 +73,6 @@ export abstract class Adapter<
   /** 根组件渲染方法 */
   render(rootComponent: Component, injector: Injector): void | (() => void) {
     const view = this.componentRender(rootComponent)
-    this.firstRending = false
     return this.mount(this.host, view, injector)
   }
 
@@ -267,7 +263,7 @@ export abstract class Adapter<
 
   private getLocation(target: NativeElement, tree: NativeElement, vNodeTree: VElement): NodeLocation | null {
     if (target === tree) {
-      return { ...vNodeTree.location! }
+      return {...vNodeTree.location!}
     }
     const childNodes = this.adapter.getChildNodes(tree)
     for (let i = 0; i < childNodes.length; i++) {
@@ -318,9 +314,6 @@ export abstract class Adapter<
         children.push(replaceEmpty(child.textContent))
       } else {
         children.push(this.componentRender(child))
-        if (!this.firstRending) {
-          invokeListener(child, 'onParentSlotUpdated')
-        }
       }
     }
     return this.adapter.vElementToViewElement(vNode, children)

@@ -170,6 +170,14 @@ export class ChangeMarker {
   }
 
   rendered() {
+    if (this._dirty && this.host instanceof Slot) {
+      this.host.sliceContent().forEach(i => {
+        if (i instanceof Component) {
+          invokeListener(i, 'onParentSlotUpdated')
+          i.changeMarker.rendered()
+        }
+      })
+    }
     this._dirty = this._changed = this._changeBefore = false
   }
 

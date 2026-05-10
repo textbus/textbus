@@ -22,8 +22,8 @@ importers:
         specifier: workspace:^
         version: link:packages/collaborate
       '@textbus/xnote':
-        specifier: ^1.2.5
-        version: 1.2.5(@textbus/adapter-viewfly@5.2.7)(@textbus/collaborate@packages+collaborate)(@textbus/core@5.2.7)(@textbus/platform-browser@5.2.7)(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)
+        specifier: ^1.2.6
+        version: 1.2.6(@textbus/adapter-viewfly@packages+adapter-viewfly)(@textbus/collaborate@packages+collaborate)(@textbus/core@packages+core)(@textbus/platform-browser@packages+platform-browser)(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)
       '@types/jest':
         specifier: ^27.0.3
         version: 27.5.2
@@ -280,6 +280,9 @@ importers:
       '@textbus/platform-browser':
         specifier: workspace:^
         version: link:../platform-browser
+      '@textbus/xnote':
+        specifier: ^1.2.6
+        version: 1.2.6(@textbus/adapter-viewfly@packages+adapter-viewfly)(@textbus/collaborate@packages+collaborate)(@textbus/core@packages+core)(@textbus/platform-browser@packages+platform-browser)(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)
       '@viewfly/core':
         specifier: ^2.2.0 || ^3.0.0
         version: 3.0.1
@@ -1608,20 +1611,8 @@ packages:
   '@tanbo/stream@1.2.7':
     resolution: {integrity: sha512-ATKVjpQFmr7x+iCKGOGWFzrtB5ZsNef6UKATWZs1R1eE16pyrBwl2AZrnALi+eQQTxOo5Ol6Rmck2BBBgBAnmA==}
 
-  '@textbus/adapter-viewfly@5.2.7':
-    resolution: {integrity: sha512-cpIwi4Wmh9Ni9wRxH1jYe8NVtr/C243GtKnouYSCc1D8TGMQPvNRmh/bHO1jLh9QGUpKFr8i/WZWfAhN0Asfsw==}
-
-  '@textbus/core@5.2.7':
-    resolution: {integrity: sha512-ZaQP4668d+5kknMTWx8VTPyPHLhbFR8hY1VL1/HJjGihmI08EWTqj/e9tNiPqh+2IjS+HzFNfPoxora4Zdh44w==}
-
-  '@textbus/platform-browser@5.2.7':
-    resolution: {integrity: sha512-ltT0Gp/fcN8CJRLUvEgD6l5yE25RggpL0uEnrKvmoxJwGzI2gdBIiL9p9B1wnNPc02L8JvqlRlvoPTwa7n64CQ==}
-
-  '@textbus/platform-node@5.2.7':
-    resolution: {integrity: sha512-KYL1Xxe1Xph1t1SpbaerJj9KK3KhY6rrF+Jx014zrvc0W57NBG0Jx18nkqHRWMXnyCQrdsom7fvPS+bxSUWKVw==}
-
-  '@textbus/xnote@1.2.5':
-    resolution: {integrity: sha512-QCDJSmCor6m1z3vn4XZwpclkqcdCoVkr4Ltn0VE8aP6/wTWx2x7l1x9IV2o67hlsO9PG3yldHx5BVPVHX4ewqw==}
+  '@textbus/xnote@1.2.6':
+    resolution: {integrity: sha512-OeZcWmzr9G8Qu1JT8F/HlNiSHaa5oPO/IuFIcpg/U3rH08sq2/4gtxNsBHNTfuXaSnbCTo/74KY94fy6OswamQ==}
     peerDependencies:
       '@textbus/adapter-viewfly': ^5.2.7
       '@textbus/collaborate': ^5.2.7
@@ -1794,15 +1785,15 @@ packages:
   '@viewfly/platform-browser@3.0.1':
     resolution: {integrity: sha512-wA7jyvv8Op4FUCu9s/B+ECHOWLTaVFef3OOLO0uRfMauDjI0x4/ZLD6vVuCWU5bUWRWvjB1nfTTIjjohIyud2g==}
 
-  '@viewfly/ui-components@0.0.16':
-    resolution: {integrity: sha512-HyN65clf94/V5cGNNiK9nbCOW01sDxQkKBw3dtr3ftVj0rcHs4Wh40tAZ+Ztx8oZIO/1/GdYu49uBbbww/Jpmw==}
+  '@viewfly/ui-components@0.0.17':
+    resolution: {integrity: sha512-9KS0fJ4n0SYGkM2i79yqjrJ1QYf6F1y7P8H4/LKWQA5Ox3Ih0ztcW0LdSroGb2lucZZS9b7LFePewRLptIkU+Q==}
     peerDependencies:
       '@viewfly/core': ^3.0.0
       '@viewfly/platform-browser': ^3.0.0
-      '@viewfly/ui-icons': ^0.0.16
+      '@viewfly/ui-icons': ^0.0.17
 
-  '@viewfly/ui-icons@0.0.16':
-    resolution: {integrity: sha512-3jpaUymupiSPU5CP92TnugmNQFVziETQ6Vk9cphTGzC/s5EKeByE900+f5LAsnfYm8g6PG2BJgeVCZrwODs16w==}
+  '@viewfly/ui-icons@0.0.17':
+    resolution: {integrity: sha512-4nKSKYQcWJ0DNiq0Qfw1FrG+uKU2SGNisXhlwmCmoIYB9dA+gyCJqs6mzp8R+klb1HgP2XgaLKiuN/l+Evp/4g==}
     peerDependencies:
       '@viewfly/core': ^3.0.0
       '@viewfly/platform-browser': ^3.0.0
@@ -5613,44 +5604,17 @@ snapshots:
 
   '@tanbo/stream@1.2.7': {}
 
-  '@textbus/adapter-viewfly@5.2.7':
-    dependencies:
-      '@tanbo/stream': 1.2.7
-      '@textbus/core': 5.2.7
-      '@textbus/platform-browser': 5.2.7
-      '@textbus/platform-node': 5.2.7
-      '@viewfly/core': 3.0.1
-      '@viewfly/platform-browser': 3.0.1
-
-  '@textbus/core@5.2.7':
-    dependencies:
-      '@tanbo/stream': 1.2.7
-      '@viewfly/core': 3.0.1
-
-  '@textbus/platform-browser@5.2.7':
-    dependencies:
-      '@tanbo/stream': 1.2.7
-      '@textbus/core': 5.2.7
-      '@viewfly/core': 3.0.1
-
-  '@textbus/platform-node@5.2.7':
-    dependencies:
-      '@tanbo/stream': 1.2.7
-      '@textbus/core': 5.2.7
-      '@viewfly/core': 3.0.1
-      '@viewfly/platform-browser': 3.0.1
-
-  '@textbus/xnote@1.2.5(@textbus/adapter-viewfly@5.2.7)(@textbus/collaborate@packages+collaborate)(@textbus/core@5.2.7)(@textbus/platform-browser@5.2.7)(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)':
+  '@textbus/xnote@1.2.6(@textbus/adapter-viewfly@packages+adapter-viewfly)(@textbus/collaborate@packages+collaborate)(@textbus/core@packages+core)(@textbus/platform-browser@packages+platform-browser)(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)':
     dependencies:
       '@tanbo/color': 0.1.1
-      '@textbus/adapter-viewfly': 5.2.7
+      '@textbus/adapter-viewfly': link:packages/adapter-viewfly
       '@textbus/collaborate': link:packages/collaborate
-      '@textbus/core': 5.2.7
-      '@textbus/platform-browser': 5.2.7
+      '@textbus/core': link:packages/core
+      '@textbus/platform-browser': link:packages/platform-browser
       '@viewfly/core': 3.0.1
       '@viewfly/platform-browser': 3.0.1
-      '@viewfly/ui-components': 0.0.16(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)(@viewfly/ui-icons@0.0.16(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1))
-      '@viewfly/ui-icons': 0.0.16(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)
+      '@viewfly/ui-components': 0.0.17(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)(@viewfly/ui-icons@0.0.17(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1))
+      '@viewfly/ui-icons': 0.0.17(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)
       highlight.js: 11.11.1
       katex: 0.16.45
       markdown-it: 14.1.1
@@ -5856,15 +5820,15 @@ snapshots:
       '@viewfly/core': 3.0.1
       csstype: 3.2.3
 
-  '@viewfly/ui-components@0.0.16(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)(@viewfly/ui-icons@0.0.16(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1))':
+  '@viewfly/ui-components@0.0.17(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)(@viewfly/ui-icons@0.0.17(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1))':
     dependencies:
       '@tanbo/color': 0.1.1
       '@tanbo/stream': 1.2.7
       '@viewfly/core': 3.0.1
       '@viewfly/platform-browser': 3.0.1
-      '@viewfly/ui-icons': 0.0.16(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)
+      '@viewfly/ui-icons': 0.0.17(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)
 
-  '@viewfly/ui-icons@0.0.16(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)':
+  '@viewfly/ui-icons@0.0.17(@viewfly/core@3.0.1)(@viewfly/platform-browser@3.0.1)':
     dependencies:
       '@viewfly/core': 3.0.1
       '@viewfly/platform-browser': 3.0.1

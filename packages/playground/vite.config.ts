@@ -4,6 +4,18 @@ import swc from 'vite-plugin-swc-transform'
 import checker from 'vite-plugin-checker'
 
 export default defineConfig({
+  /**
+   * 开发预构建默认走 esbuild，不会生成 `design:paramtypes`。
+   * Viewfly/Textbus 的 IoC 依赖该元数据；排除 workspace 包让它们走 SWC（decoratorMetadata）。
+   */
+  optimizeDeps: {
+    exclude: [
+      '@textbus/core',
+      '@textbus/platform-browser',
+      '@textbus/collaborate',
+      '@textbus/adapter-viewfly'
+    ]
+  },
   plugins: [
     checker({
       typescript: true
