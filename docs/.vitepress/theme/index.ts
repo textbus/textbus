@@ -39,12 +39,11 @@ export default {
     app.component('TextbusPlayground', TextbusPlayground)
 
     if (inBrowser) {
-      queueMicrotask(() => syncVpLayoutClasses(router.route.path))
       const prev = router.onAfterRouteChange
-      router.onAfterRouteChange = async (to) => {
-        await prev?.(to)
+      router.onAfterRouteChange = async (href: string) => {
+        await prev?.(href)
+        /** 须在 `router.go()` 完成、`route.data` 已指向当前页之后再跑；切勿在 enhanceApp 阶段用微任务提前读 `router.route`（彼时仍为占位数据，locale/nav 会短暂变成 root）。 */
         const path = router.route.path
-        // `onAfterRouteChange` 在首次 `router.go()` 里早于 `app.mount()`，`#VPContent` 尚不存在；推迟到宏任务再同步。
         setTimeout(() => syncVpLayoutClasses(path), 0)
       }
     }
