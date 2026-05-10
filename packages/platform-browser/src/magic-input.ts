@@ -175,8 +175,12 @@ class ExperimentalCaret implements Caret {
       nativeRange.selectNodeContents(compositionNode)
       nativeRange.collapse()
     }
+    this.caret.style.display = nativeRange.collapsed ? 'block' : 'none'
+    if (!nativeRange.collapsed) {
+      return
+    }
     const rect = getLayoutRectByRange(nativeRange)
-    const { fontSize, lineHeight, color, writingMode } = getComputedStyle(node)
+    const {fontSize, lineHeight, color, writingMode} = getComputedStyle(node)
 
     let height: number
     if (isNaN(+lineHeight)) {
@@ -258,7 +262,7 @@ class ExperimentalCaret implements Caret {
       const selfRect = this.elementRef.getBoundingClientRect()
       const scrollContainer = this.getScrollContainer(startContainer)
       const scrollRect = scrollContainer === document.documentElement ?
-        { top: 0, bottom: document.documentElement.clientHeight } :
+        {top: 0, bottom: document.documentElement.clientHeight} :
         scrollContainer.getBoundingClientRect()
       const limit = this.getLimit()
 
@@ -354,7 +358,7 @@ export class MagicInput extends Input {
       )
     })
 
-    this.caret.elementRef.append(this.container)
+    this.caret.elementRef.prepend(this.container)
   }
 
   focus(range: Range, restart: boolean) {
