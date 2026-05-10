@@ -57,6 +57,63 @@ export class ObjectProxyHandler<T extends object> implements ProxyHandler<T> {
     return b
   }
 
+  /**
+   * {@link Reflect.defineProperty} 会直接在 target 上落盘，不经过 {@link set}，
+   * 需在此补上与 set 一致的 observe / attachModel / 变更记录，否则子模型拿不到 parentModel。
+   */
+  defineProperty(target: T, p: string | symbol, desc: PropertyDescriptor): boolean {
+    if (p === markKey) {
+      return false
+    }
+    if (typeof desc.get === 'function' || typeof desc.set === 'function') {
+      return Reflect.defineProperty(target, p, desc)
+    }
+    if (!('value' in desc)) {
+      return Reflect.defineProperty(target, p, desc)
+    }
+
+    const newValue = toRaw(desc.value as any)
+    const has = Reflect.has(target, p)
+    const oldValue = has ? (target as any)[p] : undefined
+    const ok = Reflect.defineProperty(target, p, { ...desc, value: newValue })
+    if (!ok) {
+      return false
+    }
+    if (oldValue === newValue) {
+      return true
+    }
+
+    const parentModel = getObserver(target)!
+    const changeMarker = parentModel.__changeMarker__
+    changeMarker.beforeChange()
+
+    detachModel(oldValue)
+
+    const unApplyAction: Action = has ? {
+      type: 'propSet',
+      key: p as string,
+      value: valueToJSON(oldValue),
+      ref: null,
+    } : {
+      type: 'propDelete',
+      key: p as string
+    }
+    const subModel = observe(newValue)
+    attachModel(parentModel, subModel)
+
+    changeMarker.markAsDirtied({
+      paths: [],
+      apply: [{
+        type: 'propSet',
+        key: p as string,
+        value: valueToJSON(newValue),
+        ref: subModel,
+      }],
+      unApply: [unApplyAction]
+    })
+    return true
+  }
+
   get(target: T, p: string | symbol, receiver: any): any {
     if (p === markKey) {
       return objectChangeMarkerCache.get(target)
