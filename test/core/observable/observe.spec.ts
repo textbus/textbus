@@ -41,6 +41,31 @@ describe('observe', () => {
     expect(id!.value).toBe(arr[0])
     expect((id!.value as Model).__changeMarker__).toBeInstanceOf(ChangeMarker)
   })
+
+  test('Reflect.defineProperty 写入子对象会 attach 到模型树', () => {
+    const model = observe({} as { child?: object })
+    const child = { n: 1 }
+    Reflect.defineProperty(model, 'child', {
+      value: child,
+      writable: true,
+      enumerable: true,
+      configurable: true
+    })
+    const childModel = model.child as Model
+    expect(childModel.__changeMarker__).toBeInstanceOf(ChangeMarker)
+    expect(childModel.__changeMarker__.parentModel).toBe(model)
+
+    const arr = observe([] as object[])
+    const item = { k: 1 }
+    Reflect.defineProperty(arr, '0', {
+      value: item,
+      writable: true,
+      enumerable: true,
+      configurable: true
+    })
+    const el = arr[0] as Model
+    expect(el.__changeMarker__.parentModel).toBe(arr)
+  })
 })
 
 describe('数据原型方法', () => {
@@ -62,8 +87,8 @@ describe('数据原型方法', () => {
     const out = model.a.concat(model.b as any)
     expect((out as any).__changeMarker__).toBeUndefined()
     expect(Array.isArray(out)).toBe(true)
-    expect(out[0].__changeMarker__).toBeInstanceOf(ChangeMarker)
-    expect(out[1].__changeMarker__).toBeInstanceOf(ChangeMarker)
+    expect(out[0].__changeMarker__).toBeUndefined()
+    expect(out[1].__changeMarker__).toBeUndefined()
   })
 
   test('Array copyWithin', () => {
@@ -159,7 +184,7 @@ describe('数据原型方法', () => {
     })
     const arr = model.arr.flat()
     arr.forEach(i => {
-      expect(i.__changeMarker__).toBeInstanceOf(ChangeMarker)
+      expect((i as any).__changeMarker__).toBeUndefined()
     })
     expect(arr.length).toBe(2)
   })
@@ -325,8 +350,8 @@ describe('数据原型方法', () => {
     })
     const out = model.arr.slice()
     expect((out as any).__changeMarker__).toBeUndefined()
-    expect(out[0].__changeMarker__).toBeInstanceOf(ChangeMarker)
-    expect(out[1].__changeMarker__).toBeInstanceOf(ChangeMarker)
+    expect(out[0].__changeMarker__).toBeUndefined()
+    expect(out[1].__changeMarker__).toBeUndefined()
   })
 
   test('Array some', () => {
@@ -386,7 +411,7 @@ describe('数据原型方法', () => {
     expect((out as any).__changeMarker__).toBeUndefined()
     expect(out[0].v).toBe(2)
     expect(out[1].v).toBe(1)
-    expect(out[0].__changeMarker__).toBeInstanceOf(ChangeMarker)
+    expect(out[0].__changeMarker__).toBeUndefined()
     expect(model.arr[0].v).toBe(1)
   })
 
@@ -397,7 +422,7 @@ describe('数据原型方法', () => {
     const out = model.arr.toSorted((a, b) => a.v - b.v)
     expect((out as any).__changeMarker__).toBeUndefined()
     expect(out.map((x: { v: number }) => x.v)).toEqual([1, 3])
-    expect(out[0].__changeMarker__).toBeInstanceOf(ChangeMarker)
+    expect(out[0].__changeMarker__).toBeUndefined()
     expect(model.arr.map(x => x.v)).toEqual([3, 1])
   })
 
@@ -448,7 +473,7 @@ describe('数据原型方法', () => {
     const out = model.arr.with(0, { a: 99 } as any)
     expect((out as any).__changeMarker__).toBeUndefined()
     expect(out[0].a).toBe(99)
-    expect(out[0].__changeMarker__).toBeInstanceOf(ChangeMarker)
+    expect(out[0].__changeMarker__).toBeUndefined()
     expect(model.arr[0].a).toBe(1)
   })
 

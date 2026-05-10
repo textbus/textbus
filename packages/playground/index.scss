@@ -1,12 +1,13 @@
 .app {
-  display: flex;
-  width: 1200px;
+  //display: flex;
+  width: 800px;
   margin: 0 auto;
 }
 
 .editor {
   flex: 1;
   border: 1px solid #ccc;
+  padding: 16px;
 }
 
 .right {
