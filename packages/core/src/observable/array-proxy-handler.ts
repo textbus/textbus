@@ -86,29 +86,9 @@ function asObservableReturn<T>(v: T): T {
   return observe(v as object) as T
 }
 
-/** 普通数组，元素中的对象/数组/模型转为可观察引用（数组本身不 observe） */
-function plainArrayWithObservableMembers(items: any[]): any[] {
-  const len = items.length
-  const out: any[] = new Array(len)
-  for (let i = 0; i < len; i++) {
-    if (i in items) {
-      out[i] = asObservableReturn(items[i])
-    }
-  }
-  return out
-}
-
 function applySearchMethod(self: any, methodName: string, args: unknown[]) {
   const target = toRaw(self)
   return target[methodName](...args.map(toRaw))
-}
-
-/** 原生 reduce 传入的 previousValue 可能是底层 raw，若在缓存中有对应 proxy 则换成可观察引用 */
-function wrapAccumulator(acc: any): any {
-  if (acc === null || typeof acc !== 'object') {
-    return acc
-  }
-  return getObserver(toRaw(acc as object)) ?? acc
 }
 
 const arrayMethodsHandlers = {
@@ -129,182 +109,27 @@ const arrayMethodsHandlers = {
   },
 
   slice(...args: unknown[]) {
-    return plainArrayWithObservableMembers(applySearchMethod(this, 'slice', args))
+    return applySearchMethod(this, 'slice', args)
   },
   concat(...args: unknown[]) {
-    return plainArrayWithObservableMembers(applySearchMethod(this, 'concat', args))
+    return applySearchMethod(this, 'concat', args)
   },
   flat(...args: unknown[]) {
-    return plainArrayWithObservableMembers(applySearchMethod(this, 'flat', args))
-  },
-  flatMap(this: any, callbackfn: (...args: any[]) => any, thisArg?: any) {
-    const t = toRaw(this) as any[]
-    const self = this
-    const raw = Array.prototype.flatMap.call(t, function (x: any, i: number) {
-      if (!(i in t)) {
-        return []
-      }
-      return callbackfn.call(thisArg, asObservableReturn(x), i, self)
-    })
-    return plainArrayWithObservableMembers(raw)
-  },
-  map(this: any, callbackfn: (...args: any[]) => any, thisArg?: any) {
-    const t = toRaw(this) as any[]
-    const self = this
-    const out = new Array(t.length)
-    for (let i = 0; i < t.length; i++) {
-      const v = i in t ? t[i] : undefined
-      out[i] = callbackfn.call(thisArg, asObservableReturn(v as any), i, self)
-    }
-    return plainArrayWithObservableMembers(out)
-  },
-  filter(this: any, predicate: (...args: any[]) => unknown, thisArg?: any) {
-    const t = toRaw(this) as any[]
-    const self = this
-    const picked: any[] = []
-    for (let i = 0; i < t.length; i++) {
-      if (i in t && predicate.call(thisArg, asObservableReturn(t[i]), i, self)) {
-        picked.push(t[i])
-      }
-    }
-    return plainArrayWithObservableMembers(picked)
-  },
-  find(this: any, predicate: (...args: any[]) => unknown, thisArg?: any) {
-    const t = toRaw(this) as any[]
-    const self = this
-    for (let i = 0; i < t.length; i++) {
-      if (i in t && predicate.call(thisArg, asObservableReturn(t[i]), i, self)) {
-        return asObservableReturn(t[i])
-      }
-    }
-    return undefined
-  },
-  findIndex(this: any, predicate: (...args: any[]) => unknown, thisArg?: any) {
-    const t = toRaw(this) as any[]
-    const self = this
-    for (let i = 0; i < t.length; i++) {
-      if (i in t && predicate.call(thisArg, asObservableReturn(t[i]), i, self)) {
-        return i
-      }
-    }
-    return -1
-  },
-  findLast(this: any, predicate: (...args: any[]) => unknown, thisArg?: any) {
-    const t = toRaw(this) as any[]
-    const self = this
-    for (let i = t.length - 1; i >= 0; i--) {
-      if (i in t && predicate.call(thisArg, asObservableReturn(t[i]), i, self)) {
-        return asObservableReturn(t[i])
-      }
-    }
-    return undefined
-  },
-  findLastIndex(this: any, predicate: (...args: any[]) => unknown, thisArg?: any) {
-    const t = toRaw(this) as any[]
-    const self = this
-    for (let i = t.length - 1; i >= 0; i--) {
-      if (i in t && predicate.call(thisArg, asObservableReturn(t[i]), i, self)) {
-        return i
-      }
-    }
-    return -1
-  },
-  at(this: any, ...args: unknown[]) {
-    return asObservableReturn(applySearchMethod(this, 'at', args))
-  },
-  forEach(this: any, callbackfn: (...args: any[]) => void, thisArg?: any) {
-    const t = toRaw(this) as any[]
-    const self = this
-    for (let i = 0; i < t.length; i++) {
-      const v = i in t ? t[i] : undefined
-      callbackfn.call(thisArg, asObservableReturn(v as any), i, self)
-    }
-  },
-  every(this: any, predicate: (...args: any[]) => unknown, thisArg?: any) {
-    const t = toRaw(this) as any[]
-    const self = this
-    for (let i = 0; i < t.length; i++) {
-      if (i in t && !predicate.call(thisArg, asObservableReturn(t[i]), i, self)) {
-        return false
-      }
-    }
-    return true
-  },
-  some(this: any, predicate: (...args: any[]) => unknown, thisArg?: any) {
-    const t = toRaw(this) as any[]
-    const self = this
-    for (let i = 0; i < t.length; i++) {
-      if (i in t && predicate.call(thisArg, asObservableReturn(t[i]), i, self)) {
-        return true
-      }
-    }
-    return false
-  },
-  reduce(this: any, callbackfn: (p: any, c: any, i: number, a: any) => any, ...initial: any[]) {
-    const t = toRaw(this) as any[]
-    const self = this
-    const wrap = (acc: any, cur: any, i: number, _arr: any[]) =>
-      callbackfn(wrapAccumulator(acc), i in t ? asObservableReturn(cur) : cur, i, self)
-    const reduceFn = Array.prototype.reduce as (
-      this: any[],
-      callbackfn: (previousValue: any, currentValue: any, currentIndex: number, array: any[]) => any,
-      initialValue?: any
-    ) => any
-    return initial.length === 0
-      ? reduceFn.call(t, wrap)
-      : reduceFn.call(t, wrap, initial[0])
-  },
-  reduceRight(this: any, callbackfn: (p: any, c: any, i: number, a: any) => any, ...initial: any[]) {
-    const t = toRaw(this) as any[]
-    const self = this
-    const wrap = (acc: any, cur: any, i: number, _arr: any[]) =>
-      callbackfn(wrapAccumulator(acc), i in t ? asObservableReturn(cur) : cur, i, self)
-    const reduceRightFn = Array.prototype.reduceRight as (
-      this: any[],
-      callbackfn: (previousValue: any, currentValue: any, currentIndex: number, array: any[]) => any,
-      initialValue?: any
-    ) => any
-    return initial.length === 0
-      ? reduceRightFn.call(t, wrap)
-      : reduceRightFn.call(t, wrap, initial[0])
-  },
-  * entries(this: any): IterableIterator<[number, any]> {
-    const t = toRaw(this) as any[]
-    const len = t.length
-    for (let i = 0; i < len; i++) {
-      const v = i in t ? t[i] : undefined
-      yield [i, asObservableReturn(v as any)]
-    }
-  },
-  * values(this: any): IterableIterator<any> {
-    const t = toRaw(this) as any[]
-    const len = t.length
-    for (let i = 0; i < len; i++) {
-      const v = i in t ? t[i] : undefined
-      yield asObservableReturn(v as any)
-    }
-  },
-  * [Symbol.iterator](this: any): IterableIterator<any> {
-    const t = toRaw(this) as any[]
-    const len = t.length
-    for (let i = 0; i < len; i++) {
-      const v = i in t ? t[i] : undefined
-      yield asObservableReturn(v as any)
-    }
+    return applySearchMethod(this, 'flat', args)
   },
   toReversed(this: any) {
     const t = toRaw(this) as any[]
     const raw = typeof (Array.prototype as any).toReversed === 'function'
       ? (Array.prototype as any).toReversed.call(t)
       : [...t].reverse()
-    return plainArrayWithObservableMembers(raw)
+    return raw
   },
   toSorted(this: any, compareFn?: (a: any, b: any) => number) {
     const t = toRaw(this) as any[]
     const raw = typeof (Array.prototype as any).toSorted === 'function'
       ? (Array.prototype as any).toSorted.call(t, compareFn)
       : [...t].sort(compareFn)
-    return plainArrayWithObservableMembers(raw)
+    return raw
   },
   toSpliced(this: any, start: number, deleteCount: number, ...items: any[]) {
     const t = toRaw(this) as any[]
@@ -315,7 +140,7 @@ const arrayMethodsHandlers = {
         c.splice(start, deleteCount, ...toRaws(items))
         return c
       })()
-    return plainArrayWithObservableMembers(raw)
+    return raw
   },
   with(this: any, index: number, value: any) {
     const t = toRaw(this) as any[]
@@ -326,7 +151,7 @@ const arrayMethodsHandlers = {
         c[index] = toRaw(value)
         return c
       })()
-    return plainArrayWithObservableMembers(raw)
+    return raw
   },
 
   push(this: any, ...items: any[]): number {
