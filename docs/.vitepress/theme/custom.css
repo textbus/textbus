@@ -8,6 +8,21 @@
 }
 
 /**
+ * 自定义首页使用 `layout: TextbusIoHome`，VPNavBar 得不到官方 `home` class，
+ * 会命中 `:not(.home)`，顶栏 divider 在 scrollY===0 时也会显示。
+ * 与 `layout: home` 行为对齐：`html.tb-layout-home` 由 theme/index.ts 标记，`VPNavBar.top` 仅在未滚动时为 true。
+ */
+html.tb-layout-home .VPNavBar.top .divider-line {
+  background-color: transparent !important;
+}
+
+@media (min-width: 960px) {
+  html.tb-layout-home .VPNavBar.top .divider {
+    background-color: transparent !important;
+  }
+}
+
+/**
  * `/playground`：画布色与主内容宽度。
  * 必须用 `frontmatter.pageClass`（挂在 `.Layout` 上）：`theme/index.ts` 里在 `onAfterRouteChange`
  * 同步 `#VPContent` 类名时，首屏 `router.go()` 尚未 `app.mount()`，`#VPContent` 不存在，JS 永远不会加上类。

@@ -1,52 +1,55 @@
 <script setup lang="ts">
+import 'reflect-metadata'
 import type { Member } from '@textbus/xnote'
 import { useData, withBase } from 'vitepress'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { Editor, StaticToolbarPlugin, Organization } from '@textbus/xnote'
+import '@textbus/xnote/style.css'
 
-const { localeIndex } = useData()
+const {localeIndex} = useData()
 const isEn = computed(() => localeIndex.value === 'en')
 
 const homeCopy = computed(() =>
-  isEn.value
-    ? {
-        heroTitle: '5.0 Released',
-        heroSlogan: 'High-performance rich text with a master–slave architecture',
-        heroDesc: 'Native rendering with Viewfly, React, and Vue',
-        cta: 'Get started',
-        feat1h: 'Performance',
-        feat1p:
-          'Smooth editing at scale — very large documents, tens of thousands of DOM nodes, and tens of thousands of blocks.',
-        feat2h: 'Type safety',
-        feat2p: 'Full TypeScript support for complex editor features.',
-        feat3h: 'Collaboration',
-        feat3p: 'Build multiplayer editors without reinventing sync.',
-        feat4h: 'Extensibility',
-        feat4p: 'First-class integration with Viewfly, Vue, and React.',
-      }
-    : {
-        heroTitle: '5.0 正式发布',
-        heroSlogan: '支持主从结构、高性能的富文本库',
-        heroDesc: '原生支持 Viewfly、React、Vue 渲染富文本',
-        cta: '快速上手',
-        feat1h: '超强性能',
-        feat1p:
-          '支持 <strong>1000 万字</strong>、<strong>25 万 DOM 节点</strong>、<strong>5 万段落</strong>无卡顿编辑',
-        feat2h: '类型安全',
-        feat2p: '完整的 TypeScript 支持，帮助你更快完成复杂的富文本开发',
-        feat3h: '支持协作',
-        feat3p: '支持在线协作，无成本开发多人在线编辑器',
-        feat4h: '易扩展',
-        feat4p: '全面拥抱前端框架，无缝接入 Viewfly、Vue 和 React',
-      },
+    isEn.value
+        ? {
+          heroTitle: '5.0 Released',
+          heroSlogan: 'High-performance rich text with a master–slave architecture',
+          heroDesc: 'Native rendering with Viewfly, React, and Vue',
+          cta: 'Get started',
+          feat1h: 'Performance',
+          feat1p:
+              'Smooth editing at scale — very large documents, tens of thousands of DOM nodes, and tens of thousands of blocks.',
+          feat2h: 'Type safety',
+          feat2p: 'Full TypeScript support for complex editor features.',
+          feat3h: 'Collaboration',
+          feat3p: 'Build multiplayer editors without reinventing sync.',
+          feat4h: 'Extensibility',
+          feat4p: 'First-class integration with Viewfly, Vue, and React.',
+        }
+        : {
+          heroTitle: '5.0 正式发布',
+          heroSlogan: '支持主从结构、高性能的富文本库',
+          heroDesc: '原生支持 Viewfly、React、Vue 渲染富文本',
+          cta: '快速上手',
+          feat1h: '超强性能',
+          feat1p:
+              '支持 <strong>1000 万字</strong>、<strong>25 万 DOM 节点</strong>、<strong>5 万段落</strong>无卡顿编辑',
+          feat2h: '类型安全',
+          feat2p: '完整的 TypeScript 支持，帮助你更快完成复杂的富文本开发',
+          feat3h: '支持协作',
+          feat3p: '支持在线协作，无成本开发多人在线编辑器',
+          feat4h: '易扩展',
+          feat4p: '全面拥抱前端框架，无缝接入 Viewfly、Vue 和 React',
+        },
 )
 
 const gettingStartedHref = computed(() =>
-  withBase(isEn.value ? '/en/guide/getting-started' : '/guide/getting-started'),
+    withBase(isEn.value ? '/en/guide/getting-started' : '/guide/getting-started'),
 )
 
 const editorBgImage = computed(
-  () =>
-    `linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.15) 42%, transparent 78%), url(${JSON.stringify(withBase('/bg1.jpg'))})`,
+    () =>
+        `linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.15) 42%, transparent 78%), url(${JSON.stringify(withBase('/bg1.jpg'))})`,
 )
 
 /** 仅首页需要：用 link 注入，卸载时移除，避免 XNote 全局 UnoCSS 污染整站深色主题 */
@@ -85,7 +88,7 @@ const DEMO_HTML_ZH =
 
 /** 英文首页演示正文（与中文版结构类似） */
 const DEMO_HTML_EN =
-  '<div dir="auto" data-component="RootComponent" style="padding-bottom:40px" class="xnote-root"><div data-placeholder="" class="xnote-content"><div data-component="ParagraphComponent" class="xnote-paragraph"><div><span style="font-size:18px">Hi! Welcome to the <strong>Textbus</strong> rich text framework.</span></div></div><blockquote data-component="BlockquoteComponent" class="xnote-blockquote"><div><div data-component="ParagraphComponent" class="xnote-paragraph"><div>You are viewing <a href="https://github.com/textbus/xnote" target="_blank">XNote</a>, the official editor demo. Use XNote directly if you want a full editor product; read the Textbus docs if you need a fully custom editor.</div></div></div></blockquote><div data-component="ParagraphComponent" class="xnote-paragraph"><div>XNote covers common formatting, media, tables, code blocks, tasks, math, and more — plus Markdown-style shortcuts as you type. With an organization provider, mention teammates with <div data-info="%7B%22id%22%3A%22xxx%22%2C%22name%22%3A%22Textbus%22%2C%22groupName%22%3A%22Dept-Li%22%2C%22groupId%22%3A%22xxx%22%2C%22avatar%22%3A%22%22%2C%22color%22%3A%22%2391205a%22%7D" data-component="AtComponent" class="xnote-at xnote-at-complete"><span>@</span>Textbus</div>.</div></div><div data-component="ParagraphComponent" class="xnote-paragraph"><div>We ship improvements continuously — thanks for trying Textbus!</div></div></div></div>'
+    '<div dir="auto" data-component="RootComponent" style="padding-bottom:40px" class="xnote-root"><div data-placeholder="" class="xnote-content"><div data-component="ParagraphComponent" class="xnote-paragraph"><div><span style="font-size:18px">Hi! Welcome to the <strong>Textbus</strong> rich text framework.</span></div></div><blockquote data-component="BlockquoteComponent" class="xnote-blockquote"><div><div data-component="ParagraphComponent" class="xnote-paragraph"><div>You are viewing <a href="https://github.com/textbus/xnote" target="_blank">XNote</a>, the official editor demo. Use XNote directly if you want a full editor product; read the Textbus docs if you need a fully custom editor.</div></div></div></blockquote><div data-component="ParagraphComponent" class="xnote-paragraph"><div>XNote covers common formatting, media, tables, code blocks, tasks, math, and more — plus Markdown-style shortcuts as you type. With an organization provider, mention teammates with <div data-info="%7B%22id%22%3A%22xxx%22%2C%22name%22%3A%22Textbus%22%2C%22groupName%22%3A%22Dept-Li%22%2C%22groupId%22%3A%22xxx%22%2C%22avatar%22%3A%22%22%2C%22color%22%3A%22%2391205a%22%7D" data-component="AtComponent" class="xnote-at xnote-at-complete"><span>@</span>Textbus</div>.</div></div><div data-component="ParagraphComponent" class="xnote-paragraph"><div>We ship improvements continuously — thanks for trying Textbus!</div></div></div></div>'
 
 function sleep(delay: number): Promise<void> {
   return new Promise(resolve => {
@@ -137,32 +140,9 @@ onBeforeUnmount(() => {
 })
 
 async function bootstrap(): Promise<void> {
-  await nextTick()
   const toolbarEl = toolbarHost.value
   const contentEl = contentHost.value
   if (!toolbarEl || !contentEl || cancelled) {
-    return
-  }
-
-  /** 装饰器元数据须在 XNote 模块求值前就绪 */
-  await import('reflect-metadata')
-
-  /** 在 reflect-metadata 之后，并行拉取 XNote 样式与主包，缩短首屏可交互时间 */
-  const [{ default: xnoteCssHref }, xnoteMod] = await Promise.all([
-    import('@textbus/xnote/style.css?url'),
-    import('@textbus/xnote'),
-  ])
-  injectStylesheet(xnoteCssHref)
-
-  if (cancelled) {
-    removeInjectedStylesheets()
-    return
-  }
-
-  const { Editor, StaticToolbarPlugin, Organization } = xnoteMod
-
-  if (cancelled) {
-    removeInjectedStylesheets()
     return
   }
 
@@ -225,9 +205,9 @@ async function bootstrap(): Promise<void> {
 <template>
   <div class="tb-io-home">
     <div
-      class="static-editor"
-      :class="{ 'bg-loaded': bgLoaded }"
-      :style="{ '--tb-editor-bg-image': editorBgImage }"
+        class="static-editor"
+        :class="{ 'bg-loaded': bgLoaded }"
+        :style="{ '--tb-editor-bg-image': editorBgImage }"
     >
       <div class="banner ui-container-fluid">
         <div class="ui-container content">
@@ -257,38 +237,38 @@ async function bootstrap(): Promise<void> {
               <span class="tb-io-home__feat-icon" aria-hidden="true">
                 <svg class="tb-io-home__feat-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"
                   />
                 </svg>
               </span>
               <h3>{{ homeCopy.feat1h }}</h3>
             </div>
-            <p v-html="homeCopy.feat1p" />
+            <p v-html="homeCopy.feat1p"/>
           </div>
           <div class="ui-col-sm-12 ui-col-lg-6">
             <div class="icon">
               <span class="tb-io-home__feat-icon" aria-hidden="true">
                 <svg class="tb-io-home__feat-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"
                   />
                   <path
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="m9 12 2 2 4-4"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="m9 12 2 2 4-4"
                   />
                 </svg>
               </span>
@@ -301,21 +281,21 @@ async function bootstrap(): Promise<void> {
               <span class="tb-io-home__feat-icon" aria-hidden="true">
                 <svg class="tb-io-home__feat-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
                   />
-                  <circle cx="9" cy="7" r="4" fill="none" stroke="currentColor" stroke-width="2" />
+                  <circle cx="9" cy="7" r="4" fill="none" stroke="currentColor" stroke-width="2"/>
                   <path
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
                   />
                 </svg>
               </span>
@@ -328,20 +308,20 @@ async function bootstrap(): Promise<void> {
               <span class="tb-io-home__feat-icon" aria-hidden="true">
                 <svg class="tb-io-home__feat-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"
                   />
                   <path
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="m13 13 6 6"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="m13 13 6 6"
                   />
                 </svg>
               </span>
