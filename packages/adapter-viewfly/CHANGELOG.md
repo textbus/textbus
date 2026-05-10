@@ -1,5 +1,14 @@
 # @textbus/adapter-viewfly
 
+## 5.3.2
+
+### Patch Changes
+
+- Updated dependencies
+  - @textbus/platform-browser@5.3.2
+  - @textbus/core@5.3.2
+  - @textbus/platform-node@5.3.2
+
 ## 5.3.1
 
 ### Patch Changes

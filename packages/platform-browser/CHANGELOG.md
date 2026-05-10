@@ -1,5 +1,14 @@
 # @textbus/platform-browser
 
+## 5.3.2
+
+### Patch Changes
+
+- - 修复并删除不需要的内部观察代理
+  - 修复 transform 转换断言错误的 bug
+- Updated dependencies
+  - @textbus/core@5.3.2
+
 ## 5.3.1
 
 ### Patch Changes

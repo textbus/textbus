@@ -1,5 +1,12 @@
 # @textbus/collaborate
 
+## 5.3.2
+
+### Patch Changes
+
+- Updated dependencies
+  - @textbus/core@5.3.2
+
 ## 5.3.1
 
 ### Patch Changes
