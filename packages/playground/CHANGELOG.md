@@ -1,5 +1,21 @@
 # @textbus/playground
 
+## 5.2.0
+
+### Minor Changes
+
+- - 异步组件 metadata 支持历史回退
+  - 优化下标计算分词效率
+  - 修复数据观察部分边界未覆盖的问题
+
+### Patch Changes
+
+- Updated dependencies
+  - @textbus/collaborate@5.3.0
+  - @textbus/core@5.3.0
+  - @textbus/platform-browser@5.3.0
+  - @textbus/adapter-viewfly@5.3.0
+
 ## 5.1.7
 
 ### Patch Changes
