@@ -421,7 +421,7 @@ export class Collaborate {
 
   private syncSharedMapToLocalMap(sharedMap: YMap<any>, localMap: ProxyModel<Record<string, any>>) {
     sharedMap.forEach((value, key) => {
-      localMap[key] = this.createLocalModelBySharedByModel(value)
+      localMap[key] = toRaw(this.createLocalModelBySharedByModel(value))
     })
     this.syncObject(sharedMap, localMap)
   }
@@ -437,7 +437,7 @@ export class Collaborate {
     for (let i = 0; i < sharedArray.length; i++) {
       const item = sharedArray.get(i)
       if (!this.isArrayHoleElement(item)) {
-        raw[i] = this.createLocalModelBySharedByModel(item)
+        raw[i] = toRaw(this.createLocalModelBySharedByModel(item))
       }
     }
     raw.length = sharedArray.length
@@ -795,12 +795,12 @@ export class Collaborate {
     changeMarker.markAsDirtied({
       paths: [],
       apply: [
-        { type: 'retain', offset: retainOffset },
-        { type: 'insert', data: valueToJSON(newTail), ref: subModels }
+        {type: 'retain', offset: retainOffset},
+        {type: 'insert', data: valueToJSON(newTail), ref: subModels}
       ],
       unApply: [
-        { type: 'retain', offset: retainOffset },
-        { type: 'delete', count: holeCount }
+        {type: 'retain', offset: retainOffset},
+        {type: 'delete', count: holeCount}
       ]
     })
   }
