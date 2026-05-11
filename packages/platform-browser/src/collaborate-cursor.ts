@@ -102,7 +102,7 @@ export class CollaborateCursor {
     this.container = textbus.get(VIEW_CONTAINER)
     this.canvasContainer.append(this.canvas)
     this.host.append(this.canvasContainer, this.tooltips)
-    this.container.prepend(this.host)
+    this.container.append(this.host)
     this.subscription.add(this.onRectsChange.subscribe(rects => {
       for (const rect of rects) {
         this.context.fillStyle = rect.color
