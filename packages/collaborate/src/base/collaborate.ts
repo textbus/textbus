@@ -171,7 +171,7 @@ export class Collaborate {
   }
 
   getRelativeCursorLocation(): CursorPosition | null {
-    const { anchorSlot, anchorOffset, focusSlot, focusOffset } = this.selection
+    const {anchorSlot, anchorOffset, focusSlot, focusOffset} = this.selection
     if (anchorSlot) {
       const anchorYText = this.slotMap.get(anchorSlot)
       if (anchorYText) {
@@ -458,10 +458,9 @@ export class Collaborate {
 
   private createSharedArrayByLocalArray(localArray: ProxyModel<any[]>): YArray<any> {
     const sharedArray = new YArray<any>()
-    const raw = toRaw(localArray) as any[]
-    for (let i = 0; i < raw.length; i++) {
-      if (i in raw) {
-        sharedArray.push([this.sharedModelForArraySlot(raw[i])])
+    for (let i = 0; i < localArray.length; i++) {
+      if (i in localArray) {
+        sharedArray.push([this.sharedModelForArraySlot(localArray[i])])
       } else {
         sharedArray.push([this.createArrayHoleXmlElement()])
       }
