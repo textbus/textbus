@@ -15,6 +15,9 @@ import {
   observe,
   ProxyModel,
   toRaw,
+  getObserver,
+  attachModel,
+  valueToJSON,
 } from '@textbus/core'
 import {
   AbstractType,
@@ -763,10 +766,47 @@ export class Collaborate {
 
   /**
    * 在可观察数组中插入稀疏空洞（与 YArray 中 XmlElement 占位对齐）。
-   * 仅在远端同步路径调用；直接操作 raw，避免走插入 undefined 的可观察路径。
+   * 仅在远端同步路径调用；先改 raw，再用与 {@link ArrayProxyHandler} `length` 增长一致的原子命令
+   * `retain` + `insert`（`undefined` 槽）记录，`unApply` 为 `retain` + `delete`。
+   * `runLocalUpdate` 在 `updateFromRemote` 为 true 时会跳过，不会把洞再写回 Y。
    */
   private insertSparseHole(localArray: ProxyModel<any[]>, atIndex: number) {
     const raw = toRaw(localArray) as any[]
+    const oldLen = raw.length
+    this.applySparseHoleToRaw(raw, atIndex)
+    const holeCount = atIndex >= oldLen ? atIndex + 1 - oldLen : 1
+    const newTail: any[] = []
+    if (atIndex >= oldLen) {
+      for (let i = oldLen; i < oldLen + holeCount; i++) {
+        newTail.push((raw as any)[i])
+      }
+    } else {
+      newTail.push(undefined)
+    }
+    const changeMarker = localArray.__changeMarker__
+    changeMarker.beforeChange()
+    const parentModel = getObserver(raw)!
+    const subModels = newTail.map(item => {
+      const m = observe(item)
+      attachModel(parentModel, m)
+      return m
+    })
+    const retainOffset = atIndex >= oldLen ? oldLen : atIndex
+    changeMarker.markAsDirtied({
+      paths: [],
+      apply: [
+        { type: 'retain', offset: retainOffset },
+        { type: 'insert', data: valueToJSON(newTail), ref: subModels }
+      ],
+      unApply: [
+        { type: 'retain', offset: retainOffset },
+        { type: 'delete', count: holeCount }
+      ]
+    })
+  }
+
+  /** 与 Y 洞位对齐的稀疏洞写入，仅操作 raw */
+  private applySparseHoleToRaw(raw: any[], atIndex: number) {
     const len = raw.length
     if (atIndex >= len) {
       raw.length = atIndex + 1
