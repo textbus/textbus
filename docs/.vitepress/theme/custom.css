@@ -45,9 +45,13 @@ html.tb-layout-home .VPNavBar.top .divider-line {
   background-color: var(--tb-playground-canvas);
 }
 
+/**
+ * `layout: TextbusCollabPlayground` 不经 `VPDoc`，内容区直接挂在 `#VPContent` 下，需同步画布色。
+ */
 .Layout.tb-page-playground #VPContent {
   width: 100%;
   max-width: 100%;
+  background-color: var(--tb-playground-canvas);
 }
 
 .Layout.tb-page-playground .VPDoc {

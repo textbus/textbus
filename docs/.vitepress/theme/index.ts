@@ -2,6 +2,7 @@ import { watch } from 'vue'
 import DefaultTheme from 'vitepress/theme'
 import { inBrowser } from 'vitepress'
 import Layout from './Layout.vue'
+import TextbusCollabPlayground from './components/TextbusCollabPlayground.vue'
 import TextbusIoHome from './components/TextbusIoHome.vue'
 import TextbusPlayground from './components/TextbusPlayground.vue'
 import './custom.css'
@@ -17,6 +18,7 @@ export default {
   extends: DefaultTheme,
   Layout,
   enhanceApp({ app, router }) {
+    app.component('TextbusCollabPlayground', TextbusCollabPlayground)
     app.component('TextbusIoHome', TextbusIoHome)
     app.component('TextbusPlayground', TextbusPlayground)
 
