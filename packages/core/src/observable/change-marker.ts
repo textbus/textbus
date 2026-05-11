@@ -174,7 +174,6 @@ export class ChangeMarker {
       this.host.sliceContent().forEach(i => {
         if (i instanceof Component) {
           invokeListener(i, 'onParentSlotUpdated')
-          i.changeMarker.rendered()
         }
       })
     }
