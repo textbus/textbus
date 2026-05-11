@@ -1,5 +1,17 @@
 # @textbus/playground
 
+## 5.2.3
+
+### Patch Changes
+
+- - 修复不正确的脏路径重置
+  - 修复协作数据同步未建立依赖树的 bug
+- Updated dependencies
+  - @textbus/platform-browser@5.3.3
+  - @textbus/adapter-viewfly@5.3.3
+  - @textbus/collaborate@5.3.3
+  - @textbus/core@5.3.3
+
 ## 5.2.2
 
 ### Patch Changes
