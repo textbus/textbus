@@ -1,5 +1,12 @@
 # @textbus/collaborate
 
+## 5.3.4
+
+### Patch Changes
+
+- 修复协作数据引用不一致的 bug
+  - @textbus/core@5.3.4
+
 ## 5.3.3
 
 ### Patch Changes

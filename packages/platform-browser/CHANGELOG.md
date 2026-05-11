@@ -1,5 +1,11 @@
 # @textbus/platform-browser
 
+## 5.3.4
+
+### Patch Changes
+
+- @textbus/core@5.3.4
+
 ## 5.3.3
 
 ### Patch Changes
