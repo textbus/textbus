@@ -584,7 +584,7 @@ async function bootstrap(): Promise<void> {
   border-radius: 6px 6px 0 0;
 }
 
-.editor-toolbar :deep(.toolbar) {
+.editor-toolbar :deep(.xnote-static-toolbar) {
   height: 40px;
 }
 
