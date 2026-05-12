@@ -20,5 +20,6 @@ const TextbusXnoteCollabDemo = defineClientComponent(
 .tb-playground-page {
   /** 对齐原 `custom.css` 中 `.Layout.tb-page-playground .VPDoc { padding-top: 24px }` */
   padding-top: 24px;
+  padding-bottom: 44px;
 }
 </style>

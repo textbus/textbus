@@ -2,6 +2,7 @@
 /** `/playground` 协作演示；由 `playground.md` 经 `defineClientComponent` 仅客户端加载。 */
 import 'reflect-metadata'
 import { Input, MagicInput } from '@textbus/platform-browser'
+import { useData } from 'vitepress'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { SyncConnector, YWebsocketConnector } from '@textbus/collaborate'
 import { Editor, FileUploader, LLMService, Member, Organization, UserInfo, XNoteMessageBus } from '@textbus/xnote'
@@ -10,6 +11,8 @@ import type { Doc as YDoc } from 'yjs'
 import '@textbus/xnote/style.css'
 
 import { AiService } from './xnote-playground-ai.service'
+
+const { localeIndex } = useData()
 
 const FIRST = '王李张刘陈杨黄赵周吴徐孙马胡朱郭何罗高林'
 const LAST_PARTS = [
@@ -46,10 +49,11 @@ class Http extends Organization {
   async getMembers(name: string): Promise<Member[]> {
     await sleep(100)
     const len = Math.floor(20 / Math.max(name.length, 1) + 1)
+    const dept = localeIndex.value === 'en' ? 'Dept-' : '部门-'
     return Array.from<Member>({ length: len }).map(() => ({
       id: 'xxx',
       name: name + createUserName(),
-      groupName: '部门-' + createUserName(),
+      groupName: dept + createUserName(),
       groupId: 'xxx',
       avatar: '',
       color: createColor(),
@@ -81,6 +85,7 @@ onMounted(() => {
   if (!host) return
 
   editor = new Editor({
+    locale: localeIndex.value === 'en' ? 'en-US' : 'zh-CN',
     collaborateConfig: {
       userinfo: user,
       createConnector(yDoc: YDoc): SyncConnector {
@@ -115,7 +120,7 @@ onMounted(() => {
               fileInput.click()
               return promise
             }
-            alert('没有实现上传接口!')
+            alert(localeIndex.value === 'en' ? 'Upload is not implemented for this type.' : '没有实现上传接口!')
             throw new Error('no upload for non-image')
           },
         },

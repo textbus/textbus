@@ -158,7 +158,7 @@ async function bootstrap(): Promise<void> {
 
   try {
   await import('@textbus/xnote/style.css')
-  const { Editor, StaticToolbarPlugin, Organization } = await import('@textbus/xnote')
+  const { Editor, FileUploader, StaticToolbarPlugin, Organization } = await import('@textbus/xnote')
 
   class Http extends Organization {
     async getMembers(name: string): Promise<Member[]> {
@@ -192,11 +192,43 @@ async function bootstrap(): Promise<void> {
   }
 
   const instance = new Editor({
+    /** 与 `EditorConfig.locale` 一致：英文文档站用 `en-US`，其余为中文（默认 `zh-CN`） */
+    locale: localeIndex.value === 'en' ? 'en-US' : 'zh-CN',
     providers: [
       {
         provide: Organization,
         useValue: new Http(),
       },
+      {
+        provide: FileUploader,
+        useValue: {
+          uploadFile(type: string) {
+            if (type === 'image') {
+              const fileInput = document.createElement('input')
+              fileInput.type = 'file'
+              fileInput.accept = 'image/png, image/gif, image/jpeg, image/bmp, image/x-icon'
+              fileInput.style.cssText = 'position: absolute; left: -9999px; top: -9999px; opacity: 0'
+              const promise = new Promise(resolve => {
+                fileInput.addEventListener('change', event => {
+                  const files = (event.target as HTMLInputElement).files!
+                  const file = files[0]
+                  const fileReader = new FileReader()
+                  fileReader.onload = e => {
+                    resolve(e.target?.result)
+                  }
+                  fileReader.readAsDataURL(file)
+                  fileInput.remove()
+                })
+              })
+              document.body.appendChild(fileInput)
+              fileInput.click()
+              return promise
+            }
+            alert(localeIndex.value === 'en' ? 'Upload is not implemented for this type.' : '没有实现上传接口!')
+            throw new Error('no upload for non-image')
+          },
+        },
+      }
     ],
     content: localeIndex.value === 'en' ? DEMO_HTML_EN : DEMO_HTML_ZH,
     plugins: [
