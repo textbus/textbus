@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="98px" height="115px" viewBox="0 0 98 115" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>编组</title>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="编组" transform="translate(0, 0.182)" fill="#07BAF5">
+            <polygon id="路径" fill-rule="nonzero" points="81.8 107.817952 97.8 107.817952 20.8 4.6179522 5 4.6179522"></polygon>
+            <g transform="translate(46.5441, 57.5) rotate(37) translate(-46.5441, -57.5)translate(39.5441, -9)">
+                <polygon id="矩形" points="0 28.8081421 13.9779199 28.8081421 13.9779199 116.975357 11.1096372 133 2.96058037 133 0 116.877099"></polygon>
+                <rect id="矩形-2" x="0.022080132" y="1.70530257e-13" width="13.9779199" height="21"></rect>
+            </g>
+        </g>
+    </g>
+</svg>

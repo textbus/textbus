@@ -229,7 +229,10 @@ export default defineConfig({
   cleanUrls: false,
   vite: viteShared,
 
-  head: [...gtagHead],
+  head: [
+    ...gtagHead,
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/textbus-icon.svg' }],
+  ],
 
   /** Local search plugin initializes only when `provider` exists on shared themeConfig; i18n strings live in `options.locales`. */
   themeConfig: {
@@ -251,7 +254,7 @@ export default defineConfig({
       description: zhSiteDescription,
       head: [...zhDocHead],
       themeConfig: {
-        logo: { src: '/logo.png', alt: 'Textbus' },
+        logo: { src: '/textbus-logo.svg', alt: 'Textbus' },
         siteTitle: false,
         nav: [
           { text: '指南', link: '/guide/introduction' },
@@ -284,7 +287,7 @@ export default defineConfig({
       description: enSiteDescription,
       head: [...enDocHead],
       themeConfig: {
-        logo: { src: '/logo.png', alt: 'Textbus' },
+        logo: { src: '/textbus-logo.svg', alt: 'Textbus' },
         siteTitle: false,
         nav: [
           { text: 'Guide', link: '/en/guide/introduction' },
