@@ -1,5 +1,19 @@
 # @textbus/playground
 
+## 5.3.0
+
+### Minor Changes
+
+- 格式支持堆叠功能
+
+### Patch Changes
+
+- Updated dependencies
+  - @textbus/platform-browser@5.4.0
+  - @textbus/adapter-viewfly@5.4.0
+  - @textbus/collaborate@5.4.0
+  - @textbus/core@5.4.0
+
 ## 5.2.3
 
 ### Patch Changes

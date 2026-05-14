@@ -1,5 +1,17 @@
 # @textbus/adapter-react
 
+## 5.4.0
+
+### Minor Changes
+
+- 格式支持堆叠功能
+
+### Patch Changes
+
+- Updated dependencies
+  - @textbus/platform-browser@5.4.0
+  - @textbus/core@5.4.0
+
 ## 5.3.4
 
 ### Patch Changes
