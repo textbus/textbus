@@ -184,7 +184,7 @@ function deltaToSlots(selection: Selection,
 
   let index = 0
   while (delta.length) {
-    const { insert, formats } = delta.shift()!
+    const {insert, formats} = delta.shift()!
     const b = canInsert(insert, newSlot)
     const oldIndex = index
     index += insert.length
@@ -465,7 +465,7 @@ export class Commander {
 
     while (isDeleteRanges && scopes.length) {
       const lastScope = scopes.pop()!
-      const { slot, startIndex } = lastScope
+      const {slot, startIndex} = lastScope
       const endIndex = lastScope.endIndex
       const isFocusEnd = selection.focusSlot === slot && selection.focusOffset === endIndex
       const event = new Event<Slot, DeleteEventData>(slot, {
@@ -668,7 +668,7 @@ export class Commander {
       const delta = pasteSlot.toDelta()
       const afterDelta = new DeltaLite()
       while (delta.length) {
-        const { insert, formats } = delta.shift()!
+        const {insert, formats} = delta.shift()!
         const commonAncestorSlot = selection.commonAncestorSlot!
 
         if (this.insert(insert, formats)) {
@@ -699,7 +699,7 @@ export class Commander {
       }
       const snapshot = this.selection.createSnapshot()
       while (afterDelta.length) {
-        const { insert, formats } = afterDelta.shift()!
+        const {insert, formats} = afterDelta.shift()!
         this.insert(insert, formats)
       }
       snapshot.restore()
@@ -719,6 +719,22 @@ export class Commander {
    * @param remainFormats 要保留的格式；可为格式类数组，或 `(formatter) => boolean` 谓词
    */
   cleanFormats(remainFormats: Formatter<any>[] | ((formatter: Formatter<any>) => boolean) = []) {
+    this.cleanFormatters((slot, formatter) => {
+      if (typeof remainFormats === 'function') {
+        return !remainFormats(formatter)
+      }
+      if (Array.isArray(remainFormats)) {
+        return !remainFormats.includes(formatter)
+      }
+      return true
+    })
+  }
+
+  /**
+   * 清除当前选区的所有格式
+   * @param filter 可选，当返回为 true 时，才会被真正清除
+   */
+  cleanFormatters(filter?: (slot: Slot, formatter: Formatter<any>, value: any) => boolean) {
     this.selection.getSelectedScopes().forEach(scope => {
       const slot = scope.slot
       if (scope.startIndex === 0) {
@@ -729,7 +745,7 @@ export class Commander {
           }
         }
       }
-      slot.cleanFormats(remainFormats, scope.startIndex, scope.endIndex)
+      slot.cleanFormats([], scope.startIndex, scope.endIndex, filter)
     })
   }
 
@@ -770,30 +786,31 @@ export class Commander {
   /**
    * 清除当前选区特定的格式
    * @param formatter 要清除的格式
+   * @param filter 可选，当返回为 true 时，才会被真正清除
    */
-  unApplyFormat(formatter: Formatter<any>) {
+  unApplyFormat(formatter: Formatter<any>, filter?: (slot: Slot, formatter: Formatter<any>, value: any) => boolean) {
     if (this.selection.isCollapsed) {
       const slot = this.selection.commonAncestorSlot!
       if (slot.isEmpty) {
         slot.retain(0)
-        slot.retain(slot.length, formatter, null)
+        slot.retain(slot.length, formatter, null, filter)
       } else {
         const startOffset = this.selection.startOffset!
         const prevContent = slot.getContentAtIndex(startOffset - 1)
         if (prevContent === Slot.placeholder) {
           slot.retain(startOffset - 1)
-          slot.retain(1, formatter, null)
+          slot.retain(1, formatter, null, filter)
         } else {
           this.write(Slot.placeholder)
           slot.retain(startOffset)
-          slot.retain(1, formatter, null)
+          slot.retain(1, formatter, null, filter)
         }
       }
       return
     }
     this.selection.getSelectedScopes().forEach(i => {
       i.slot.retain(i.startIndex)
-      i.slot.retain(i.endIndex - i.startIndex, formatter, null)
+      i.slot.retain(i.endIndex - i.startIndex, formatter, null, filter)
     })
   }
 
@@ -917,7 +934,7 @@ export class Commander {
   }
 
   private transformByRange(rule: TransformRule, abstractSelection: AbstractSelection, range: Range): boolean {
-    const { startSlot, startOffset, endSlot, endOffset } = range
+    const {startSlot, startOffset, endSlot, endOffset} = range
     const selection = this.selection
     const commonAncestorSlot = Selection.getCommonAncestorSlot(startSlot, endSlot)
     const commonAncestorComponent = Selection.getCommonAncestorComponent(startSlot, endSlot)
@@ -974,7 +991,7 @@ export class Commander {
         endIndex: 0
       } : getBlockRangeToBegin(startScope.slot, startScope.offset)
 
-      const { slot, startIndex, endIndex } = scope
+      const {slot, startIndex, endIndex} = scope
       const parentComponent = slot.parent!
 
       if (!parentComponent.separate && parentComponent.slots.length > 1 && !slot.schema.includes(rule.targetType)) {

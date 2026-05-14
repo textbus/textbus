@@ -10,7 +10,6 @@ import { VElement, VTextNode } from './element'
 import { makeError } from '../_utils/make-error'
 import { setup } from './setup'
 import { observe } from '../observable/observe'
-import { detachModel } from '../observable/help'
 
 const slotError = makeError('Slot')
 
@@ -381,11 +380,11 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
    */
   retain(offset: number): boolean
   retain(offset: number, formats: Formats,
-         canApply?: (slot: Slot<T>, formatter: Formatter, value: any) => boolean): boolean
+         canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean
   retain<U>(offset: number, formatter: Formatter<U>, value: U | null,
-            canApply?: (slot: Slot<T>, formatter: Formatter, value: any) => boolean): boolean
+            canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean
   retain(offset: number, formatter?: Formatter<any> | Formats, value?: FormatValue | null,
-         canApply?: (slot: Slot<T>, formatter: Formatter, value: any) => boolean): boolean {
+         canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean {
     let formats: Formats = []
     if (formatter) {
       if (Array.isArray(formatter)) {
@@ -458,11 +457,11 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
           if (this.applyFormatCoverChild) {
             slot.background(() => {
               slot.retain(0)
-              slot.retain(slot.length, formats)
+              slot.retain(slot.length, formats, canApply)
             })
           } else {
             slot.retain(0)
-            slot.retain(slot.length, formats)
+            slot.retain(slot.length, formats, canApply)
           }
         })
       }
@@ -547,7 +546,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
    * @param canApply
    */
   applyFormat<U extends FormatValue>(formatter: Formatter<U>, data: FormatRange<U>,
-                                     canApply?: (slot: Slot<T>, formatter: Formatter, value: any) => boolean): void {
+                                     canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): void {
     this.retain(data.startIndex)
     this.retain(data.endIndex - data.startIndex, formatter, data.value, canApply)
   }
@@ -763,6 +762,22 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
     return delta
   }
 
+
+  /**
+   * 清除指定格式
+   * @param formatter
+   * @param startIndex
+   * @param endIndex
+   * @param canApply
+   */
+  cleanFormatter(formatter: Formatter,
+                 startIndex = 0,
+                 endIndex = this.length,
+                 canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean) {
+    this.retain(startIndex)
+    this.retain(endIndex - startIndex, formatter, null, canApply)
+  }
+
   /**
    * 清除插槽格式
    * @param remainFormats 要保留的格式
@@ -781,8 +796,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
         if (typeof remainFormats === 'function' ? remainFormats(item.formatter) : remainFormats.includes(item.formatter)) {
           return
         }
-        this.retain(startIndex)
-        this.retain(endIndex - startIndex, item.formatter, null, canApply)
+        this.cleanFormatter(item.formatter, startIndex, endIndex, canApply)
       })
     } else {
       this.sliceContent(startIndex, endIndex).forEach(item => {
@@ -868,7 +882,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
                        startIndex: number,
                        offset: number,
                        background: boolean,
-                       canApply: (slot: Slot<T>, formatter: Formatter<any>, value: any) => boolean) {
+                       canApply: (slot: Slot, formatter: Formatter<any>, value: any) => boolean) {
     formats.forEach(keyValue => {
       const key = keyValue[0]
       const value = keyValue[1]

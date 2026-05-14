@@ -66,6 +66,13 @@ export interface FormatterConfig<T> {
   columned?: boolean
 
   /**
+   * 格式是否可堆叠，默认为 false，适用大于多数样式应用情况，但如批注
+   * 这样会对同一份内容作为多次批注的情况，可设置为 true，这样可以使多
+   * 个同名的 Formatter 在同一段内容上共存
+   */
+  stackable?: boolean
+
+  /**
    * 校验是否可应用，当返回 false 时，由不应用
    */
   checkHost?(host: Slot, value: T): boolean
@@ -87,9 +94,10 @@ export interface FormatterConfig<T> {
  * Formatter 可以在任意插槽的任意区域内生效，常用于行内样式或其它需要标记插槽内一部分内容的情况
  */
 export class Formatter<T = FormatValue> {
-  priority = 0
-  columned = false
-  inheritable = true
+  priority: number
+  columned: boolean
+  inheritable: boolean
+  stackable: boolean
 
   /**
    * 构造函数
@@ -97,10 +105,11 @@ export class Formatter<T = FormatValue> {
    * @param config 格式配置
    */
   constructor(public name: string, private config: FormatterConfig<T>) {
-    const { priority = 0, inheritable = true, columned = false } = config
+    const {priority = 0, inheritable = true, columned = false, stackable = false} = config
     this.priority = priority
     this.inheritable = inheritable
     this.columned = columned
+    this.stackable = stackable
   }
 
   checkHost(host: Slot, value: T): boolean {

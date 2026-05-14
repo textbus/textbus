@@ -76,7 +76,7 @@ export class Format {
       return this
     }
 
-    const newRanges = this.normalizeFormatRange(background, ranges, value)
+    const newRanges = this.normalizeFormatRange(background, formatter.stackable, ranges, value)
     if (newRanges.length) {
       this.map.set(formatter, newRanges)
     } else {
@@ -115,7 +115,7 @@ export class Format {
       const newRanges: FormatRange[] = []
       formatRanges.forEach(range => {
         if (range.endIndex <= index) {
-          newRanges.push({ ...range })
+          newRanges.push({...range})
           return
         }
         if (range.startIndex >= index) {
@@ -162,7 +162,7 @@ export class Format {
     })
     Array.from(this.map.keys()).forEach(key => {
       const oldRanges = this.map.get(key)!
-      const newRanges = this.normalizeFormatRange(false, oldRanges)
+      const newRanges = this.normalizeFormatRange(false, key.stackable, oldRanges)
       if (newRanges.length) {
         this.map.set(key, newRanges)
       } else {
@@ -249,7 +249,7 @@ export class Format {
   discard(formatter: Formatter<any>, startIndex: number, endIndex: number) {
     const oldRanges = this.map.get(formatter)
     if (oldRanges) {
-      this.normalizeFormatRange(false, oldRanges, {
+      this.normalizeFormatRange(false, formatter.stackable, oldRanges, {
         startIndex,
         endIndex,
         value: null as any
@@ -302,7 +302,7 @@ export class Format {
   toJSON() {
     const json: FormatLiteral<any> = {}
     this.map.forEach((value, formatter) => {
-      json[formatter.name] = value.map(i => ({ ...i }))
+      json[formatter.name] = value.map(i => ({...i}))
     })
     return json
   }
@@ -402,7 +402,10 @@ export class Format {
     return list
   }
 
-  private normalizeFormatRange(background: boolean, oldRanges: FormatRange<any>[], newRange?: FormatRange<any>) {
+  private normalizeFormatRange(background: boolean,
+                               stackable: boolean,
+                               oldRanges: FormatRange<any>[],
+                               newRange?: FormatRange<any>) {
     const length = this.slot.length
     oldRanges = oldRanges.filter(range => {
       range.endIndex = Math.min(range.endIndex, length)
@@ -422,7 +425,7 @@ export class Format {
     let mergedRanges: FormatRange<any>[] = [oldRanges.at(0)!]
     for (let i = 1; i < oldRanges.length; i++) {
       const range = oldRanges[i]
-      mergedRanges = Format.mergeRanges(mergedRanges, range)
+      mergedRanges = Format.mergeRanges(mergedRanges, range, stackable)
     }
     return mergedRanges.filter(range => {
       return !isVoid(range.value)
@@ -434,22 +437,22 @@ export class Format {
     if (left === right) {
       return true
     }
-    
+
     // null 或 undefined 检查
     if (left === null || left === undefined || right === null || right === undefined) {
       return left === right
     }
-    
+
     // 类型不同直接返回 false
     if (typeof left !== typeof right) {
       return false
     }
-    
+
     // 基本类型比较
     if (typeof left !== 'object') {
       return left === right
     }
-    
+
     // 数组比较
     if (Array.isArray(left) && Array.isArray(right)) {
       if (left.length !== right.length) {
@@ -457,27 +460,71 @@ export class Format {
       }
       return left.every((item, index) => Format.equal(item, right[index]))
     }
-    
+
     // 一个是数组一个不是
     if (Array.isArray(left) || Array.isArray(right)) {
       return false
     }
-    
+
     // 对象比较
     const leftKeys = Object.keys(left)
     const rightKeys = Object.keys(right)
-    
+
     if (leftKeys.length !== rightKeys.length) {
       return false
     }
-    
+
     // 递归比较每个属性
     return leftKeys.every(key => {
       return rightKeys.includes(key) && Format.equal(left[key], right[key])
     })
   }
 
-  private static mergeRanges(ranges: FormatRange[], newRange: FormatRange) {
+  private static mergeRanges(ranges: FormatRange[], newRange: FormatRange, stackable: boolean) {
+    if (stackable) {
+      const results: FormatRange[] = []
+      let isMerged = false
+      for (let i = 0; i < ranges.length; i++) {
+        const range = ranges[i]
+        if (isMerged) {
+          results.push(range)
+          continue
+        }
+        if (range.endIndex < newRange.startIndex) {
+          results.push(range)
+          continue
+        }
+        if (range.startIndex > newRange.endIndex) {
+          results.push(newRange)
+          results.push(range)
+          isMerged = true
+          continue
+        }
+        if (Format.equal(range.value, newRange.value)) {
+          newRange.startIndex = Math.min(range.startIndex, newRange.startIndex)
+          newRange.endIndex = Math.max(range.endIndex, newRange.endIndex)
+          results.push(newRange)
+          isMerged = true
+          continue
+        }
+        if (range.startIndex < newRange.startIndex) {
+          results.push(range, newRange)
+          isMerged = true
+          continue
+        }
+        if (range.startIndex === newRange.startIndex && range.endIndex < newRange.endIndex) {
+          results.push(range, newRange)
+          isMerged = true
+          continue
+        }
+        results.push(newRange, range)
+        isMerged = true
+      }
+      if (!isMerged) {
+        results.push(newRange)
+      }
+      return results
+    }
     const results: FormatRange[] = []
     let isMerged = false
     for (let i = 0; i < ranges.length; i++) {
