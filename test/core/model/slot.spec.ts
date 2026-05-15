@@ -1,4 +1,4 @@
-import { Component, ContentType, createVNode, FormatHostBindingRender, Formatter, Slot, Textbus, VElement, VTextNode } from '@textbus/core'
+import { Component, ContentType, createVNode, FormatHostBindingRender, Formatter, PendingErasure, Slot, Textbus, VElement, VTextNode } from '@textbus/core'
 import { NodeModule, NodeViewAdapter } from '@textbus/platform-node'
 
 let textbus: Textbus
@@ -445,6 +445,83 @@ describe('根据内容生成渲染树', () => {
     const strong = tree.children[1] as VElement
 
     expect(strong.children[0]).toHaveProperty('textContent', '2345')
+  })
+})
+
+describe('可堆叠格式', () => {
+  const commentFormatter = new Formatter<string>('comment', {
+    stackable: true,
+    render(children: any, value: string) {
+      return createVNode('span', {
+        'data-data': value
+      }, children)
+    }
+  })
+
+  test('相同 Formatter 上可并存不同取值（同一段文本多次批注）', () => {
+    const slot = new Slot([ContentType.Text])
+    slot.insert('abcde')
+    slot.applyFormat(commentFormatter, { startIndex: 1, endIndex: 4, value: 'note-a' })
+    slot.applyFormat(commentFormatter, { startIndex: 1, endIndex: 4, value: 'note-b' })
+    const ranges = slot.getFormatRangesByFormatter(commentFormatter, 0, slot.length)
+    expect(ranges.length).toBe(2)
+    const values = ranges.map(r => r.value).sort()
+    expect(values).toEqual(['note-a', 'note-b'])
+    ranges.forEach(r => {
+      expect(r.startIndex).toBe(1)
+      expect(r.endIndex).toBe(4)
+    })
+  })
+
+  test('相同取值在重叠区间上自动合并为一段', () => {
+    const slot = new Slot([ContentType.Text])
+    slot.insert('hello')
+    slot.applyFormat(commentFormatter, { startIndex: 0, endIndex: 2, value: 'same' })
+    slot.applyFormat(commentFormatter, { startIndex: 1, endIndex: 3, value: 'same' })
+    const ranges = slot.getFormatRangesByFormatter(commentFormatter, 0, slot.length)
+    expect(ranges.length).toBe(1)
+    expect(ranges[0]).toMatchObject({
+      startIndex: 0,
+      endIndex: 3,
+      value: 'same'
+    })
+  })
+
+  test('PendingErasure(false, value) 可按指定取值擦除，其它堆叠段保留', () => {
+    const slot = new Slot([ContentType.Text])
+    slot.insert('abcdef')
+    slot.applyFormat(commentFormatter, { startIndex: 0, endIndex: 2, value: 'keep-me' })
+    slot.applyFormat(commentFormatter, { startIndex: 2, endIndex: 4, value: 'remove-me' })
+    slot.applyFormat(commentFormatter, { startIndex: 4, endIndex: 6, value: 'also-keep' })
+    slot.retain(0)
+    slot.retain(6, commentFormatter, new PendingErasure(false, 'remove-me'))
+    const ranges = slot.getFormatRangesByFormatter(commentFormatter, 0, slot.length)
+    expect(ranges.length).toBe(2)
+    const sorted = [...ranges].sort((a, b) => a.startIndex - b.startIndex)
+    expect(sorted[0]).toMatchObject({ startIndex: 0, endIndex: 2, value: 'keep-me' })
+    expect(sorted[1]).toMatchObject({ startIndex: 4, endIndex: 6, value: 'also-keep' })
+  })
+
+  test('null 在可堆叠格式上整段清除该 Formatter 全部区间', () => {
+    const slot = new Slot([ContentType.Text])
+    slot.insert('abc')
+    slot.applyFormat(commentFormatter, { startIndex: 0, endIndex: 2, value: 'x' })
+    slot.applyFormat(commentFormatter, { startIndex: 1, endIndex: 3, value: 'y' })
+    expect(slot.getFormatRangesByFormatter(commentFormatter, 0, slot.length).length).toBeGreaterThan(0)
+    slot.retain(0)
+    slot.retain(3, commentFormatter, null)
+    expect(slot.getFormatRangesByFormatter(commentFormatter, 0, slot.length).length).toBe(0)
+  })
+
+  test('cleanFormatter 可用 PendingErasure 按值擦除', () => {
+    const slot = new Slot([ContentType.Text])
+    slot.insert('abcd')
+    slot.applyFormat(commentFormatter, { startIndex: 0, endIndex: 2, value: 't1' })
+    slot.applyFormat(commentFormatter, { startIndex: 0, endIndex: 2, value: 't2' })
+    slot.cleanFormatter(commentFormatter, 0, 2, new PendingErasure(false, 't1'))
+    const ranges = slot.getFormatRangesByFormatter(commentFormatter, 0, slot.length)
+    expect(ranges.length).toBe(1)
+    expect(ranges[0]).toMatchObject({ startIndex: 0, endIndex: 2, value: 't2' })
   })
 })
 
