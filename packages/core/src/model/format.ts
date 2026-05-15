@@ -45,7 +45,13 @@ export interface FormatTree<T = FormatValue> {
 }
 
 function isVoid(data: any) {
-  return data === null || typeof data === 'undefined'
+  return data === null || typeof data === 'undefined' || data instanceof PendingErasure
+}
+
+export class PendingErasure<T> {
+  constructor(public erasureAll: boolean,
+              public value?: T) {
+  }
 }
 
 /**
@@ -259,30 +265,20 @@ export class Format {
   }
 
   extractFormatsByIndex(index: number) {
-    const formats: Formats = []
-    if (index === 0) {
-      this.map.forEach((ranges, formatter) => {
-        ranges.forEach(i => {
-          if (i.startIndex === 0) {
-            formats.push([
-              formatter,
-              i.value
-            ])
-          }
-        })
-      })
-    } else {
-      this.map.forEach((ranges, formatter) => {
-        ranges.forEach(i => {
-          if (i.startIndex < index && i.endIndex >= index) {
-            formats.push([
-              formatter,
-              i.value
-            ])
-          }
-        })
-      })
+    if (index < 0) {
+      index = 0
     }
+    const formats: Formats = []
+    this.map.forEach((ranges, formatter) => {
+      ranges.forEach(i => {
+        if (i.startIndex <= index && i.endIndex > index) {
+          formats.push([
+            formatter,
+            i.value
+          ])
+        }
+      })
+    })
     return formats
   }
 
@@ -493,6 +489,48 @@ export class Format {
   }
 
   private static mergeRanges(ranges: FormatRange[], newRange: FormatRange, stackable: boolean) {
+    if (newRange.value instanceof PendingErasure) {
+      const normalizedRanges: FormatRange[] = []
+      for (const range of ranges) {
+        if (range.endIndex <= newRange.startIndex) {
+          normalizedRanges.push(range)
+          continue
+        }
+        if (range.startIndex > newRange.endIndex) {
+          normalizedRanges.push(range)
+          continue
+        }
+        if (!Format.equal(range.value, newRange.value.value) && !newRange.value.erasureAll) {
+          normalizedRanges.push(range)
+          continue
+        }
+        if (range.startIndex < newRange.startIndex) {
+          if (range.endIndex <= newRange.endIndex) {
+            range.endIndex = newRange.startIndex
+            normalizedRanges.push(range)
+            continue
+          }
+          normalizedRanges.push({
+            startIndex: range.startIndex,
+            endIndex: newRange.startIndex,
+            value: range.value
+          }, {
+            startIndex: newRange.endIndex,
+            endIndex: range.endIndex,
+            value: range.value
+          })
+          continue
+        }
+        if (range.endIndex > newRange.endIndex) {
+          normalizedRanges.push({
+            startIndex: newRange.endIndex,
+            endIndex: newRange.endIndex,
+            value: range.value
+          })
+        }
+      }
+      ranges = normalizedRanges
+    }
     if (stackable) {
       const results: FormatRange[] = []
       for (let i = 0; i < ranges.length; i++) {

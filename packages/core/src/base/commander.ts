@@ -13,7 +13,7 @@ import {
   Formatter,
   FormatValue,
   InsertEventData,
-  invokeListener,
+  invokeListener, PendingErasure,
   Slot,
   SlotApplyFormatEventData,
   SlotRange,
@@ -317,8 +317,8 @@ export class Commander {
 
     let formats: Formats = []
     if (canInsert(content, position.slot)) {
-      const nextFormats = position.slot.extractFormatsByIndex(position.offset + 1)
-      formats = position.slot.extractFormatsByIndex(position.offset).filter(i => {
+      const nextFormats = position.slot.extractFormatsByIndex(position.offset)
+      formats = position.slot.extractFormatsByIndex(position.offset - 1).filter(i => {
         return i[0].inheritable || nextFormats.some(value => {
           return value[0] === i[0] && value[1] === i[1]
         })
@@ -719,22 +719,6 @@ export class Commander {
    * @param remainFormats 要保留的格式；可为格式类数组，或 `(formatter) => boolean` 谓词
    */
   cleanFormats(remainFormats: Formatter<any>[] | ((formatter: Formatter<any>) => boolean) = []) {
-    this.cleanFormatters((slot, formatter) => {
-      if (typeof remainFormats === 'function') {
-        return !remainFormats(formatter)
-      }
-      if (Array.isArray(remainFormats)) {
-        return !remainFormats.includes(formatter)
-      }
-      return true
-    })
-  }
-
-  /**
-   * 清除当前选区的所有格式
-   * @param filter 可选，当返回为 true 时，才会被真正清除
-   */
-  cleanFormatters(filter?: (slot: Slot, formatter: Formatter<any>, value: any) => boolean) {
     this.selection.getSelectedScopes().forEach(scope => {
       const slot = scope.slot
       if (scope.startIndex === 0) {
@@ -745,7 +729,7 @@ export class Commander {
           }
         }
       }
-      slot.cleanFormats([], scope.startIndex, scope.endIndex, filter)
+      slot.cleanFormats(remainFormats, scope.startIndex, scope.endIndex)
     })
   }
 
@@ -786,31 +770,32 @@ export class Commander {
   /**
    * 清除当前选区特定的格式
    * @param formatter 要清除的格式
-   * @param filter 可选，当返回为 true 时，才会被真正清除
+   * @param rule 指定清除规划
    */
-  unApplyFormat(formatter: Formatter<any>, filter?: (slot: Slot, formatter: Formatter<any>, value: any) => boolean) {
+  unApplyFormat<T>(formatter: Formatter<T>, rule?: PendingErasure<T>) {
+    const formatValue = rule || null
     if (this.selection.isCollapsed) {
       const slot = this.selection.commonAncestorSlot!
       if (slot.isEmpty) {
         slot.retain(0)
-        slot.retain(slot.length, formatter, null, filter)
+        slot.retain(slot.length, formatter, formatValue)
       } else {
         const startOffset = this.selection.startOffset!
         const prevContent = slot.getContentAtIndex(startOffset - 1)
         if (prevContent === Slot.placeholder) {
           slot.retain(startOffset - 1)
-          slot.retain(1, formatter, null, filter)
+          slot.retain(1, formatter, formatValue)
         } else {
           this.write(Slot.placeholder)
           slot.retain(startOffset)
-          slot.retain(1, formatter, null, filter)
+          slot.retain(1, formatter, formatValue)
         }
       }
       return
     }
     this.selection.getSelectedScopes().forEach(i => {
       i.slot.retain(i.startIndex)
-      i.slot.retain(i.endIndex - i.startIndex, formatter, null, filter)
+      i.slot.retain(i.endIndex - i.startIndex, formatter, formatValue)
     })
   }
 

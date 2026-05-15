@@ -2,7 +2,7 @@ import { Observable, Subject } from '@tanbo/stream'
 
 import { Component, ComponentLiteral } from './component'
 import { Content } from './content'
-import { Format, FormatLiteral, FormatRange, FormatValue, Formats, FormatTree, FormatItem } from './format'
+import { Format, FormatLiteral, FormatRange, FormatValue, Formats, FormatTree, FormatItem, PendingErasure } from './format'
 import { Attribute, FormatHostBindingRender, Formatter } from './attribute'
 import { ChangeMarker } from '../observable/change-marker'
 import { Action } from './types'
@@ -42,6 +42,8 @@ export interface DeltaInsert {
 export class DeltaLite extends Array<DeltaInsert> {
   attributes = new Map<Attribute<any>, any>()
 }
+
+export type FormatCanApply = (slot: Slot, formatter: Formatter, value: any) => boolean
 
 /**
  * Textbus 插槽类，用于管理组件、文本及格式的增删改查
@@ -242,24 +244,17 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
    */
   write(content: string | Component,
         formats?: Formats,
-        canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean
+        canApply?: FormatCanApply): boolean
   write<T>(content: string | Component,
            formatter?: Formatter<T>,
            value?: T,
-           canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean
+           canApply?: FormatCanApply): boolean
   write(content: string | Component,
         formatter?: Formatter<any> | Formats,
         value?: FormatValue,
-        canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean {
-    const index = this.index
-    const expandFormat = (this.isEmpty || index === 0) ? this.format.extract(0, 1) : this.format.extract(index - 1, index)
-
-    const formats: Formats = expandFormat.toArray().map(i => {
-      return [
-        i.formatter,
-        i.value
-      ]
-    })
+        canApply?: FormatCanApply): boolean {
+    const index = this.isEmpty ? 0 : this.index
+    const formats = this.extractFormatsByIndex(index - 1)
     if (formatter) {
       if (Array.isArray(formatter)) {
         formats.push(...formatter)
@@ -277,11 +272,11 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
    * @param canApply
    */
   insert(content: string | Component, formats?: Formats,
-         canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean
+         canApply?: FormatCanApply): boolean
   insert<T>(content: string | Component, formatter?: Formatter<T>, value?: T,
-            canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean
+            canApply?: FormatCanApply): boolean
   insert(content: string | Component, formatter?: Formatter<any> | Formats, value?: FormatValue,
-         canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean {
+         canApply?: FormatCanApply): boolean {
     const contentType = typeof content === 'string' ? ContentType.Text : content.type
     if (!this.schema.includes(contentType)) {
       return false
@@ -379,12 +374,17 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
    * @param offset
    */
   retain(offset: number): boolean
-  retain(offset: number, formats: Formats,
-         canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean
-  retain<U>(offset: number, formatter: Formatter<U>, value: U | null,
-            canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean
-  retain(offset: number, formatter?: Formatter<any> | Formats, value?: FormatValue | null,
-         canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): boolean {
+  retain(offset: number,
+         formats: Formats,
+         canApply?: FormatCanApply): boolean
+  retain<U>(offset: number,
+            formatter: Formatter<U>,
+            value: U | null | PendingErasure<U>,
+            canApply?: FormatCanApply): boolean
+  retain(offset: number,
+         formatter?: Formatter<any> | Formats,
+         value?: FormatValue | null | PendingErasure<any>,
+         canApply?: FormatCanApply): boolean {
     let formats: Formats = []
     if (formatter) {
       if (Array.isArray(formatter)) {
@@ -420,38 +420,138 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
 
     const applyActions: Action[] = []
     const unApplyActions: Action[] = []
-    const formatsObj = formats.reduce((opt: Record<string, any>, next) => {
-      opt[next[0].name] = next[1]
-      return opt
-    }, {})
-    const resetFormatObj = formats.reduce((opt: Record<string, any>, next) => {
-      opt[next[0].name] = null
-      return opt
-    }, {})
-    const currentFormatters = formats.map(i => i[0])
+
     this.content.slice(startIndex, endIndex).forEach(content => {
       const offset = content.length
       if (typeof content === 'string' || content.type !== ContentType.BlockComponent) {
-        const deletedFormat = this.format.extract(index, index + offset, currentFormatters)
-        this.applyFormats(formats, index, offset, this.applyFormatCoverChild, canApply || (() => true))
-        applyActions.push({
-          type: 'retain',
-          offset: index
-        }, {
-          type: 'retain',
-          offset: offset,
-          formats: {
-            ...formatsObj
+        for (const [formatter, value] of formats) {
+          const rawValue = value instanceof PendingErasure ? null : value
+          if (!formatter.checkHost(this, rawValue)) {
+            continue
           }
-        })
-        unApplyActions.push({
-          type: 'retain',
-          offset: index
-        }, {
-          type: 'retain',
-          offset: offset,
-          formats: resetFormatObj
-        }, ...Slot.createActionByFormat(deletedFormat))
+          const is = typeof canApply === 'function' ? canApply(this, formatter, rawValue) : true
+          if (is) {
+            const startIndex = index
+            const endIndex = index + offset
+            if (formatter.stackable) {
+              let computedValue = value
+              if (computedValue === null || computedValue === undefined) {
+                computedValue = new PendingErasure(true)
+              }
+              const oldRanges = this.format.extractFormatRangesByFormatter(startIndex, endIndex, formatter)
+
+              if (oldRanges.length === 0 && computedValue instanceof PendingErasure) {
+                continue
+              }
+
+              this.format.merge(formatter, {
+                startIndex,
+                endIndex,
+                value: computedValue
+              }, this.applyFormatCoverChild)
+
+              applyActions.push({
+                type: 'retain',
+                offset: startIndex,
+              }, {
+                type: 'retain',
+                offset,
+                formats: {
+                  [formatter.name]: value
+                }
+              })
+              if (oldRanges.length > 0) {
+                if (!(computedValue instanceof PendingErasure)) {
+                  unApplyActions.push({
+                    type: 'retain',
+                    offset: startIndex,
+                  }, {
+                    type: 'retain',
+                    offset,
+                    formats: {
+                      [formatter.name]: new PendingErasure(false, value)
+                    }
+                  })
+                }
+                oldRanges.forEach(range => {
+                  unApplyActions.push({
+                    type: 'retain',
+                    offset: range.startIndex,
+                  }, {
+                    type: 'retain',
+                    offset: range.endIndex - range.startIndex,
+                    formats: {
+                      [formatter.name]: range.value
+                    }
+                  })
+                })
+              } else if (!(computedValue instanceof PendingErasure)) {
+                unApplyActions.push({
+                  type: 'retain',
+                  offset: startIndex,
+                }, {
+                  type: 'retain',
+                  offset,
+                  formats: {
+                    [formatter.name]: new PendingErasure(false, value)
+                  }
+                })
+              }
+            } else {
+              let computedValue = value
+              if (computedValue instanceof PendingErasure && computedValue.erasureAll) {
+                computedValue = null
+              }
+              const oldRanges = this.format.extractFormatRangesByFormatter(startIndex, endIndex, formatter)
+              if (oldRanges.length === 0 &&
+                (computedValue instanceof PendingErasure ||
+                  computedValue === null ||
+                  computedValue === undefined)) {
+                continue
+              }
+              this.format.merge(formatter, {
+                startIndex,
+                endIndex,
+                value: computedValue
+              }, this.applyFormatCoverChild)
+
+              applyActions.push({
+                type: 'retain',
+                offset: startIndex,
+              }, {
+                type: 'retain',
+                offset,
+                formats: {
+                  [formatter.name]: value
+                }
+              })
+              unApplyActions.push({
+                type: 'retain',
+                offset: startIndex
+              }, {
+                type: 'retain',
+                offset,
+                formats: {
+                  [formatter.name]: null
+                }
+              })
+              if (oldRanges.length > 0) {
+                oldRanges.forEach(range => {
+                  unApplyActions.push({
+                    type: 'retain',
+                    offset: range.startIndex,
+                  }, {
+                    type: 'retain',
+                    offset: range.endIndex - range.startIndex,
+                    formats: {
+                      [formatter.name]: range.value
+                    }
+                  })
+                })
+              }
+            }
+          }
+        }
       } else {
         content.slots.forEach(slot => {
           if (this.applyFormatCoverChild) {
@@ -540,13 +640,13 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
   }
 
   /**
-   * 给插槽应用新的格式，如果为块级样式，则应用到整个插槽，否则根据参数配置的范围应用
+   * 给插槽应用新的格式
    * @param formatter
    * @param data
    * @param canApply
    */
   applyFormat<U extends FormatValue>(formatter: Formatter<U>, data: FormatRange<U>,
-                                     canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): void {
+                                     canApply?: FormatCanApply): void {
     this.retain(data.startIndex)
     this.retain(data.endIndex - data.startIndex, formatter, data.value, canApply)
   }
@@ -746,7 +846,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
    * @param canApply
    */
   insertDelta(delta: DeltaLite,
-              canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean): DeltaLite {
+              canApply?: FormatCanApply): DeltaLite {
     delta.attributes.forEach((value, key) => {
       this.setAttribute(key, value)
     })
@@ -762,7 +862,12 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
     return delta
   }
 
-
+  /**
+   * 清除指定指定值的格式
+   * @param formatter
+   * @param rule
+   */
+  cleanFormatter<U>(formatter: Formatter, rule?: PendingErasure<U>): void
   /**
    * 清除指定格式
    * @param formatter
@@ -770,11 +875,23 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
    * @param endIndex
    * @param canApply
    */
-  cleanFormatter(formatter: Formatter,
-                 startIndex = 0,
-                 endIndex = this.length,
-                 canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean) {
+  cleanFormatter<U>(formatter: Formatter<U>,
+                    startIndex?: number,
+                    endIndex?: number,
+                    canApply?: FormatCanApply | PendingErasure<U>): void
+  cleanFormatter<U>(formatter: Formatter<U>,
+                    startIndex: number | PendingErasure<U> = 0,
+                    endIndex: number = this.length,
+                    canApply?: FormatCanApply | PendingErasure<U>) {
+    if (startIndex instanceof PendingErasure) {
+      canApply = startIndex
+      startIndex = 0
+    }
     this.retain(startIndex)
+    if (canApply instanceof PendingErasure) {
+      this.retain(endIndex - startIndex, formatter, canApply)
+      return
+    }
     this.retain(endIndex - startIndex, formatter, null, canApply)
   }
 
@@ -789,7 +906,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
     remainFormats: Formatter<any>[] | ((formatter: Formatter<any>) => boolean) = [],
     startIndex = 0,
     endIndex = this.length,
-    canApply?: (slot: Slot, formatter: Formatter, value: any) => boolean) {
+    canApply?: FormatCanApply) {
     const formats = this.getFormats()
     if (formats.length) {
       formats.forEach(item => {
@@ -882,15 +999,16 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
                        startIndex: number,
                        offset: number,
                        background: boolean,
-                       canApply: (slot: Slot, formatter: Formatter<any>, value: any) => boolean) {
+                       canApply: FormatCanApply) {
     formats.forEach(keyValue => {
       const key = keyValue[0]
       const value = keyValue[1]
-      if (!key.checkHost(this, value)) {
+      const rawValue = value instanceof PendingErasure ? value.value : value
+      if (!key.checkHost(this, rawValue)) {
         return
       }
 
-      if (canApply(this, key, value)) {
+      if (canApply(this, key, rawValue)) {
         this.format.merge(key, {
           startIndex,
           endIndex: startIndex + offset,
