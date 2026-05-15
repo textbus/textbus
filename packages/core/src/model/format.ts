@@ -319,9 +319,11 @@ export class Format {
     const formats: FormatItem<any>[] = []
     const columnedFormats: FormatItem<any>[] = []
 
-    Array.from(copyFormat.map.keys()).forEach(formatter => {
+    const formatters = copyFormat.map.keys()
+    for (const formatter of formatters) {
       const ranges = copyFormat.map.get(formatter)!
-      ranges.forEach(range => {
+      for (let j = 0; j < ranges.length; j++) {
+        const range = ranges[j]
         if (range.startIndex === startIndex && range.endIndex === endIndex) {
           if (formatter.columned) {
             columnedFormats.push({
@@ -333,16 +335,26 @@ export class Format {
               formatter,
               ...range
             })
-            copyFormat.map.delete(formatter)
+            if (formatter.stackable) {
+              if (ranges.length === 1) {
+                copyFormat.map.delete(formatter)
+              } else {
+                ranges.splice(j, 1)
+              }
+            } else {
+              copyFormat.map.delete(formatter)
+            }
           }
-        } else if (range.startIndex < nextStartIndex) {
+        }
+
+        if (range.startIndex < nextStartIndex) {
           nextStartIndex = range.startIndex
           nextEndIndex = range.endIndex
         } else if (range.startIndex === nextStartIndex) {
           nextEndIndex = Math.max(nextEndIndex, range.endIndex)
         }
-      })
-    })
+      }
+    }
 
     const hasChildren = copyFormat.map.size > columnedFormats.length
     if (hasChildren) {
@@ -483,47 +495,34 @@ export class Format {
   private static mergeRanges(ranges: FormatRange[], newRange: FormatRange, stackable: boolean) {
     if (stackable) {
       const results: FormatRange[] = []
-      let isMerged = false
       for (let i = 0; i < ranges.length; i++) {
         const range = ranges[i]
-        if (isMerged) {
-          results.push(range)
-          continue
-        }
         if (range.endIndex < newRange.startIndex) {
           results.push(range)
           continue
         }
         if (range.startIndex > newRange.endIndex) {
-          results.push(newRange)
           results.push(range)
-          isMerged = true
           continue
         }
         if (Format.equal(range.value, newRange.value)) {
           newRange.startIndex = Math.min(range.startIndex, newRange.startIndex)
           newRange.endIndex = Math.max(range.endIndex, newRange.endIndex)
-          results.push(newRange)
-          isMerged = true
-          continue
+        } else {
+          results.push(range)
         }
-        if (range.startIndex < newRange.startIndex) {
-          results.push(range, newRange)
-          isMerged = true
-          continue
-        }
-        if (range.startIndex === newRange.startIndex && range.endIndex < newRange.endIndex) {
-          results.push(range, newRange)
-          isMerged = true
-          continue
-        }
-        results.push(newRange, range)
-        isMerged = true
       }
-      if (!isMerged) {
-        results.push(newRange)
-      }
-      return results
+      results.push(newRange)
+      return results.sort((a, b) => {
+        const n = a.startIndex - b.startIndex
+        if (n < 0) {
+          return -1
+        }
+        if (n === 0) {
+          return a.endIndex - b.endIndex
+        }
+        return 1
+      })
     }
     const results: FormatRange[] = []
     let isMerged = false
