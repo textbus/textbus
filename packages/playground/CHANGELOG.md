@@ -1,5 +1,16 @@
 # @textbus/playground
 
+## 5.3.1
+
+### Patch Changes
+
+- 修复可堆叠格式合并计算错误和生成虚拟节点树不正确的 bug
+- Updated dependencies
+  - @textbus/adapter-viewfly@5.4.1
+  - @textbus/collaborate@5.4.1
+  - @textbus/core@5.4.1
+  - @textbus/platform-browser@5.4.1
+
 ## 5.3.0
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # @textbus/playground-server
 
+## 5.1.8
+
+### Patch Changes
+
+- 修复可堆叠格式合并计算错误和生成虚拟节点树不正确的 bug
+
 ## 5.1.7
 
 ### Patch Changes

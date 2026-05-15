@@ -1,5 +1,11 @@
 # @textbus/core
 
+## 5.4.1
+
+### Patch Changes
+
+- 修复可堆叠格式合并计算错误和生成虚拟节点树不正确的 bug
+
 ## 5.4.0
 
 ### Minor Changes
