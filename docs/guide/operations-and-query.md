@@ -246,10 +246,16 @@ commander.applyFormat(BoldFormatter, true)
 
 ## `unApplyFormat`：移除文字格式
 
-按 **当前选区** 移除指定 **`Formatter`**，不再保留该格式标记。
+按 **当前选区** 移除指定 **`Formatter`**。可选第二参数 **`filter`**：`(slot, formatter, value) => boolean`，**返回 `true`** 时 **才执行清除**；省略则对选区内该格式器的匹配区间一律清除。
 
 ```ts
+import { ContentType } from '@textbus/core'
+
 commander.unApplyFormat(BoldFormatter)
+
+commander.unApplyFormat(annotationFormatter, (slot) => {
+  return slot.schema.includes(ContentType.Text)
+})
 ```
 
 ## `cleanFormats`：清除文字格式
@@ -275,6 +281,16 @@ commander.cleanFormats([BoldFormatter])
 
 ```ts
 commander.cleanFormats(f => f === BoldFormatter)
+```
+
+## `cleanFormatters`：按条件清除文字格式
+
+与 **`cleanFormats`**（用 **`remainFormats`** 指定 **保留** 项）相对，**`cleanFormatters`** 通过 **`filter`** 指定 **要被清除** 的格式：**`filter(slot, formatter, value)` 返回 `true`** 时清除该条。
+
+```ts
+commander.cleanFormatters((_slot, formatter) => formatter !== BoldFormatter)
+
+commander.cleanFormatters(() => true)
 ```
 
 ## `applyAttribute`：设置插槽属性
@@ -448,8 +464,9 @@ commander.transform(paragraphTransform)
 | **`cut`** | 先 **`copy`**；未折叠再 **`delete`**，返回 **`boolean`** |
 | **`paste`** | **`paste(pasteSlot, text)`**，返回 **`boolean`** |
 | **`cleanFormats`** | **`cleanFormats()`**；或传入 **`Formatter`** 数组，或传入谓词函数；用于指定清除时保留的格式（见正文） |
+| **`cleanFormatters`** | **`cleanFormatters(filter)`**；**`filter` 返回 `true`** 时清除对应格式（见正文） |
 | **`applyFormat`** | 应用格式 |
-| **`unApplyFormat`** | 移除格式 |
+| **`unApplyFormat`** | 移除格式；可选 **`filter`** |
 | **`cleanAttributes`** | **`cleanAttributes()`**；或传入 **`Attribute`** 数组，或传入谓词函数；用于指定清除时保留的属性（见正文） |
 | **`applyAttribute`** | 设置插槽属性 |
 | **`unApplyAttribute`** | 移除插槽属性 |

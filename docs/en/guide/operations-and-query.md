@@ -251,10 +251,16 @@ commander.applyFormat(BoldFormatter, true)
 
 ## `unApplyFormat`: remove text format
 
-Removes the given **`Formatter`** from the **current selection**.
+Removes the given **`Formatter`** from the **current selection**. Optional **`filter`**: **`(slot, formatter, value) => boolean`**—the clear runs **only when it returns `true`**; omit to clear all matching ranges of that formatter in the selection.
 
 ```ts
+import { ContentType } from '@textbus/core'
+
 commander.unApplyFormat(BoldFormatter)
+
+commander.unApplyFormat(annotationFormatter, (slot) => {
+  return slot.schema.includes(ContentType.Text)
+})
 ```
 
 ## `cleanFormats`: clear text formats
@@ -280,6 +286,16 @@ commander.cleanFormats([BoldFormatter])
 
 ```ts
 commander.cleanFormats(f => f === BoldFormatter)
+```
+
+## `cleanFormatters`: clear formats by predicate
+
+Complements **`cleanFormats`** (which lists **what to keep** via **`remainFormats`**). **`cleanFormatters`** takes **`filter`**: **`filter(slot, formatter, value)` returns `true`** to **clear** that entry.
+
+```ts
+commander.cleanFormatters((_slot, formatter) => formatter !== BoldFormatter)
+
+commander.cleanFormatters(() => true)
 ```
 
 ## `applyAttribute`: set slot attribute
@@ -451,8 +467,9 @@ commander.transform(paragraphTransform)
 | **`cut`** | **`copy`** then **`delete`** if not collapsed; **`boolean`** |
 | **`paste`** | **`paste(pasteSlot, text)`**; **`boolean`** |
 | **`cleanFormats`** | Clear formats; optional keep list or predicate |
+| **`cleanFormatters`** | **`cleanFormatters(filter)`**—clear when **`filter` returns `true`** |
 | **`applyFormat`** | Apply format |
-| **`unApplyFormat`** | Remove format |
+| **`unApplyFormat`** | Remove format; optional **`filter`** |
 | **`cleanAttributes`** | Clear attributes; optional keep list or predicate |
 | **`applyAttribute`** | Set attribute |
 | **`unApplyAttribute`** | Remove attribute |

@@ -37,7 +37,7 @@ In the view you typically use injected **`Adapter.slotRender`** to render a slot
 
 ## Formats and attributes
 
-- **Formatter**: applies to **any contiguous text range** inside a slot—**inline** styling or marking **part** of slot content (bold, color, links, …). Registered on the editor; the kernel merges overlaps, inheritance, render order.
+- **Formatter**: applies to **any contiguous text range** inside a slot—**inline** styling or marking **part** of slot content (bold, color, links, …). Registered on the editor; the kernel merges overlaps, inheritance, render order. For **multiple distinct values** of the same formatter on one run (e.g. annotations), set **`stackable: true`** ([Text styles](./text-styles)).
 - **Attribute**: applies to the **entire slot**—often **block-level** look (alignment, list indent, …) or **whole-slot** business flags; **`Attribute.render`** writes onto the **virtual node** that hosts the slot. By default attributes also cascade to **nested components’ slots** inside (**`onlySelf: true`** limits to the current slot).
 
 Both **decouple** styling from “plain text + tree”: ranges → formats; whole-slot / block chrome → attributes—fewer unnecessary components and simpler collaboration merges.

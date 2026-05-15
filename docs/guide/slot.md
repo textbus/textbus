@@ -299,7 +299,7 @@ slot.retain(5, bold, null) // 清除加粗（示意）
 
 ### `canApply`（可选回调）
 
-在 **`insert` / `write`、带格式参数的 `retain`、`applyFormat`、`cleanFormats`、`insertDelta`** 里可作为最后一参传入，签名为 **`(slot, formatter, value) => boolean`**。返回 **`false`** 时，**这一轮**里不会对 **`formatter` / `value`** 做合并（**`insert` 仍会写入字符串或组件**，只是被拒绝的 **`Formatter`** 不会套上）。
+在 **`insert` / `write`、带格式参数的 `retain`、`applyFormat`、`cleanFormatter` / `cleanFormats`、`insertDelta`** 里可作为最后一参传入，签名为 **`(slot, formatter, value) => boolean`**。返回 **`false`** 时，**这一轮**里不会对 **`formatter` / `value`** 做合并（**`insert` 仍会写入字符串或组件**，只是被拒绝的 **`Formatter`** 不会套上）。
 
 ```ts
 import { ContentType, Slot } from '@textbus/core'
@@ -480,6 +480,23 @@ slot.applyFormat(bold, { startIndex: 1, endIndex: 4, value: true })
 const ranges = slot.getFormatRangesByFormatter(bold, 0, slot.length)
 console.log(ranges.length)
 ```
+
+### `cleanFormatter(formatter, startIndex?, endIndex?, canApply?)`
+
+在 **`[startIndex, endIndex)`** 上清除 **指定 **`Formatter`****（对该区间调用 **`retain(..., formatter, null, canApply)`**）。比 **`cleanFormats`** 更适合 **只动一种格式器** 的脚本化区间操作。
+
+```ts
+import { ContentType, Slot } from '@textbus/core'
+import type { Formatter } from '@textbus/core'
+
+declare const italic: Formatter<boolean>
+const slot = new Slot([ContentType.Text])
+slot.retain(0)
+slot.insert('hello', italic, true)
+slot.cleanFormatter(italic, 1, 4)
+```
+
+最后一个参数 **`canApply`** 与其它写操作一致；返回 **`false`** 则 **本轮跳过** 对该格式器的清除。
 
 ### `cleanFormats(remainFormats?, startIndex?, endIndex?, canApply?)`
 

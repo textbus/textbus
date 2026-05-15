@@ -304,7 +304,7 @@ slot.retain(5, bold, null) // clear bold (illustrative)
 
 ### `canApply` (optional callback)
 
-Last argument to **`insert` / `write`**, formatted **`retain`**, **`applyFormat`**, **`cleanFormats`**, **`insertDelta`**, …—**`(slot, formatter, value) => boolean`**. **`false`** skips merging **that** formatter for **this** round (**text/component still inserts**).
+Last argument to **`insert` / `write`**, formatted **`retain`**, **`applyFormat`**, **`cleanFormatter` / `cleanFormats`**, **`insertDelta`**, …—**`(slot, formatter, value) => boolean`**. **`false`** skips merging **that** formatter for **this** round (**text/component still inserts**).
 
 ```ts
 import { ContentType, Slot } from '@textbus/core'
@@ -485,6 +485,23 @@ slot.applyFormat(bold, { startIndex: 1, endIndex: 4, value: true })
 const ranges = slot.getFormatRangesByFormatter(bold, 0, slot.length)
 console.log(ranges.length)
 ```
+
+### `cleanFormatter(formatter, startIndex?, endIndex?, canApply?)`
+
+Clears **one **`Formatter`**** on **`[startIndex, endIndex)`** ( **`retain(..., formatter, null, canApply)`** on that span). Handy when scripts need to touch **a single formatter** without walking **`cleanFormats`**.
+
+```ts
+import { ContentType, Slot } from '@textbus/core'
+import type { Formatter } from '@textbus/core'
+
+declare const italic: Formatter<boolean>
+const slot = new Slot([ContentType.Text])
+slot.retain(0)
+slot.insert('hello', italic, true)
+slot.cleanFormatter(italic, 1, 4)
+```
+
+**`canApply`** matches other write APIs; **`false`** skips clearing **that** formatter this round.
 
 ### `cleanFormats(remainFormats?, startIndex?, endIndex?, canApply?)`
 

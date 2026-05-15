@@ -19,7 +19,7 @@ This differs from **Attributes** that affect **the whole slot** (alignment, inde
 
 ## `Formatter` configuration: `render`
 
-When you construct **`new Formatter<T>(name, config)`**, the second argument is **`FormatterConfig<T>`**; **`T`** is the value type (**`boolean`** for bold, **`string`** for font size, …). Below is the overall shape (confirm against **`@textbus/core`** after upgrades); **`render`** is required; **`priority`**, **`inheritable`**, **`columned`**, **`checkHost`** are optional—see **[Optional fields](#optional-formatter-fields)**.
+When you construct **`new Formatter<T>(name, config)`**, the second argument is **`FormatterConfig<T>`**; **`T`** is the value type (**`boolean`** for bold, **`string`** for font size, …). Below is the overall shape (confirm against **`@textbus/core`** after upgrades); **`render`** is required; **`priority`**, **`inheritable`**, **`columned`**, **`stackable`**, **`checkHost`** are optional—see **[Optional fields](#optional-formatter-fields)**.
 
 ```ts
 import type { Component, Slot, VElement, VTextNode } from '@textbus/core'
@@ -35,6 +35,7 @@ interface FormatterConfig<T> {
   priority?: number
   inheritable?: boolean
   columned?: boolean
+  stackable?: boolean
   checkHost?(host: Slot, value: T): boolean
   render(
     children: Array<VElement | VTextNode | Component>,
@@ -130,7 +131,7 @@ Clear one formatter:
 commander.unApplyFormat(boldFormatter)
 ```
 
-**`unApplyFormat`** uses the current selection and removes **only that** formatter; overlapping formats stay.
+**`unApplyFormat`** uses the current selection and removes **only that** formatter; overlapping formats stay. An optional second argument **`filter`**: **`(slot, formatter, value) => boolean`**—the clear runs **only when it returns `true`**. Use with **`stackable: true`** formatters or slot-level guards; see [Query & operations](./operations-and-query).
 
 ## Toolbar: apply formats and sync `Query`
 
@@ -149,7 +150,7 @@ In a standalone app, putting the toolbar markup in **`index.html`** and wiring f
 
 ## Optional fields {#optional-formatter-fields}
 
-You can add these four on the **`Formatter`** config when needed.
+You can add these five on the **`Formatter`** config when needed.
 
 ### `priority`
 
@@ -202,6 +203,33 @@ Set **`columned: true`** on that **`Formatter`** (e.g. background): rendering **
 
 For everyday **bold / font size**, keep **`columned: false`**; turn **`columned`** on for “column-aligned” visuals (often background, underline, …).
 
+### `stackable`
+
+**Default `false`.** When the same **`Formatter`** is applied again on **overlapping text ranges**, the kernel **updates or replaces** existing ranges per its merge rules—typical for **bold**, **font size**, and similar inline styles.
+
+**`true`** lets **multiple ranges of the same formatter name** coexist on **the same text** with **different values**; ranges merge only when values are **deep-equal** (objects and arrays compared recursively). Use for **annotations**, **multi-user marks**, or any case where one run needs **several independent payloads**.
+
+```ts
+import { createVNode, Formatter } from '@textbus/core'
+
+interface AnnotationValue {
+  id: string
+  author: string
+}
+
+export const annotationFormatter = new Formatter<AnnotationValue>('annotation', {
+  stackable: true,
+  inheritable: false,
+  render(children, formatValue) {
+    return createVNode('mark', {
+      attrs: { 'data-annotation-id': formatValue.id, title: formatValue.author }
+    }, children)
+  }
+})
+```
+
+For **`stackable: true`** formatters, **conditional** removal (not wiping every range at once) can use the optional **`filter` / `canApply`** on **`unApplyFormat`**, **`Commander.cleanFormatters`**, or **`Slot.cleanFormatter`**—see [Query & operations](./operations-and-query) and [Slot](./slot).
+
 ### `checkHost`
 
 Optional; **omit** to allow application always. **`checkHost(host, value)`** runs **before** writing the format: **`host`** is the **`Slot`**, **`value`** is this application’s value; return **`false`** to **skip** (command effectively no-ops). Use to **restrict which slots** accept a formatter or to validate **`value`**.
@@ -222,6 +250,7 @@ If **`checkHost`** lives **inside** the **`Formatter`** config, import **`Conten
 - **Button does nothing**: confirm **`formatters`** are registered and **`name`** matches stored/pasted ids; check the selection is in an **editable text slot**, not a whole-block selection.
 - **Paste drops styles**: mapping external styles to your **`Formatter`** names depends on **`platform-browser`** and **`Parser`**—unmapped formats are dropped. See [Document parsing & compatibility](./document-parse-compat).
 - **Odd overlap nesting**: tune **`Formatter.priority`** (**smaller → wraps outer first**); use **`columned: true`** for per-glyph alignment (backgrounds, …).
+- **Multiple annotations on the same text**: set **`stackable: true`** on that **`Formatter`** and give each mark a **distinct value** (e.g. different **`id`** fields).
 - **Typing after caret doesn’t inherit bold**: check **`inheritable`** is not **`false`**; collapsed-caret rules in [Selection](./selection).
 
 ## What's next
