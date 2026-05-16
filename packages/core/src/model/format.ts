@@ -341,9 +341,7 @@ export class Format {
               copyFormat.map.delete(formatter)
             }
           }
-        }
-
-        if (range.startIndex < nextStartIndex) {
+        } else if (range.startIndex < nextStartIndex) {
           nextStartIndex = range.startIndex
           nextEndIndex = range.endIndex
         } else if (range.startIndex === nextStartIndex) {
