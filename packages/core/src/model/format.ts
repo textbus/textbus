@@ -4,12 +4,12 @@ import { Slot } from './slot'
 /**
  * 格式或属性的值，必须为可被 JSON 序列化的字面量
  */
-export type FormatValue = any
+export type FormatValue = NonNullable<any>
 
 /**
  * 一组格式
  */
-export type Formats = [formatter: Formatter<any>, value: FormatValue][]
+export type Formats<T = FormatValue> = [formatter: Formatter<any>, value: T][]
 
 /**
  * 标识格式的范围
@@ -488,151 +488,147 @@ export class Format {
     })
   }
 
-  private static mergeRanges(ranges: FormatRange[], newRange: FormatRange, stackable: boolean) {
-    if (newRange.value instanceof PendingErasure) {
-      const normalizedRanges: FormatRange[] = []
-      for (const range of ranges) {
-        if (range.endIndex <= newRange.startIndex) {
-          normalizedRanges.push(range)
-          continue
-        }
-        if (range.startIndex > newRange.endIndex) {
-          normalizedRanges.push(range)
-          continue
-        }
-        if (!Format.equal(range.value, newRange.value.value) && !newRange.value.erasureAll) {
-          normalizedRanges.push(range)
-          continue
-        }
-        if (range.startIndex < newRange.startIndex) {
-          if (range.endIndex <= newRange.endIndex) {
-            range.endIndex = newRange.startIndex
-            normalizedRanges.push(range)
-            continue
-          }
-          normalizedRanges.push({
-            startIndex: range.startIndex,
-            endIndex: newRange.startIndex,
-            value: range.value
-          }, {
-            startIndex: newRange.endIndex,
-            endIndex: range.endIndex,
-            value: range.value
-          })
-          continue
-        }
-        if (range.endIndex > newRange.endIndex) {
-          normalizedRanges.push({
-            startIndex: newRange.endIndex,
-            endIndex: newRange.endIndex,
-            value: range.value
-          })
-        }
-      }
-      ranges = normalizedRanges
+  /** 保留 range 在 [cutStart, cutEnd) 之外的片段 */
+  private static clipRangeOutside(range: FormatRange, cutStart: number, cutEnd: number): FormatRange[] {
+    if (range.endIndex <= cutStart || range.startIndex >= cutEnd) {
+      return [range]
     }
-    if (stackable) {
-      const results: FormatRange[] = []
-      for (let i = 0; i < ranges.length; i++) {
-        const range = ranges[i]
-        if (range.endIndex < newRange.startIndex) {
-          results.push(range)
-          continue
-        }
-        if (range.startIndex > newRange.endIndex) {
-          results.push(range)
-          continue
-        }
-        if (Format.equal(range.value, newRange.value)) {
-          newRange.startIndex = Math.min(range.startIndex, newRange.startIndex)
-          newRange.endIndex = Math.max(range.endIndex, newRange.endIndex)
-        } else {
-          results.push(range)
-        }
-      }
-      results.push(newRange)
-      return results.sort((a, b) => {
-        const n = a.startIndex - b.startIndex
-        if (n < 0) {
-          return -1
-        }
-        if (n === 0) {
-          return a.endIndex - b.endIndex
-        }
-        return 1
-      })
+    const parts: FormatRange[] = []
+    if (range.startIndex < cutStart) {
+      parts.push({ startIndex: range.startIndex, endIndex: cutStart, value: range.value })
     }
-    const results: FormatRange[] = []
-    let isMerged = false
-    for (let i = 0; i < ranges.length; i++) {
-      const range = ranges[i]
-      if (isMerged) {
-        results.push(range)
-        continue
-      }
-      if (range.endIndex < newRange.startIndex) {
-        results.push(range)
-        continue
-      }
-      if (range.startIndex > newRange.endIndex) {
-        results.push(newRange)
-        results.push(range)
-        isMerged = true
-        continue
-      }
-      const before = range
-      let last: FormatRange | null = null
+    if (range.endIndex > cutEnd) {
+      parts.push({ startIndex: cutEnd, endIndex: range.endIndex, value: range.value })
+    }
+    return parts
+  }
 
-      // if (before.endIndex <= newRange.endIndex) {
-      //   i++
-      // }
-      for (; i < ranges.length; i++) {
-        const next = ranges[i]
-        if (next.startIndex <= newRange.endIndex) {
-          last = next
+  /** 在 [eraseStart, eraseEnd) 内按条件擦除；不相交区间原样保留 */
+  private static applyErasure(
+    ranges: FormatRange[],
+    eraseStart: number,
+    eraseEnd: number,
+    shouldErase: (value: FormatValue) => boolean,
+  ): FormatRange[] {
+    const result: FormatRange[] = []
+    for (const range of ranges) {
+      if (range.endIndex <= eraseStart || range.startIndex >= eraseEnd) {
+        result.push(range)
+        continue
+      }
+      if (shouldErase(range.value)) {
+        result.push(...Format.clipRangeOutside(range, eraseStart, eraseEnd))
+      } else {
+        result.push(range)
+      }
+    }
+    return result
+  }
+
+  /** 相邻且取值相同的区间合并为一项（按取值分组，避免排序后中间夹着其它取值而无法合并） */
+  private static mergeAdjacentSameValue(ranges: FormatRange[]): FormatRange[] {
+    if (ranges.length === 0) {
+      return []
+    }
+    const valueGroups: FormatRange[][] = []
+    for (const range of ranges) {
+      let group = valueGroups.find(g => Format.equal(g[0].value, range.value))
+      if (!group) {
+        group = []
+        valueGroups.push(group)
+      }
+      group.push(range)
+    }
+
+    const result: FormatRange[] = []
+    for (const group of valueGroups) {
+      const sorted = [...group].sort((a, b) => {
+        const n = a.startIndex - b.startIndex
+        return n !== 0 ? n : a.endIndex - b.endIndex
+      })
+      let chain: FormatRange = { ...sorted[0] }
+      for (let i = 1; i < sorted.length; i++) {
+        const cur = sorted[i]
+        if (chain.endIndex === cur.startIndex) {
+          chain.endIndex = cur.endIndex
         } else {
-          i--
-          break
+          result.push(chain)
+          chain = { ...cur }
         }
       }
-      if (!last) {
-        results.push(newRange)
-        isMerged = true
+      result.push(chain)
+    }
+
+    return result.sort((a, b) => {
+      const n = a.startIndex - b.startIndex
+      return n !== 0 ? n : a.endIndex - b.endIndex
+    })
+  }
+
+  private static mergeStackableValue(ranges: FormatRange[], newRange: FormatRange): FormatRange[] {
+    const merged: FormatRange = {
+      startIndex: newRange.startIndex,
+      endIndex: newRange.endIndex,
+      value: newRange.value,
+    }
+    const result: FormatRange[] = []
+    for (const range of ranges) {
+      if (range.endIndex <= merged.startIndex || range.startIndex >= merged.endIndex) {
+        result.push(range)
+      } else if (Format.equal(range.value, merged.value)) {
+        merged.startIndex = Math.min(merged.startIndex, range.startIndex)
+        merged.endIndex = Math.max(merged.endIndex, range.endIndex)
+      } else {
+        result.push(range)
+      }
+    }
+    result.push(merged)
+    return Format.mergeAdjacentSameValue(result)
+  }
+
+  private static mergeNonStackableValue(ranges: FormatRange[], newRange: FormatRange): FormatRange[] {
+    const { startIndex: ns, endIndex: ne, value } = newRange
+    const result: FormatRange[] = []
+    for (const range of ranges) {
+      if (range.endIndex <= ns || range.startIndex >= ne) {
+        result.push(range)
         continue
       }
-      if (Format.equal(before.value, newRange.value)) {
-        newRange.startIndex = Math.min(before.startIndex, newRange.startIndex)
-        newRange.endIndex = Math.max(before.endIndex, newRange.endIndex)
+      if (range.startIndex < ns) {
+        result.push({ startIndex: range.startIndex, endIndex: ns, value: range.value })
       }
-      if (before.startIndex < newRange.startIndex) {
-        results.push({
-          startIndex: before.startIndex,
-          endIndex: newRange.startIndex,
-          value: before.value
-        })
+      if (range.endIndex > ne) {
+        result.push({ startIndex: ne, endIndex: range.endIndex, value: range.value })
       }
-      if (Format.equal(last.value, newRange.value)) {
-        results.push({
-          startIndex: Math.min(last.startIndex, newRange.startIndex),
-          endIndex: Math.max(last.endIndex, newRange.endIndex),
-          value: newRange.value
-        })
-        isMerged = true
-        continue
-      }
-      results.push(newRange)
-      if (newRange.endIndex < last.endIndex) {
-        results.push({
-          startIndex: newRange.endIndex,
-          endIndex: last.endIndex,
-          value: last.value
-        })
-      }
-      isMerged = true
     }
-    if (!isMerged) {
-      results.push(newRange)
+    result.push({ startIndex: ns, endIndex: ne, value })
+    return Format.mergeAdjacentSameValue(result)
+  }
+
+  private static mergeRanges(ranges: FormatRange[], newRange: FormatRange, stackable: boolean): FormatRange[] {
+    const v = newRange.value
+    const { startIndex: eraseStart, endIndex: eraseEnd } = newRange
+
+    if (isVoid(v)) {
+      if (v instanceof PendingErasure) {
+        if (v.erasureAll) {
+          return Format.mergeAdjacentSameValue(
+            Format.applyErasure(ranges, eraseStart, eraseEnd, () => true),
+          )
+        }
+        const target = v.value
+        return Format.mergeAdjacentSameValue(
+          Format.applyErasure(ranges, eraseStart, eraseEnd, rv => Format.equal(rv, target)),
+        )
+      }
+      return Format.mergeAdjacentSameValue(
+        Format.applyErasure(ranges, eraseStart, eraseEnd, () => true),
+      )
     }
-    return results
+
+    if (stackable) {
+      return Format.mergeStackableValue(ranges, newRange)
+    }
+    return Format.mergeNonStackableValue(ranges, newRange)
   }
 }

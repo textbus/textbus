@@ -271,11 +271,16 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
    * @param formats
    * @param canApply
    */
-  insert(content: string | Component, formats?: Formats,
+  insert(content: string | Component,
+         formats?: Formats,
          canApply?: FormatCanApply): boolean
-  insert<T>(content: string | Component, formatter?: Formatter<T>, value?: T,
+  insert<T>(content: string | Component,
+            formatter?: Formatter<T>,
+            value?: T,
             canApply?: FormatCanApply): boolean
-  insert(content: string | Component, formatter?: Formatter<any> | Formats, value?: FormatValue,
+  insert(content: string | Component,
+         formatter?: Formatter<any> | Formats,
+         value?: FormatValue,
          canApply?: FormatCanApply): boolean {
     const contentType = typeof content === 'string' ? ContentType.Text : content.type
     if (!this.schema.includes(contentType)) {
@@ -375,14 +380,14 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
    */
   retain(offset: number): boolean
   retain(offset: number,
-         formats: Formats,
+         formats: Formats<FormatValue | PendingErasure<FormatValue>>,
          canApply?: FormatCanApply): boolean
   retain<U>(offset: number,
             formatter: Formatter<U>,
             value: U | null | PendingErasure<U>,
             canApply?: FormatCanApply): boolean
   retain(offset: number,
-         formatter?: Formatter<any> | Formats,
+         formatter?: Formatter<any> | Formats<FormatValue | PendingErasure<FormatValue>>,
          value?: FormatValue | null | PendingErasure<any>,
          canApply?: FormatCanApply): boolean {
     let formats: Formats = []
