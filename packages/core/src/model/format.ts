@@ -230,7 +230,7 @@ export class Format {
 
     const ranges = this.map.get(formatter) || []
     ranges.forEach(range => {
-      if (range.startIndex > endIndex || range.endIndex < startIndex) {
+      if (range.startIndex >= endIndex || range.endIndex < startIndex) {
         return
       }
       const s = Math.max(range.startIndex, startIndex)
