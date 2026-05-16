@@ -52,15 +52,12 @@ selection.onChange.subscribe(() => {
 
 ## `Query`：如何读出格式、属性与组件
 
-**`Query`** 不修改文档，只返回 **`QueryState<T>`**：**`state`** 取 **`QueryStateType`**；**`state === Enabled`** 时 **`value`** 为类型 **`T`** 的具体值（格式取值、属性值、组件实例等）；否则 **`value`** 为 **`null`**。
+**`Query`** 不修改文档。对 **普通 **`Formatter`****，返回 **`QueryState<T>`**：**`state`** 为 **`QueryStateType`**；**`state === Enabled`** 时 **`value`** 为 **`T`**（格式取值、属性值、组件实例等）；否则 **`value`** 为 **`null`**。类型定义以 **`@textbus/core`** 导出的 **`QueryState`**、**`QueryStackableState`** 为准。
+
+对 **`StackableFormatter`**（子类，内核用 **`instanceof StackableFormatter`** 识别），**`queryFormat` / `queryFormatByRange`** 返回 **`QueryStackableState<T>`**：**`Enabled`** 时 **`value`** 为 **`T[]`**（选区内该格式全部取值，含同段重叠多条）；**`Normal` / `Disabled`** 时 **`value`** 为 **`null`**。行为与合并规则见 [文字样式](./text-styles) 中的 **`StackableFormatter`**。
 
 ```ts
-import { Query, QueryStateType } from '@textbus/core'
-
-interface QueryState<V, S = QueryStateType, K = S extends QueryStateType.Enabled ? V : null> {
-  state: S
-  value: K
-}
+import { QueryStateType } from '@textbus/core'
 
 enum QueryStateType {
   Normal = 'Normal',
@@ -73,7 +70,8 @@ enum QueryStateType {
 
 ### 格式：`queryFormat` / `queryFormatByRange`
 
-判断某一 **`Formatter`** 在范围内是否 **全覆盖且取值一致**。**折叠光标** 看光标 **左侧** 是否落在该格式上；**拖选** 若混有无格式片段、同一格式多种取值、或跨子组件后子树未一致携带该格式，合并结果为 **`Normal`**。一致时为 **`Enabled`**，**`value`** 即当前格式值。
+- **普通 **`Formatter`****：判断在范围内是否 **按连续片段铺满且同一取值**。**折叠光标** 看光标 **左侧** 是否落在该格式上；**拖选** 若有无格式空隙、同一格式多种取值且不能按实现规则视为一致、或跨子组件后不一致，则为 **`Normal`**；否则 **`Enabled`**，**`value`** 为 **`T`**。
+- **`StackableFormatter`**：判断选区内是否 **被该格式的区间并集完全覆盖**（无空隙）；满足则为 **`Enabled`**，**`value`** 为按区间归并后的 **`T[]`**（多条重叠取值都会列出）。详见内核 **`Query`** 实现与 [文字样式](./text-styles)。
 
 ```ts
 const bold = query.queryFormat(BoldFormatter)
@@ -124,7 +122,8 @@ const q = query.queryFormatByRange(BoldFormatter, {
 <p style="font-size: 12px; margin: 0; color: #6e6e73;">同一条目下多块选中且格式取值不一致时，合并为 <strong>Normal</strong>，工具栏可显示为「未点亮」或单独做「混合」图标，避免给用户「全开 / 全关」的假结论。</p>
 </div>
 
-- **格式**：同一 **`Formatter`** 必须在选中范围内 **分段连续且取值一致** 才是 **`Enabled`**；否则为 **`Normal`**。
+- **格式（普通 **`Formatter`**）**：选中范围内须 **按连续片段铺满且取值一致** 才是 **`Enabled`**；否则为 **`Normal`**。
+- **格式（**`StackableFormatter`**）**：与上不同，**`Enabled`** 时 **`value`** 为 **`T[]`**；规则见上文与 [文字样式](./text-styles)。
 - **属性 / 组件**：多块选中且 **取值不同** 或 **命中实例不同** 时，合并结果为 **`Normal`**。若要「只要有一块对齐就高亮」，需自行遍历 **`Selection`** / **`Slot`**，**不要**依赖内置 **`mergeState`**。
 
 ---
@@ -246,16 +245,20 @@ commander.applyFormat(BoldFormatter, true)
 
 ## `unApplyFormat`：移除文字格式
 
-按 **当前选区** 移除指定 **`Formatter`**。可选第二参数 **`filter`**：`(slot, formatter, value) => boolean`，**返回 `true`** 时 **才执行清除**；省略则对选区内该格式器的匹配区间一律清除。
+按 **当前选区** 移除指定 **`Formatter`**。签名为 **`unApplyFormat(formatter, rule?)`**：第二参数 **`rule`** 为可选的 **`PendingErasure<T>`**（与 **`@textbus/core`** 中 **`Slot.retain`** 清除格式时传入的 **`PendingErasure`** 语义一致）。
+
+- **不传 **`rule`**（或等价于未指定）**：在选区内对该 **`Formatter`** 做常规清除（与底层 **`retain(..., formatter, …)`** 清除语义一致）。
+- **`new PendingErasure(false, value)`**：仅清除取值与 **`value` 深度相等** 的区间（**`StackableFormatter`** 下同段多条批注时常用，只去掉其中一条取值）。
+
+更复杂的擦除（例如 **`PendingErasure(true)`** 等）与 **`Slot.cleanFormatter`** 的 **`rule`** 参数一致，见 [插槽](./slot) 与 **`@textbus/core`** 源码。
 
 ```ts
-import { ContentType } from '@textbus/core'
+import { PendingErasure, StackableFormatter } from '@textbus/core'
 
 commander.unApplyFormat(BoldFormatter)
 
-commander.unApplyFormat(annotationFormatter, (slot) => {
-  return slot.schema.includes(ContentType.Text)
-})
+declare const stackComment: StackableFormatter<string>
+commander.unApplyFormat(stackComment, new PendingErasure(false, 'drop'))
 ```
 
 ## `cleanFormats`：清除文字格式
@@ -281,16 +284,6 @@ commander.cleanFormats([BoldFormatter])
 
 ```ts
 commander.cleanFormats(f => f === BoldFormatter)
-```
-
-## `cleanFormatters`：按条件清除文字格式
-
-与 **`cleanFormats`**（用 **`remainFormats`** 指定 **保留** 项）相对，**`cleanFormatters`** 通过 **`filter`** 指定 **要被清除** 的格式：**`filter(slot, formatter, value)` 返回 `true`** 时清除该条。
-
-```ts
-commander.cleanFormatters((_slot, formatter) => formatter !== BoldFormatter)
-
-commander.cleanFormatters(() => true)
 ```
 
 ## `applyAttribute`：设置插槽属性
@@ -464,9 +457,8 @@ commander.transform(paragraphTransform)
 | **`cut`** | 先 **`copy`**；未折叠再 **`delete`**，返回 **`boolean`** |
 | **`paste`** | **`paste(pasteSlot, text)`**，返回 **`boolean`** |
 | **`cleanFormats`** | **`cleanFormats()`**；或传入 **`Formatter`** 数组，或传入谓词函数；用于指定清除时保留的格式（见正文） |
-| **`cleanFormatters`** | **`cleanFormatters(filter)`**；**`filter` 返回 `true`** 时清除对应格式（见正文） |
 | **`applyFormat`** | 应用格式 |
-| **`unApplyFormat`** | 移除格式；可选 **`filter`** |
+| **`unApplyFormat`** | **`unApplyFormat(formatter, rule?)`**；可选 **`PendingErasure<T>`** |
 | **`cleanAttributes`** | **`cleanAttributes()`**；或传入 **`Attribute`** 数组，或传入谓词函数；用于指定清除时保留的属性（见正文） |
 | **`applyAttribute`** | 设置插槽属性 |
 | **`unApplyAttribute`** | 移除插槽属性 |
@@ -475,7 +467,7 @@ commander.transform(paragraphTransform)
 
 | 方法 | 作用概要 |
 | --- | --- |
-| **`queryFormat` / `queryFormatByRange`** | 格式是否全覆盖且取值一致 |
+| **`queryFormat` / `queryFormatByRange`** | 普通格式：全覆盖且取值一致；**`StackableFormatter`**：返回 **`T[]`**（见 **`QueryStackableState`**） |
 | **`queryAttribute` / `queryAttributeByRange`** | 插槽属性查询 |
 | **`queryComponent` / `queryComponentByRange`** | 沿祖先链命中组件 |
 | **`queryWrappedComponent` / `queryWrappedComponentByRange`** | 是否整块包住某一组件 |
@@ -486,6 +478,7 @@ commander.transform(paragraphTransform)
 
 - **命令总是 `false`**：先确认 **`selection.isSelected`**；再看 **`onContentInsert` / `onBreak` / `onPaste`** 是否 **`preventDefault`**（钩子说明见 [组件事件与生命周期](./component-events-and-lifecycle)）。
 - **`queryFormat` 已是加粗仍为 `Normal`**：选中是否 **跨格式边界**、或 **混有多种 `value`**；折叠光标是否在 **格式内侧**（见 [选区](./selection)）。
+- **`queryFormat(StackableFormatter)` 得到 `Normal` 但肉眼有格式**：选区内是否存在 **未被该格式任一条 range 覆盖的字符格**；可对照 **`Slot.getFormatRangesByFormatter`**。
 - **`queryWrappedComponent` 恒为 `Normal`**：当前是 **折叠**，或 **未** 做到 **`selectComponent`** 式整块选中；改用 **`queryComponent`**。
 - **`paste` 无效**：**`pasteSlot.isEmpty`**、**`onPaste`** 是否阻止（见 [组件事件与生命周期](./component-events-and-lifecycle)）；剪贴板依赖 **`Adapter`** / **`BrowserModule`**。
 

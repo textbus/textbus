@@ -281,10 +281,17 @@ slot.delete(1) // 删掉 'b'
 
 ### `retain(offset, formatter, value, canApply?)`
 
-从 **当前游标**起，向后 **`offset`** 长度的区间施加格式；**`value` 为 `null`** 表示在该区间对该 **`Formatter`** 解除格式（清空）。亦可传入 **`Formats`**（**`[Formatter, value][]`**）一次多套。
+从 **当前游标**起，向后 **`offset`** 长度的区间施加格式。第二、三参为单个 **`Formatter`** 时，**`value`** 类型为 **`U | null | PendingErasure<U>`**（见 **`@textbus/core`** 类型声明）：
+
+| **`value`** | 含义（示意） |
+|-------------|----------------|
+| 普通取值 | 合并到该区间 |
+| **`null`** | 清除该 **`Formatter`** 在此区间的格式；对 **`StackableFormatter`** 等价于清空该区间上该格式器的全部堆叠取值 |
+| **`new PendingErasure(true)`** | 显式清空该区间上该格式器的全部取值（可堆叠常用） |
+| **`new PendingErasure(false, v)`** | 仅清除与 **`v` 深度相等** 的一条堆叠取值（**`StackableFormatter`**） |
 
 ```ts
-import { ContentType, Slot } from '@textbus/core'
+import { ContentType, PendingErasure, Slot } from '@textbus/core'
 import type { Formatter } from '@textbus/core'
 
 declare const bold: Formatter<boolean>
@@ -295,6 +302,29 @@ slot.retain(0)
 slot.retain(5, bold, true)
 slot.retain(0)
 slot.retain(5, bold, null) // 清除加粗（示意）
+```
+
+### `retain(offset, formats, canApply?)`
+
+一次传入多套格式。第二参 **`formats`** 类型为 **`Formats<FormatValue | PendingErasure<FormatValue>>`**，即 **`[Formatter, value][]`**，每一项的 **`value`** 同样可为 **`null`** 或 **`PendingErasure`**，语义与上一节单 **`Formatter`** 形式一致。按数组顺序依次合并。
+
+```ts
+import { ContentType, PendingErasure, Slot } from '@textbus/core'
+import type { Formatter, StackableFormatter } from '@textbus/core'
+
+declare const bold: Formatter<boolean>
+declare const stackComment: StackableFormatter<string>
+const slot = new Slot([ContentType.Text])
+slot.retain(0)
+slot.insert('abc')
+slot.retain(0)
+slot.retain(3, [
+  [bold, true],
+  [stackComment, 'n1'],
+  [stackComment, 'n2'],
+])
+slot.retain(0)
+slot.retain(3, [[stackComment, new PendingErasure(false, 'n1')]])
 ```
 
 ### `canApply`（可选回调）
@@ -410,9 +440,11 @@ slot.removeComponent(child)
 
 ## 格式：`Formatter`
 
+可堆叠批注等同一段多取值场景，请使用 **`StackableFormatter`** 子类（内核用 **`instanceof StackableFormatter`** 与 **`Format.merge`** 走可堆叠合并）；定义与示例见 [文字样式](./text-styles)。下文 **`applyFormat` / `retain` / `insert`** 等 API 的 **`formatter`** 参数既可为 **`Formatter`** 也可为 **`StackableFormatter`**。
+
 ### `applyFormat(formatter, { startIndex, endIndex, value }, canApply?)`
 
-等价于 **`retain(startIndex)`** 再 **`retain(endIndex - startIndex, formatter, value)`**，用于 **绝对下标区间** 套格式。**`canApply`** 见 **`canApply`（可选回调）**。
+等价于 **`retain(startIndex)`** 再 **`retain(endIndex - startIndex, formatter, value)`**，用于 **绝对下标区间** 套格式；**`value`** 可为 **`PendingErasure`**（与 **`retain(offset, formatter, value)`** 相同）。**`canApply`** 见 **`canApply`（可选回调）**。
 
 ```ts
 import { ContentType, Slot } from '@textbus/core'
@@ -481,22 +513,40 @@ const ranges = slot.getFormatRangesByFormatter(bold, 0, slot.length)
 console.log(ranges.length)
 ```
 
-### `cleanFormatter(formatter, startIndex?, endIndex?, canApply?)`
+### `cleanFormatter(formatter, rule?)` / `cleanFormatter(formatter, startIndex?, endIndex?, canApply?)`
 
-在 **`[startIndex, endIndex)`** 上清除 **指定 **`Formatter`****（对该区间调用 **`retain(..., formatter, null, canApply)`**）。比 **`cleanFormats`** 更适合 **只动一种格式器** 的脚本化区间操作。
+清除 **指定 **`Formatter`****，底层仍通过 **`retain`** 写入 **`null`** 或 **`PendingErasure`**。比 **`cleanFormats`** 更适合 **只动一种格式器**。
+
+| 调用形式 | 作用区间 | 清除规则 |
+|----------|----------|----------|
+| **`cleanFormatter(formatter)`** | **`[0, length)`** | **`retain(..., formatter, null)`** |
+| **`cleanFormatter(formatter, rule)`** | **`[0, length)`** | **`retain(..., formatter, rule)`**，**`rule`** 为 **`PendingErasure<U>`**（如按取值擦除堆叠） |
+| **`cleanFormatter(formatter, start, end)`** | **`[start, end)`** | 区间内 **`retain(..., formatter, null)`** |
+| **`cleanFormatter(formatter, start, end, canApply)`** | **`[start, end)`** | 第四参为 **`canApply`** 时与其它写操作一致；为 **`PendingErasure<U>`** 时作为 **`retain`** 的 **`value`**（按 **`rule`** 擦除） |
+
+若第二参直接传入 **`PendingErasure`**（省略下标），等价于从 **`0`** 到 **`length`** 并按该 **`rule`** 清除。
 
 ```ts
-import { ContentType, Slot } from '@textbus/core'
-import type { Formatter } from '@textbus/core'
+import { ContentType, PendingErasure, Slot } from '@textbus/core'
+import type { Formatter, StackableFormatter } from '@textbus/core'
 
 declare const italic: Formatter<boolean>
+declare const stackComment: StackableFormatter<string>
 const slot = new Slot([ContentType.Text])
 slot.retain(0)
 slot.insert('hello', italic, true)
 slot.cleanFormatter(italic, 1, 4)
+
+slot.retain(0)
+slot.insert('abc')
+slot.retain(0)
+slot.retain(3, stackComment, 'a')
+slot.retain(0)
+slot.retain(3, stackComment, 'b')
+slot.cleanFormatter(stackComment, new PendingErasure(false, 'a')) // 整槽按取值擦除一条堆叠
 ```
 
-最后一个参数 **`canApply`** 与其它写操作一致；返回 **`false`** 则 **本轮跳过** 对该格式器的清除。
+最后一参 **`canApply`** 与其它写操作一致；返回 **`false`** 则 **本轮跳过** 对该格式器的清除。
 
 ### `cleanFormats(remainFormats?, startIndex?, endIndex?, canApply?)`
 
@@ -506,6 +556,8 @@ slot.cleanFormatter(italic, 1, 4)
 - **`(formatter: Formatter) => boolean`**：遍历 **`getFormats()`** 的每一条 **`FormatItem`**，将其 **`formatter`** 传入回调。返回 **`true`** 表示 **跳过清除**（保留该格式化器在当前区间的呈现）；返回 **`false`** 则在 **`[startIndex, endIndex)`** 上对该 **`formatter`** 执行 **`retain(..., formatter, null)`**。
 
 若当前槽 **`getFormats()`** 为空，会 **递归子组件插槽** 内的格式清理。每一次解除格式的 **`retain`** 都会传入 **`canApply`**：返回 **`false`** 则 **这一轮不对该 `formatter` 执行清除**。
+
+下面第一个示例演示 **`remainFormats`** 为数组；第二个示例演示 **第四个参数 **`canApply`**（签名为 **`(slot, formatter, value) => boolean`**），用于在清除循环中跳过某一种 **`Formatter`**——**不要**与 **`remainFormats`** 的 **`(formatter) => boolean`** 谓词混淆。
 
 ```ts
 import { ContentType, Slot } from '@textbus/core'
@@ -663,7 +715,7 @@ console.log(slot.toString().includes('z')) // true，文本仍插入
 
 在 **`fn` 执行期间**，凡是 **`retain`（带格式）、`applyFormat`** 等写入的 **`Formatter`**，都会以 **最低优先级**参与 **`Format.merge`**：**在同一 `Formatter`、与你指定的合并区间相交的部分里，若已经存在该格式化器的区间，则以已有的 **`value` 与区间**为准；只有区间内尚未被当前 **`Formatter`** 覆盖到的部分，这次新设的格式才会生效**。重叠区间不会出现「背景写入把原来的同格式化结果盖掉」的行为。
 
-当 **`retain`** 需要作用到 **嵌套子组件内部的插槽**时，内核会对子槽再套一层 **`background`**（内部 **`applyFormatCoverChild`**），子槽里的格式写入遵循同一套合并规则。
+当 **`retain`** 需要作用到 **嵌套子组件内部的插槽**时，内核会对子槽再套一层 **`background`**（内部 **`applyFormatCoverChild`**），子槽里的格式写入遵循同一套合并规则。若本次写入涉及 **`StackableFormatter`**，在相交区间上走 **可堆叠** 合并（同段多条 range），见 [文字样式](./text-styles)。
 
 ```ts
 import { ContentType, Slot } from '@textbus/core'

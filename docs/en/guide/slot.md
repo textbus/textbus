@@ -286,10 +286,17 @@ slot.delete(1) // removes 'b'
 
 ### `retain(offset, formatter, value, canApply?)`
 
-From the **current caret**, apply format over the next **`offset`** cells; **`value === null`** clears that **`Formatter`** on the range. Or pass **`Formats`** (**`[Formatter, value][]`**) for multiple formats at once.
+From the **current caret**, apply format over the next **`offset`** cells. With a single **`Formatter`**, **`value`** is typed **`U | null | PendingErasure<U>`** (see **`@textbus/core`**):
+
+| **`value`** | Meaning (illustrative) |
+|-------------|-------------------------|
+| Normal value | Merge onto the range |
+| **`null`** | Clear that **`Formatter`** on the range; for **`StackableFormatter`**, clears **all** stacked values on the range |
+| **`new PendingErasure(true)`** | Explicitly clear **all** values for that formatter on the range |
+| **`new PendingErasure(false, v)`** | Remove only the stacked value **deep-equal** to **`v`** |
 
 ```ts
-import { ContentType, Slot } from '@textbus/core'
+import { ContentType, PendingErasure, Slot } from '@textbus/core'
 import type { Formatter } from '@textbus/core'
 
 declare const bold: Formatter<boolean>
@@ -300,6 +307,29 @@ slot.retain(0)
 slot.retain(5, bold, true)
 slot.retain(0)
 slot.retain(5, bold, null) // clear bold (illustrative)
+```
+
+### `retain(offset, formats, canApply?)`
+
+Apply **multiple** formatters in one call. The second argument is **`Formats<FormatValue | PendingErasure<FormatValue>>`** — **`[Formatter, value][]`** where each **`value`** may also be **`null`** or **`PendingErasure`**, with the same semantics as the single-formatter form. Entries are merged **in array order**.
+
+```ts
+import { ContentType, PendingErasure, Slot } from '@textbus/core'
+import type { Formatter, StackableFormatter } from '@textbus/core'
+
+declare const bold: Formatter<boolean>
+declare const stackComment: StackableFormatter<string>
+const slot = new Slot([ContentType.Text])
+slot.retain(0)
+slot.insert('abc')
+slot.retain(0)
+slot.retain(3, [
+  [bold, true],
+  [stackComment, 'n1'],
+  [stackComment, 'n2'],
+])
+slot.retain(0)
+slot.retain(3, [[stackComment, new PendingErasure(false, 'n1')]])
 ```
 
 ### `canApply` (optional callback)
@@ -415,9 +445,11 @@ slot.removeComponent(child)
 
 ## Formats: `Formatter`
 
+Use **`StackableFormatter`** when the same format name may carry **multiple values on one run of text** (annotations, …); the kernel uses **`instanceof StackableFormatter`** with **`Format.merge`**. See [Text styles](./text-styles). The **`formatter`** arguments below accept either **`Formatter`** or **`StackableFormatter`**.
+
 ### `applyFormat(formatter, { startIndex, endIndex, value }, canApply?)`
 
-Same as **`retain(startIndex)`** then **`retain(endIndex - startIndex, formatter, value)`** for **absolute index ranges**. **`canApply`**: see above.
+Same as **`retain(startIndex)`** then **`retain(endIndex - startIndex, formatter, value)`** for **absolute index ranges**; **`value`** may be **`PendingErasure`** (same as **`retain(offset, formatter, value)`**). **`canApply`**: see above.
 
 ```ts
 import { ContentType, Slot } from '@textbus/core'
@@ -486,19 +518,37 @@ const ranges = slot.getFormatRangesByFormatter(bold, 0, slot.length)
 console.log(ranges.length)
 ```
 
-### `cleanFormatter(formatter, startIndex?, endIndex?, canApply?)`
+### `cleanFormatter(formatter, rule?)` / `cleanFormatter(formatter, startIndex?, endIndex?, canApply?)`
 
-Clears **one **`Formatter`**** on **`[startIndex, endIndex)`** ( **`retain(..., formatter, null, canApply)`** on that span). Handy when scripts need to touch **a single formatter** without walking **`cleanFormats`**.
+Clears **one **`Formatter`**** via **`retain`** with **`null`** or **`PendingErasure`**. Prefer this over **`cleanFormats`** when scripts target **a single formatter**.
+
+| Form | Range | Clear rule |
+|------|-------|------------|
+| **`cleanFormatter(formatter)`** | **`[0, length)`** | **`retain(..., formatter, null)`** |
+| **`cleanFormatter(formatter, rule)`** | **`[0, length)`** | **`retain(..., formatter, rule)`** with **`PendingErasure<U>`** |
+| **`cleanFormatter(formatter, start, end)`** | **`[start, end)`** | **`retain(..., formatter, null)`** on the span |
+| **`cleanFormatter(formatter, start, end, canApply)`** | **`[start, end)`** | Fourth arg may be **`canApply`** or **`PendingErasure<U>`** (used as **`retain`** **`value`**) |
+
+If the **second** argument alone is **`PendingErasure`**, the range defaults to **`[0, length)`** with that **`rule`**.
 
 ```ts
-import { ContentType, Slot } from '@textbus/core'
-import type { Formatter } from '@textbus/core'
+import { ContentType, PendingErasure, Slot } from '@textbus/core'
+import type { Formatter, StackableFormatter } from '@textbus/core'
 
 declare const italic: Formatter<boolean>
+declare const stackComment: StackableFormatter<string>
 const slot = new Slot([ContentType.Text])
 slot.retain(0)
 slot.insert('hello', italic, true)
 slot.cleanFormatter(italic, 1, 4)
+
+slot.retain(0)
+slot.insert('abc')
+slot.retain(0)
+slot.retain(3, stackComment, 'a')
+slot.retain(0)
+slot.retain(3, stackComment, 'b')
+slot.cleanFormatter(stackComment, new PendingErasure(false, 'a')) // whole slot, erase one stacked value
 ```
 
 **`canApply`** matches other write APIs; **`false`** skips clearing **that** formatter this round.
@@ -511,6 +561,8 @@ Clears formats on **`[startIndex, endIndex)`**. First arg **`remainFormats`** (d
 - **`(formatter: Formatter) => boolean`**: for each **`FormatItem`** from **`getFormats()`**, **`true`** keeps, **`false`** clears **`formatter`** on the range.
 
 If **`getFormats()`** is empty on this slot, **recursively** cleans child component slots. Each clear passes **`canApply`**—**`false`** skips clearing **that** formatter this round.
+
+The first sample uses a **`remainFormats`** array; the second uses the **fourth argument **`canApply`** (**`(slot, formatter, value) => boolean`**) to skip clearing one **`Formatter`** in the loop—**not** the **`remainFormats`** predicate form (that predicate only takes **`formatter`**).
 
 ```ts
 import { ContentType, Slot } from '@textbus/core'
@@ -668,7 +720,7 @@ console.log(slot.toString().includes('z')) // true — text still inserted
 
 While **`fn`** runs, **`retain` (with format)**, **`applyFormat`**, … writes use **lowest priority** in **`Format.merge`**: for the **same `Formatter`** where ranges overlap, **existing `value` and intervals win**; only gaps without that formatter receive the new format—background writes do not stomp existing same-format spans.
 
-When **`retain`** targets **nested child slots**, the kernel wraps child slots in **`background`** (**`applyFormatCoverChild`** internally) with the same merge rules.
+When **`retain`** targets **nested child slots**, the kernel wraps child slots in **`background`** (**`applyFormatCoverChild`** internally) with the same merge rules. **StackableFormatter** spans use **stackable** merging on overlaps—[Text styles](./text-styles).
 
 ```ts
 import { ContentType, Slot } from '@textbus/core'

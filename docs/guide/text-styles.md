@@ -14,7 +14,7 @@
 
 ## `Formatter` 配置：`render`
 
-构造 **`new Formatter<T>(name, config)`** 时，第二个参数的类型是 **`FormatterConfig<T>`**，**`T`** 为格式值的类型（加粗用 **`boolean`**，字号用 **`string`** 等）。下面先给出类型整体形状（升级依赖后以编辑器中的类型为准），并说明必填的 **`render`**；**`priority`、`inheritable`、`columned`、`stackable`、`checkHost`** 五项可选含义见后文 **[可选字段详解](#optional-formatter-fields)**。
+构造 **`new Formatter<T>(name, config)`** 时，第二个参数的类型是 **`FormatterConfig<T>`**，**`T`** 为格式值的类型（加粗用 **`boolean`**，字号用 **`string`** 等）。下面先给出类型整体形状（升级依赖后以编辑器中的类型为准），并说明必填的 **`render`**；**`priority`、`inheritable`、`columned`、`checkHost`** 四项可选含义见后文 **[可选字段详解](#optional-formatter-fields)**。需要 **可堆叠**（同段多取值）时改用 **`StackableFormatter`**，见后文 **`StackableFormatter`** 小节。
 
 ```ts
 import type { Component, Slot, VElement, VTextNode } from '@textbus/core'
@@ -30,7 +30,6 @@ interface FormatterConfig<T> {
   priority?: number
   inheritable?: boolean
   columned?: boolean
-  stackable?: boolean
   checkHost?(host: Slot, value: T): boolean
   render(
     children: Array<VElement | VTextNode | Component>,
@@ -126,7 +125,7 @@ commander.applyFormat(fontSizeFormatter, '18px')
 commander.unApplyFormat(boldFormatter)
 ```
 
-**`unApplyFormat`** 同样依赖当前选区；仅清除 **这一种** 格式，其它重叠格式保留。可选第二参数 **`filter`**：`(slot, formatter, value) => boolean`，**返回 `true`** 时 **才执行清除**；对 **`stackable: true`** 的格式、或需按插槽条件拦截时可用，详见 [状态查询与基础操作](./operations-and-query)。
+**`unApplyFormat`** 同样依赖当前选区；仅清除 **这一种** 格式，其它重叠格式保留。可选第二参数为 **`PendingErasure<T>`**（如 **`new PendingErasure(false, id)`** 只去掉与 **`id` 深度相等** 的可堆叠取值），语义与 **`Slot.retain`** 中带 **`PendingErasure`** 的清除一致，详见 [状态查询与基础操作](./operations-and-query)。
 
 ## 工具条：应用格式并同步 `Query`
 
@@ -145,7 +144,7 @@ commander.unApplyFormat(boldFormatter)
 
 ## 可选字段详解 {#optional-formatter-fields}
 
-下列五项可按需在 **`Formatter`** 配置对象里补充；细则见本章 **[可选字段详解](#optional-formatter-fields)**。
+下列四项可按需在 **`Formatter`** 配置对象里补充；细则见本章 **[可选字段详解](#optional-formatter-fields)**。
 
 ### `priority`
 
@@ -198,22 +197,19 @@ commander.unApplyFormat(boldFormatter)
 
 日常 **加粗、字号** 等一般仍可保持 **`columned: false`**，只在需要「按列贴齐」的样式（常见是背景、下划线等）上开启。
 
-### `stackable`
+### `StackableFormatter`
 
-**默认 `false`。** 同一 **`Formatter`** 在 **重叠的文本区间** 上再次应用时，内核会按区间合并规则 **更新或替换** 已有区间——**加粗、字号** 等常见行内样式即属此种行为。
-
-**设为 `true`** 时，**同名** **`Formatter`** 可在 **同一段文字** 上保留 **多段互不相同的格式值**；仅当两段区间的 **值深度相等**（含对象、数组的逐项比较）时才会合并为一段。适用于 **批注**、**多人标记** 等同一段正文需要挂 **多条独立元数据** 的场景。
+**`Formatter` 的子类。** 同一 **格式名** 可在 **同一段文字** 上保留 **多段互不相同的格式值**；仅当两段区间的 **值深度相等**（含对象、数组的逐项比较）时才会合并为一段。内核通过 **`instanceof StackableFormatter`** 识别并与普通 **`Formatter`** 区分合并策略；**`Query.queryFormat`** 对其返回的 **`value`** 类型为 **`T[]`**。适用于 **批注**、**多人标记** 等同一段正文需要挂 **多条独立元数据** 的场景。
 
 ```ts
-import { createVNode, Formatter } from '@textbus/core'
+import { createVNode, StackableFormatter } from '@textbus/core'
 
 interface AnnotationValue {
   id: string
   author: string
 }
 
-export const annotationFormatter = new Formatter<AnnotationValue>('annotation', {
-  stackable: true,
+export const annotationFormatter = new StackableFormatter<AnnotationValue>('annotation', {
   inheritable: false,
   render(children, formatValue) {
     return createVNode('mark', {
@@ -223,7 +219,7 @@ export const annotationFormatter = new Formatter<AnnotationValue>('annotation', 
 })
 ```
 
-对 **`stackable: true`** 的格式，若需 **按条件** 移除而非整类清除，可用 **`unApplyFormat`**、**`Commander.cleanFormatters`** 或 **`Slot.cleanFormatter`** 的可选 **`filter` / `canApply`**，见 [状态查询与基础操作](./operations-and-query) 与 [插槽](./slot)。
+对 **`StackableFormatter`**，若需 **按取值** 去掉其中一条而非整类清除，可用 **`unApplyFormat(formatter, new PendingErasure(false, value))`**；更细的区间或组合条件请在 **`Slot`** 上使用 **`cleanFormatter` / `cleanFormats`**（含 **`canApply`**、**`PendingErasure`** 等），见 [插槽](./slot)。
 
 ### `checkHost`
 
@@ -245,7 +241,7 @@ checkHost(host, value) {
 - **点了按钮没反应**：确认 **`formatters`** 已注册、**`name`** 与保存/粘贴场景下的标识一致；再看选区是否落在 **可编辑文本插槽**（而不是整块组件选区）。
 - **粘贴丢样式**：粘贴管线是否把外部样式映射到你注册的 **`Formatter`** 名称上，取决于 **`platform-browser`** 与 **`Parser`** 配置；未配置的格式会被丢弃。详见 [文档解析与兼容处理](./document-parse-compat)。
 - **重叠格式顺序异常**：调整 **`Formatter`** 的 **`priority`**（数字 **越小越先包外层**）；需要「按字对齐」的背景等再考虑 **`columned: true`**。
-- **同一段字需要多条批注**：将对应 **`Formatter`** 的 **`stackable`** 设为 **`true`**，并为每条批注使用 **互不相同的格式值**（例如不同的 **`id`**）。
+- **同一段字需要多条批注**：使用 **`StackableFormatter`** 定义该格式，并为每条批注使用 **互不相同的格式值**（例如不同的 **`id`**）。
 - **光标后的字没有继承加粗**：检查 **`inheritable`** 是否为 **`false`**；或折叠光标下的输入继承规则是否符合预期（见 [选区](./selection)）。
 
 ## 接下来

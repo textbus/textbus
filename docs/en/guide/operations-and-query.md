@@ -57,15 +57,12 @@ selection.onChange.subscribe(() => {
 
 ## `Query`: reading formats, attributes, and components
 
-**`Query`** never edits the document; it returns **`QueryState<T>`**: **`state`** is **`QueryStateType`**; when **`state === Enabled`**, **`value`** is **`T`** (format value, attribute value, component instance, …); otherwise **`value`** is **`null`**.
+**`Query`** never edits the document. For a plain **`Formatter`**, it returns **`QueryState<T>`**: **`state`** is **`QueryStateType`**; when **`state === Enabled`**, **`value`** is **`T`** (format value, attribute value, component instance, …); otherwise **`value`** is **`null`**. See exported **`QueryState`** / **`QueryStackableState`** in **`@textbus/core`** for exact typings.
+
+For a **`StackableFormatter`** (subclass; the kernel detects it with **`instanceof StackableFormatter`**), **`queryFormat` / `queryFormatByRange`** return **`QueryStackableState<T>`**: when **`Enabled`**, **`value`** is **`T[]`** (all values of that format on the selection, including overlapping ranges); for **`Normal` / `Disabled`**, **`value`** is **`null`**. Details: [Text styles](./text-styles) (**`StackableFormatter`**).
 
 ```ts
-import { Query, QueryStateType } from '@textbus/core'
-
-interface QueryState<V, S = QueryStateType, K = S extends QueryStateType.Enabled ? V : null> {
-  state: S
-  value: K
-}
+import { QueryStateType } from '@textbus/core'
 
 enum QueryStateType {
   Normal = 'Normal',
@@ -78,7 +75,8 @@ Built-in **`Query`** on implemented paths returns only **`Normal`** and **`Enabl
 
 ### Format: `queryFormat` / `queryFormatByRange`
 
-Whether a **`Formatter`** is **fully covered with one consistent value** in the range. **Collapsed caret**: check **to the left** of the caret. **Range**: if any unformatted span, mixed values for the same format, or subtree inconsistency after crossing components → **`Normal`**. Uniform coverage → **`Enabled`** with **`value`**.
+- **Plain **`Formatter`****: whether the range is **fully tiled by contiguous segments with one value**. **Collapsed caret**: check **to the left** of the caret. **Range**: unformatted gaps, incompatible multiple values for the same format, or inconsistency after crossing components → **`Normal`**; otherwise **`Enabled`** with **`value: T`**.
+- **`StackableFormatter`**: different rules—the union of that formatter’s ranges must **fully cover** every character cell in the selection with no gaps; then **`Enabled`** with **`value: T[]`**. See **`Query`** in the kernel and [Text styles](./text-styles).
 
 ```ts
 const bold = query.queryFormat(BoldFormatter)
@@ -129,7 +127,8 @@ With multi-range selections, **`Query`** feeds segment results into **`mergeStat
 <p style="font-size: 12px; margin: 0; color: #6e6e73;">Multiple disjoint selections with inconsistent format values merge to <strong>Normal</strong>; toolbar can stay inactive or show a “mixed” state instead of implying all-on / all-off.</p>
 </div>
 
-- **Format**: same **`Formatter`** must be **continuous per segment with one value** across the selection → **`Enabled`**; else **`Normal`**.
+- **Format (plain **`Formatter`**)**: **contiguous tiling with one value** across the selection → **`Enabled`**; else **`Normal`**.
+- **Format (**`StackableFormatter`**)**: different—**`Enabled`** yields **`value: T[]`**; see above and [Text styles](./text-styles).
 - **Attribute / component**: multiple blocks with **different values** or **different instances** → **`Normal`**. To highlight when **any** block matches (e.g. alignment), **walk **`Selection`** / **`Slot`** yourself**—do not rely on built-in **`mergeState`** alone.
 
 ---
@@ -251,16 +250,20 @@ commander.applyFormat(BoldFormatter, true)
 
 ## `unApplyFormat`: remove text format
 
-Removes the given **`Formatter`** from the **current selection**. Optional **`filter`**: **`(slot, formatter, value) => boolean`**—the clear runs **only when it returns `true`**; omit to clear all matching ranges of that formatter in the selection.
+Removes the given **`Formatter`** from the **current selection**. Signature **`unApplyFormat(formatter, rule?)`**: optional second argument **`rule`** is **`PendingErasure<T>`** (same idea as passing **`PendingErasure`** when clearing formats via **`Slot.retain`** in **`@textbus/core`**).
+
+- **Omit **`rule`****: default clearing for that formatter on the selection (matches underlying **`retain(..., formatter, …)`** erase semantics).
+- **`new PendingErasure(false, value)`**: remove only ranges whose stored value is **deep-equal** to **`value`** (typical for **`StackableFormatter`**—drop one mark without removing others).
+
+Other **`PendingErasure`** shapes (e.g. **`erasureAll`**) align with **`Slot.cleanFormatter`**’s **`rule`** parameter—see [Slot](./slot) and **`@textbus/core`** sources.
 
 ```ts
-import { ContentType } from '@textbus/core'
+import { PendingErasure, StackableFormatter } from '@textbus/core'
 
 commander.unApplyFormat(BoldFormatter)
 
-commander.unApplyFormat(annotationFormatter, (slot) => {
-  return slot.schema.includes(ContentType.Text)
-})
+declare const stackComment: StackableFormatter<string>
+commander.unApplyFormat(stackComment, new PendingErasure(false, 'drop'))
 ```
 
 ## `cleanFormats`: clear text formats
@@ -286,16 +289,6 @@ commander.cleanFormats([BoldFormatter])
 
 ```ts
 commander.cleanFormats(f => f === BoldFormatter)
-```
-
-## `cleanFormatters`: clear formats by predicate
-
-Complements **`cleanFormats`** (which lists **what to keep** via **`remainFormats`**). **`cleanFormatters`** takes **`filter`**: **`filter(slot, formatter, value)` returns `true`** to **clear** that entry.
-
-```ts
-commander.cleanFormatters((_slot, formatter) => formatter !== BoldFormatter)
-
-commander.cleanFormatters(() => true)
 ```
 
 ## `applyAttribute`: set slot attribute
@@ -467,9 +460,8 @@ commander.transform(paragraphTransform)
 | **`cut`** | **`copy`** then **`delete`** if not collapsed; **`boolean`** |
 | **`paste`** | **`paste(pasteSlot, text)`**; **`boolean`** |
 | **`cleanFormats`** | Clear formats; optional keep list or predicate |
-| **`cleanFormatters`** | **`cleanFormatters(filter)`**—clear when **`filter` returns `true`** |
 | **`applyFormat`** | Apply format |
-| **`unApplyFormat`** | Remove format; optional **`filter`** |
+| **`unApplyFormat`** | **`unApplyFormat(formatter, rule?)`**; optional **`PendingErasure<T>`** |
 | **`cleanAttributes`** | Clear attributes; optional keep list or predicate |
 | **`applyAttribute`** | Set attribute |
 | **`unApplyAttribute`** | Remove attribute |
@@ -478,7 +470,7 @@ commander.transform(paragraphTransform)
 
 | Method | Summary |
 | --- | --- |
-| **`queryFormat` / `queryFormatByRange`** | Uniform format coverage |
+| **`queryFormat` / `queryFormatByRange`** | Plain formatter: uniform coverage; **`StackableFormatter`**: **`T[]`** (**`QueryStackableState`**) |
 | **`queryAttribute` / `queryAttributeByRange`** | Slot attributes |
 | **`queryComponent` / `queryComponentByRange`** | Component along ancestors |
 | **`queryWrappedComponent` / `queryWrappedComponentByRange`** | Selection wraps one component |
@@ -489,6 +481,7 @@ commander.transform(paragraphTransform)
 
 - **Command always `false`**: check **`selection.isSelected`**; hooks **`onContentInsert` / `onBreak` / `onPaste`** **`preventDefault`**? ([Component events & lifecycle](./component-events-and-lifecycle))
 - **`queryFormat` bold but `Normal`**: cross-format boundaries or mixed values? collapsed caret position? ([Selection](./selection))
+- **`queryFormat(StackableFormatter)` is `Normal` but ranges look present**: a character cell in the selection is **not covered** by any range of that formatter; compare **`Slot.getFormatRangesByFormatter`**.
 - **`queryWrappedComponent` always `Normal`**: collapsed selection or not whole-block—use **`queryComponent`** or **`selectComponent`**.
 - **`paste` no-op**: **`pasteSlot.isEmpty`**, **`onPaste`** cancelled ([Component events & lifecycle](./component-events-and-lifecycle)); clipboard needs **`Adapter`** / **`BrowserModule`**.
 
