@@ -14,6 +14,7 @@ import {
 import { NodeModule, NodeViewAdapter } from '@textbus/platform-node'
 
 import { boldFormatter } from '../../_editor/formatters/bold.formatter'
+import { fontSizeFormatter } from '../../_editor/formatters/font-size.formatter'
 import {
   stackColumnedFormatter,
   stackCommentFormatter,
@@ -178,5 +179,191 @@ describe('可堆叠格式 — Slot 进阶', () => {
     slot.retain(0)
     slot.retain(3, stackCommentFormatter, new PendingErasure(true))
     expect(slot.getFormatRangesByFormatter(stackCommentFormatter, 0, slot.length).length).toBe(0)
+  })
+})
+
+function stackRangesByValue(slot: Slot, value: string) {
+  return slot
+    .getFormatRangesByFormatter(stackCommentFormatter, 0, slot.length)
+    .filter(r => r.value === value)
+}
+
+describe('可堆叠格式 — mergeRanges / mergeAdjacentSameValue（Slot 间接）', () => {
+  test('同取值碎片经合并后应首尾相接成一段（中间夹其它取值不阻断）', () => {
+    const slot = new Slot([ContentType.Text])
+    slot.insert('abcde')
+    slot.applyFormat(stackCommentFormatter, { startIndex: 1, endIndex: 2, value: 's1' })
+    slot.applyFormat(stackCommentFormatter, { startIndex: 1, endIndex: 2, value: 's2' })
+    slot.applyFormat(stackCommentFormatter, { startIndex: 3, endIndex: 5, value: 's1' })
+    slot.applyFormat(stackCommentFormatter, { startIndex: 3, endIndex: 5, value: 's2' })
+    slot.applyFormat(stackCommentFormatter, { startIndex: 2, endIndex: 3, value: 's1' })
+
+    const s1 = stackRangesByValue(slot, 's1')
+    expect(s1.length).toBe(1)
+    expect(s1[0]).toMatchObject({ startIndex: 1, endIndex: 5, value: 's1' })
+
+    const s2 = stackRangesByValue(slot, 's2')
+    expect(s2.length).toBe(2)
+    expect(s2.map(r => [r.startIndex, r.endIndex]).sort()).toEqual([
+      [1, 2],
+      [3, 5],
+    ])
+  })
+
+  test('同取值中间有空隙时不应合并', () => {
+    const slot = new Slot([ContentType.Text])
+    slot.insert('abcde')
+    slot.applyFormat(stackCommentFormatter, { startIndex: 0, endIndex: 2, value: 'gap' })
+    slot.applyFormat(stackCommentFormatter, { startIndex: 3, endIndex: 5, value: 'gap' })
+
+    const gap = stackRangesByValue(slot, 'gap')
+    expect(gap.length).toBe(2)
+    expect(gap[0]).toMatchObject({ startIndex: 0, endIndex: 2, value: 'gap' })
+    expect(gap[1]).toMatchObject({ startIndex: 3, endIndex: 5, value: 'gap' })
+  })
+
+  test('同区间同取值重复 apply 应合并为一段', () => {
+    const slot = new Slot([ContentType.Text])
+    slot.insert('abcd')
+    slot.applyFormat(stackCommentFormatter, { startIndex: 1, endIndex: 3, value: 'dup' })
+    slot.applyFormat(stackCommentFormatter, { startIndex: 1, endIndex: 3, value: 'dup' })
+
+    const dup = stackRangesByValue(slot, 'dup')
+    expect(dup.length).toBe(1)
+    expect(dup[0]).toMatchObject({ startIndex: 1, endIndex: 3, value: 'dup' })
+  })
+
+  test('applyErasure：整段擦除、部分裁剪、非目标取值与擦除窗相交仍整段保留', () => {
+    const slotFull = new Slot([ContentType.Text])
+    slotFull.insert('abcde')
+    slotFull.applyFormat(stackCommentFormatter, { startIndex: 2, endIndex: 4, value: 'gone' })
+    slotFull.retain(0)
+    slotFull.retain(5, stackCommentFormatter, null)
+    expect(slotFull.getFormatRangesByFormatter(stackCommentFormatter, 0, slotFull.length).length).toBe(0)
+
+    const slotClip = new Slot([ContentType.Text])
+    slotClip.insert('0123456789')
+    slotClip.applyFormat(stackCommentFormatter, { startIndex: 0, endIndex: 10, value: 'clip' })
+    slotClip.retain(3)
+    slotClip.retain(4, stackCommentFormatter, new PendingErasure(false, 'clip'))
+    const clipped = stackRangesByValue(slotClip, 'clip')
+    expect(clipped.length).toBe(2)
+    expect(clipped[0]).toMatchObject({ startIndex: 0, endIndex: 3, value: 'clip' })
+    expect(clipped[1]).toMatchObject({ startIndex: 7, endIndex: 10, value: 'clip' })
+
+    const slotKeep = new Slot([ContentType.Text])
+    slotKeep.insert('abcde')
+    slotKeep.applyFormat(stackCommentFormatter, { startIndex: 0, endIndex: 5, value: 's1' })
+    slotKeep.applyFormat(stackCommentFormatter, { startIndex: 0, endIndex: 5, value: 's2' })
+    slotKeep.retain(2)
+    slotKeep.retain(1, stackCommentFormatter, new PendingErasure(false, 's1'))
+    expect(stackRangesByValue(slotKeep, 's2')).toEqual([
+      { startIndex: 0, endIndex: 5, value: 's2' },
+    ])
+    const s1After = stackRangesByValue(slotKeep, 's1')
+    expect(s1After.length).toBe(2)
+    expect(s1After[0]).toMatchObject({ startIndex: 0, endIndex: 2, value: 's1' })
+    expect(s1After[1]).toMatchObject({ startIndex: 3, endIndex: 5, value: 's1' })
+  })
+
+  test('尚无区间时 retain(null) 不应写入格式', () => {
+    const slot = new Slot([ContentType.Text])
+    slot.insert('abc')
+    slot.retain(0)
+    slot.retain(3, stackCommentFormatter, null)
+    expect(slot.getFormatRangesByFormatter(stackCommentFormatter, 0, slot.length).length).toBe(0)
+  })
+
+  test('background 内 retain 写入的格式应与已有区间按 background 合并顺序共存', () => {
+    const slot = new Slot([ContentType.Text])
+    slot.insert('abcde')
+    slot.applyFormat(stackCommentFormatter, { startIndex: 0, endIndex: 2, value: 'outer' })
+    slot.background(() => {
+      slot.retain(0)
+      slot.retain(5, stackCommentFormatter, 'inner')
+    })
+    const outer = stackRangesByValue(slot, 'outer')
+    const inner = stackRangesByValue(slot, 'inner')
+    expect(outer.length).toBeGreaterThan(0)
+    expect(inner.some(r => r.startIndex === 0 && r.endIndex === 5 && r.value === 'inner')).toBe(true)
+    expect(outer.some(r => r.value === 'outer' && r.startIndex < 2)).toBe(true)
+  })
+
+  test('删文后区间应裁剪到插槽长度且去掉空段', () => {
+    const slot = new Slot([ContentType.Text])
+    slot.insert('abcdef')
+    slot.applyFormat(stackCommentFormatter, { startIndex: 0, endIndex: 6, value: 'v' })
+    slot.retain(3)
+    slot.delete(4)
+    expect(slot.length).toBe(3)
+    const ranges = slot.getFormatRangesByFormatter(stackCommentFormatter, 0, slot.length)
+    expect(ranges.length).toBeGreaterThan(0)
+    ranges.forEach(r => {
+      expect(r.startIndex).toBeGreaterThanOrEqual(0)
+      expect(r.endIndex).toBeLessThanOrEqual(slot.length)
+      expect(r.startIndex).toBeLessThan(r.endIndex)
+    })
+    expect(ranges.every(r => r.endIndex <= 3)).toBe(true)
+  })
+
+  test('同取值原本不相邻：删除中间正文后相接应合并为一段', () => {
+    const slot = new Slot([ContentType.Text])
+    slot.insert('abcdef')
+    slot.applyFormat(stackCommentFormatter, { startIndex: 0, endIndex: 2, value: 'join' })
+    slot.applyFormat(stackCommentFormatter, { startIndex: 4, endIndex: 6, value: 'join' })
+    expect(stackRangesByValue(slot, 'join').length).toBe(2)
+
+    slot.retain(2)
+    slot.delete(2)
+    expect(slot.sliceContent().join('')).toBe('abef')
+
+    const join = stackRangesByValue(slot, 'join')
+    expect(join.length).toBe(1)
+    expect(join[0]).toMatchObject({ startIndex: 0, endIndex: 4, value: 'join' })
+  })
+
+  test('同格式中间插入无格式正文应拆成两段区间', () => {
+    const slot = new Slot([ContentType.Text])
+    slot.insert('abcde')
+    slot.applyFormat(stackCommentFormatter, { startIndex: 0, endIndex: 5, value: 'span' })
+    expect(stackRangesByValue(slot, 'span').length).toBe(1)
+
+    slot.retain(2)
+    slot.insert('XY')
+    expect(slot.sliceContent().join('')).toBe('abXYcde')
+
+    const span = stackRangesByValue(slot, 'span')
+    expect(span.length).toBe(2)
+    expect(span[0]).toMatchObject({ startIndex: 0, endIndex: 2, value: 'span' })
+    expect(span[1]).toMatchObject({ startIndex: 4, endIndex: 7, value: 'span' })
+  })
+
+  test('非堆叠格式：retain 覆盖多段旧区间时外侧保留、重叠区改为新值', () => {
+    const slot = new Slot([ContentType.Text])
+    slot.insert('0123456')
+    slot.applyFormat(fontSizeFormatter, { startIndex: 0, endIndex: 2, value: '10px' })
+    slot.applyFormat(fontSizeFormatter, { startIndex: 5, endIndex: 7, value: '10px' })
+    slot.retain(1)
+    slot.retain(4, fontSizeFormatter, '20px')
+
+    const ranges = slot.getFormatRangesByFormatter(fontSizeFormatter, 0, slot.length)
+    const sorted = [...ranges].sort((a, b) => a.startIndex - b.startIndex)
+    expect(sorted).toEqual([
+      { startIndex: 0, endIndex: 1, value: '10px' },
+      { startIndex: 1, endIndex: 5, value: '20px' },
+      { startIndex: 5, endIndex: 7, value: '10px' },
+    ])
+  })
+
+  test('对象取值 PendingErasure(false) 与区间值非 deepEqual 时不擦除', () => {
+    const slot = new Slot([ContentType.Text])
+    slot.insert('abc')
+    slot.applyFormat(stackNoteObjectFormatter, { startIndex: 0, endIndex: 3, value: { id: 1 } })
+    slot.applyFormat(stackNoteObjectFormatter, { startIndex: 0, endIndex: 3, value: { id: 2 } })
+    slot.retain(0)
+    slot.retain(3, stackNoteObjectFormatter, new PendingErasure(false, { id: 1, tag: 'x' }))
+    const ranges = slot.getFormatRangesByFormatter(stackNoteObjectFormatter, 0, slot.length)
+    expect(ranges.length).toBe(2)
+    expect(ranges.map(r => r.value.id).sort()).toEqual([1, 2])
   })
 })

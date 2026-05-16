@@ -226,6 +226,12 @@ describe('Commander — 可堆叠格式（insert / cleanFormats / 历史与删�
     history.back()
     await sleep()
     expect(ref.component.state.slot.getFormatRangesByFormatter(stackCommentFormatter, 0, 99).length).toBe(2)
+
+    history.forward()
+    await sleep()
+    const afterRedo = ref.component.state.slot.getFormatRangesByFormatter(stackCommentFormatter, 0, 99)
+    expect(afterRedo.length).toBe(2)
+    expect(afterRedo.map((r: { value: string }) => r.value).sort()).toEqual(['s1', 's2'])
   })
 })
 
@@ -257,6 +263,75 @@ describe('Commander — PendingErasure 与 unApplyFormat（API 预期）', () =>
     const onPh = ref.component.state.slot.getFormatRangesByFormatter(stackCommentFormatter, 1, 2)
     expect(onPh.some((r: { value: string }) => r.value === 'keep')).toBe(true)
     expect(onPh.some((r: { value: string }) => r.value === 'drop')).toBe(false)
+  })
+
+  test('折叠选区：前一字非 placeholder 时 unApplyFormat 仍作用于零宽占位段', async () => {
+    editor = new Editor(document.body, {
+      providers: bridgeProviders,
+      formatters: stackableEditorFormattersWithObject
+    })
+    const slot = new Slot([ContentType.Text])
+    slot.insert('abcde')
+    const root = new RootComponent({ slot })
+    await editor.render(root)
+    const ref = editor.get(RootComponentRef)
+    const commander = editor.get(Commander)
+    const selection = editor.get(Selection)
+    const s = ref.component.state.slot
+
+    selection.setBaseAndExtent(s, 0, s, 5)
+    commander.applyFormat(stackCommentFormatter, 'mark')
+    selection.setPosition(s, 3)
+    commander.unApplyFormat(stackCommentFormatter, new PendingErasure(false, 'mark'))
+    await sleep()
+
+    const onCaret = s.getFormatRangesByFormatter(stackCommentFormatter, 3, 4)
+    expect(onCaret.length).toBe(0)
+    expect(s.getContentAtIndex(2)).not.toBe(Slot.placeholder)
+  })
+
+  test('unApplyFormat(formatter) 无第二参时清除选区内该 stackable 全部区间', async () => {
+    editor = new Editor(document.body, {
+      providers: bridgeProviders,
+      formatters: stackableEditorFormattersWithObject
+    })
+    const slot = new Slot([ContentType.Text])
+    slot.insert('abc')
+    const root = new RootComponent({ slot })
+    await editor.render(root)
+    const ref = editor.get(RootComponentRef)
+    const commander = editor.get(Commander)
+    const selection = editor.get(Selection)
+
+    selection.setBaseAndExtent(ref.component.state.slot, 0, ref.component.state.slot, 3)
+    commander.applyFormat(stackCommentFormatter, 'x')
+    commander.applyFormat(stackCommentFormatter, 'y')
+    commander.unApplyFormat(stackCommentFormatter)
+    await sleep()
+    expect(ref.component.state.slot.getFormatRangesByFormatter(stackCommentFormatter, 0, 99).length).toBe(0)
+  })
+
+  test('对象取值 PendingErasure(false) 与存储值非 deepEqual 时为 no-op', async () => {
+    editor = new Editor(document.body, {
+      providers: bridgeProviders,
+      formatters: stackableEditorFormattersWithObject
+    })
+    const slot = new Slot([ContentType.Text])
+    slot.insert('abc')
+    const root = new RootComponent({ slot })
+    await editor.render(root)
+    const ref = editor.get(RootComponentRef)
+    const commander = editor.get(Commander)
+    const selection = editor.get(Selection)
+
+    selection.setBaseAndExtent(ref.component.state.slot, 0, ref.component.state.slot, 3)
+    commander.applyFormat(stackNoteObjectFormatter, { id: 1 })
+    commander.applyFormat(stackNoteObjectFormatter, { id: 2 })
+    commander.unApplyFormat(stackNoteObjectFormatter, new PendingErasure(false, { id: 1, tag: 'extra' }))
+    await sleep()
+    const ranges = ref.component.state.slot.getFormatRangesByFormatter(stackNoteObjectFormatter, 0, 99)
+    expect(ranges.length).toBe(2)
+    expect(ranges.map((r: { value: { id: number } }) => r.value.id).sort()).toEqual([1, 2])
   })
 
   test('部分选区：PendingErasure(false, value) 只清除与选区重叠且取值匹配的堆叠', async () => {
