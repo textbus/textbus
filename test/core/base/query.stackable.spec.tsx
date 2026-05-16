@@ -32,7 +32,7 @@ describe('Query — 可堆叠格式', () => {
     editor.destroy()
   })
 
-  test('选区覆盖同段两条重叠 stack 时 queryFormat 为 Normal（getStatesByRange 按连续区间遍历多条 range）', async () => {
+  test('选区覆盖同段两条重叠 stack 时 queryFormat 为 Enabled 且 value 为多条取值', async () => {
     const slot = new Slot([ContentType.Text])
     slot.insert('abc')
     slot.applyFormat(stackCommentFormatter, { startIndex: 0, endIndex: 3, value: 'u1' })
@@ -45,11 +45,11 @@ describe('Query — 可堆叠格式', () => {
     const ref = editor.get(RootComponentRef)
     selection.setBaseAndExtent(ref.component.state.slot, 0, ref.component.state.slot, 3)
     const r = query.queryFormat(stackCommentFormatter)
-    expect(r.state).toBe(QueryStateType.Normal)
-    expect(r.value).toBeNull()
+    expect(r.state).toBe(QueryStateType.Enabled)
+    expect(r.value).toEqual(['u1', 'u2'])
   })
 
-  test('选区跨相邻两段 stack（L/R）且与区间首尾相接时 queryFormat 为 Enabled', async () => {
+  test('选区跨相邻两段 stack（L/R）时 queryFormat 为 Enabled 且 value 按区间顺序', async () => {
     const slot = new Slot([ContentType.Text])
     slot.insert('abcd')
     slot.applyFormat(stackCommentFormatter, { startIndex: 0, endIndex: 2, value: 'L' })
@@ -63,6 +63,6 @@ describe('Query — 可堆叠格式', () => {
     selection.setBaseAndExtent(ref.component.state.slot, 0, ref.component.state.slot, 3)
     const r = query.queryFormat(stackCommentFormatter)
     expect(r.state).toBe(QueryStateType.Enabled)
-    expect(['L', 'R']).toContain(r.value as string)
+    expect(r.value).toEqual(['L', 'R'])
   })
 })

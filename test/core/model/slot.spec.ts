@@ -1,4 +1,4 @@
-import { Component, ContentType, createVNode, FormatHostBindingRender, Formatter, PendingErasure, Slot, Textbus, VElement, VTextNode } from '@textbus/core'
+import { Component, ContentType, createVNode, FormatHostBindingRender, Formatter, PendingErasure, Slot, StackableFormatter, Textbus, VElement, VTextNode } from '@textbus/core'
 import { NodeModule, NodeViewAdapter } from '@textbus/platform-node'
 
 let textbus: Textbus
@@ -449,8 +449,7 @@ describe('根据内容生成渲染树', () => {
 })
 
 describe('可堆叠格式', () => {
-  const commentFormatter = new Formatter<string>('comment', {
-    stackable: true,
+  const commentFormatter = new StackableFormatter<string>('comment', {
     render(children: any, value: string) {
       return createVNode('span', {
         'data-data': value
