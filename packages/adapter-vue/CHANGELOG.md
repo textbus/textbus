@@ -1,5 +1,13 @@
 # @textbus/adapter-vue
 
+## 5.4.2
+
+### Patch Changes
+
+- Updated dependencies
+  - @textbus/core@5.4.2
+  - @textbus/platform-browser@5.4.2
+
 ## 5.4.1
 
 ### Patch Changes

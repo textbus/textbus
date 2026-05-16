@@ -1,5 +1,11 @@
 # @textbus/core
 
+## 5.4.2
+
+### Patch Changes
+
+- 完善可堆叠样式的支持
+
 ## 5.4.1
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @textbus/collaborate
 
+## 5.4.2
+
+### Patch Changes
+
+- 完善可堆叠样式的支持
+- Updated dependencies
+  - @textbus/core@5.4.2
+
 ## 5.4.1
 
 ### Patch Changes
