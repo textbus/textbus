@@ -9,7 +9,7 @@ export type FormatValue = NonNullable<any>
 /**
  * 一组格式
  */
-export type Formats<T = FormatValue> = [formatter: Formatter<any>, value: T][]
+export type Formats<T = FormatValue> = [formatter: Formatter, value: T][]
 
 /**
  * 标识格式的范围
@@ -59,7 +59,7 @@ export class PendingErasure<T> {
  * Format 类为 Slot 的私有属性，在实际场景中，开发者不需在关注此类，也不需要访问或操作此类
  */
 export class Format {
-  private map = new Map<Formatter<any>, FormatRange<any>[]>()
+  private map = new Map<Formatter, FormatRange<any>[]>()
 
   constructor(private slot: Slot) {
   }
@@ -225,8 +225,8 @@ export class Format {
    * @param endIndex
    * @param formatter
    */
-  extractFormatRangesByFormatter(startIndex: number, endIndex: number, formatter: Formatter<any>) {
-    const extractRanges: FormatRange<any>[] = []
+  extractFormatRangesByFormatter(startIndex: number, endIndex: number, formatter: Formatter) {
+    const extractRanges: FormatRange[] = []
 
     const ranges = this.map.get(formatter) || []
     ranges.forEach(range => {
@@ -252,7 +252,7 @@ export class Format {
    * @param startIndex
    * @param endIndex
    */
-  discard(formatter: Formatter<any>, startIndex: number, endIndex: number) {
+  discard(formatter: Formatter, startIndex: number, endIndex: number) {
     const oldRanges = this.map.get(formatter)
     if (oldRanges) {
       this.normalizeFormatRange(false, formatter instanceof StackableFormatter, oldRanges, {
@@ -440,7 +440,7 @@ export class Format {
     })
   }
 
-  private static equal(left: FormatValue, right: FormatValue): boolean {
+  static equal(left: FormatValue, right: FormatValue): boolean {
     // 严格相等检查
     if (left === right) {
       return true

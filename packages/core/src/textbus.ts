@@ -58,9 +58,9 @@ export interface Module {
   /** 组件列表 */
   components?: (ComponentConstructor | AsyncComponentConstructor)[]
   /** 格式列表 */
-  formatters?: Formatter<any>[]
+  formatters?: Formatter[]
   /** 属性列表 */
-  attributes?: Attribute<any>[]
+  attributes?: Attribute[]
   /** 跨平台及基础扩展实现的提供者 */
   providers?: Provider[]
   /** 插件集合 */
@@ -437,7 +437,7 @@ export class Textbus extends ReflectiveInjector {
     }
   }
 
-  private bindContext<T extends (Attribute<any> | Formatter<any>)>(
+  private bindContext<T extends (Attribute | Formatter)>(
     list: Array<T | ((injector: Textbus) => T)> = []
   ): T[] {
     return list.map(item => {

@@ -40,7 +40,7 @@ export interface DeltaInsert {
 }
 
 export class DeltaLite extends Array<DeltaInsert> {
-  attributes = new Map<Attribute<any>, any>()
+  attributes = new Map<Attribute, any>()
 }
 
 export type FormatCanApply = (slot: Slot, formatter: Formatter, value: any) => boolean
@@ -105,7 +105,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
 
   protected content = new Content()
   protected format = new Format(this)
-  protected attributes = new Map<Attribute<any>, any>()
+  protected attributes = new Map<Attribute, any>()
 
   protected contentChangeEvent = new Subject<Action[]>()
 
@@ -130,7 +130,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
    * @param value
    * @param canSet
    */
-  setAttribute(attribute: Attribute<any>, value: FormatValue, canSet?: (slot: Slot, attr: Attribute, value: any) => boolean) {
+  setAttribute(attribute: Attribute, value: FormatValue, canSet?: (slot: Slot, attr: Attribute, value: any) => boolean) {
     if (typeof canSet === 'function' && !canSet(this, attribute, value)) {
       return
     }
@@ -193,7 +193,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
    * @param attribute
    * @param canRemove
    */
-  removeAttribute(attribute: Attribute<any>, canRemove?: (slot: Slot, attr: Attribute<any>) => boolean) {
+  removeAttribute(attribute: Attribute, canRemove?: (slot: Slot, attr: Attribute) => boolean) {
     if (typeof canRemove === 'function' && !canRemove(this, attribute)) {
       return
     }
@@ -232,7 +232,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
    * 根据是否包含指定 Attribute
    * @param attribute
    */
-  hasAttribute(attribute: Attribute<any>) {
+  hasAttribute(attribute: Attribute) {
     return this.attributes.has(attribute)
   }
 
@@ -250,7 +250,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
            value?: T,
            canApply?: FormatCanApply): boolean
   write(content: string | Component,
-        formatter?: Formatter<any> | Formats,
+        formatter?: Formatter | Formats,
         value?: FormatValue,
         canApply?: FormatCanApply): boolean {
     const index = this.isEmpty ? 0 : this.index
@@ -279,7 +279,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
             value?: T,
             canApply?: FormatCanApply): boolean
   insert(content: string | Component,
-         formatter?: Formatter<any> | Formats,
+         formatter?: Formatter | Formats,
          value?: FormatValue,
          canApply?: FormatCanApply): boolean {
     const contentType = typeof content === 'string' ? ContentType.Text : content.type
@@ -387,7 +387,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
             value: U | null | PendingErasure<U>,
             canApply?: FormatCanApply): boolean
   retain(offset: number,
-         formatter?: Formatter<any> | Formats<FormatValue | PendingErasure<FormatValue>>,
+         formatter?: Formatter | Formats<FormatValue | PendingErasure<FormatValue>>,
          value?: FormatValue | null | PendingErasure<any>,
          canApply?: FormatCanApply): boolean {
     let formats: Formats = []
@@ -768,7 +768,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
    * @param startIndex
    * @param endIndex
    */
-  getFormatRangesByFormatter<T extends Formatter<any>,
+  getFormatRangesByFormatter<T extends Formatter,
     U = T extends Formatter<infer V> ? V : never>(
     formatter: T,
     startIndex: number,
@@ -908,7 +908,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
    * @param canApply
    */
   cleanFormats(
-    remainFormats: Formatter<any>[] | ((formatter: Formatter<any>) => boolean) = [],
+    remainFormats: Formatter[] | ((formatter: Formatter) => boolean) = [],
     startIndex = 0,
     endIndex = this.length,
     canApply?: FormatCanApply) {
@@ -946,8 +946,8 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
    * @param remainAttributes 要保留的属性
    * @param canRemove
    */
-  cleanAttributes(remainAttributes: Attribute<any>[] | ((attribute: Attribute<any>) => boolean) = [],
-                  canRemove?: (slot: Slot, attr: Attribute<any>) => boolean) {
+  cleanAttributes(remainAttributes: Attribute[] | ((attribute: Attribute) => boolean) = [],
+                  canRemove?: (slot: Slot, attr: Attribute) => boolean) {
     Array.from(this.attributes.keys()).forEach(item => {
       if (typeof remainAttributes === 'function' ? remainAttributes(item) : remainAttributes.includes(item)) {
         return

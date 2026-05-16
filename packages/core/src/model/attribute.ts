@@ -87,9 +87,9 @@ export interface FormatterConfig<T> {
  * Formatter 可以在任意插槽的任意区域内生效，常用于行内样式或其它需要标记插槽内一部分内容的情况
  */
 export class Formatter<T = FormatValue> {
-  priority: number
-  columned: boolean
-  inheritable: boolean
+  readonly priority: number
+  readonly columned: boolean
+  readonly inheritable: boolean
 
   /**
    * 构造函数
@@ -124,6 +124,9 @@ export class Formatter<T = FormatValue> {
  * {@link Query#queryFormat} 对该类返回的 `value` 类型为 `T[]`。
  */
 export class StackableFormatter<T = FormatValue> extends Formatter<T> {
+  /** 类型品牌：供条件类型区分普通 {@link Formatter}，运行时不参与逻辑 */
+  readonly _stackableFormatterMarker = true as const
+
   constructor(name: string, config: FormatterConfig<T>) {
     super(name, config)
   }

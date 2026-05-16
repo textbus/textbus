@@ -26,12 +26,12 @@ export enum QueryStateType {
 }
 
 /**
- * Textbus 状态查询结果，当状态为 Normal，`value` 为 null
+ * Textbus 状态查询结果；`state === Enabled` 时 `value` 为 `V`，否则为 `null`。
  */
-export interface QueryState<V, S = QueryStateType, K = S extends QueryStateType.Enabled ? V : null> {
-  state: S
-  value: K
-}
+export type QueryState<V> =
+  | { state: QueryStateType.Normal; value: null }
+  | { state: QueryStateType.Disabled; value: null }
+  | { state: QueryStateType.Enabled; value: V }
 
 /**
  * 查询可堆叠格式时的结果：`Enabled` 时 `value` 为选区内该格式的全部取值（含重叠多条）。
@@ -55,23 +55,14 @@ export class Query {
    */
   queryFormat<T extends FormatValue>(formatter: StackableFormatter<T>): QueryStackableState<T>
   queryFormat<T extends FormatValue>(formatter: Formatter<T>): QueryState<T>
-  queryFormat<T extends FormatValue>(formatter: Formatter<T>): QueryState<T> | QueryStackableState<T> {
+  queryFormat(formatter: Formatter<FormatValue>): QueryState<FormatValue> | QueryStackableState<FormatValue> {
     if (!this.selection.isSelected) {
       return {
         state: QueryStateType.Normal,
         value: null
       }
     }
-    if (formatter instanceof StackableFormatter) {
-      const states = this.selection.getSelectedScopes().map(i => {
-        return this.getStackableStatesByRange(i.slot, formatter, i.startIndex, i.endIndex)
-      })
-      return this.mergeStackableScopes(states)
-    }
-    const states = this.selection.getSelectedScopes().map(i => {
-      return this.getStatesByRange(i.slot, formatter, i.startIndex, i.endIndex)
-    })
-    return this.mergeState(states)
+    return this.queryFormatByScopes(formatter, this.selection.getSelectedScopes())
   }
 
   /**
@@ -81,17 +72,8 @@ export class Query {
    */
   queryFormatByRange<T extends FormatValue>(formatter: StackableFormatter<T>, range: Range): QueryStackableState<T>
   queryFormatByRange<T extends FormatValue>(formatter: Formatter<T>, range: Range): QueryState<T>
-  queryFormatByRange<T extends FormatValue>(formatter: Formatter<T>, range: Range): QueryState<T> | QueryStackableState<T> {
-    if (formatter instanceof StackableFormatter) {
-      const states = Selection.getSelectedScopes(range).map(i => {
-        return this.getStackableStatesByRange(i.slot, formatter, i.startIndex, i.endIndex)
-      })
-      return this.mergeStackableScopes(states)
-    }
-    const states = Selection.getSelectedScopes(range).map(i => {
-      return this.getStatesByRange(i.slot, formatter, i.startIndex, i.endIndex)
-    })
-    return this.mergeState(states)
+  queryFormatByRange(formatter: Formatter<FormatValue>, range: Range): QueryState<FormatValue> | QueryStackableState<FormatValue> {
+    return this.queryFormatByScopes(formatter, Selection.getSelectedScopes(range))
   }
 
   /**
@@ -370,6 +352,22 @@ export class Query {
     }
   }
 
+  private queryFormatByScopes(
+    formatter: Formatter<FormatValue>,
+    scopes: SlotRange[],
+  ): QueryState<FormatValue> | QueryStackableState<FormatValue> {
+    if (formatter instanceof StackableFormatter) {
+      const states = scopes.map(i => {
+        return this.getStackableStatesByRange(i.slot, formatter, i.startIndex, i.endIndex)
+      })
+      return this.mergeStackableScopes(states)
+    }
+    const states = scopes.map(i => {
+      return this.getStatesByRange(i.slot, formatter, i.startIndex, i.endIndex)
+    })
+    return this.mergeState(states)
+  }
+
   private mergeState<T>(states: Array<QueryState<T> | null>): QueryState<T> {
     const states1 = states.filter(i => i) as QueryState<T>[]
     const states2 = states1.filter(i => i.state !== QueryStateType.Normal)
@@ -381,9 +379,13 @@ export class Query {
     }
 
     if (states2.length) {
+      const head = states2[0]
+      if (head.state === QueryStateType.Enabled) {
+        return head
+      }
       return {
-        state: QueryStateType.Enabled,
-        value: states2[0].value
+        state: QueryStateType.Disabled,
+        value: null
       }
     }
     return {
@@ -426,7 +428,7 @@ export class Query {
     ranges: Range[],
     component: U,
     filter?: (instance: Component<T>) => boolean): QueryState<Component<T>> {
-    const states = ranges.map(item => {
+    const states: QueryState<Component<T>>[] = ranges.map(item => {
       let parent = Selection.getCommonAncestorComponent(item.startSlot, item.endSlot)
 
       while (parent) {

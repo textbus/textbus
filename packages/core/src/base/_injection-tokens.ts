@@ -18,12 +18,12 @@ export const COMPONENT_LIST = new InjectionToken<ComponentConstructor[]>('COMPON
 /**
  * @internal Textbus 格式列表注入 token
  */
-export const FORMATTER_LIST = new InjectionToken<Formatter<any>[]>('FORMATTER_LIST')
+export const FORMATTER_LIST = new InjectionToken<Formatter[]>('FORMATTER_LIST')
 
 /**
  * @internal Textbus 插槽属性注入列表
  */
-export const ATTRIBUTE_LIST = new InjectionToken<Attribute<any>[]>('ATTRIBUTE_LIST')
+export const ATTRIBUTE_LIST = new InjectionToken<Attribute[]>('ATTRIBUTE_LIST')
 
 /**
  * 开启 Zen Coding 支持

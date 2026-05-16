@@ -32,13 +32,13 @@ function isAsyncSlotLiteral(slotLiteral: SlotLiteral): slotLiteral is AsyncSlotL
 @Injectable()
 export class Registry {
   private componentMap = new Map<string, ComponentConstructor>()
-  private formatMap = new Map<string, Formatter<any>>()
-  private attributeMap = new Map<string, Attribute<any>>()
+  private formatMap = new Map<string, Formatter>()
+  private attributeMap = new Map<string, Attribute>()
 
   constructor(public textbus: Textbus,
               @Inject(COMPONENT_LIST) components: ComponentConstructor[],
-              @Inject(ATTRIBUTE_LIST) attributes: Attribute<any>[],
-              @Inject(FORMATTER_LIST) formatters: Formatter<any>[]) {
+              @Inject(ATTRIBUTE_LIST) attributes: Attribute[],
+              @Inject(FORMATTER_LIST) formatters: Formatter[]) {
     components.reverse().forEach(f => {
       this.componentMap.set(f.componentName, f)
     })
