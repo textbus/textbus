@@ -66,13 +66,6 @@ export interface FormatterConfig<T> {
   columned?: boolean
 
   /**
-   * 格式是否可堆叠，默认为 false，适用大于多数样式应用情况，但如批注
-   * 这样会对同一份内容作为多次批注的情况，可设置为 true，这样可以使多
-   * 个同名的 Formatter 在同一段内容上共存
-   */
-  stackable?: boolean
-
-  /**
    * 校验是否可应用，当返回 false 时，由不应用
    */
   checkHost?(host: Slot, value: T): boolean
@@ -97,7 +90,6 @@ export class Formatter<T = FormatValue> {
   priority: number
   columned: boolean
   inheritable: boolean
-  stackable: boolean
 
   /**
    * 构造函数
@@ -105,11 +97,10 @@ export class Formatter<T = FormatValue> {
    * @param config 格式配置
    */
   constructor(public name: string, private config: FormatterConfig<T>) {
-    const {priority = 0, inheritable = true, columned = false, stackable = false} = config
+    const {priority = 0, inheritable = true, columned = false} = config
     this.priority = priority
     this.inheritable = inheritable
     this.columned = columned
-    this.stackable = stackable
   }
 
   checkHost(host: Slot, value: T): boolean {
@@ -124,6 +115,17 @@ export class Formatter<T = FormatValue> {
     formatValue: T,
     renderEnv: unknown): VElement | FormatHostBindingRender {
     return this.config.render(children, formatValue, renderEnv)
+  }
+}
+
+/**
+ * 可堆叠格式：同一段文本上同一格式名可并存多条不同取值（如多条批注）。
+ * 内核通过 `instanceof StackableFormatter` 与 {@link Formatter} 区分合并与查询策略；
+ * {@link Query#queryFormat} 对该类返回的 `value` 类型为 `T[]`。
+ */
+export class StackableFormatter<T = FormatValue> extends Formatter<T> {
+  constructor(name: string, config: FormatterConfig<T>) {
+    super(name, config)
   }
 }
 

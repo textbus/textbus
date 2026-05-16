@@ -8,7 +8,9 @@ import {
   Slot,
   ComponentConstructor,
   Attribute,
-  SlotRange, State
+  SlotRange,
+  StackableFormatter,
+  State
 } from '../model/_api'
 
 /**
@@ -32,6 +34,14 @@ export interface QueryState<V, S = QueryStateType, K = S extends QueryStateType.
 }
 
 /**
+ * 查询可堆叠格式时的结果：`Enabled` 时 `value` 为选区内该格式的全部取值（含重叠多条）。
+ */
+export type QueryStackableState<T extends FormatValue = FormatValue> =
+  | { state: QueryStateType.Normal; value: null }
+  | { state: QueryStateType.Disabled; value: null }
+  | { state: QueryStateType.Enabled; value: T[] }
+
+/**
  * Textbus 状态查询类，用于查询组件或格式在当前选区的状态
  */
 @Injectable()
@@ -43,12 +53,20 @@ export class Query {
    * 查询格式在当前选区的状态
    * @param formatter 要查询的格式
    */
-  queryFormat<T extends FormatValue>(formatter: Formatter<T>): QueryState<T> {
+  queryFormat<T extends FormatValue>(formatter: StackableFormatter<T>): QueryStackableState<T>
+  queryFormat<T extends FormatValue>(formatter: Formatter<T>): QueryState<T>
+  queryFormat<T extends FormatValue>(formatter: Formatter<T>): QueryState<T> | QueryStackableState<T> {
     if (!this.selection.isSelected) {
       return {
         state: QueryStateType.Normal,
         value: null
       }
+    }
+    if (formatter instanceof StackableFormatter) {
+      const states = this.selection.getSelectedScopes().map(i => {
+        return this.getStackableStatesByRange(i.slot, formatter, i.startIndex, i.endIndex)
+      })
+      return this.mergeStackableScopes(states)
     }
     const states = this.selection.getSelectedScopes().map(i => {
       return this.getStatesByRange(i.slot, formatter, i.startIndex, i.endIndex)
@@ -61,7 +79,15 @@ export class Query {
    * @param formatter 要查询的格式
    * @param range 要查询的格式的范围
    */
-  queryFormatByRange<T extends FormatValue>(formatter: Formatter<T>, range: Range): QueryState<T> {
+  queryFormatByRange<T extends FormatValue>(formatter: StackableFormatter<T>, range: Range): QueryStackableState<T>
+  queryFormatByRange<T extends FormatValue>(formatter: Formatter<T>, range: Range): QueryState<T>
+  queryFormatByRange<T extends FormatValue>(formatter: Formatter<T>, range: Range): QueryState<T> | QueryStackableState<T> {
+    if (formatter instanceof StackableFormatter) {
+      const states = Selection.getSelectedScopes(range).map(i => {
+        return this.getStackableStatesByRange(i.slot, formatter, i.startIndex, i.endIndex)
+      })
+      return this.mergeStackableScopes(states)
+    }
     const states = Selection.getSelectedScopes(range).map(i => {
       return this.getStatesByRange(i.slot, formatter, i.startIndex, i.endIndex)
     })
@@ -233,6 +259,115 @@ export class Query {
       index += child.length
     }
     return this.mergeState(states)
+  }
+
+  private compareFormatRanges<T>(a: { startIndex: number; endIndex: number; value: T },
+                                 b: { startIndex: number; endIndex: number; value: T }): number {
+    if (a.startIndex !== b.startIndex) {
+      return a.startIndex - b.startIndex
+    }
+    if (a.endIndex !== b.endIndex) {
+      return a.endIndex - b.endIndex
+    }
+    const as = typeof a.value === 'string' ? a.value as string : JSON.stringify(a.value)
+    const bs = typeof b.value === 'string' ? b.value as string : JSON.stringify(b.value)
+    if (as < bs) {
+      return -1
+    }
+    if (as > bs) {
+      return 1
+    }
+    return 0
+  }
+
+  /**
+   * 选区内每个下标位置都至少有一条该 formatter 的 range 覆盖时返回 true。
+   */
+  private isRangeFullyCoveredByFormatter<T extends FormatValue>(
+    slot: Slot,
+    formatter: Formatter<T>,
+    startIndex: number,
+    endIndex: number): boolean {
+    for (let i = startIndex; i < endIndex; i++) {
+      const at = slot.extractFormatsByIndex(i)
+      if (!at.some(([f]) => f === formatter)) {
+        return false
+      }
+    }
+    return true
+  }
+
+  /**
+   * 可堆叠格式：选区并集全覆盖时返回按 range 排序后的全部 value；否则 null。
+   */
+  private getStackableStatesByRange<T extends FormatValue>(
+    slot: Slot,
+    formatter: Formatter<T>,
+    startIndex: number,
+    endIndex: number): T[] | null {
+
+    if (startIndex === endIndex) {
+      const probeStart = startIndex === 0 ? 0 : startIndex - 1
+      const probeEnd = startIndex === 0 ? 1 : startIndex
+      if (!this.isRangeFullyCoveredByFormatter(slot, formatter, probeStart, probeEnd)) {
+        return null
+      }
+      const ranges = slot.getFormatRangesByFormatter(formatter, probeStart, probeEnd)
+        .sort((a, b) => this.compareFormatRanges(a, b))
+      return ranges.map(r => r.value)
+    }
+
+    const childContents = slot.sliceContent(startIndex, endIndex)
+    const values: T[] = []
+    let index = startIndex
+
+    for (const child of childContents) {
+      if (typeof child === 'string' || child.slots.length === 0) {
+        const segEnd = index + child.length
+        if (!this.isRangeFullyCoveredByFormatter(slot, formatter, index, segEnd)) {
+          return null
+        }
+        const ranges = slot.getFormatRangesByFormatter(formatter, index, segEnd)
+          .sort((a, b) => this.compareFormatRanges(a, b))
+        values.push(...ranges.map(r => r.value))
+      } else {
+        for (const s of child.slots) {
+          const nested = this.getStackableStatesByRange(s, formatter, 0, s.length)
+          if (nested === null) {
+            return null
+          }
+          values.push(...nested)
+        }
+      }
+      index += child.length
+    }
+    return values
+  }
+
+  private mergeStackableScopes<T extends FormatValue>(states: Array<T[] | null>): QueryStackableState<T> {
+    if (states.length === 0) {
+      return {
+        state: QueryStateType.Normal,
+        value: null
+      }
+    }
+    if (states.some(i => i === null)) {
+      return {
+        state: QueryStateType.Normal,
+        value: null
+      }
+    }
+    const flat = ([] as T[]).concat(...states as T[][])
+    if (flat.length === 0) {
+      return {
+        state: QueryStateType.Normal,
+        value: null
+      }
+    }
+    return {
+      state: QueryStateType.Enabled,
+      value: flat
+    }
   }
 
   private mergeState<T>(states: Array<QueryState<T> | null>): QueryState<T> {

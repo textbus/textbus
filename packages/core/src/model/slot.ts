@@ -3,7 +3,7 @@ import { Observable, Subject } from '@tanbo/stream'
 import { Component, ComponentLiteral } from './component'
 import { Content } from './content'
 import { Format, FormatLiteral, FormatRange, FormatValue, Formats, FormatTree, FormatItem, PendingErasure } from './format'
-import { Attribute, FormatHostBindingRender, Formatter } from './attribute'
+import { Attribute, FormatHostBindingRender, Formatter, StackableFormatter } from './attribute'
 import { ChangeMarker } from '../observable/change-marker'
 import { Action } from './types'
 import { VElement, VTextNode } from './element'
@@ -433,7 +433,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
           if (is) {
             const startIndex = index
             const endIndex = index + offset
-            if (formatter.stackable) {
+            if (formatter instanceof StackableFormatter) {
               let computedValue = value
               if (computedValue === null || computedValue === undefined) {
                 computedValue = new PendingErasure(true)

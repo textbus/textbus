@@ -1,4 +1,4 @@
-import { Formatter } from './attribute'
+import { Formatter, StackableFormatter } from './attribute'
 import { Slot } from './slot'
 
 /**
@@ -82,7 +82,7 @@ export class Format {
       return this
     }
 
-    const newRanges = this.normalizeFormatRange(background, formatter.stackable, ranges, value)
+    const newRanges = this.normalizeFormatRange(background, formatter instanceof StackableFormatter, ranges, value)
     if (newRanges.length) {
       this.map.set(formatter, newRanges)
     } else {
@@ -168,7 +168,7 @@ export class Format {
     })
     Array.from(this.map.keys()).forEach(key => {
       const oldRanges = this.map.get(key)!
-      const newRanges = this.normalizeFormatRange(false, key.stackable, oldRanges)
+      const newRanges = this.normalizeFormatRange(false, key instanceof StackableFormatter, oldRanges)
       if (newRanges.length) {
         this.map.set(key, newRanges)
       } else {
@@ -255,7 +255,7 @@ export class Format {
   discard(formatter: Formatter<any>, startIndex: number, endIndex: number) {
     const oldRanges = this.map.get(formatter)
     if (oldRanges) {
-      this.normalizeFormatRange(false, formatter.stackable, oldRanges, {
+      this.normalizeFormatRange(false, formatter instanceof StackableFormatter, oldRanges, {
         startIndex,
         endIndex,
         value: null as any
@@ -331,7 +331,7 @@ export class Format {
               formatter,
               ...range
             })
-            if (formatter.stackable) {
+            if (formatter instanceof StackableFormatter) {
               if (ranges.length === 1) {
                 copyFormat.map.delete(formatter)
               } else {
