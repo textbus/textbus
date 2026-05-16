@@ -3,8 +3,11 @@ import { filter, map, Observable, Subject, Subscription } from '@tanbo/stream'
 import {
   ChangeOrigin,
   Component,
-  Registry,
+  Format,
   Formats,
+  FormatValue,
+  PendingErasure,
+  Registry,
   makeError,
   Scheduler,
   Selection,
@@ -17,6 +20,7 @@ import {
   toRaw,
   getObserver,
   attachModel,
+  StackableFormatter,
   valueToJSON,
 } from '@textbus/core'
 import {
@@ -306,7 +310,9 @@ export class Collaborate {
         ev.delta.forEach(action => {
           if (Reflect.has(action, 'retain')) {
             if (action.attributes) {
-              const formats = remoteFormatsToLocal(this.registry, action.attributes)
+              const start = localSlot.index
+              const end = start + action.retain!
+              const formats = remoteRetainFormatsToLocal(this.registry, localSlot, start, end, action.attributes)
               if (formats.length) {
                 localSlot.retain(action.retain!, formats)
               }
@@ -317,7 +323,7 @@ export class Collaborate {
             let length = 1
             if (typeof action.insert === 'string') {
               length = action.insert.length
-              localSlot.insert(action.insert, remoteFormatsToLocal(this.registry, action.attributes))
+              localSlot.insert(action.insert, remoteInsertFormatsToLocal(this.registry, action.attributes))
             } else {
               const sharedComponent = action.insert as YMap<any>
               const component = this.createLocalComponentBySharedComponent(sharedComponent)
@@ -356,17 +362,15 @@ export class Collaborate {
           if (action.type === 'retain') {
             const formats = action.formats
             if (formats) {
-              const keys = Object.keys(formats)
-              let length = keys.length
-              keys.forEach(key => {
-                const formatter = this.registry.getFormatter(key)
-                if (!formatter) {
-                  length--
-                  Reflect.deleteProperty(formats, key)
-                }
-              })
-              if (length) {
-                sharedSlot.format(offset, action.offset, formats)
+              const attrs = localFormatsToYjsAttributes(
+                this.registry,
+                localSlot,
+                offset,
+                offset + action.offset,
+                formats,
+              )
+              if (Object.keys(attrs).length) {
+                sharedSlot.format(offset, action.offset, attrs)
               }
             } else {
               offset = action.offset
@@ -376,11 +380,11 @@ export class Collaborate {
             const isEmpty = delta.length === 1 && delta[0].insert === Slot.emptyPlaceholder
             if (typeof action.content === 'string') {
               length = action.content.length
-              sharedSlot.insert(offset, action.content, action.formats || {})
+              sharedSlot.insert(offset, action.content, localFormatsRecordToRemote(this.registry, action.formats) || {})
             } else {
               length = 1
               const sharedComponent = this.createSharedComponentByLocalComponent(action.ref as Component)
-              sharedSlot.insertEmbed(offset, sharedComponent, action.formats || {})
+              sharedSlot.insertEmbed(offset, sharedComponent, localFormatsRecordToRemote(this.registry, action.formats) || {})
             }
 
             if (isEmpty && offset === 0) {
@@ -518,14 +522,7 @@ export class Collaborate {
   private initSharedSlotByLocalSlot(sharedContent: YText, localSlot: Slot) {
     let offset = 0
     localSlot.toDelta().forEach(i => {
-      let formats: any = {}
-      if (i.formats) {
-        i.formats.forEach(item => {
-          formats[item[0].name] = item[1]
-        })
-      } else {
-        formats = null
-      }
+      const formats = i.formats ? formatsArrayToRemoteRecord(this.registry, i.formats) : undefined
       if (typeof i.insert === 'string') {
         sharedContent.insert(offset, i.insert, formats)
       } else {
@@ -614,12 +611,12 @@ export class Collaborate {
     for (const action of delta) {
       if (action.insert) {
         if (typeof action.insert === 'string') {
-          const formats = remoteFormatsToLocal(this.registry, action.attributes)
+          const formats = remoteInsertFormatsToLocal(this.registry, action.attributes)
           localSlot.insert(action.insert, formats)
         } else {
           const sharedComponent = action.insert as YMap<any>
           const component = this.createLocalComponentBySharedComponent(sharedComponent)
-          localSlot.insert(component, remoteFormatsToLocal(this.registry, action.attributes))
+          localSlot.insert(component, remoteInsertFormatsToLocal(this.registry, action.attributes))
         }
       } else {
         throw collaborateErrorFn('unexpected delta action.')
@@ -990,15 +987,189 @@ export class Collaborate {
   }
 }
 
-function remoteFormatsToLocal(registry: Registry, attrs?: any,) {
-  const formats: Formats = []
-  if (attrs) {
-    Object.keys(attrs).forEach(key => {
-      const formatter = registry.getFormatter(key)
-      if (formatter) {
-        formats.push([formatter, attrs[key]])
-      }
-    })
+function collectStackableValuesInRange(
+  slot: Slot,
+  formatter: StackableFormatter<any>,
+  start: number,
+  end: number,
+): FormatValue[] {
+  const values: FormatValue[] = []
+  slot.getFormatRangesByFormatter(formatter, start, end).forEach(range => {
+    const v = range.value
+    if (!values.some(existing => Format.equal(existing, v))) {
+      values.push(v)
+    }
+  })
+  return values
+}
+
+function serializeFormatForYjs(value: FormatValue): FormatValue {
+  return valueToJSON(value) as FormatValue
+}
+
+export function localFormatsToYjsAttributes(
+  registry: Registry,
+  slot: Slot,
+  start: number,
+  end: number,
+  localFormats: Record<string, FormatValue>,
+): Record<string, FormatValue | FormatValue[] | null> {
+  const attrs: Record<string, FormatValue | FormatValue[] | null> = {}
+  Object.keys(localFormats).forEach(key => {
+    const formatter = registry.getFormatter(key)
+    if (!formatter) {
+      return
+    }
+    if (formatter instanceof StackableFormatter) {
+      const values = collectStackableValuesInRange(slot, formatter, start, end)
+      attrs[key] = values.length ? values.map(serializeFormatForYjs) : null
+    } else {
+      attrs[key] = localFormats[key]
+    }
+  })
+  return attrs
+}
+
+export function localFormatsRecordToRemote(
+  registry: Registry,
+  formats: Record<string, FormatValue> | undefined,
+): Record<string, FormatValue | FormatValue[] | null> | undefined {
+  if (!formats) {
+    return undefined
   }
+  const record: Record<string, FormatValue | FormatValue[] | null> = {}
+  Object.keys(formats).forEach(key => {
+    const formatter = registry.getFormatter(key)
+    if (!formatter) {
+      return
+    }
+    const incoming = formats[key]
+    if (formatter instanceof StackableFormatter) {
+      if (incoming === null || incoming === undefined) {
+        record[key] = null
+      } else {
+        record[key] = [serializeFormatForYjs(incoming)]
+      }
+    } else {
+      record[key] = incoming
+    }
+  })
+  return Object.keys(record).length ? record : undefined
+}
+
+export function formatsArrayToRemoteRecord(
+  registry: Registry,
+  formats: Formats,
+): Record<string, FormatValue | FormatValue[]> | undefined {
+  const record: Record<string, FormatValue | FormatValue[]> = {}
+  formats.forEach(([formatter, value]) => {
+    if (!registry.getFormatter(formatter.name)) {
+      return
+    }
+    if (formatter instanceof StackableFormatter) {
+      const serialized = serializeFormatForYjs(value)
+      const current = record[formatter.name]
+      if (Array.isArray(current)) {
+        current.push(serialized)
+      } else {
+        record[formatter.name] = [serialized]
+      }
+    } else {
+      record[formatter.name] = value
+    }
+  })
+  return Object.keys(record).length ? record : undefined
+}
+
+function stackableRemoteRetainToLocal(
+  slot: Slot,
+  formatter: StackableFormatter<any>,
+  start: number,
+  end: number,
+  raw: FormatValue | FormatValue[] | null | undefined,
+): Formats {
+  const formats: Formats = []
+  const localValues = collectStackableValuesInRange(slot, formatter, start, end)
+
+  if (raw === null || raw === undefined || (Array.isArray(raw) && raw.length === 0)) {
+    if (localValues.length > 0) {
+      formats.push([formatter, new PendingErasure(true)])
+    }
+    return formats
+  }
+
+  const remoteValues = Array.isArray(raw) ? raw : [raw]
+  localValues.forEach(localValue => {
+    if (!remoteValues.some(remoteValue => Format.equal(localValue, remoteValue))) {
+      formats.push([formatter, new PendingErasure(false, localValue)])
+    }
+  })
+  remoteValues.forEach(remoteValue => {
+    if (!localValues.some(localValue => Format.equal(localValue, remoteValue))) {
+      formats.push([formatter, remoteValue])
+    }
+  })
+  return formats
+}
+
+function stackableRemoteInsertToLocal(
+  formatter: StackableFormatter<any>,
+  raw: FormatValue | FormatValue[] | null | undefined,
+): Formats {
+  if (raw === null || raw === undefined || (Array.isArray(raw) && raw.length === 0)) {
+    return []
+  }
+  const remoteValues = Array.isArray(raw) ? raw : [raw]
+  return remoteValues.map(value => [formatter, value])
+}
+
+/** 远程插入内容的格式 → 本地 Formats（新内容无旧状态，可堆叠仅展开远程数组） */
+export function remoteInsertFormatsToLocal(
+  registry: Registry,
+  attrs?: Record<string, FormatValue | FormatValue[] | null> | null,
+): Formats {
+  const formats: Formats = []
+  if (!attrs) {
+    return formats
+  }
+  Object.keys(attrs).forEach(key => {
+    const formatter = registry.getFormatter(key)
+    if (!formatter) {
+      return
+    }
+    const raw = attrs[key]
+    if (formatter instanceof StackableFormatter) {
+      formats.push(...stackableRemoteInsertToLocal(formatter, raw))
+      return
+    }
+    formats.push([formatter, raw as FormatValue])
+  })
+  return formats
+}
+
+/** 远程 retain 格式 → 本地 Formats（可堆叠与区间内本地快照做差量对齐） */
+export function remoteRetainFormatsToLocal(
+  registry: Registry,
+  slot: Slot,
+  start: number,
+  end: number,
+  attrs?: Record<string, FormatValue | FormatValue[] | null> | null,
+): Formats {
+  const formats: Formats = []
+  if (!attrs) {
+    return formats
+  }
+  Object.keys(attrs).forEach(key => {
+    const formatter = registry.getFormatter(key)
+    if (!formatter) {
+      return
+    }
+    const raw = attrs[key]
+    if (formatter instanceof StackableFormatter) {
+      formats.push(...stackableRemoteRetainToLocal(slot, formatter, start, end, raw))
+      return
+    }
+    formats.push([formatter, raw as FormatValue])
+  })
   return formats
 }
