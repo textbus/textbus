@@ -1,5 +1,14 @@
 # @textbus/collaborate
 
+## 5.4.3
+
+### Patch Changes
+
+- - fix: 修复因重构导致生成虚拟节点死循环的 bug
+  - fix: 修复提取样式排除条件不正确的 bug
+- Updated dependencies
+  - @textbus/core@5.4.3
+
 ## 5.4.2
 
 ### Patch Changes
