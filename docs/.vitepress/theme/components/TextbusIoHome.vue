@@ -158,7 +158,7 @@ async function bootstrap(): Promise<void> {
 
   try {
   await import('@textbus/xnote/style.css')
-  const { Editor, FileUploader, StaticToolbarPlugin, Organization } = await import('@textbus/xnote')
+  const { Editor, FileUploader, StaticToolbarPlugin, Organization, CommentService } = await import('@textbus/xnote')
 
   class Http extends Organization {
     async getMembers(name: string): Promise<Member[]> {
@@ -198,6 +198,17 @@ async function bootstrap(): Promise<void> {
       {
         provide: Organization,
         useValue: new Http(),
+      },
+      {
+        provide: CommentService,
+        useValue: {
+          createComment() {
+            return Promise.resolve({
+              id: 'xnote-example' + Math.random(),
+              userId: 'xnote-example' + Math.random()
+            })
+          }
+        }
       },
       {
         provide: FileUploader,

@@ -5,7 +5,7 @@ import { Input, MagicInput } from '@textbus/platform-browser'
 import { useData } from 'vitepress'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { SyncConnector, YWebsocketConnector } from '@textbus/collaborate'
-import { Editor, FileUploader, LLMService, Member, Organization, UserInfo, XNoteMessageBus } from '@textbus/xnote'
+import { Editor, FileUploader, LLMService, Member, Organization, UserInfo, XNoteMessageBus, CommentService } from '@textbus/xnote'
 import type { Doc as YDoc } from 'yjs'
 
 import '@textbus/xnote/style.css'
@@ -95,6 +95,17 @@ onMounted(() => {
     providers: [
       { provide: LLMService, useValue: new AiService() },
       { provide: Organization, useValue: new Http() },
+      {
+        provide: CommentService,
+        useValue: {
+          createComment() {
+            return Promise.resolve({
+              id: 'xnote-example' + Math.random(),
+              userId: 'xnote-example' + Math.random()
+            })
+          }
+        }
+      },
       {
         provide: FileUploader,
         useValue: {
