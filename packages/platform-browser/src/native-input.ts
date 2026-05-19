@@ -23,7 +23,7 @@ import {
   Textbus
 } from '@textbus/core'
 
-import { Caret, CaretPosition, Input } from './types'
+import { Caret, CaretPosition, caretPositionEqual, Input } from './types'
 import { VIEW_DOCUMENT } from './injection-tokens'
 import { isSafari, isMac, isMobileBrowser, isFirefox } from './_utils/env'
 import { Parser } from './parser'
@@ -73,7 +73,7 @@ class NativeCaret implements Caret {
   private positionChangeEvent = new Subject<CaretPosition | null>()
 
   constructor() {
-    this.onPositionChange = this.positionChangeEvent.pipe(distinctUntilChanged())
+    this.onPositionChange = this.positionChangeEvent.pipe(distinctUntilChanged(caretPositionEqual))
   }
 
   refresh() {

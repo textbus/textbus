@@ -13,6 +13,16 @@ export interface CaretPosition {
   height: number
 }
 
+export function caretPositionEqual(a: CaretPosition | null, b: CaretPosition | null): boolean {
+  if (a === b) {
+    return true
+  }
+  if (a === null || b === null) {
+    return false
+  }
+  return a.left === b.left && a.top === b.top && a.height === b.height
+}
+
 export interface Caret {
   onPositionChange: Observable<CaretPosition | null>
   readonly rect: Rect

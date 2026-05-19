@@ -14,11 +14,21 @@ import {
   Textbus
 } from '@textbus/core'
 
-import { createElement, getLayoutRectByRange } from './_utils/uikit'
+import {
+  CaretPresentation,
+  computeCaretPresentation,
+  createElement,
+  getLayoutRectByRange,
+  getOverflowClipContext,
+  measureCaretBoxLayout,
+  measureInlineCaretRotate,
+  OverflowClipContext,
+  Rect,
+} from './_utils/uikit'
 import { Parser } from './parser'
 import { isFirefox, isMac, isSafari, isWindows } from './_utils/env'
 import { VIEW_MASK } from './injection-tokens'
-import { Caret, CaretLimit, CaretPosition, Input } from './types'
+import { Caret, CaretLimit, CaretPosition, caretPositionEqual, Input } from './types'
 import { DomAdapter } from './dom-adapter'
 
 const iframeHTML = `
@@ -69,7 +79,9 @@ class ExperimentalCaret implements Caret {
 
   private set display(v: boolean) {
     this._display = v
-    this.caret.style.visibility = v ? 'visible' : 'hidden'
+    if (!this.caretClippedOut) {
+      this.caret.style.visibility = v ? 'visible' : 'hidden'
+    }
   }
 
   private get display() {
@@ -78,8 +90,15 @@ class ExperimentalCaret implements Caret {
 
   private _display = true
   private flashing = true
+  /** 被 overflow 裁出可视区（不用 display:none，避免触发 Input.hide） */
+  private caretClippedOut = false
 
   private subscription = new Subscription()
+  private scrollSubscription = new Subscription()
+  private scrollRaf = 0
+  private clipContext: OverflowClipContext | null = null
+  private clipContextAnchor: Node | null = null
+  private scrollListenerAnchor: Node | null = null
 
   private positionChangeEvent = new Subject<CaretPosition | null>()
   private styleChangeEvent = new Subject<CaretStyle>()
@@ -89,7 +108,7 @@ class ExperimentalCaret implements Caret {
     private domRenderer: DomAdapter,
     private scheduler: Scheduler,
     private editorMask: HTMLElement) {
-    this.onPositionChange = this.positionChangeEvent.pipe(distinctUntilChanged())
+    this.onPositionChange = this.positionChangeEvent.pipe(distinctUntilChanged(caretPositionEqual))
     this.onStyleChange = this.styleChangeEvent.asObservable()
     this.elementRef = createElement('div', {
       styles: {
@@ -122,8 +141,8 @@ class ExperimentalCaret implements Caret {
   }
 
   refresh() {
-    if (this.oldRange) {
-      this.show(this.oldRange, false)
+    if (this.oldRange?.collapsed) {
+      this.updateCursorPosition(this.oldRange)
     }
   }
 
@@ -132,8 +151,24 @@ class ExperimentalCaret implements Caret {
     if (restart || this.scheduler.lastChangesHasLocalUpdate) {
       clearTimeout(this.timer)
     }
+    if (range.collapsed && (restart || this.scheduler.lastChangesHasLocalUpdate)) {
+      this._display = true
+    }
     this.updateCursorPosition(range)
     if (range.collapsed) {
+      const anchor = range.startContainer.nodeType === Node.ELEMENT_NODE ?
+        range.startContainer :
+        range.startContainer.parentNode
+      if (anchor) {
+        this.bindScrollListeners(anchor)
+      }
+      if (restart) {
+        requestAnimationFrame(() => {
+          if (this.oldRange?.collapsed) {
+            this.updateCursorPosition(this.oldRange)
+          }
+        })
+      }
       if (restart || this.scheduler.lastChangesHasLocalUpdate) {
         this.display = true
         const toggleShowHide = () => {
@@ -144,150 +179,198 @@ class ExperimentalCaret implements Caret {
         this.timer = setTimeout(toggleShowHide, 400)
       }
     } else {
+      this.unbindScrollListeners()
       this.display = false
       clearTimeout(this.timer)
     }
   }
 
   hide() {
+    this.unbindScrollListeners()
+    this.clearClipContext()
     this.display = false
     clearTimeout(this.timer)
+    this.caretClippedOut = false
+    this.elementRef.style.clipPath = 'none'
+    this.elementRef.style.visibility = ''
+    this.caret.style.visibility = ''
     this.positionChangeEvent.next(null)
   }
 
   destroy() {
     clearTimeout(this.timer)
-    // this.caret.
+    this.unbindScrollListeners()
     this.subscription.unsubscribe()
   }
 
-  private updateCursorPosition(nativeRange: Range) {
-    const startContainer = nativeRange.startContainer
+  private bindScrollListeners(anchor: Node) {
+    if (this.scrollListenerAnchor === anchor) {
+      return
+    }
+    this.unbindScrollListeners()
+    this.scrollListenerAnchor = anchor
+    const onScroll = () => {
+      if (!this.oldRange || this.scrollRaf) {
+        return
+      }
+      this.scrollRaf = requestAnimationFrame(() => {
+        this.scrollRaf = 0
+        if (this.oldRange) {
+          this.updateCursorPosition(this.oldRange)
+        }
+      })
+    }
+    for (const el of this.ensureClipContext(anchor).scrollContainers) {
+      this.scrollSubscription.add(fromEvent(el, 'scroll').subscribe(onScroll))
+    }
+    const win = anchor.ownerDocument?.defaultView
+    if (win) {
+      this.scrollSubscription.add(fromEvent(win, 'scroll').subscribe(onScroll))
+    }
+  }
 
-    const node = (startContainer.nodeType === Node.ELEMENT_NODE ? startContainer : startContainer.parentNode) as HTMLElement
-    if (node?.nodeType !== Node.ELEMENT_NODE) {
+  private unbindScrollListeners() {
+    if (this.scrollRaf) {
+      cancelAnimationFrame(this.scrollRaf)
+      this.scrollRaf = 0
+    }
+    this.scrollSubscription.unsubscribe()
+    this.scrollSubscription = new Subscription()
+    this.scrollListenerAnchor = null
+  }
+
+  private ensureClipContext(anchor: Node): OverflowClipContext {
+    if (this.clipContextAnchor !== anchor) {
+      this.clipContextAnchor = anchor
+      this.clipContext = getOverflowClipContext(anchor, this.editorMask)
+    }
+    return this.clipContext!
+  }
+
+  private clearClipContext() {
+    this.clipContext = null
+    this.clipContextAnchor = null
+  }
+
+  private updateCursorPosition(nativeRange: Range) {
+    const node = this.resolveCaretAnchor(nativeRange)
+    if (!node) {
       this.positionChangeEvent.next(null)
       return
     }
-    const compositionNode = this.domRenderer.compositionNode
-    if (compositionNode) {
-      nativeRange = nativeRange.cloneRange()
-      nativeRange.selectNodeContents(compositionNode)
-      nativeRange.collapse()
-    }
+
+    nativeRange = this.normalizeCollapsedRange(nativeRange)
     this.caret.style.display = nativeRange.collapsed ? 'block' : 'none'
     if (!nativeRange.collapsed) {
       return
     }
-    const rect = getLayoutRectByRange(nativeRange)
-    const {fontSize, lineHeight, color, writingMode} = getComputedStyle(node)
 
-    let height: number
-    if (isNaN(+lineHeight)) {
-      const f = parseFloat(lineHeight)
-      if (isNaN(f)) {
-        height = parseFloat(fontSize)
-      } else {
-        height = f
-      }
-    } else {
-      height = parseFloat(fontSize) * parseFloat(lineHeight)
+    const contentRect = getLayoutRectByRange(nativeRange)
+    const nodeStyle = getComputedStyle(node)
+    const {boxHeight, rectTop} = measureCaretBoxLayout(contentRect, nodeStyle)
+    const maskRect = this.editorMask.getBoundingClientRect()
+    const clipContext = this.ensureClipContext(node)
+    const maskLeft = Math.floor(contentRect.left + contentRect.width / 2 - maskRect.left)
+    const maskTop = Math.floor(rectTop - maskRect.top)
+    const initialRotate = Math.round(Math.atan2(contentRect.width, contentRect.height) * 180 / Math.PI)
+    const rotate = measureInlineCaretRotate(node, initialRotate, nodeStyle.writingMode)
+
+    this.applyCaretElementLayout(maskLeft, maskTop, boxHeight, nodeStyle.fontSize, rotate)
+
+    const presentation = computeCaretPresentation({
+      anchor: node,
+      maskRect,
+      clipAncestors: clipContext.clipAncestors,
+      maskLeft,
+      maskTop,
+      boxHeight,
+      rectTop,
+      contentRect,
+      fontSize: nodeStyle.fontSize,
+      color: nodeStyle.color,
+      measureElementRect: () => this.elementRef.getBoundingClientRect(),
+    })
+
+    this.applyCaretPresentation(presentation)
+    this.emitCaretPresentation(presentation)
+    this.scrollCaretIntoViewIfNeeded(presentation.layoutElRect, clipContext)
+  }
+
+  private resolveCaretAnchor(nativeRange: Range): HTMLElement | null {
+    const startContainer = nativeRange.startContainer
+    const node = (startContainer.nodeType === Node.ELEMENT_NODE ?
+      startContainer :
+      startContainer.parentNode) as HTMLElement
+    return node?.nodeType === Node.ELEMENT_NODE ? node : null
+  }
+
+  private normalizeCollapsedRange(nativeRange: Range): Range {
+    const compositionNode = this.domRenderer.compositionNode
+    if (!compositionNode) {
+      return nativeRange
     }
+    const range = nativeRange.cloneRange()
+    range.selectNodeContents(compositionNode)
+    range.collapse()
+    return range
+  }
 
-    const boxHeight = Math.max(Math.floor(Math.max(height, rect.height)), 12)
-    // const boxHeight = Math.floor(height)
-
-    let rectTop = rect.top
-    if (rect.height < height) {
-      rectTop -= (height - rect.height) / 2
-    }
-
-    rectTop = Math.floor(rectTop)
-
-    const containerRect = this.editorMask.getBoundingClientRect()
-
-    const top = Math.floor(rectTop - containerRect.top)
-    const left = Math.floor(rect.left + rect.width / 2 - containerRect.left)
-    let rotate = 0
-    if (nativeRange.collapsed) {
-      rotate = Math.round(Math.atan2(rect.width, rect.height) * 180 / Math.PI)
-
-      if (rotate !== 0) {
-        const hackEle = document.createElement('span')
-        // eslint-disable-next-line max-len
-        hackEle.style.cssText = 'display: inline-block; width: 10px; height: 10px; position: relative; contain: layout style size; writing-mode: inherit'
-        const pointEle = document.createElement('span')
-        pointEle.style.cssText = 'position: absolute; left: 0; top: 0; width:0;height:0'
-        hackEle.append(pointEle)
-        node.append(hackEle)
-
-        const p1 = pointEle.getBoundingClientRect()
-        pointEle.style.right = '0'
-        pointEle.style.left = ''
-        const p2 = pointEle.getBoundingClientRect()
-
-        const x = p1.x - p2.x
-        const y = p1.y - p2.y
-
-        rotate = Math.atan2(y, x) * 180 / Math.PI
-        hackEle.remove()
-      }
-    }
-    if (writingMode === 'vertical-lr' || writingMode === 'vertical-rl') {
-      rotate += 90
-    }
+  private applyCaretElementLayout(
+    maskLeft: number,
+    maskTop: number,
+    boxHeight: number,
+    fontSize: string,
+    rotate: number,
+  ) {
     Object.assign(this.elementRef.style, {
-      left: left + 'px',
-      top: top + 'px',
+      left: maskLeft + 'px',
+      top: maskTop + 'px',
       height: boxHeight + 'px',
       lineHeight: boxHeight + 'px',
       fontSize,
       transform: `rotate(${rotate}deg)`,
     })
-
-    this.caret.style.backgroundColor = color === 'rgba(0, 0, 0, 0)' ? '#000' : color
-    this.styleChangeEvent.next({
-      height: boxHeight + 'px',
-      lineHeight: boxHeight + 'px',
-      fontSize
-    })
-    this.positionChangeEvent.next({
-      left,
-      top: rectTop,
-      height: boxHeight
-    })
-
-    if (this.changeFromSelf) {
-      this.changeFromSelf = false
-      const selfRect = this.elementRef.getBoundingClientRect()
-      const scrollContainer = this.getScrollContainer(startContainer)
-      const scrollRect = scrollContainer === document.documentElement ?
-        {top: 0, bottom: document.documentElement.clientHeight} :
-        scrollContainer.getBoundingClientRect()
-      const limit = this.getLimit()
-
-      const top = Math.max(limit.top, scrollRect.top)
-      const bottom = Math.min(limit.bottom, scrollRect.bottom)
-
-      if (selfRect.top < top) {
-        scrollContainer.scrollTop -= top - selfRect.top
-      } else if (selfRect.bottom > bottom) {
-        scrollContainer.scrollTop += selfRect.bottom - bottom
-      }
-    }
   }
 
-  private getScrollContainer(container: Node): Element {
-    while (container) {
-      if (container instanceof Element) {
-        const styles = getComputedStyle(container)
-        if (styles.overflow !== 'visible' || styles.overflowX !== 'visible' || styles.overflowY !== 'visible') {
-          return container
-        }
-      }
-      container = container.parentNode as Node
+  private applyCaretPresentation(presentation: CaretPresentation) {
+    this.caretClippedOut = presentation.outOfView
+    if (presentation.outOfView) {
+      this.elementRef.style.clipPath = 'none'
+      this.elementRef.style.visibility = 'hidden'
+      this.caret.style.visibility = 'hidden'
+    } else {
+      this.elementRef.style.clipPath = presentation.clipPath
+      this.elementRef.style.visibility = ''
+      this.caret.style.visibility = this._display ? 'visible' : 'hidden'
     }
-    return document.documentElement
+    this.caret.style.backgroundColor = presentation.caretColor
+  }
+
+  private emitCaretPresentation(presentation: CaretPresentation) {
+    this.styleChangeEvent.next(presentation.style)
+    this.positionChangeEvent.next(presentation.position)
+  }
+
+  private scrollCaretIntoViewIfNeeded(layoutElRect: Rect, clipContext: OverflowClipContext) {
+    if (!this.changeFromSelf) {
+      return
+    }
+    this.changeFromSelf = false
+    const scrollContainer = clipContext.firstScrollContainer
+    const doc = scrollContainer.ownerDocument ?? document
+    const scrollRect = scrollContainer === doc.documentElement ?
+      {top: 0, bottom: doc.documentElement.clientHeight} :
+      scrollContainer.getBoundingClientRect()
+    const limit = this.getLimit()
+    const scrollTop = Math.max(limit.top, scrollRect.top)
+    const scrollBottom = Math.min(limit.bottom, scrollRect.bottom)
+
+    const layoutBottom = layoutElRect.top + layoutElRect.height
+    if (layoutElRect.top < scrollTop) {
+      scrollContainer.scrollTop -= scrollTop - layoutElRect.top
+    } else if (layoutBottom > scrollBottom) {
+      scrollContainer.scrollTop += layoutBottom - scrollBottom
+    }
   }
 }
 
