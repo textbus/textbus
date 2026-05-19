@@ -129,13 +129,13 @@ export class ChangeMarker {
       return
     }
     this._changed = true
+    if (!source && this.host instanceof Component) {
+      this._dirty = true
+      source = this.host
+    }
     this.forceChangeEvent.next()
     if (this.parentModel) {
-      if (!source && this.host instanceof Component) {
-        this.parentModel.__changeMarker__.forceMarkDirtied(source)
-      } else {
-        this.parentModel.__changeMarker__.forceMarkChanged(source)
-      }
+      this.parentModel.__changeMarker__.forceMarkChanged(source)
     }
   }
 
@@ -170,12 +170,16 @@ export class ChangeMarker {
   }
 
   rendered() {
-    if (this._dirty && this.host instanceof Slot) {
-      this.host.sliceContent().forEach(i => {
-        if (i instanceof Component) {
-          invokeListener(i, 'onParentSlotUpdated')
-        }
-      })
+    if (this._dirty) {
+      if (this.host instanceof Slot) {
+        this.host.sliceContent().forEach(i => {
+          if (i instanceof Component) {
+            invokeListener(i, 'onParentSlotUpdated')
+          }
+        })
+      } else if (this.host instanceof Component) {
+        this.resetComponentState(this.host.state)
+      }
     }
     this._dirty = this._changed = this._changeBefore = false
   }
@@ -222,6 +226,25 @@ export class ChangeMarker {
       }
     }
     this.detachCallbacks = []
+  }
+
+  private resetComponentState(state: Record<string, any>) {
+    if (state instanceof Slot) {
+      return
+    }
+    if (Array.isArray(state)) {
+      const changeMarker = (state as any).__changeMarker__ as ChangeMarker
+      changeMarker._dirty = changeMarker._changed = changeMarker._changeBefore = false
+      for (const item of state) {
+        this.resetComponentState(item)
+      }
+    } else if (state && typeof state === 'object') {
+      const changeMarker = (state as any).__changeMarker__ as ChangeMarker
+      changeMarker._dirty = changeMarker._changed = changeMarker._changeBefore = false
+      Object.keys(state).forEach(key => {
+        this.resetComponentState(state[key])
+      })
+    }
   }
 
   private getPathInParent(): string | number | null {
