@@ -1,6 +1,6 @@
 {
   "name": "@textbus/playground",
-  "version": "5.3.3",
+  "version": "5.3.4",
   "private": true,
   "scripts": {
     "dev": "vite",

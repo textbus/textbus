@@ -1,5 +1,13 @@
 # @textbus/platform-node
 
+## 5.4.6
+
+### Patch Changes
+
+- fix: 修复模拟组合输入在节点起始位置无效果的 bug
+- Updated dependencies
+  - @textbus/core@5.4.6
+
 ## 5.4.5
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # @textbus/playground
 
+## 5.3.4
+
+### Patch Changes
+
+- fix: 修复模拟组合输入在节点起始位置无效果的 bug
+- Updated dependencies
+  - @textbus/platform-browser@5.4.6
+  - @textbus/adapter-viewfly@5.4.6
+  - @textbus/collaborate@5.4.6
+  - @textbus/core@5.4.6
+
 ## 5.3.3
 
 ### Patch Changes
