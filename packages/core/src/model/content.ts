@@ -266,7 +266,7 @@ export class Content<T extends ContentItem> {
       const fragmentEndIndex = index + len
       index += len
 
-      if (len === 0 && index === endIndex) {
+      if (len === 0 && index === fragmentStartIndex) {
         // 输入时的 Composition 装饰节点
         result.push(el)
       } else if (startIndex < fragmentEndIndex && endIndex > fragmentStartIndex) {
@@ -279,6 +279,9 @@ export class Content<T extends ContentItem> {
         }
       }
 
+      if (index > endIndex) {
+        break
+      }
     }
     return result
   }
