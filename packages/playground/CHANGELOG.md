@@ -1,5 +1,16 @@
 # @textbus/playground
 
+## 5.3.2
+
+### Patch Changes
+
+- 优化虚拟光标展示功能
+- Updated dependencies
+  - @textbus/platform-browser@5.4.4
+  - @textbus/adapter-viewfly@5.4.4
+  - @textbus/collaborate@5.4.4
+  - @textbus/core@5.4.4
+
 ## 5.3.1
 
 ### Patch Changes

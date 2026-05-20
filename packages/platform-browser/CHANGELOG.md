@@ -1,5 +1,13 @@
 # @textbus/platform-browser
 
+## 5.4.4
+
+### Patch Changes
+
+- 优化虚拟光标展示功能
+- Updated dependencies
+  - @textbus/core@5.4.4
+
 ## 5.4.3
 
 ### Patch Changes

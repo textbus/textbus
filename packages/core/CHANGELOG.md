@@ -1,5 +1,11 @@
 # @textbus/core
 
+## 5.4.4
+
+### Patch Changes
+
+- 优化虚拟光标展示功能
+
 ## 5.4.3
 
 ### Patch Changes
