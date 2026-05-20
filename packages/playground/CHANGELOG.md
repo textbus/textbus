@@ -1,5 +1,16 @@
 # @textbus/playground
 
+## 5.3.3
+
+### Patch Changes
+
+- fix: 修复光标失焦后不隐藏的 bug
+- Updated dependencies
+  - @textbus/platform-browser@5.4.5
+  - @textbus/adapter-viewfly@5.4.5
+  - @textbus/collaborate@5.4.5
+  - @textbus/core@5.4.5
+
 ## 5.3.2
 
 ### Patch Changes

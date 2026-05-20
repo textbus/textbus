@@ -1,5 +1,11 @@
 # @textbus/core
 
+## 5.4.5
+
+### Patch Changes
+
+- fix: 修复光标失焦后不隐藏的 bug
+
 ## 5.4.4
 
 ### Patch Changes
