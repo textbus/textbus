@@ -162,13 +162,6 @@ class ExperimentalCaret implements Caret {
       if (anchor) {
         this.bindScrollListeners(anchor)
       }
-      if (restart) {
-        requestAnimationFrame(() => {
-          if (this.oldRange?.collapsed) {
-            this.updateCursorPosition(this.oldRange)
-          }
-        })
-      }
       if (restart || this.scheduler.lastChangesHasLocalUpdate) {
         this.display = true
         const toggleShowHide = () => {
@@ -193,7 +186,7 @@ class ExperimentalCaret implements Caret {
     this.caretClippedOut = false
     this.elementRef.style.clipPath = 'none'
     this.elementRef.style.visibility = ''
-    this.caret.style.visibility = ''
+    this.caret.style.visibility = 'hidden'
     this.positionChangeEvent.next(null)
   }
 
