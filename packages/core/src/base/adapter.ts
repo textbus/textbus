@@ -43,7 +43,7 @@ export interface CompositionState {
   index: number
 }
 
-class InputDecorator extends Decorator {
+export class InputDecorator extends Decorator {
 }
 
 /**
@@ -86,11 +86,11 @@ export abstract class Adapter<
   }
 
   slotRender(slot: Slot,
-             slotHostRender: (children: Array<VElement | VTextNode | Component>) => VElement,
+             slotHostRender: (children: Array<VElement | VTextNode | Component | Decorator>) => VElement,
              renderEnv?: any): ViewElement;
   slotRender(slot: Slot,
              customFormat: Format,
-             slotHostRender: (children: Array<VElement | VTextNode | Component>) => VElement,
+             slotHostRender: (children: Array<VElement | VTextNode | Component | Decorator>) => VElement,
              renderEnv?: any): ViewElement;
   slotRender(slot: Slot,
              customFormat: any,
