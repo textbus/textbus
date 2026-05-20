@@ -10,6 +10,7 @@ import { VElement, VTextNode } from './element'
 import { makeError } from '../_utils/make-error'
 import { setup } from './setup'
 import { observe } from '../observable/observe'
+import { Decorator } from './decorator'
 
 const slotError = makeError('Slot')
 
@@ -17,7 +18,7 @@ const slotError = makeError('Slot')
  * 插槽渲染的工厂函数
  */
 export interface SlotRenderFactory {
-  (children: Array<VElement | VTextNode | Component>): VElement
+  (children: Array<VElement | VTextNode | Component | Decorator>): VElement
 }
 
 export enum ContentType {
@@ -44,6 +45,20 @@ export class DeltaLite extends Array<DeltaInsert> {
 }
 
 export type FormatCanApply = (slot: Slot, formatter: Formatter, value: any) => boolean
+
+export interface CompositionContext {
+  decorator: Decorator
+  index: number
+}
+
+let compositionContext: CompositionContext | null = null
+
+export function applyCompositionContext<T>(context: CompositionContext, callback: () => T) {
+  compositionContext = context
+  const r = callback()
+  compositionContext = null
+  return r
+}
 
 /**
  * Textbus 插槽类，用于管理组件、文本及格式的增删改查
@@ -103,7 +118,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
 
   protected _index = 0
 
-  protected content = new Content()
+  protected content = new Content<Component>()
   protected format = new Format(this)
   protected attributes = new Map<Attribute, any>()
 
@@ -981,9 +996,19 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
   }
 
   static toTree(slot: Slot, slotRenderFactory: SlotRenderFactory, formatTree: FormatTree, renderEnv?: any): VElement {
+    let normalizedContent: Content<Component | Decorator>
+    if (compositionContext) {
+      normalizedContent = new Content<Component | Decorator>()
+      slot.content.slice().forEach(item => {
+        normalizedContent.append(item)
+      })
+      normalizedContent.insert(compositionContext.index, compositionContext.decorator)
+    } else {
+      normalizedContent = slot.content
+    }
     let children = formatTree.children ?
-      Slot.createVDomByFormatTree(slot, formatTree.children, renderEnv) :
-      Slot.createVDomByContent(slot, formatTree.startIndex, formatTree.endIndex)
+      Slot.createVDomByFormatTree(slot, normalizedContent, formatTree.children, renderEnv) :
+      Slot.createVDomByContent(slot, normalizedContent, formatTree.startIndex, formatTree.endIndex)
 
     if (formatTree.formats) {
       children = [Slot.createVDomByOverlapFormats(slot, formatTree.formats, children, renderEnv)]
@@ -1025,14 +1050,15 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
 
   private static createVDomByFormatTree(
     slot: Slot,
+    content: Content<Component | Decorator>,
     formats: FormatTree<any>[],
     renderEnv: any) {
-    const nodes: Array<VElement | VTextNode | Component> = []
+    const nodes: Array<VElement | VTextNode | Component | Decorator> = []
     for (const child of formats) {
       if (child.formats?.length) {
         const children = child.children ?
-          Slot.createVDomByFormatTree(slot, child.children, renderEnv) :
-          Slot.createVDomByContent(slot, child.startIndex, child.endIndex)
+          Slot.createVDomByFormatTree(slot, content, child.children, renderEnv) :
+          Slot.createVDomByContent(slot, content, child.startIndex, child.endIndex)
 
         const nextChildren = Slot.createVDomByOverlapFormats(
           slot,
@@ -1044,6 +1070,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
       } else {
         nodes.push(...Slot.createVDomByContent(
           slot,
+          content,
           child.startIndex,
           child.endIndex,
         ))
@@ -1081,7 +1108,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
   private static createVDomByOverlapFormats(
     slot: Slot,
     formats: (FormatItem<any>)[],
-    children: Array<VElement | VTextNode | Component>,
+    children: Array<VElement | VTextNode | Component | Decorator>,
     renderEnv: any
   ): VElement {
     const hostBindings: Array<{ render: FormatHostBindingRender, item: FormatItem<any> }> = []
@@ -1125,17 +1152,18 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
 
   private static createVDomByContent(
     slot: Slot,
+    content: Content<Component | Decorator>,
     startIndex: number,
     endIndex: number
-  ): Array<VTextNode | VElement | Component> {
-    const elements: Array<string | Component> = slot.sliceContent(startIndex, endIndex).map(i => {
+  ): Array<VTextNode | VElement | Component | Decorator> {
+    const elements: Array<string | Component | Decorator> = content.slice(startIndex, endIndex).map(i => {
       if (typeof i === 'string') {
         return i.match(/\n|[^\n]+/g)!
       }
       return i
     }).flat()
     return elements.map(item => {
-      let vNode!: VElement | VTextNode | Component
+      let vNode!: VElement | VTextNode | Component | Decorator
       let length: number
       if (typeof item === 'string') {
         if (item === '\n') {
@@ -1156,7 +1184,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
           }
         }
       } else {
-        length = 1
+        length = item instanceof Component ? 1 : 0
         vNode = item
       }
       startIndex += length

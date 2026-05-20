@@ -1,5 +1,3 @@
-import { Component, ComponentLiteral } from './component'
-
 let firstRun = true
 
 /** 窗口分段：索引前后保留的 UTF-16 码元宽度（覆盖常见 emoji / ZWJ 簇） */
@@ -110,11 +108,17 @@ function correctStringIndexWithoutContaining(
   return localIndex
 }
 
+export interface ContentItem {
+  length: number
+
+  toJSON(): any
+}
+
 /**
  * Textbus 内容管理类
  * Content 属于 Slot 的私有属性，在实际场景中，开发者不需在关注此类，也不需要访问或操作此类
  */
-export class Content {
+export class Content<T extends ContentItem> {
   private static get segmenter() {
     if (Content._segmenter) {
       return Content._segmenter
@@ -131,7 +135,7 @@ export class Content {
   }
 
   static _segmenter: Intl.Segmenter | null = null
-  private data: Array<string | Component> = []
+  private data: Array<string | T> = []
 
   /**
    * 内容的长度
@@ -187,7 +191,7 @@ export class Content {
    * @param index
    * @param content
    */
-  insert(index: number, content: string | Component) {
+  insert(index: number, content: string | T) {
     if (index >= this.length) {
       this.append(content)
     } else {
@@ -227,7 +231,7 @@ export class Content {
    * 把内容添加到最后
    * @param content
    */
-  append(content: Component | string) {
+  append(content: T | string) {
     const lastChildIndex = this.data.length - 1
     const lastChild = this.data[lastChildIndex]
     if (typeof lastChild === 'string' && typeof content === 'string') {
@@ -237,7 +241,7 @@ export class Content {
     }
   }
 
-  cut(startIndex = 0, endIndex = this.length): Array<string | Component> {
+  cut(startIndex = 0, endIndex = this.length): Array<string | T> {
     if (endIndex <= startIndex) {
       return []
     }
@@ -248,21 +252,24 @@ export class Content {
     return discardedContents
   }
 
-  slice(startIndex = 0, endIndex = this.length): Array<string | Component> {
+  slice(startIndex = 0, endIndex = this.length): Array<string | T> {
     if (startIndex >= endIndex) {
       return []
     }
     startIndex = this.correctIndex(startIndex, false)
     endIndex = this.correctIndex(endIndex, true)
     let index = 0
-    const result: Array<string | Component> = []
+    const result: Array<string | T> = []
     for (const el of this.data) {
       const fragmentStartIndex = index
       const len = el.length
       const fragmentEndIndex = index + len
       index += len
 
-      if (startIndex < fragmentEndIndex && endIndex > fragmentStartIndex) {
+      if (len === 0 && index === endIndex) {
+        // 输入时的 Composition 装饰节点
+        result.push(el)
+      } else if (startIndex < fragmentEndIndex && endIndex > fragmentStartIndex) {
         if (typeof el === 'string') {
           const min = Math.max(0, startIndex - fragmentStartIndex)
           const max = Math.min(fragmentEndIndex, endIndex) - fragmentStartIndex
@@ -276,7 +283,7 @@ export class Content {
     return result
   }
 
-  toJSON(): Array<string | ComponentLiteral> {
+  toJSON(): Array<any> {
     return this.data.map(i => {
       if (typeof i === 'string') {
         return i
@@ -285,7 +292,7 @@ export class Content {
     })
   }
 
-  indexOf(element: Component): number {
+  indexOf(element: T): number {
     let index = 0
     for (const item of this.data) {
       if (item === element) {

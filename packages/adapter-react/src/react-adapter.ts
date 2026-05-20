@@ -1,4 +1,4 @@
-import { Adapter, Component, CompositionState, makeError, VElement, ViewMount, VTextNode } from '@textbus/core'
+import { Adapter, Component, CompositionState, makeError, VElement, ViewMount } from '@textbus/core'
 import { DomAdapter } from '@textbus/platform-browser'
 import { createElement, JSX, useEffect, useState } from 'react'
 import { Injector, ReflectiveInjector } from '@viewfly/core'
@@ -22,17 +22,16 @@ export class ReactAdapter extends DomAdapter<JSX.Element, JSX.Element> {
               mount: ViewMount<JSX.Element, Element>) {
     super({
       createCompositionNode(compositionState: CompositionState,
-                            updateNativeCompositionNode: (nativeNode: (Element | null)) => void): VElement {
-        return new VElement('span', {
+                            updateNativeCompositionNode: (nativeNode: (Element | null)) => void) {
+        return createElement('span', {
           style: {
             textDecoration: 'underline'
           },
           ref: (node: Element) => {
             updateNativeCompositionNode(node)
-          }
-        }, [
-          new VTextNode(compositionState.text)
-        ])
+          },
+          children: [compositionState.text]
+        })
       },
       getParentNode(node: Element | Text): Element | null {
         return (node as Node).parentNode as Element

@@ -11,7 +11,7 @@ export abstract class DomAdapter<
   host = createElement('div', {
     styles: {
       cursor: 'text',
-      wordBreak: 'break-all',
+      overflowWrap: 'break-word',
       boxSizing: 'border-box',
       flex: 1,
       outline: 'none'

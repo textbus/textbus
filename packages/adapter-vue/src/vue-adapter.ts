@@ -1,5 +1,5 @@
-import { Adapter, Component, CompositionState, makeError, VElement, ViewMount, VTextNode } from '@textbus/core'
-import { DefineComponent, getCurrentInstance, h, onMounted, onUnmounted, onUpdated, ref, Ref, VNode } from 'vue'
+import { Adapter, Component, CompositionState, makeError, VElement, ViewMount } from '@textbus/core'
+import { DefineComponent, getCurrentInstance, h, onMounted, onUnmounted, onUpdated, ref, Ref, VNode, VNodeRef } from 'vue'
 import { DomAdapter } from '@textbus/platform-browser'
 import { Injector, ReflectiveInjector } from '@viewfly/core'
 import { merge } from '@tanbo/stream'
@@ -24,15 +24,13 @@ export class VueAdapter extends DomAdapter<VNode, VNode> {
               mount: ViewMount<VNode, Element>) {
     super({
       createCompositionNode: (compositionState: CompositionState,
-                              updateNativeCompositionNode: (nativeNode: (Element | null)) => void): VElement => {
-        return new VElement('span', {
+                              updateNativeCompositionNode: (nativeNode: (Element | null)) => void) => {
+        return h('span', {
           style: {
             textDecoration: 'underline'
           },
-          ref: updateNativeCompositionNode
-        }, [
-          new VTextNode(compositionState.text)
-        ])
+          ref: updateNativeCompositionNode as VNodeRef,
+        }, [compositionState.text])
       },
       getParentNode(node: Element | Text): Element | null {
         return (node as Node).parentNode as Element

@@ -14,10 +14,10 @@ import {
   FormatHostBindingRender,
   Slot,
   VElement,
-  VTextNode
+  VTextNode, Decorator
 } from '@textbus/core'
 
-function doc(children: Array<VElement | VTextNode | Component>) {
+function doc(children: Array<VElement | VTextNode | Component | Decorator>) {
   return createVNode('div', { class: 'doc-root' }, children)
 }
 

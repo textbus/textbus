@@ -1,4 +1,4 @@
-import { Component, CompositionState, makeError, VElement, ViewMount, VTextNode, merge, Adapter } from '@textbus/core'
+import { Component, CompositionState, makeError, VElement, ViewMount, merge, Adapter } from '@textbus/core'
 import {
   ComponentSetup,
   createDynamicRef,
@@ -32,21 +32,20 @@ export class ViewflyAdapter extends DomAdapter<ViewFlyNode, ViewFlyNode> {
   ) {
     super({
       createCompositionNode(compositionState: CompositionState,
-                            updateNativeCompositionNode: (nativeNode: (Element | null)) => void): VElement {
+                            updateNativeCompositionNode: (nativeNode: (Element | null)) => void) {
         const ref = createDynamicRef<Element>(node => {
           updateNativeCompositionNode(node)
           return () => {
             updateNativeCompositionNode(null)
           }
         })
-        return new VElement('span', {
+        return jsx('span', {
           style: {
             textDecoration: 'underline'
           },
-          ref
-        }, [
-          new VTextNode(compositionState.text)
-        ])
+          ref,
+          children: [compositionState.text]
+        })
       },
       getParentNode(node: Element | Text): Element | null {
         return (node as Node).parentNode as Element

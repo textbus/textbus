@@ -2,10 +2,11 @@ import { Observable } from '@tanbo/stream'
 import { Injector } from '@viewfly/core'
 
 import { Component } from '../model/component'
-import { Slot } from '../model/slot'
+import { applyCompositionContext, Slot } from '../model/slot'
 import { NodeLocation, VElement, VTextNode } from '../model/element'
 import { createBidirectionalMapping, replaceEmpty } from '../_utils/tools'
 import { Format } from '../model/format'
+import { Decorator } from '../model/decorator'
 
 export interface ViewMount<ViewComponent, NativeElement> {
   (host: NativeElement, viewComponent: ViewComponent, injector: Injector): (void | (() => void))
@@ -17,14 +18,14 @@ export interface ViewMount<ViewComponent, NativeElement> {
 export interface Renderer<ViewComponent, ViewElement, NativeElement, NativeTextNode> {
   componentRender(component: Component<any>): ViewComponent
 
-  vElementToViewElement(vEle: VElement, children: Array<ViewElement | string>): ViewElement
+  vElementToViewElement(vEle: VElement, children: Array<ViewElement | ViewComponent | string>): ViewElement
 
   getAndUpdateSlotRootNativeElement(vEle: VElement, update: (nativeElement: NativeElement | null) => void): void
 
   createCompositionNode(
     compositionState: CompositionState,
     updateNativeCompositionNode: (nativeNode: NativeElement | null) => void
-  ): VElement
+  ): ViewElement
 
   getChildByIndex(parentElement: NativeElement, index: number): NativeElement | NativeTextNode
 
@@ -40,6 +41,9 @@ export interface CompositionState {
   text: string
   offset: number
   index: number
+}
+
+class InputDecorator extends Decorator {
 }
 
 /**
@@ -65,6 +69,7 @@ export abstract class Adapter<
   })
 
   compositionNode: any = null
+  private inputDecorator = new InputDecorator()
 
   protected constructor(private adapter: Renderer<ViewComponent, ViewElement, NativeElement, NativeTextNode>,
                         private mount: ViewMount<ViewComponent, NativeElement>) {
@@ -96,7 +101,18 @@ export abstract class Adapter<
       slotHostRender = customFormat
       customFormat = null
     }
-    const vElement = slot.toTree(slotHostRender, customFormat, renderEnv)
+    const composition = this.composition
+    let vElement: VElement
+    if (composition && composition.slot === slot) {
+      vElement = applyCompositionContext({
+        decorator: this.inputDecorator,
+        index: composition.index,
+      }, () => {
+        return slot.toTree(slotHostRender, customFormat, renderEnv)
+      })
+    } else {
+      vElement = slot.toTree(slotHostRender, customFormat, renderEnv)
+    }
     this.slotRootVElementCaches.set(slot, vElement)
 
     const oldNativeNode = this.slotRootNativeElementCaches.get(slot)
@@ -111,71 +127,6 @@ export abstract class Adapter<
     const jsxNode = this.vElementToViewElement(vElement, slot)
     slot.__changeMarker__.rendered()
     return jsxNode
-  }
-
-  protected insertCompositionByIndex(slot: Slot,
-                                     vNode: VElement,
-                                     composition: CompositionState,
-                                     createCompositionNode: (composition: CompositionState) => VElement) {
-    const location = vNode.location
-    const nodes = vNode.children
-
-    if (location && location.slot === composition.slot) {
-      for (let i = 0; i < nodes.length; i++) {
-        const child = nodes[i]
-        if (child instanceof VTextNode) {
-          const childLocation = child.location
-          if (childLocation) {
-            if (composition.index > childLocation.startIndex && composition.index <= childLocation.endIndex) {
-              const compositionVNode = createCompositionNode(composition)
-              if (composition.index === childLocation.endIndex) {
-                nodes.splice(i + 1, 0, compositionVNode)
-                break
-              }
-              const splitIndex = composition.index - childLocation.startIndex
-              const beforeNode = new VTextNode(child.textContent.slice(0, splitIndex))
-              beforeNode.location = {
-                slot: childLocation.slot,
-                startIndex: childLocation.startIndex,
-                endIndex: childLocation.startIndex + splitIndex
-              }
-
-              const afterNode = new VTextNode(child.textContent.slice(splitIndex))
-              afterNode.location = {
-                slot: childLocation.slot,
-                startIndex: composition.index,
-                endIndex: childLocation.endIndex
-              }
-              nodes.splice(i, 1, beforeNode, compositionVNode, afterNode)
-              break
-            } else if (composition.index === 0 && childLocation.startIndex === 0) {
-              nodes.splice(i, 0, createCompositionNode(composition))
-              break
-            }
-          }
-        } else if (child instanceof Component) {
-          const componentIndex = slot.indexOf(child)
-          if (composition.index === componentIndex + 1) {
-            nodes.splice(i + 1, 0, createCompositionNode(composition))
-            break
-          } else if (componentIndex === 0 && composition.index === 0) {
-            nodes.splice(i, 0, createCompositionNode(composition))
-            break
-          }
-        } else if (child.tagName === 'br') {
-          const location = child.location
-          if (location) {
-            if (location.endIndex === composition.index) {
-              nodes.splice(i + 1, 0, createCompositionNode(composition))
-              break
-            } else if (location.startIndex === 0 && composition.index === 0) {
-              nodes.splice(i, 0, createCompositionNode(composition))
-              break
-            }
-          }
-        }
-      }
-    }
   }
 
   /**
@@ -254,7 +205,7 @@ export abstract class Adapter<
         this.getNodes(vChild, nativeChild as NativeElement, result)
       } else if (vChild instanceof VTextNode) {
         result.push(nativeChild)
-      } else {
+      } else if (vChild instanceof Component) {
         result.push(this.getNativeNodeByComponent(vChild)!)
       }
     }
@@ -277,6 +228,8 @@ export abstract class Adapter<
             startIndex: index,
             endIndex: index + 1
           }
+        } else if (child instanceof Decorator) {
+          return null
         }
         return child?.location || null
       } else if (child instanceof VElement) {
@@ -297,23 +250,20 @@ export abstract class Adapter<
 
   /** 将虚拟树节点转换为视图树节点 */
   vElementToViewElement(vNode: VElement, slot?: Slot): ViewElement {
-    const children: any[] = []
-    const composition = this.composition
-    if (composition && composition.slot === slot) {
-      this.insertCompositionByIndex(slot, vNode, composition, () => {
-        return this.adapter.createCompositionNode(composition, (compositionNode: any) => {
-          this.compositionNode = compositionNode
-        })
-      })
-    }
+    const children: Array<ViewElement | ViewComponent | string> = []
     for (let i = 0; i < vNode.children.length; i++) {
       const child = vNode.children[i]
       if (child instanceof VElement) {
         children.push(this.vElementToViewElement(child, slot))
       } else if (child instanceof VTextNode) {
         children.push(replaceEmpty(child.textContent))
-      } else {
+      } else if (child instanceof Component) {
         children.push(this.componentRender(child))
+      } else if (this.composition) {
+        const el = this.adapter.createCompositionNode(this.composition, compositionNode => {
+          this.compositionNode = compositionNode
+        })
+        children.push(el)
       }
     }
     return this.adapter.vElementToViewElement(vNode, children)
