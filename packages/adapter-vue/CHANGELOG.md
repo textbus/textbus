@@ -1,5 +1,15 @@
 # @textbus/adapter-vue
 
+## 5.4.7
+
+### Patch Changes
+
+- - fix: 修复光标占位裁切错误
+  - fix: 修复光标不在输入插槽未尾时仍触发 zenCoding 的 bug
+- Updated dependencies
+  - @textbus/platform-browser@5.4.7
+  - @textbus/core@5.4.7
+
 ## 5.4.6
 
 ### Patch Changes
