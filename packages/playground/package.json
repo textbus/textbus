@@ -14,7 +14,7 @@
     "@textbus/collaborate": "workspace:^",
     "@textbus/core": "workspace:^",
     "@textbus/platform-browser": "workspace:^",
-    "@textbus/xnote": "^1.4.11",
+    "@textbus/xnote": "^1.4.12",
     "@viewfly/core": "^3.0.5",
     "@viewfly/platform-browser": "^3.0.5",
     "yjs": "^13.6.29"
