@@ -1184,7 +1184,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
           }
         }
       } else {
-        length = item instanceof Component ? 1 : 0
+        length = item.length
         vNode = item
       }
       startIndex += length

@@ -266,9 +266,13 @@ export class Content<T extends ContentItem> {
       const fragmentEndIndex = index + len
       index += len
 
-      if (len === 0 && index === fragmentStartIndex) {
-        // 输入时的 Composition 装饰节点
-        result.push(el)
+      if (len === 0) {
+          // 输入时的 Composition 装饰节点
+        if (startIndex === 0) {
+          result.push(el)
+        } else if (fragmentStartIndex > startIndex && fragmentEndIndex <= endIndex) {
+          result.push(el)
+        }
       } else if (startIndex < fragmentEndIndex && endIndex > fragmentStartIndex) {
         if (typeof el === 'string') {
           const min = Math.max(0, startIndex - fragmentStartIndex)
