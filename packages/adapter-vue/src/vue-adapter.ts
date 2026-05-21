@@ -30,7 +30,8 @@ export class VueAdapter extends DomAdapter<VNode, VNode> {
             textDecoration: 'underline'
           },
           ref: updateNativeCompositionNode as VNodeRef,
-        }, [compositionState.text])
+          key: compositionState.slot.id
+        }, compositionState.text)
       },
       getParentNode(node: Element | Text): Element | null {
         return (node as Node).parentNode as Element

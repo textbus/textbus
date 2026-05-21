@@ -16,7 +16,7 @@ export interface ReactAdapterComponents {
 }
 
 export class ReactAdapter extends DomAdapter<JSX.Element, JSX.Element> {
-  private components: Record<string, (props: {component: Component}) => JSX.Element> = {}
+  private components: Record<string, (props: { component: Component }) => JSX.Element> = {}
 
   constructor(components: ReactAdapterComponents,
               mount: ViewMount<JSX.Element, Element>) {
@@ -30,8 +30,8 @@ export class ReactAdapter extends DomAdapter<JSX.Element, JSX.Element> {
           ref: (node: Element) => {
             updateNativeCompositionNode(node)
           },
-          children: [compositionState.text]
-        })
+          key: compositionState.slot.id,
+        }, compositionState.text)
       },
       getParentNode(node: Element | Text): Element | null {
         return (node as Node).parentNode as Element
@@ -91,7 +91,7 @@ export class ReactAdapter extends DomAdapter<JSX.Element, JSX.Element> {
       }
     }, mount)
     Object.keys(components).forEach(key => {
-      this.components[key] = (props: {component: Component}) => {
+      this.components[key] = (props: { component: Component }) => {
         const component = props.component
         const [updateKey, refreshUpdateKey] = useState(Math.random())
 

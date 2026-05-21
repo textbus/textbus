@@ -45,7 +45,7 @@ export class ViewflyAdapter extends DomAdapter<ViewFlyNode, ViewFlyNode> {
           },
           ref,
           children: [compositionState.text]
-        })
+        }, compositionState.slot.id)
       },
       getParentNode(node: Element | Text): Element | null {
         return (node as Node).parentNode as Element
