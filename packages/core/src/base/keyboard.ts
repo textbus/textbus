@@ -90,8 +90,8 @@ export class Keyboard {
       !keymapState.modKey &&
       !keymapState.shiftKey &&
       !keymapState.altKey &&
-      commonAncestorSlot === this.selection.startSlot &&
-      commonAncestorSlot === this.selection.endSlot) {
+      this.selection.isCollapsed &&
+      this.selection.focusOffset === commonAncestorSlot.length) {
 
       for (let i = this.zenCodingInterceptors.length - 1; i > -1; i--) {
         const interceptor = this.zenCodingInterceptors[i]
