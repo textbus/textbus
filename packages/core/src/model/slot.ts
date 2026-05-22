@@ -93,7 +93,7 @@ export class Slot<T = any> {
   protected applyFormatCoverChild = false
 
   constructor(schema: ContentType[], public state?: T) {
-    this.schema = schema.sort()
+    this.schema = [...schema].sort()
     this.onContentChange = this.contentChangeEvent.asObservable()
     this.onStateChange = this.stateChangeEvent.asObservable()
     this.onChildComponentRemove = this.childComponentRemoveEvent.asObservable()
