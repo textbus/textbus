@@ -507,7 +507,9 @@ export class MagicInput extends Input {
         this.nativeFocus = true
       }),
       this.caret.onStyleChange.subscribe(style => {
-        Object.assign(textarea.style, style)
+        Object.assign(textarea.style, {
+          fontSize: style.fontSize,
+        })
       })
     )
     this.handleInput(textarea)
@@ -757,9 +759,9 @@ export class MagicInput extends Input {
         border: 'none',
         width: '100%',
         display: 'block',
-        height: '100%',
+        height: '16px',
         position: 'relative',
-        top: this.isWindows ? '3px' : '0'
+        bottom: this.isWindows ? '3px' : '0'
       }
     }) as HTMLIFrameElement
   }
