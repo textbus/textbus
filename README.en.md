@@ -18,7 +18,7 @@
 
 XNote is an official, headless, high-performance open-source rich text editor from the Textbus team, built on Textbus 4.x. It ships with most features out of the box and serves as hands-on reference if you build your own editor. Repository: [https://github.com/textbus/xnote](https://github.com/textbus/xnote).
 
-Try the live demo: [Playground](https://textbus.io/playground/index.html)
+Try the live demo: [Playground](https://textbus.io/playground.html)
 
 Introduction
 -------------------------------------------------------------
