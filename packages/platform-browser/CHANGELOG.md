@@ -1,5 +1,12 @@
 # @textbus/platform-browser
 
+## 5.4.8
+
+### Patch Changes
+
+- 优化光标位置
+  - @textbus/core@5.4.8
+
 ## 5.4.7
 
 ### Patch Changes

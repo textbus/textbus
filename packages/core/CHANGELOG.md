@@ -1,5 +1,7 @@
 # @textbus/core
 
+## 5.4.8
+
 ## 5.4.7
 
 ### Patch Changes
