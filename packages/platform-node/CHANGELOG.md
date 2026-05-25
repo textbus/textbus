@@ -1,5 +1,12 @@
 # @textbus/platform-node
 
+## 5.4.9
+
+### Patch Changes
+
+- Updated dependencies
+  - @textbus/core@5.4.9
+
 ## 5.4.8
 
 ### Patch Changes

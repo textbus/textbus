@@ -1,5 +1,16 @@
 # @textbus/playground
 
+## 5.3.6
+
+### Patch Changes
+
+- fix: 修复协作初始化时，数据恢复被格式 checkHost 意外拦截的 bug
+- Updated dependencies
+  - @textbus/collaborate@5.4.9
+  - @textbus/core@5.4.9
+  - @textbus/platform-browser@5.4.9
+  - @textbus/adapter-viewfly@5.4.9
+
 ## 5.3.5
 
 ### Patch Changes
