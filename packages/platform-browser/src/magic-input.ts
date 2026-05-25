@@ -760,7 +760,8 @@ export class MagicInput extends Input {
         width: '100%',
         display: 'block',
         height: '16px',
-        position: 'relative',
+        position: 'absolute',
+        left: 0,
         bottom: this.isWindows ? '3px' : '0'
       }
     }) as HTMLIFrameElement
