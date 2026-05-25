@@ -128,6 +128,8 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
 
   readonly state: T
 
+  protected skipCheck = false
+
   constructor(schema: ContentType[], state: T = {} as T) {
     this.schema = schema.sort()
     this.onContentChange = this.contentChangeEvent.asObservable()
@@ -140,6 +142,16 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
   }
 
   /**
+   * 写入时路过 Attribute 和 Formatter 的 CheckHost 校验
+   * @param fn
+   */
+  skipCheckHost(fn: () => void) {
+    this.skipCheck = true
+    fn()
+    this.skipCheck = false
+  }
+
+  /**
    * 设置属性
    * @param attribute
    * @param value
@@ -149,7 +161,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
     if (typeof canSet === 'function' && !canSet(this, attribute, value)) {
       return
     }
-    if (!attribute.checkHost(this, value)) {
+    if (!this.skipCheck && !attribute.checkHost(this, value)) {
       return
     }
     const has = this.attributes.has(attribute)
@@ -340,7 +352,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
         formats.push([formatter, value as FormatValue])
       }
     }
-    formats = formats.filter(i => {
+    formats = this.skipCheck ? formats : formats.filter(i => {
       return i[0].checkHost(this, i[1])
     })
     this.format.split(startIndex, length)
@@ -446,7 +458,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
       if (typeof content === 'string' || content.type !== ContentType.BlockComponent) {
         for (const [formatter, value] of formats) {
           const rawValue = value instanceof PendingErasure ? null : value
-          if (!formatter.checkHost(this, rawValue)) {
+          if (!this.skipCheck && !formatter.checkHost(this, rawValue)) {
             continue
           }
           const is = typeof canApply === 'function' ? canApply(this, formatter, rawValue) : true
@@ -1034,9 +1046,6 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
       const key = keyValue[0]
       const value = keyValue[1]
       const rawValue = value instanceof PendingErasure ? value.value : value
-      if (!key.checkHost(this, rawValue)) {
-        return
-      }
 
       if (canApply(this, key, rawValue)) {
         this.format.merge(key, {

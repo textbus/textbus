@@ -605,18 +605,24 @@ export class Collaborate {
     Object.keys(attrs).forEach(key => {
       const attribute = this.registry.getAttribute(key)
       if (attribute) {
-        localSlot.setAttribute(attribute, attrs[key])
+        localSlot.skipCheckHost(() => {
+          localSlot.setAttribute(attribute, attrs[key])
+        })
       }
     })
     for (const action of delta) {
       if (action.insert) {
         if (typeof action.insert === 'string') {
           const formats = remoteInsertFormatsToLocal(this.registry, action.attributes)
-          localSlot.insert(action.insert, formats)
+          localSlot.skipCheckHost(() => {
+            localSlot.insert(action.insert, formats)
+          })
         } else {
           const sharedComponent = action.insert as YMap<any>
           const component = this.createLocalComponentBySharedComponent(sharedComponent)
-          localSlot.insert(component, remoteInsertFormatsToLocal(this.registry, action.attributes))
+          localSlot.skipCheckHost(() => {
+            localSlot.insert(component, remoteInsertFormatsToLocal(this.registry, action.attributes))
+          })
         }
       } else {
         throw collaborateErrorFn('unexpected delta action.')
