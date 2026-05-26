@@ -622,7 +622,7 @@ export class SelectionBridge implements NativeSelectionBridge {
       }
     }
     const firstChild = toAfter ? node.firstChild : node.lastChild
-    if (firstChild) {
+    if (firstChild && !excludeNodes.includes(firstChild as Node)) {
       return this.findFocusNode(firstChild, toAfter, excludeNodes)
     }
     const nextSibling = toAfter ? node.nextSibling : node.previousSibling
@@ -632,9 +632,16 @@ export class SelectionBridge implements NativeSelectionBridge {
     return this.findFocusNodeByParent(node, toAfter, excludeNodes)
   }
 
-  private findFocusNodeByParent(node: Node, toAfter: boolean, excludeNodes: Node[]) {
+  private findFocusNodeByParent(node: Node, toAfter: boolean, excludeNodes: Node[]): SelectionPosition | null {
     const parentNode = node.parentNode
     if (parentNode) {
+      if (excludeNodes.includes(parentNode)) {
+        const nextNode = toAfter ? parentNode.nextSibling : parentNode.previousSibling
+        if (nextNode) {
+          return this.findFocusNode(nextNode, toAfter, excludeNodes)
+        }
+        return this.findFocusNodeByParent(parentNode, toAfter, excludeNodes)
+      }
       const parentPosition = this.domAdapter.getLocationByNativeNode(parentNode)
       if (parentPosition) {
         return {
@@ -642,8 +649,12 @@ export class SelectionBridge implements NativeSelectionBridge {
           offset: toAfter ? parentPosition.endIndex : parentPosition.startIndex
         }
       }
-      excludeNodes.push(node)
-      return this.findFocusNode(parentNode, toAfter, excludeNodes)
+      excludeNodes.push(parentNode)
+      const nextNode = toAfter ? parentNode.nextSibling : parentNode.previousSibling
+      if (nextNode) {
+        return this.findFocusNode(nextNode, toAfter, excludeNodes)
+      }
+      return this.findFocusNodeByParent(parentNode, toAfter, excludeNodes)
     }
     return null
   }
