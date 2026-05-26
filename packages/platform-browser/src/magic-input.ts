@@ -349,20 +349,31 @@ class ExperimentalCaret implements Caret {
       return
     }
     this.changeFromSelf = false
-    const scrollContainer = clipContext.firstScrollContainer
-    const doc = scrollContainer.ownerDocument ?? document
-    const scrollRect = scrollContainer === doc.documentElement ?
-      {top: 0, bottom: doc.documentElement.clientHeight} :
-      scrollContainer.getBoundingClientRect()
     const limit = this.getLimit()
-    const scrollTop = Math.max(limit.top, scrollRect.top)
-    const scrollBottom = Math.min(limit.bottom, scrollRect.bottom)
 
-    const layoutBottom = layoutElRect.top + layoutElRect.height
-    if (layoutElRect.top < scrollTop) {
-      scrollContainer.scrollTop -= scrollTop - layoutElRect.top
-    } else if (layoutBottom > scrollBottom) {
-      scrollContainer.scrollTop += layoutBottom - scrollBottom
+    // 从外到内逐层处理，每滚动一层后重新获取光标位置再处理内层
+    for (const scrollContainer of [...clipContext.scrollContainers].reverse()) {
+      const doc = scrollContainer.ownerDocument ?? document
+      const isDoc = scrollContainer === doc.documentElement
+      const scrollRect = isDoc
+        ? { top: 0, bottom: doc.documentElement.clientHeight }
+        : scrollContainer.getBoundingClientRect()
+
+      const visibleTop = Math.max(limit.top, scrollRect.top)
+      const visibleBottom = Math.min(limit.bottom, scrollRect.bottom)
+      const caretBottom = layoutElRect.top + layoutElRect.height
+
+      if (layoutElRect.top >= visibleTop && caretBottom <= visibleBottom) {
+        continue // 光标已在当前容器可视区域内，无需滚动
+      }
+
+      if (layoutElRect.top < visibleTop) {
+        scrollContainer.scrollTop -= visibleTop - layoutElRect.top
+      } else if (caretBottom > visibleBottom) {
+        scrollContainer.scrollTop += caretBottom - visibleBottom
+      }
+
+      layoutElRect = this.elementRef.getBoundingClientRect()
     }
   }
 }
