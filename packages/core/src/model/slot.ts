@@ -142,7 +142,7 @@ export class Slot<T extends Record<string, any> = Record<string, any>> {
   }
 
   /**
-   * 写入时路过 Attribute 和 Formatter 的 CheckHost 校验
+   * 写入时跳过 Attribute 和 Formatter 的 CheckHost 校验
    * @param fn
    */
   skipCheckHost(fn: () => void) {
