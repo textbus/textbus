@@ -1,5 +1,19 @@
 # @textbus/playground
 
+## 5.3.7
+
+### Patch Changes
+
+- - refactor: 重构原生输入实现
+  - refactor: 重新实现光标上下移动位置计算
+  - fix: 修复光标在可文档中的可滚动容器内时，页面无法把光标位置修正到可视区域的 bug
+  - feat: 优化虚拟光标输入 IME 提示框展示位置
+- Updated dependencies
+  - @textbus/platform-browser@5.4.10
+  - @textbus/core@5.4.10
+  - @textbus/collaborate@5.4.10
+  - @textbus/adapter-viewfly@5.4.10
+
 ## 5.3.6
 
 ### Patch Changes
