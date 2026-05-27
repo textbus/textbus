@@ -1,5 +1,13 @@
 # @textbus/collaborate
 
+## 5.4.11
+
+### Patch Changes
+
+- 修复换行会产生死循环的 bug
+- Updated dependencies
+  - @textbus/core@5.4.11
+
 ## 5.4.10
 
 ### Patch Changes
