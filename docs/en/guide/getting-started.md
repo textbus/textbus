@@ -5,9 +5,11 @@ description: Minimal Vite + TypeScript + Viewfly editor with core, platform-brow
 
 # Getting started
 
-If you have not read the product overview and package split yet, start with [Introduction](./introduction).
-
 This guide builds a minimal editor with **Vite + TypeScript + Viewfly** where you can type and press Enter for new lines: **`@textbus/core`** supplies the model and kernel, **`@textbus/platform-browser`** handles browser mounting and input, and **`@textbus/adapter-viewfly`** renders the document as a Viewfly tree. If you use **Vue** or **React**, you do not need Viewfly—see the [Vue adapter](./adapter-vue) and [React adapter](./adapter-react).
+
+::: tip
+You are reading the development documentation for Textbus. If you want a ready-to-use rich text editor out of the box, check out XNote. Repository: <a href="https://github.com/textbus/xnote" target="_blank">https://github.com/textbus/xnote</a>.
+:::
 
 ## What you'll learn
 

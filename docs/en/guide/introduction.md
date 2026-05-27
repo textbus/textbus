@@ -5,11 +5,15 @@ description: What Textbus is, model-driven editing, and package overview.
 
 # Introduction
 
-Textbus is a **component-centric, data-driven** framework for building rich text editors. To address common pain points in traditional rich text development, we **designed our own component system and format system for rich text**, aiming to **lower the cost of extension** so you can ship richer editing features more easily. Whether you are an experienced developer in rich text or a frontend newcomer, Textbus offers a smooth development path and room to grow.
+Textbus is a component-centric, data-driven rich text editor development framework! To solve the various problems encountered in traditional rich text development, we independently designed a component system and a format system for rich text from the ground up. Our goal is to lower the development cost of rich text and help you more easily extend rich editing features. Whether you are a veteran of rich text development or a frontend beginner, you will find an exceptional development experience and powerful extensibility in Textbus.
 
-**Since 4.0**, Textbus **embraces the frontend ecosystem**: you can render the same document model with **Viewfly**, **Vue**, or **React**. That means you can **wire in popular open-source component libraries with almost no extra adapter work**, and build rich interactions inside the editor more simply—without reinventing wheels between “rich text” and “business UI.”
+**Since 4.0**, Textbus fully embraces the frontend ecosystem, supporting rendering rich text content directly with [Viewfly](https://viewfly.org), Vue, and React. This means you can use open-source component libraries at zero cost, making it simpler to implement all kinds of interactive features in rich text.
 
-For performance, with **Viewfly** as the rendering layer we once stress-tested using the full text of *Dream of the Red Chamber*: editing stayed smooth at **roughly 50,000 paragraphs**—on the order of **15 copies of the novel** and about **17 million Chinese characters** in one document (one full copy is about **3,100 paragraphs**; test machine: **MacBook M1 Pro, 32 GB RAM**). At that scale, an editable document was once hard to imagine.
+Textbus also delivers outstanding performance. When using [Viewfly](https://viewfly.org) as the rendering layer, tested with the full text of *Dream of the Red Chamber* as a sample, Textbus can handle **50,000 paragraphs with smooth editing — equivalent to 15 copies of the novel totaling 17 million Chinese characters in a single document** (<span style=”font-size:14px”>one copy of Dream of the Red Chamber is approximately 3,100 paragraphs; test machine: MacBook M1 Pro, 32GB RAM</span>). This was unimaginable in the past.
+
+::: info Note
+Since 4.0, the Textbus repository <strong>no longer provides a default editor</strong>. However, we have rebuilt the XNote rich text editor. Repository: <a href=”https://github.com/textbus/xnote” target=”_blank”>https://github.com/textbus/xnote</a>.
+:::
 
 If you are ready to set up your environment, go to [Getting started](./getting-started), then follow the **Basics** section in order (from [Component basics](./component-basics) through [Document parsing & compatibility](./document-parse-compat)).
 
