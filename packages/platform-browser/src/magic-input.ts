@@ -356,7 +356,7 @@ class ExperimentalCaret implements Caret {
       const doc = scrollContainer.ownerDocument ?? document
       const isDoc = scrollContainer === doc.documentElement
       const scrollRect = isDoc
-        ? { top: 0, bottom: doc.documentElement.clientHeight }
+        ? {top: 0, bottom: doc.documentElement.clientHeight}
         : scrollContainer.getBoundingClientRect()
 
       const visibleTop = Math.max(limit.top, scrollRect.top)
@@ -518,9 +518,7 @@ export class MagicInput extends Input {
         this.nativeFocus = true
       }),
       this.caret.onStyleChange.subscribe(style => {
-        Object.assign(textarea.style, {
-          fontSize: style.fontSize,
-        })
+        Object.assign(textarea.style, style)
       })
     )
     this.handleInput(textarea)
@@ -770,7 +768,7 @@ export class MagicInput extends Input {
         border: 'none',
         width: '100%',
         display: 'block',
-        height: '16px',
+        height: '100%',
         position: 'absolute',
         left: 0,
         bottom: this.isWindows ? '3px' : '0'
