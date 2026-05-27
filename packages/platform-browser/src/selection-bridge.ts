@@ -238,77 +238,49 @@ export class SelectionBridge implements NativeSelectionBridge {
   }
 
   /**
-   * 计算光标到下一行或上一行的位置
-   * @param currentPosition
-   * @param startLeft
-   * @param toNext
-   * @private
+   * 通过遍历模型位置 + 视觉 rect 判断换行，计算光标到下一行或上一行的位置。
+   * 不使用 Selection.modify()，避免复杂布局中的死循环。
    */
   private getVerticalMovePosition(
     currentPosition: SelectionPosition,
     startLeft: number,
     toNext: boolean,
   ): SelectionPosition {
-    const nativePos = this.findSelectedNodeAndOffset(currentPosition.slot, currentPosition.offset)
-    if (!nativePos) return currentPosition
+    const startRect = this.getRect(currentPosition)
+    if (!startRect) return currentPosition
 
-    this.ignoreSelectionChange = true
-    const sel = this.nativeSelection
+    const startTop = startRect.top
+    const startBottom = startTop + startRect.height
 
-    sel.removeAllRanges()
-    sel.setBaseAndExtent(nativePos.node, nativePos.offset, nativePos.node, nativePos.offset)
-    const startRect = getLayoutRectByRange(sel.getRangeAt(0).cloneRange())
+    const step = toNext
+      ? (pos: SelectionPosition) => this.selection.getNextPositionByPosition(pos.slot, pos.offset)
+      : (pos: SelectionPosition) => this.selection.getPreviousPositionByPosition(pos.slot, pos.offset)
 
-    let lastPos = currentPosition
-    let prevRange: { node: Node; offset: number } | null = { node: nativePos.node, offset: nativePos.offset }
+    let cur = currentPosition
 
     while (true) {
-      sel.modify('move', toNext ? 'forward' : 'backward', 'line')
+      const next = step(cur)
+      if (next.slot === cur.slot && next.offset === cur.offset) break
 
-      const { focusNode, focusOffset } = sel
-      if (!focusNode) break
+      const rect = this.getRect(next)
+      if (!rect) break
 
-      // 浏览器无法继续移动
-      if (prevRange && focusNode === prevRange.node && focusOffset === prevRange.offset) break
-      prevRange = { node: focusNode, offset: focusOffset }
+      cur = next
 
-      // X 轴对齐
-      // const movedRect = getLayoutRectByRange(sel.getRangeAt(0).cloneRange())
-      // const xRefined = this.caretPositionFromPoint(startLeft, movedRect)
-      // if (xRefined) {
-      //   focusNode = xRefined.offsetNode
-      //   focusOffset = xRefined.offset
-      // }
-
-      const modelPos = this.getCorrectedPosition(focusNode, focusOffset, true)
-      if (!modelPos) {
-        lastPos = this.getDocumentBoundary(toNext)
-        break
+      if (this.isDifferentLine(startTop, startBottom, rect, toNext)) {
+        return this.refineXOnLine(cur, startLeft, rect)
       }
-
-      lastPos = modelPos
-      const rect = this.getRect(modelPos)!
-
-      // 仍未到达新行，继续 modify
-      if (this.isSameLine(startRect, rect, toNext)) continue
-
-      // 已到达新行，沿该行微调 X
-      this.ignoreSelectionChange = false
-      return this.refineXOnLine(modelPos, startLeft, rect)
     }
 
-    this.ignoreSelectionChange = false
-    return lastPos
+    return this.getDocumentBoundary(toNext)
   }
 
-  /** 目标位置是否仍在当前视觉行内 */
-  private isSameLine(startRect: Rect, targetRect: Rect, toNext: boolean): boolean {
-    const startBottom = startRect.top + startRect.height
-    const targetBottom = targetRect.top + targetRect.height
+  /** 目标位置是否已离开起始行 */
+  private isDifferentLine(startTop: number, startBottom: number, targetRect: Rect, toNext: boolean): boolean {
     if (toNext) {
-      return targetRect.top <= startRect.top || targetBottom <= startBottom
+      return targetRect.top >= startBottom
     }
-    return targetRect.top >= startRect.top || targetBottom >= startBottom
+    return targetRect.top + targetRect.height <= startTop
   }
 
   /**
