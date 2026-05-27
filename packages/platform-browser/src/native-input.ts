@@ -3,8 +3,6 @@ import {
   distinctUntilChanged,
   filter,
   fromEvent,
-  map,
-  merge,
   Observable,
   Subject,
   Subscription,
@@ -25,10 +23,92 @@ import {
 
 import { Caret, CaretPosition, caretPositionEqual, Input } from './types'
 import { VIEW_DOCUMENT } from './injection-tokens'
-import { isSafari, isMac, isMobileBrowser, isFirefox } from './_utils/env'
+import { isSafari, isMac, isFirefox } from './_utils/env'
 import { Parser } from './parser'
 import { getLayoutRectByRange } from './_utils/uikit'
 import { DomAdapter } from './dom-adapter'
+
+/**
+ * 轻量级 DOM 文本变化记录器，仅在 composition 期间激活。
+ * 记录 composition 期间 DOM 中新增/修改的文本节点，在 compositionend 时从 DOM 读取最终文本。
+ * 写入模型后清理浏览器创建的新文本节点，避免残留在文档中。
+ */
+class CompositionRecorder {
+  private observer: MutationObserver | null = null
+  private nodeOldValues = new Map<Text, string | null>()
+
+  start(target: Node) {
+    this.nodeOldValues.clear()
+    this.observer = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.type === 'childList') {
+          for (const node of Array.from(m.addedNodes)) {
+            if (node.nodeType === Node.TEXT_NODE && !this.nodeOldValues.has(node as Text)) {
+              this.nodeOldValues.set(node as Text, null)
+            }
+          }
+        } else if (m.type === 'characterData') {
+          const target = m.target as Text
+          if (!this.nodeOldValues.has(target)) {
+            this.nodeOldValues.set(target, m.oldValue)
+          }
+        }
+      }
+    })
+    this.observer.observe(target, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      characterDataOldValue: true,
+    })
+  }
+
+  readText(): string {
+    let text = ''
+    for (const [node, oldValue] of this.nodeOldValues) {
+      if (!node.isConnected) continue
+      const current = node.textContent || ''
+      if (!current) continue
+      if (oldValue === null) {
+        text += current
+      } else {
+        text += this.diffText(oldValue, current)
+      }
+    }
+    return text
+  }
+
+  /** 移除 composition 期间浏览器创建的文本节点（焦点处），光标位置不可能被协作触及 */
+  cleanup(committedText: string, focusNode: Node | null) {
+    if (focusNode instanceof Text &&
+        focusNode.isConnected &&
+        focusNode.textContent === committedText &&
+        this.nodeOldValues.has(focusNode as Text) &&
+        focusNode.parentNode) {
+      focusNode.parentNode.removeChild(focusNode)
+    }
+    this.nodeOldValues.clear()
+  }
+
+  stop() {
+    this.observer?.disconnect()
+    this.observer = null
+  }
+
+  private diffText(oldStr: string, newStr: string): string {
+    let start = 0
+    while (start < oldStr.length && start < newStr.length && oldStr[start] === newStr[start]) {
+      start++
+    }
+    let oldEnd = oldStr.length - 1
+    let newEnd = newStr.length - 1
+    while (oldEnd >= start && newEnd >= start && oldStr[oldEnd] === newStr[newEnd]) {
+      oldEnd--
+      newEnd--
+    }
+    return newStr.slice(start, newEnd + 1)
+  }
+}
 
 class NativeCaret implements Caret {
   onPositionChange: Observable<CaretPosition | null>
@@ -117,9 +197,7 @@ export class NativeInput extends Input {
 
   private isSafari = isSafari()
   private isMac = isMac()
-  private isMobileBrowser = isMobileBrowser()
-
-  private ignoreComposition = false // 有 bug 版本搜狗拼音
+  private compositionEndedAt = 0
 
   constructor(textbus: Textbus,
               private parser: Parser,
@@ -248,30 +326,17 @@ export class NativeInput extends Input {
   }
 
   private handleShortcut(input: HTMLElement) {
-    let isWriting = false
-    let isIgnore = false
     this.subscription.add(
-      fromEvent(input, 'compositionstart').subscribe(() => {
-        isWriting = true
-      }),
-      fromEvent(input, 'compositionend').subscribe(() => {
-        isWriting = false
-      }),
-      fromEvent<InputEvent>(input, 'beforeinput').subscribe(ev => {
-        if (this.isSafari) {
-          if (ev.inputType === 'insertFromComposition') {
-            isIgnore = true
-          }
-        }
-      }),
       fromEvent<KeyboardEvent>(input, 'keydown').pipe(filter(() => {
-        if (this.isSafari && isIgnore) {
-          isIgnore = false
+        // Safari: IME 确认键（Enter）会在 compositionend 后紧接着触发 keydown
+        // 用时间戳窗口检测并忽略
+        if (this.isSafari && this.compositionEndedAt > 0 &&
+            Date.now() - this.compositionEndedAt < 500) {
+          this.compositionEndedAt = 0
           return false
         }
-        return !isWriting // || !this.textarea.value
+        return !this.composition
       })).subscribe(ev => {
-        this.ignoreComposition = false
         let key = ev.key
         const keys = ')!@#$%^Z&*('
         const b = key === 'Process' && /Digit\d/.test(ev.code) && ev.shiftKey
@@ -291,7 +356,6 @@ export class NativeInput extends Input {
           }
         })
         if (is) {
-          this.ignoreComposition = true
           ev.preventDefault()
         }
       })
@@ -299,134 +363,14 @@ export class NativeInput extends Input {
   }
 
   private handleInput(input: HTMLElement) {
-    if (this.isMobileBrowser) {
-      this.handleMobileInput(input)
-    } else {
-      this.handlePCInput(input)
-    }
-  }
-
-  private handleMobileInput(input: HTMLElement) {
-    let isCompositionStart = true
-    let startIndex: number
-    const compositionStart = () => {
-      this.composition = true
-      startIndex = this.selection.startOffset!
-      const startSlot = this.selection.startSlot!
-      const event = new Event<Slot, CompositionStartEventData>(startSlot, {
-        index: startIndex
-      })
-      invokeListener(startSlot.parent!, 'onCompositionStart', event)
-    }
-    const compositionUpdate = (data: string) => {
-      const startSlot = this.selection.startSlot!
-      const event = new Event<Slot, CompositionUpdateEventData>(startSlot, {
-        index: startIndex,
-        data
-      })
-
-      invokeListener(startSlot.parent!, 'onCompositionUpdate', event)
-    }
-    const compositionEnd = (data: string) => {
-      this.composition = false
-
-      if (data) {
-        this.commander.write(data)
-      }
-      const startSlot = this.selection.startSlot
-      if (startSlot) {
-        const event = new Event<Slot>(startSlot, null)
-        invokeListener(startSlot.parent!, 'onCompositionEnd', event)
-      }
-    }
-    this.subscription.add(
-      fromEvent(input, 'compositionstart').subscribe(() => {
-        compositionStart()
-      }),
-      fromEvent<CompositionEvent>(input, 'compositionupdate').subscribe(ev => {
-        compositionUpdate(ev.data)
-      }),
-      fromEvent<CompositionEvent>(input, 'compositionend').subscribe(ev => {
-        compositionEnd(ev.data)
-        const startContainer = this.nativeSelection.focusNode
-        if (startContainer instanceof Text && startContainer.textContent === ev.data) {
-          startContainer.remove()
-        }
-      }),
-      fromEvent<InputEvent>(input, 'beforeinput').subscribe(ev => {
-        switch (ev.inputType) {
-          case 'insertText':
-            if (ev.data) {
-              this.commander.write(ev.data)
-              ev.preventDefault()
-            }
-            break
-          case 'insertCompositionText':
-            if (isCompositionStart) {
-              isCompositionStart = false
-              compositionStart()
-            } else {
-              compositionUpdate(ev.data || '')
-            }
-            break
-          case 'deleteCompositionText':
-            this.composition = false
-            break
-          case 'deleteContentBackward': {
-            this.composition = false
-            const range = ev.getTargetRanges()[0]
-            if (!range) {
-              break
-            }
-            const location = this.domAdapter.getLocationByNativeNode(range.startContainer)!
-            const startSlot = this.selection.startSlot
-            if (startSlot) {
-              this.selection.setBaseAndExtent(
-                startSlot,
-                location.startIndex + range.startOffset,
-                startSlot,
-                location.startIndex + range.endOffset)
-
-              this.commander.delete()
-            }
-            break
-          }
-          case 'insertReplacementText': {
-            this.composition = false
-            const range = ev.getTargetRanges()[0]
-            const location = this.domAdapter.getLocationByNativeNode(range.startContainer)!
-            const startSlot = this.selection.startSlot!
-            this.selection.setBaseAndExtent(
-              startSlot,
-              location.startIndex + range.startOffset,
-              startSlot,
-              location.startIndex + range.endOffset)
-
-            this.commander.delete()
-            const text = ev.dataTransfer?.getData('text') || ev.data || null
-            if (text) {
-              this.commander.write(text)
-            }
-            break
-          }
-          //
-          // case 'insertFromComposition': {
-          //   compositionEnd(ev.data || '')
-          //   break
-          // }
-        }
-      })
-    )
-  }
-
-  private handlePCInput(input: HTMLElement) {
+    const recorder = new CompositionRecorder()
     let startIndex = 0
-    let isCompositionEnd = false
+
     this.subscription.add(
-      fromEvent(input, 'compositionstart').pipe(filter(() => {
-        return !this.ignoreComposition
-      })).subscribe(() => {
+      // ===== Composition 事件：纯开关，不读 ev.data 做模型决策 =====
+      fromEvent(input, 'compositionstart').subscribe(() => {
         this.composition = true
+        recorder.start(input)
         startIndex = this.selection.startOffset!
         const startSlot = this.selection.startSlot!
         const event = new Event<Slot, CompositionStartEventData>(startSlot, {
@@ -434,91 +378,89 @@ export class NativeInput extends Input {
         })
         invokeListener(startSlot.parent!, 'onCompositionStart', event)
       }),
-      fromEvent<CompositionEvent>(input, 'compositionupdate').pipe(filter(() => {
-        return !this.ignoreComposition
-      })).subscribe(ev => {
-        const startSlot = this.selection.startSlot!
-        const event = new Event(startSlot, {
-          index: startIndex,
-          data: ev.data
-        })
 
-        invokeListener(startSlot.parent!, 'onCompositionUpdate', event)
+      fromEvent<CompositionEvent>(input, 'compositionupdate').subscribe(ev => {
+        const startSlot = this.selection.startSlot
+        if (startSlot) {
+          invokeListener(startSlot.parent!, 'onCompositionUpdate',
+            new Event(startSlot, {
+              index: startIndex,
+              data: ev.data
+            }))
+        }
       }),
-      merge(
-        fromEvent<InputEvent>(input, 'beforeinput').pipe(
-          map(ev => {
-            ev.preventDefault()
-            if (ev.inputType === 'insertCompositionText') {
-              return null
-            }
-            if (ev.inputType === 'insertReplacementText') {
-              const range = ev.getTargetRanges()[0]
-              const location = this.domAdapter.getLocationByNativeNode(range.startContainer)!
-              const startSlot = this.selection.startSlot!
-              this.selection.setBaseAndExtent(
-                startSlot,
-                location.startIndex + range.startOffset,
-                startSlot,
-                location.startIndex + range.endOffset)
 
-              this.commander.delete()
-              return ev.dataTransfer?.getData('text') || ev.data || null
+      fromEvent(input, 'compositionend').subscribe(() => {
+        if (!this.composition) return
+        this.composition = false
+        this.compositionEndedAt = Date.now()
+
+        // Safari: WebKit 在 compositionend 之后才更新 DOM，通过 microtask 延迟读取
+        if (this.isSafari) {
+          queueMicrotask(() => this.syncCompositionText(recorder))
+        } else {
+          this.syncCompositionText(recorder)
+        }
+      }),
+
+      // ===== beforeinput：仅处理非 IME 输入 =====
+      fromEvent<InputEvent>(input, 'beforeinput').subscribe(ev => {
+        if (ev.isComposing || this.composition) {
+          return
+        }
+
+        ev.preventDefault()
+
+        switch (ev.inputType) {
+          case 'insertText':
+            if (ev.data) {
+              this.commander.write(ev.data)
             }
-            isCompositionEnd = ev.inputType === 'insertFromComposition'
-            if (isCompositionEnd && this.composition) {
-              return null
-            }
-            if (this.isSafari) {
-              if (ev.inputType === 'insertText' || isCompositionEnd) {
-                return ev.data
+            break
+          case 'deleteContentBackward':
+            this.commander.delete(true)
+            break
+          case 'deleteContentForward':
+            this.commander.delete()
+            break
+          case 'insertReplacementText': {
+            const range = ev.getTargetRanges()[0]
+            if (range) {
+              const location = this.domAdapter.getLocationByNativeNode(range.startContainer)
+              if (location) {
+                const startSlot = this.selection.startSlot!
+                this.selection.setBaseAndExtent(
+                  startSlot,
+                  location.startIndex + range.startOffset,
+                  startSlot,
+                  location.startIndex + range.endOffset)
+                this.commander.delete()
               }
             }
-            if (!ev.isComposing && !!ev.data) {
-              return ev.data
+            const text = ev.dataTransfer?.getData('text') || ev.data
+            if (text) {
+              this.commander.write(text)
             }
-            return null
-          }),
-          filter(text => {
-            return text
-          })
-        ),
-        this.isSafari ? new Observable<string>() :
-          fromEvent<CompositionEvent>(input, 'compositionend').pipe(filter(() => {
-            return !this.ignoreComposition
-          })).pipe(
-            filter(() => {
-              return this.composition
-            }),
-            map(ev => {
-              isCompositionEnd = true
-              ev.preventDefault()
-              return ev.data
-            }),
-            filter(() => {
-              const b = this.ignoreComposition
-              this.ignoreComposition = false
-              return !b
-            })
-          )
-      ).subscribe(text => {
-        this.composition = false
-        if (text) {
-          const startContainer = this.nativeSelection.focusNode
-          if (startContainer instanceof Text && startContainer.textContent === text) {
-            startContainer.remove()
-          }
-          this.commander.write(text)
-        }
-        if (isCompositionEnd) {
-          const startSlot = this.selection.startSlot
-          if (startSlot) {
-            const event = new Event<Slot>(startSlot, null)
-            invokeListener(startSlot.parent!, 'onCompositionEnd', event)
+            break
           }
         }
-        isCompositionEnd = false
       })
     )
+  }
+
+  private syncCompositionText(recorder: CompositionRecorder) {
+    const text = recorder.readText()
+    recorder.stop()
+
+    if (text) {
+      // 先清理 composition 期间浏览器创建的节点，确保写入模型时 DOM 是干净的
+      recorder.cleanup(text, this.nativeSelection.focusNode)
+      this.commander.write(text)
+    }
+
+    const startSlot = this.selection.startSlot
+    if (startSlot) {
+      invokeListener(startSlot.parent!, 'onCompositionEnd', new Event<Slot>(startSlot, null))
+    }
   }
 }
