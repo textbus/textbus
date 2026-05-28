@@ -2,16 +2,21 @@ import 'reflect-metadata'
 import { createApp } from '@viewfly/platform-browser'
 import { createRef, onMounted } from '@viewfly/core'
 import { Selection } from '@textbus/core'
-import { Editor } from '@textbus/xnote'
+import { Editor, Organization } from '@textbus/xnote'
 import '@textbus/xnote/style.css'
 
 import './index.scss'
 import { SyncConnector, YWebsocketConnector } from '@textbus/collaborate'
+import { Http } from './src/help'
 
 function App() {
   const textareaRef = createRef<HTMLTextAreaElement>()
   const editorRef = createRef<HTMLDivElement>()
   const editor = new Editor({
+    providers: [{
+      provide: Organization,
+      useValue: new Http()
+    }],
     collaborateConfig: {
       userinfo: {username: 'test', color: '#f00', id: 'xxxx'},
       createConnector(yDoc): SyncConnector {

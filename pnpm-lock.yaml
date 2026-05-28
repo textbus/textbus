@@ -23,7 +23,7 @@ importers:
         version: link:packages/collaborate
       '@textbus/xnote':
         specifier: ^1.4.16
-        version: 1.4.16(@textbus/adapter-viewfly@packages+adapter-viewfly)(@textbus/collaborate@packages+collaborate)(@textbus/core@packages+core)(@textbus/platform-browser@packages+platform-browser)(@viewfly/core@3.0.5)(@viewfly/platform-browser@3.0.5)
+        version: 1.4.16(@textbus/adapter-viewfly@packages+adapter-viewfly)(@textbus/collaborate@packages+collaborate)(@textbus/core@packages+core)(@textbus/platform-browser@packages+platform-browser)(@viewfly/core@3.0.6)(@viewfly/platform-browser@3.0.6)
       '@types/jest':
         specifier: ^27.0.3
         version: 27.5.2
@@ -37,11 +37,11 @@ importers:
         specifier: ^5.8.0
         version: 5.62.0(eslint@8.56.0)(typescript@5.9.3)
       '@viewfly/core':
-        specifier: ^3.0.5
-        version: 3.0.5
+        specifier: ^3.0.6
+        version: 3.0.6
       '@viewfly/platform-browser':
-        specifier: ^3.0.5
-        version: 3.0.5
+        specifier: ^3.0.6
+        version: 3.0.6
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -109,8 +109,8 @@ importers:
         specifier: workspace:^
         version: link:../platform-browser
       '@viewfly/core':
-        specifier: ^3.0.5
-        version: 3.0.5
+        specifier: ^3.0.6
+        version: 3.0.6
       react:
         specifier: ^17.0.0 || ^18.0.0 || ^19.0.0
         version: 18.2.0
@@ -140,11 +140,11 @@ importers:
         specifier: workspace:^
         version: link:../platform-node
       '@viewfly/core':
-        specifier: ^3.0.5
-        version: 3.0.5
+        specifier: ^3.0.6
+        version: 3.0.6
       '@viewfly/platform-browser':
-        specifier: ^3.0.5
-        version: 3.0.5
+        specifier: ^3.0.6
+        version: 3.0.6
     devDependencies:
       rimraf:
         specifier: ^3.0.2
@@ -165,8 +165,8 @@ importers:
         specifier: workspace:^
         version: link:../platform-browser
       '@viewfly/core':
-        specifier: ^3.0.5
-        version: 3.0.5
+        specifier: ^3.0.6
+        version: 3.0.6
       vue:
         specifier: ^3.4.28
         version: 3.4.28(typescript@5.9.3)
@@ -190,8 +190,8 @@ importers:
         specifier: workspace:^
         version: link:../core
       '@viewfly/core':
-        specifier: ^3.0.5
-        version: 3.0.5
+        specifier: ^3.0.6
+        version: 3.0.6
       y-websocket:
         specifier: ^3.0.0
         version: 3.0.0(yjs@13.6.29)
@@ -212,8 +212,8 @@ importers:
         specifier: ^1.2.7
         version: 1.2.7
       '@viewfly/core':
-        specifier: ^3.0.5
-        version: 3.0.5
+        specifier: ^3.0.6
+        version: 3.0.6
     devDependencies:
       rimraf:
         specifier: ^3.0.2
@@ -231,8 +231,8 @@ importers:
         specifier: workspace:^
         version: link:../core
       '@viewfly/core':
-        specifier: ^3.0.5
-        version: 3.0.5
+        specifier: ^3.0.6
+        version: 3.0.6
     devDependencies:
       rimraf:
         specifier: ^3.0.2
@@ -250,11 +250,11 @@ importers:
         specifier: workspace:^
         version: link:../core
       '@viewfly/core':
-        specifier: ^3.0.5
-        version: 3.0.5
+        specifier: ^3.0.6
+        version: 3.0.6
       '@viewfly/platform-browser':
-        specifier: ^3.0.5
-        version: 3.0.5
+        specifier: ^3.0.6
+        version: 3.0.6
     devDependencies:
       rimraf:
         specifier: ^3.0.2
@@ -282,13 +282,13 @@ importers:
         version: link:../platform-browser
       '@textbus/xnote':
         specifier: ^1.4.16
-        version: 1.4.16(@textbus/adapter-viewfly@packages+adapter-viewfly)(@textbus/collaborate@packages+collaborate)(@textbus/core@packages+core)(@textbus/platform-browser@packages+platform-browser)(@viewfly/core@3.0.5)(@viewfly/platform-browser@3.0.5)
+        version: 1.4.16(@textbus/adapter-viewfly@packages+adapter-viewfly)(@textbus/collaborate@packages+collaborate)(@textbus/core@packages+core)(@textbus/platform-browser@packages+platform-browser)(@viewfly/core@3.0.6)(@viewfly/platform-browser@3.0.6)
       '@viewfly/core':
-        specifier: ^3.0.5
-        version: 3.0.5
+        specifier: ^3.0.6
+        version: 3.0.6
       '@viewfly/platform-browser':
-        specifier: ^3.0.5
-        version: 3.0.5
+        specifier: ^3.0.6
+        version: 3.0.6
       yjs:
         specifier: ^13.6.29
         version: 13.6.29
@@ -1896,11 +1896,11 @@ packages:
   '@upsetjs/venn.js@2.0.0':
     resolution: {integrity: sha512-WbBhLrooyePuQ1VZxrJjtLvTc4NVfpOyKx0sKqioq9bX1C1m7Jgykkn8gLrtwumBioXIqam8DLxp88Adbue6Hw==}
 
-  '@viewfly/core@3.0.5':
-    resolution: {integrity: sha512-TH43gKJOkb+sWkJiLC7mTzSRJt6t8/KjHjbTeaSyq3/VGfYncEq29OJxfynj/iFkV6fl4W7JNw/WD9pAPaNdJg==}
+  '@viewfly/core@3.0.6':
+    resolution: {integrity: sha512-eqJcSSM0mQ1Y88NTuYNRbyFSPipQCXPXKOFGOWyLpVE2q70UefxJeyli5tUuRxpv2qDCf+91Yoa5Ocfu9fHK4g==}
 
-  '@viewfly/platform-browser@3.0.5':
-    resolution: {integrity: sha512-1O9gPF07l43NvO4qEyu9AYxCrqU0SDKkNgcCgQLgq4iafs8znh8pERQC1q5wjObMoHi6uAu4GKb6JRZ943aRRQ==}
+  '@viewfly/platform-browser@3.0.6':
+    resolution: {integrity: sha512-IhCEepE5lhOdwyrlWgERISFuXId+JjSseBsR+Ic+1r7MuJVb/xVJCjXQAGKYkfL69KWDoMeQsRvlmzE+MTx2UA==}
 
   '@viewfly/ui-components@0.0.27':
     resolution: {integrity: sha512-Lm0kwiW0j9PIS69YJruTg+8bIGkcMztEcGa7IN1e5PaOhXz0+OkOoS6+kTOo9UNkix/n15qjUNyQseUg8S9kfQ==}
@@ -5987,17 +5987,17 @@ snapshots:
 
   '@tanbo/stream@1.2.7': {}
 
-  '@textbus/xnote@1.4.16(@textbus/adapter-viewfly@packages+adapter-viewfly)(@textbus/collaborate@packages+collaborate)(@textbus/core@packages+core)(@textbus/platform-browser@packages+platform-browser)(@viewfly/core@3.0.5)(@viewfly/platform-browser@3.0.5)':
+  '@textbus/xnote@1.4.16(@textbus/adapter-viewfly@packages+adapter-viewfly)(@textbus/collaborate@packages+collaborate)(@textbus/core@packages+core)(@textbus/platform-browser@packages+platform-browser)(@viewfly/core@3.0.6)(@viewfly/platform-browser@3.0.6)':
     dependencies:
       '@tanbo/color': 0.1.1
       '@textbus/adapter-viewfly': link:packages/adapter-viewfly
       '@textbus/collaborate': link:packages/collaborate
       '@textbus/core': link:packages/core
       '@textbus/platform-browser': link:packages/platform-browser
-      '@viewfly/core': 3.0.5
-      '@viewfly/platform-browser': 3.0.5
-      '@viewfly/ui-components': 0.0.27(@viewfly/core@3.0.5)(@viewfly/platform-browser@3.0.5)(@viewfly/ui-icons@0.0.27(@viewfly/core@3.0.5)(@viewfly/platform-browser@3.0.5))
-      '@viewfly/ui-icons': 0.0.27(@viewfly/core@3.0.5)(@viewfly/platform-browser@3.0.5)
+      '@viewfly/core': 3.0.6
+      '@viewfly/platform-browser': 3.0.6
+      '@viewfly/ui-components': 0.0.27(@viewfly/core@3.0.6)(@viewfly/platform-browser@3.0.6)(@viewfly/ui-icons@0.0.27(@viewfly/core@3.0.6)(@viewfly/platform-browser@3.0.6))
+      '@viewfly/ui-icons': 0.0.27(@viewfly/core@3.0.6)(@viewfly/platform-browser@3.0.6)
       highlight.js: 11.11.1
       katex: 0.16.45
       markdown-it: 14.1.1
@@ -6322,27 +6322,27 @@ snapshots:
       d3-selection: 3.0.0
       d3-transition: 3.0.1(d3-selection@3.0.0)
 
-  '@viewfly/core@3.0.5':
+  '@viewfly/core@3.0.6':
     dependencies:
       reflect-metadata: 0.2.2
 
-  '@viewfly/platform-browser@3.0.5':
+  '@viewfly/platform-browser@3.0.6':
     dependencies:
-      '@viewfly/core': 3.0.5
+      '@viewfly/core': 3.0.6
       csstype: 3.2.3
 
-  '@viewfly/ui-components@0.0.27(@viewfly/core@3.0.5)(@viewfly/platform-browser@3.0.5)(@viewfly/ui-icons@0.0.27(@viewfly/core@3.0.5)(@viewfly/platform-browser@3.0.5))':
+  '@viewfly/ui-components@0.0.27(@viewfly/core@3.0.6)(@viewfly/platform-browser@3.0.6)(@viewfly/ui-icons@0.0.27(@viewfly/core@3.0.6)(@viewfly/platform-browser@3.0.6))':
     dependencies:
       '@tanbo/color': 0.1.1
       '@tanbo/stream': 1.2.7
-      '@viewfly/core': 3.0.5
-      '@viewfly/platform-browser': 3.0.5
-      '@viewfly/ui-icons': 0.0.27(@viewfly/core@3.0.5)(@viewfly/platform-browser@3.0.5)
+      '@viewfly/core': 3.0.6
+      '@viewfly/platform-browser': 3.0.6
+      '@viewfly/ui-icons': 0.0.27(@viewfly/core@3.0.6)(@viewfly/platform-browser@3.0.6)
 
-  '@viewfly/ui-icons@0.0.27(@viewfly/core@3.0.5)(@viewfly/platform-browser@3.0.5)':
+  '@viewfly/ui-icons@0.0.27(@viewfly/core@3.0.6)(@viewfly/platform-browser@3.0.6)':
     dependencies:
-      '@viewfly/core': 3.0.5
-      '@viewfly/platform-browser': 3.0.5
+      '@viewfly/core': 3.0.6
+      '@viewfly/platform-browser': 3.0.6
 
   '@vitejs/plugin-vue@5.2.4(vite@5.4.21(@types/node@22.19.17)(sass@1.99.0)(terser@5.39.0))(vue@3.5.33(typescript@5.9.3))':
     dependencies:
