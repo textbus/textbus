@@ -1,5 +1,5 @@
 import { Injectable, Prop } from '@viewfly/core'
-import { distinctUntilChanged, map, Observable, share, Subject, Subscription } from '@tanbo/stream'
+import { distinctUntilChanged, filter, map, Observable, share, Subject, Subscription } from '@tanbo/stream'
 
 import { Component, ContentType, Event, GetRangesEvent, invokeListener, Slot, SlotRange } from '../model/_api'
 import { RootComponentRef, SelectionCorrector } from './_injection-tokens'
@@ -239,7 +239,7 @@ export class Selection {
         this.unSelect()
         return
       }
-      const { focusOffset, focusSlot, anchorOffset, anchorSlot } = range
+      const {focusOffset, focusSlot, anchorOffset, anchorSlot} = range
       if (focusSlot === this.focusSlot &&
         anchorSlot === this.anchorSlot &&
         focusOffset === this.focusOffset &&
@@ -271,6 +271,8 @@ export class Selection {
 
   private changeFromUpdateCustomRanges = false
 
+  private isTransaction = false
+
   constructor(private root: RootComponentRef,
               private controller: Controller,
               private corrector: SelectionCorrector) {
@@ -284,6 +286,9 @@ export class Selection {
             previous.anchorSlot === current.anchorSlot)
         }
         return previous !== current
+      }),
+      filter(() => {
+        return !this.isTransaction
       }),
       share()
     )
@@ -390,11 +395,21 @@ export class Selection {
     Promise.resolve().then(() => this.nativeSelectionDelegate = true)
   }
 
+  transaction(fn: () => void) {
+    this.isTransaction = true
+    try {
+      fn()
+    } finally {
+      this.isTransaction = false
+      this.broadcastChanged()
+    }
+  }
+
   /**
    * 创建选区快照，并可在需要时恢复选区，前提是缓存的插槽和位置还在文档中存在
    */
   createSnapshot(): SelectionSnapshot {
-    const { anchorSlot, anchorOffset, focusSlot, focusOffset } = this
+    const {anchorSlot, anchorOffset, focusSlot, focusOffset} = this
     return {
       restore: (syncNative?: boolean) => {
         this._anchorSlot = anchorSlot
@@ -540,7 +555,7 @@ export class Selection {
     const slots = componentInstance.slots
     if (slots.length) {
       const first = slots.at(0)!
-      const { slot, offset } = this.findFirstPosition(first, deep)
+      const {slot, offset} = this.findFirstPosition(first, deep)
       this.setBaseAndExtent(slot, offset, slot, offset)
     } else {
       this.selectComponentFront(componentInstance)
@@ -560,7 +575,7 @@ export class Selection {
     const slots = componentInstance.slots
     if (slots.length) {
       const last = slots.at(-1)!
-      const { slot, offset } = this.findLastPosition(last, deep)
+      const {slot, offset} = this.findLastPosition(last, deep)
       this.setBaseAndExtent(slot, offset, slot, offset)
     } else {
       this.selectComponentEnd(componentInstance)
@@ -678,7 +693,7 @@ export class Selection {
       this.restore()
       return
     }
-    const { startSlot, startOffset } = this
+    const {startSlot, startOffset} = this
     const position = this.getPreviousPosition()
     if (position) {
       this.setPosition(position.slot, position.offset)
@@ -718,7 +733,7 @@ export class Selection {
       this.restore()
       return
     }
-    const { endSlot, endOffset } = this
+    const {endSlot, endOffset} = this
     const position = this.getNextPosition()
     if (position) {
       let offset = position.offset
@@ -1322,7 +1337,7 @@ export class Selection {
     }, discardEmptyScope)
   }
 
-  static getScopes({ startSlot, startOffset, endSlot, endOffset }: Range, decompose = false) {
+  static getScopes({startSlot, startOffset, endSlot, endOffset}: Range, decompose = false) {
     const commonAncestorSlot = Selection.getCommonAncestorSlot(startSlot, endSlot)!
     const commonAncestorComponent = Selection.getCommonAncestorComponent(startSlot, endSlot)!
 
