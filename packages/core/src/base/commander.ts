@@ -914,8 +914,15 @@ export class Commander {
           focusOffset = startIndex
         }
         if (focusSlot !== prevHost) {
-          this.flushTransformedData(convertedData, rule)
-          convertedData = []
+          let parentComponent = prevHost?.parent
+          while (parentComponent) {
+            if (parentComponent === this.rootComponentRef.component) {
+              this.flushTransformedData(convertedData, rule)
+              convertedData = []
+              break
+            }
+            parentComponent = parentComponent.parentComponent
+          }
         }
         prevHost = focusSlot
         this.selection.setPosition(focusSlot, focusOffset)
