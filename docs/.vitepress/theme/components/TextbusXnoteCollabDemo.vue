@@ -7,6 +7,7 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { SyncConnector, YWebsocketConnector } from '@textbus/collaborate'
 import { Editor, FileUploader, LLMService, Member, Organization, UserInfo, XNoteMessageBus, CommentService } from '@textbus/xnote'
 import type { Doc as YDoc } from 'yjs'
+import { Controller, Query, Selection } from '@textbus/core'
 
 import '@textbus/xnote/style.css'
 
@@ -80,6 +81,15 @@ let unsubReady: (() => void) | null = null
 let unsubMsg: (() => void) | null = null
 let savedConsume: XNoteMessageBus['consume'] | null = null
 
+class TestCommentService extends CommentService {
+  createComment() {
+    return Promise.resolve({
+      id: 'comment-id-' + Math.random().toString(16).substring(2),
+      userId: 'comment-user-' + Math.random().toString(16).substring(2),
+    })
+  }
+}
+
 onMounted(() => {
   const host = editorHost.value
   if (!host) return
@@ -97,14 +107,10 @@ onMounted(() => {
       { provide: Organization, useValue: new Http() },
       {
         provide: CommentService,
-        useValue: {
-          createComment() {
-            return Promise.resolve({
-              id: 'xnote-example' + Math.random(),
-              userId: 'xnote-example' + Math.random()
-            })
-          }
-        }
+        useFactory(controller: Controller, query: Query, selection: Selection) {
+          return new TestCommentService(controller, query, selection)
+        },
+        deps: [Controller, Query, Selection],
       },
       {
         provide: FileUploader,

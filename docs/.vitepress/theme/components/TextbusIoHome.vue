@@ -3,6 +3,7 @@ import 'reflect-metadata'
 import type { Member } from '@textbus/xnote'
 import { useData, withBase } from 'vitepress'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { Controller, Query, Selection } from '@textbus/core'
 
 const {localeIndex} = useData()
 const isEn = computed(() => localeIndex.value === 'en')
@@ -191,7 +192,18 @@ async function bootstrap(): Promise<void> {
     }
   }
 
-  const instance = new Editor({
+
+class TestCommentService extends CommentService {
+  createComment() {
+    return Promise.resolve({
+      id: 'comment-id-' + Math.random().toString(16).substring(2),
+      userId: 'comment-user-' + Math.random().toString(16).substring(2),
+    })
+  }
+}
+
+
+    const instance = new Editor({
     /** 与 `EditorConfig.locale` 一致：英文文档站用 `en-US`，其余为中文（默认 `zh-CN`） */
     locale: localeIndex.value === 'en' ? 'en-US' : 'zh-CN',
     providers: [
@@ -201,14 +213,10 @@ async function bootstrap(): Promise<void> {
       },
       {
         provide: CommentService,
-        useValue: {
-          createComment() {
-            return Promise.resolve({
-              id: 'xnote-example' + Math.random(),
-              userId: 'xnote-example' + Math.random()
-            })
-          }
-        }
+        useFactory(controller: Controller, query: Query, selection: Selection) {
+          return new TestCommentService(controller, query, selection)
+        },
+        deps: [Controller, Query, Selection],
       },
       {
         provide: FileUploader,
