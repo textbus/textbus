@@ -410,12 +410,18 @@ export class Selection {
    */
   createSnapshot(): SelectionSnapshot {
     const {anchorSlot, anchorOffset, focusSlot, focusOffset} = this
+    const customRanges = this.customRanges?.map(i => {
+      return {
+        ...i
+      }
+    }) || null
     return {
       restore: (syncNative?: boolean) => {
         this._anchorSlot = anchorSlot
         this._anchorOffset = anchorOffset
         this._focusSlot = focusSlot
         this._focusOffset = focusOffset
+        this.customRanges = customRanges
         this.resetStartAndEndPosition()
         if (syncNative) {
           this.restore(true)
@@ -442,11 +448,10 @@ export class Selection {
       return
     }
     this.changeFromUpdateCustomRanges = true
-    this.customRanges = ranges
     const start = ranges[0]
     const end = ranges[ranges.length - 1]
     this.setBaseAndExtent(start.slot, start.startIndex, end.slot, end.endIndex)
-    // this.broadcastChanged()
+    this.customRanges = ranges
     this.changeFromUpdateCustomRanges = false
   }
 
@@ -1553,6 +1558,7 @@ export class Selection {
   }
 
   private resetStartAndEndPosition() {
+    this.customRanges = null
     let focusPaths: number[] = []
     let anchorPaths: number[] = []
     if (this.focusSlot) {
