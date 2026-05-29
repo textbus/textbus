@@ -143,24 +143,9 @@ function deleteUpBySlot(selection: Selection,
       }
     }
   }
-  const slotIndex = parentComponent.slots.indexOf(slot)
 
-  if (slotIndex === 0) {
-    if (parentSlot) {
-      const index = parentSlot.indexOf(parentComponent)
-      return {
-        slot: parentSlot,
-        offset: index,
-      }
-    }
-    return {
-      slot,
-      offset
-    }
-  }
-  const position = selection.findLastPosition(parentComponent.slots.at(slotIndex - 1)!, true)
+  const position = selection.getPreviousPositionByPosition(slot, 0)
   if (parentComponent.removeSlot?.(slot)) {
-    parentComponent.slots.splice(slotIndex, 1)
     return position
   }
 
@@ -404,7 +389,7 @@ export class Commander {
 
     while (isDeleteRanges && scopes.length) {
       const lastScope = scopes.pop()!
-      const {slot, startIndex} = lastScope
+      const { slot, startIndex } = lastScope
       const endIndex = lastScope.endIndex
       const isFocusEnd = selection.focusSlot === slot && selection.focusOffset === endIndex
       const event = new Event<Slot, DeleteEventData>(slot, {
