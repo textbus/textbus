@@ -1,5 +1,11 @@
 # @textbus/core
 
+## 5.5.1
+
+### Patch Changes
+
+- 优化格式转换细节
+
 ## 5.5.0
 
 ### Minor Changes
