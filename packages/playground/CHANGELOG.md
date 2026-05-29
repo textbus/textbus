@@ -1,5 +1,20 @@
 # @textbus/playground
 
+## 5.4.0
+
+### Minor Changes
+
+- - 选区增加事务方法
+  - 优化 Commander 格式转换能力的实现
+
+### Patch Changes
+
+- Updated dependencies
+  - @textbus/platform-browser@5.5.0
+  - @textbus/adapter-viewfly@5.5.0
+  - @textbus/collaborate@5.5.0
+  - @textbus/core@5.5.0
+
 ## 5.3.8
 
 ### Patch Changes

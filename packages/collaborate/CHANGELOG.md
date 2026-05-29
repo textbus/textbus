@@ -1,5 +1,17 @@
 # @textbus/collaborate
 
+## 5.5.0
+
+### Minor Changes
+
+- - 选区增加事务方法
+  - 优化 Commander 格式转换能力的实现
+
+### Patch Changes
+
+- Updated dependencies
+  - @textbus/core@5.5.0
+
 ## 5.4.11
 
 ### Patch Changes
