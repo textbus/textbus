@@ -143,7 +143,6 @@ function deleteUpBySlot(selection: Selection,
       }
     }
   }
-
   const position = selection.getPreviousPositionByPosition(slot, 0)
   if (parentComponent.removeSlot?.(slot)) {
     return position
@@ -868,7 +867,7 @@ export class Commander {
       }
     }
 
-    const slotRanges = Selection.getSelectedScopes(range).reverse()
+    const slotRanges = Selection.getSelectedScopes(range)
     this.transformByNormalizedRanges(slotRanges, rule, abstractSelection, stopComponent)
     return true
   }
@@ -881,7 +880,8 @@ export class Commander {
     let prevHost: Slot | null = null
     const startSlot = this.selection.startSlot
     this.selection.transaction(() => {
-      for (const slotRange of slotRanges) {
+      while (slotRanges.length) {
+        const slotRange = slotRanges.pop()!
         const startIndex = Selection.getInlineContentStartIndex(slotRange.slot, slotRange.startIndex)
         const endIndex = Selection.getInlineContentEndIndex(slotRange.slot, slotRange.endIndex)
 
@@ -889,9 +889,24 @@ export class Commander {
         let focusSlot: Slot
         let focusOffset: number
         if (slotRange.slot.isEmpty) {
-          const position = deleteUpBySlot(this.selection, slotRange.slot, startIndex, stopComponent, true, slot => {
-            return !!slot.parent?.separate
+          let position = deleteUpBySlot(this.selection, slotRange.slot, startIndex, stopComponent, true, slot => {
+            if (slot === prevHost) {
+              return false
+            }
+            return typeof slot.parent?.removeSlot === 'function'
           })
+          // 多插件组件不能原位插入最新内容，这时尝试回退到当前组件的后面
+          if (!position.slot.schema.includes(rule.targetType)) {
+            const parentComponent = position.slot.parent
+            const parentSlot = parentComponent?.parent
+            if (parentSlot) {
+              const index = parentSlot.indexOf(parentComponent)!
+              position = {
+                slot: parentSlot,
+                offset: index + 1
+              }
+            }
+          }
           focusSlot = position.slot
           focusOffset = position.offset
         } else {
