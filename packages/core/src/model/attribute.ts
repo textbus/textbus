@@ -60,9 +60,13 @@ export interface FormatterConfig<T> {
   /** 当光标在格式末尾并编辑时，是否自动从前继承样式 */
   inheritable?: boolean
   /**
-   * 格式是否列对齐，默认情况下，Textbus 会采用最少节点的策略进行渲染，
-   * 但在某些情况下是不适用的，你可以通过设置 columned 值为 true，让
-   * Textbus 从格式变更处生成新的节点
+   * 格式是否分段渲染。默认情况下 Textbus 采用"最少节点"策略——全覆盖格式统一包裹为一个父节点。
+   * 设为 true 后，格式不会创建统一包裹，而是下沉到每个子段独立渲染，适用于需要保持并列结构的场景。
+   */
+  segmented?: boolean
+
+  /**
+   * @deprecated 请使用 {@link segmented} 替代
    */
   columned?: boolean
 
@@ -89,6 +93,8 @@ export interface FormatterConfig<T> {
  */
 export class Formatter<T = FormatValue> {
   readonly priority: number
+  readonly segmented: boolean
+  /** @deprecated 请使用 {@link segmented} 替代 */
   readonly columned: boolean
   readonly inheritable: boolean
 
@@ -98,10 +104,11 @@ export class Formatter<T = FormatValue> {
    * @param config 格式配置
    */
   constructor(public name: string, private config: FormatterConfig<T>) {
-    const {priority = 0, inheritable = true, columned = false} = config
+    const {priority = 0, inheritable = true, segmented, columned} = config
     this.priority = priority
     this.inheritable = inheritable
-    this.columned = columned
+    this.segmented = segmented ?? columned ?? false
+    this.columned = this.segmented
   }
 
   checkHost(host: Slot, value: T): boolean {

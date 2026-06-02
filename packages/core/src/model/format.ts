@@ -305,17 +305,17 @@ export class Format {
 
   toTree(startIndex: number, endIndex: number): FormatTree<any> {
     const workingCopy = this.extract(startIndex, endIndex)
-    const {formats, columnedFormats} = Format.extractNodeFormats(workingCopy, startIndex, endIndex)
-    const split = Format.findFirstSplit(workingCopy, columnedFormats.length, startIndex, endIndex)
+    const {formats, segmentedFormats} = Format.extractNodeFormats(workingCopy, startIndex, endIndex)
+    const split = Format.findFirstSplit(workingCopy, segmentedFormats.length, startIndex, endIndex)
 
     const tree: FormatTree<any> = {startIndex, endIndex}
 
     if (!split) {
-      formats.push(...columnedFormats)
+      formats.push(...segmentedFormats)
     } else {
       tree.children = []
       if (startIndex < split.start) {
-        if (columnedFormats.length) {
+        if (segmentedFormats.length) {
           for (const child of Format.unwrapOrFlatten(
             workingCopy.toTree(startIndex, split.start)
           )) {
@@ -347,24 +347,24 @@ export class Format {
 
   /**
    * 从 workingCopy 中提取完全覆盖 [L, R) 的格式。
-   * 非 columned 格式会从 map 中移除（stackable 只移除匹配的那一条，非 stackable 移除全部）。
-   * columned 格式保留在 map 中以参与子节点的分段。
+   * 非 segmented 格式会从 map 中移除（stackable 只移除匹配的那一条，非 stackable 移除全部）。
+   * segmented 格式保留在 map 中以参与子节点的分段。
    */
   private static extractNodeFormats(
     workingCopy: Format,
     L: number,
     R: number,
-  ): { formats: FormatItem[]; columnedFormats: FormatItem[] } {
+  ): { formats: FormatItem[]; segmentedFormats: FormatItem[] } {
     const formats: FormatItem[] = []
-    const columnedFormats: FormatItem[] = []
+    const segmentedFormats: FormatItem[] = []
 
     for (const [formatter, ranges] of workingCopy.map) {
       const isFull = (r: FormatRange) => r.startIndex === L && r.endIndex === R
 
-      if (formatter.columned) {
+      if (formatter.segmented) {
         for (const range of ranges) {
           if (isFull(range)) {
-            columnedFormats.push({formatter, ...range})
+            segmentedFormats.push({formatter, ...range})
           }
         }
         continue
@@ -390,12 +390,12 @@ export class Format {
       }
     }
 
-    return {formats, columnedFormats}
+    return {formats, segmentedFormats}
   }
 
   /**
    * 在 workingCopy 中找到最靠左的非 ghost range 作为递归分割点。
-   * ghost 指 columned 格式中完全覆盖当前区间的 range，它们不参与 hasChildren 判断。
+   * ghost 指 segmented 格式中完全覆盖当前区间的 range，它们不参与 hasChildren 判断。
    * 返回 null 表示无需继续分割。
    */
   private static findFirstSplit(
