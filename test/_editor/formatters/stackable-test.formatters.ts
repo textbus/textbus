@@ -15,8 +15,8 @@ export const stackNoteObjectFormatter = new StackableFormatter<{ id: number; tag
 })
 
 /** 可堆叠 + 列对齐同时开启 */
-export const stackColumnedFormatter = new StackableFormatter<boolean>('stack-columned', {
-  columned: true,
+export const stackSegmentedFormatter = new StackableFormatter<boolean>('stack-segmented', {
+  segmented: true,
   render(children: Array<VElement | VTextNode | Component>, value: boolean): VElement | FormatHostBindingRender {
     return createVNode('mark', { 'data-col-stack': String(value) }, children)
   }

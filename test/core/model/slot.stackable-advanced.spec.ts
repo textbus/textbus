@@ -16,7 +16,7 @@ import { NodeModule, NodeViewAdapter } from '@textbus/platform-node'
 import { boldFormatter } from '../../_editor/formatters/bold.formatter'
 import { fontSizeFormatter } from '../../_editor/formatters/font-size.formatter'
 import {
-  stackColumnedFormatter,
+  stackSegmentedFormatter,
   stackCommentFormatter,
   stackGuardedFormatter,
   stackNoteObjectFormatter
@@ -123,11 +123,11 @@ describe('可堆叠格式 — Slot 进阶', () => {
     expect(boldRanges.length).toBeGreaterThan(0)
   })
 
-  test('stackable + columned 的 Formatter 可生成 toTree 不抛错', () => {
+  test('stackable + segmented 的 Formatter 可生成 toTree 不抛错', () => {
     const slot = new Slot([ContentType.Text])
     slot.insert('abcde')
-    slot.applyFormat(stackColumnedFormatter, { startIndex: 1, endIndex: 4, value: true })
-    slot.applyFormat(stackColumnedFormatter, { startIndex: 2, endIndex: 3, value: false })
+    slot.applyFormat(stackSegmentedFormatter, { startIndex: 1, endIndex: 4, value: true })
+    slot.applyFormat(stackSegmentedFormatter, { startIndex: 2, endIndex: 3, value: false })
     const tree = slot.toTree(children => createVNode('div', null, children))
     expect(tree).toBeTruthy()
   })

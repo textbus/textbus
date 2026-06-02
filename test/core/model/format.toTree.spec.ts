@@ -95,17 +95,25 @@ const colorFmt = new Formatter<string>('color', {
   }
 })
 
-const columnedFmt = new Formatter<boolean>('columned', {
-  columned: true,
+const segmentedFmt = new Formatter<boolean>('segmented', {
+  segmented: true,
   render(children): VElement | FormatHostBindingRender {
     return createVNode('mark', null, children)
   }
 })
 
-const stackColumnedFmt = new StackableFormatter<boolean>('stackColumned', {
-  columned: true,
+const stackSegmentedFmt = new StackableFormatter<boolean>('stackSegmented', {
+  segmented: true,
   render(children, v): VElement | FormatHostBindingRender {
     return createVNode('mark', { 'data-col': String(v) }, children)
+  }
+})
+
+const segmented2Fmt = new Formatter<boolean>('segmented2', {
+  segmented: true,
+  priority: 5,
+  render(children): VElement | FormatHostBindingRender {
+    return createVNode('mark', { 'data-seg2': '' }, children)
   }
 })
 
@@ -173,6 +181,25 @@ describe('Format.toTree', () => {
       expect(tree.children![1].startIndex).toBe(6)
       expect(tree.children![1].endIndex).toBe(10)
       expect(tree.children![1].formats).toBeUndefined()
+    })
+
+    test('零长度区间 toTree(5,5) → 单节点，无 formats 无 children', () => {
+      const slot = new TestSlot([ContentType.Text])
+      slot.insert('01234')
+      slot.applyFormat(bold, { startIndex: 0, endIndex: 5, value: true })
+
+      const tree = slot.getFormat().toTree(5, 5)
+      expect(tree).toEqual({
+        startIndex: 5,
+        endIndex: 5,
+      })
+    })
+
+    test('空 slot toTree(0,0) → 不抛错，返回空节点', () => {
+      const slot = new TestSlot([ContentType.Text])
+      expect(() => slot.getFormat().toTree(0, 0)).not.toThrow()
+      const tree = slot.getFormat().toTree(0, 0)
+      expect(tree).toEqual({ startIndex: 0, endIndex: 0 })
     })
   })
 
@@ -384,6 +411,130 @@ describe('Format.toTree', () => {
       expect(boldInside).toBeDefined()
       expect(boldInside!.startIndex).toBe(0)
       expect(boldInside!.endIndex).toBe(3)
+    })
+
+    test('同 key 重叠值相同 → 合并为一个连续区间 bold[0,3)+bold[2,5)=bold[0,5)', () => {
+      const slot = new TestSlot([ContentType.Text])
+      slot.insert('012345')
+      slot.applyFormat(bold, { startIndex: 0, endIndex: 3, value: true })
+      slot.applyFormat(bold, { startIndex: 2, endIndex: 5, value: true })
+
+      const tree = slot.getFormat().toTree(0, 6)
+      // 合并后 bold 覆盖 [0,5)，但 bold[0,5) 并不全覆盖 [0,6) → 产生 children
+      expect(tree.formats).toBeUndefined()
+      expect(tree.children!.length).toBe(2)
+
+      // [0,5) bold
+      expect(tree.children![0].startIndex).toBe(0)
+      expect(tree.children![0].endIndex).toBe(5)
+      expect(tree.children![0].formats).toBeDefined()
+      expect(tree.children![0].formats![0].formatter.name).toBe('bold')
+      expect(tree.children![0].children).toBeUndefined()
+
+      // [5,6) 无格式
+      expect(tree.children![1].startIndex).toBe(5)
+      expect(tree.children![1].endIndex).toBe(6)
+      expect(tree.children![1].formats).toBeUndefined()
+    })
+
+    test('同 key 重叠值不同 → 按值分段 color[0,5)=red + color[3,7)=blue', () => {
+      const slot = new TestSlot([ContentType.Text])
+      slot.insert('012345678')
+      slot.applyFormat(colorFmt, { startIndex: 0, endIndex: 5, value: 'red' })
+      slot.applyFormat(colorFmt, { startIndex: 3, endIndex: 7, value: 'blue' })
+
+      const tree = slot.getFormat().toTree(0, 8)
+      expectNoInvertedNodes(tree)
+      expectChildrenCoverParent(tree)
+
+      // 无全覆盖格式 → 根无 formats；color 同 key 不同值产生 [0,3)red + [3,7)blue 两段
+      // toTree 在 [0,3) 处第一次 split，[3,8) 递归后在 [3,7) 再次 split 并被 flatten
+      expect(tree.formats).toBeUndefined()
+      expect(tree.children!.length).toBe(3)
+
+      // [0,3) red
+      expect(tree.children![0].startIndex).toBe(0)
+      expect(tree.children![0].endIndex).toBe(3)
+      expect(tree.children![0].formats).toBeDefined()
+      expect(tree.children![0].formats![0].value).toBe('red')
+
+      // [3,7) blue（来自 [3,8) 递归 split 再 flatten）
+      expect(tree.children![1].startIndex).toBe(3)
+      expect(tree.children![1].endIndex).toBe(7)
+      expect(tree.children![1].formats).toBeDefined()
+      expect(tree.children![1].formats![0].value).toBe('blue')
+      expect(tree.children![1].children).toBeUndefined()
+
+      // [7,8) 无格式
+      expect(tree.children![2].startIndex).toBe(7)
+      expect(tree.children![2].endIndex).toBe(8)
+      expect(tree.children![2].formats).toBeUndefined()
+    })
+
+    test('三个非堆叠不同起点 bold[1,5) italic[2,7) underline[3,6) → 递归嵌套', () => {
+      const slot = new TestSlot([ContentType.Text])
+      slot.insert('012345678')
+      slot.applyFormat(bold, { startIndex: 1, endIndex: 5, value: true })
+      slot.applyFormat(italic, { startIndex: 2, endIndex: 7, value: true })
+      slot.applyFormat(underline, { startIndex: 3, endIndex: 6, value: true })
+
+      const tree = slot.getFormat().toTree(0, 9)
+      expectNoInvertedNodes(tree)
+      expectChildrenCoverParent(tree)
+
+      // 无全覆盖 → 根无 formats；[5,9) 递归后在 [5,7) split 并被 flatten
+      expect(tree.formats).toBeUndefined()
+      expect(tree.children!.length).toBe(4)
+
+      // [0,1) 无格式
+      expect(tree.children![0].startIndex).toBe(0)
+      expect(tree.children![0].endIndex).toBe(1)
+      expect(tree.children![0].formats).toBeUndefined()
+
+      // [1,5) bold 全覆盖此段，内部按 italic 拆分
+      const boldSeg = tree.children![1]
+      expect(boldSeg.startIndex).toBe(1)
+      expect(boldSeg.endIndex).toBe(5)
+      expect(boldSeg.formats).toBeDefined()
+      expect(boldSeg.formats![0].formatter.name).toBe('bold')
+      expect(boldSeg.children).toBeDefined()
+      expect(boldSeg.children!.length).toBe(2)
+
+      // [1,2) 仅 bold（继承）
+      expect(boldSeg.children![0].startIndex).toBe(1)
+      expect(boldSeg.children![0].endIndex).toBe(2)
+      expect(boldSeg.children![0].formats).toBeUndefined()
+
+      // [2,5) bold(继承) + italic，内部再按 underline 拆分
+      const italicSeg = boldSeg.children![1]
+      expect(italicSeg.startIndex).toBe(2)
+      expect(italicSeg.endIndex).toBe(5)
+      expect(italicSeg.formats).toBeDefined()
+      expect(italicSeg.formats!.some(f => f.formatter.name === 'italic')).toBe(true)
+      expect(italicSeg.children).toBeDefined()
+      expect(italicSeg.children!.length).toBe(2)
+
+      // [2,3) 仅 italic（继承自父）
+      expect(italicSeg.children![0].startIndex).toBe(2)
+      expect(italicSeg.children![0].endIndex).toBe(3)
+      expect(italicSeg.children![0].formats).toBeUndefined()
+
+      // [3,5) italic(继承) + underline
+      expect(italicSeg.children![1].startIndex).toBe(3)
+      expect(italicSeg.children![1].endIndex).toBe(5)
+      expect(italicSeg.children![1].formats).toBeDefined()
+      expect(italicSeg.children![1].formats!.some(f => f.formatter.name === 'underline')).toBe(true)
+
+      // [5,7) italic 覆盖（来自 [5,9) 递归 flatten）
+      expect(tree.children![2].startIndex).toBe(5)
+      expect(tree.children![2].endIndex).toBe(7)
+      expect(tree.children![2].formats).toBeDefined()
+      expect(tree.children![2].formats![0].formatter.name).toBe('italic')
+
+      // [7,9) 无格式
+      expect(tree.children![3].startIndex).toBe(7)
+      expect(tree.children![3].endIndex).toBe(9)
+      expect(tree.children![3].formats).toBeUndefined()
     })
   })
 
@@ -695,53 +846,157 @@ describe('Format.toTree', () => {
     })
   })
 
-  describe('columned 格式', () => {
+  describe('segmented 格式', () => {
 
-    test('columned 单独覆盖整段 → 根节点有 formats', () => {
+    test('segmented 单独覆盖整段 → 根节点有 formats', () => {
       const slot = new TestSlot([ContentType.Text])
       slot.insert('hello')
-      slot.applyFormat(columnedFmt, { startIndex: 0, endIndex: 5, value: true })
+      slot.applyFormat(segmentedFmt, { startIndex: 0, endIndex: 5, value: true })
 
       const tree = slot.getFormat().toTree(0, 5)
       expect(tree.formats).toBeDefined()
-      expect(tree.formats!.some(f => f.formatter.name === 'columned')).toBe(true)
+      expect(tree.formats!.some(f => f.formatter.name === 'segmented')).toBe(true)
       expect(tree.children).toBeUndefined()
     })
 
-    test('columned 全覆盖 + bold 部分覆盖 → columned 下沉到子段', () => {
+    test('segmented 全覆盖 + bold 部分覆盖 → segmented 下沉到子段', () => {
       const slot = new TestSlot([ContentType.Text])
       slot.insert('01234')
-      slot.applyFormat(columnedFmt, { startIndex: 0, endIndex: 5, value: true })
+      slot.applyFormat(segmentedFmt, { startIndex: 0, endIndex: 5, value: true })
       slot.applyFormat(bold, { startIndex: 2, endIndex: 5, value: true })
 
       const tree = slot.getFormat().toTree(0, 5)
       expectNoInvertedNodes(tree)
       expectChildrenCoverParent(tree)
 
-      // columned 全覆盖但有其他部分格式时，根无 formats，下沉到各子段
+      // segmented 全覆盖但有其他部分格式时，根无 formats，下沉到各子段
       expect(tree.formats).toBeUndefined()
       expect(tree.children).toBeDefined()
       expect(tree.children!.length).toBe(2)
 
-      // [0,2) columned
-      expect(tree.children![0].formats!.some(f => f.formatter.name === 'columned')).toBe(true)
-      // [2,5) columned + bold
-      expect(tree.children![1].formats!.some(f => f.formatter.name === 'columned')).toBe(true)
+      // [0,2) segmented
+      expect(tree.children![0].formats!.some(f => f.formatter.name === 'segmented')).toBe(true)
+      // [2,5) segmented + bold
+      expect(tree.children![1].formats!.some(f => f.formatter.name === 'segmented')).toBe(true)
       expect(tree.children![1].formats!.some(f => f.formatter.name === 'bold')).toBe(true)
     })
 
-    test('stackable + columned 同时全覆盖整段 → 根节点两个格式', () => {
+    test('stackable + segmented 同时全覆盖整段 → 根节点两个格式', () => {
       const slot = new TestSlot([ContentType.Text])
       slot.insert('test')
-      slot.applyFormat(stackColumnedFmt, { startIndex: 0, endIndex: 4, value: true })
+      slot.applyFormat(stackSegmentedFmt, { startIndex: 0, endIndex: 4, value: true })
       slot.applyFormat(commentFmt, { startIndex: 0, endIndex: 4, value: { id: 'x', userId: 'y' } })
 
       const tree = slot.getFormat().toTree(0, 4)
       expect(tree.formats).toBeDefined()
       const names = tree.formats!.map(f => f.formatter.name)
-      expect(names).toContain('stackColumned')
+      expect(names).toContain('stackSegmented')
       expect(names).toContain('comment')
       expect(tree.children).toBeUndefined()
+    })
+
+    test('segmented 覆盖整段 + bold 在内部不与末端贴合 → after 段保留 segmented', () => {
+      const slot = new TestSlot([ContentType.Text])
+      slot.insert('0123456789')
+      slot.applyFormat(segmentedFmt, { startIndex: 0, endIndex: 10, value: true })
+      slot.applyFormat(bold, { startIndex: 2, endIndex: 5, value: true })
+
+      const tree = slot.getFormat().toTree(0, 10)
+      expectNoInvertedNodes(tree)
+      expectChildrenCoverParent(tree)
+
+      // segmented 非 ghost（有 bold 部分覆盖）→ 根无 formats
+      expect(tree.formats).toBeUndefined()
+
+      // split 在 [2,5) → before=[0,2) 有 segmented, split=[2,5) 有 segmented+bold, after=[5,10) 应有 segmented
+      expect(tree.children!.length).toBe(3)
+
+      // [0,2) segmented
+      expect(tree.children![0].startIndex).toBe(0)
+      expect(tree.children![0].endIndex).toBe(2)
+      expect(tree.children![0].formats).toBeDefined()
+      expect(tree.children![0].formats![0].formatter.name).toBe('segmented')
+
+      // [2,5) segmented + bold
+      expect(tree.children![1].startIndex).toBe(2)
+      expect(tree.children![1].endIndex).toBe(5)
+      expect(tree.children![1].formats).toBeDefined()
+      expect(tree.children![1].formats!.some(f => f.formatter.name === 'segmented')).toBe(true)
+      expect(tree.children![1].formats!.some(f => f.formatter.name === 'bold')).toBe(true)
+
+      // [5,10) after 段 — 关键：应保留 segmented
+      expect(tree.children![2].startIndex).toBe(5)
+      expect(tree.children![2].endIndex).toBe(10)
+      expect(tree.children![2].formats).toBeDefined()
+      expect(tree.children![2].formats!.some(f => f.formatter.name === 'segmented')).toBe(true)
+      expect(tree.children![2].formats!.some(f => f.formatter.name === 'bold')).toBe(false)
+    })
+
+    test('两个 segmented 交叉 segmentedFmt[0,8) + segmented2Fmt[3,10) → 都下沉', () => {
+      const slot = new TestSlot([ContentType.Text])
+      slot.insert('0123456789')
+      slot.applyFormat(segmentedFmt, { startIndex: 0, endIndex: 8, value: true })
+      slot.applyFormat(segmented2Fmt, { startIndex: 3, endIndex: 10, value: true })
+
+      const tree = slot.getFormat().toTree(0, 10)
+      expectNoInvertedNodes(tree)
+      expectChildrenCoverParent(tree)
+
+      // 无全覆盖 ghost → 根无 formats；[0,8) 递归返回无 formats 节点被 flatten
+      expect(tree.formats).toBeUndefined()
+      expect(tree.children!.length).toBe(3)
+
+      // [0,3) 仅 segmented
+      expect(tree.children![0].startIndex).toBe(0)
+      expect(tree.children![0].endIndex).toBe(3)
+      expect(tree.children![0].formats).toBeDefined()
+      expect(tree.children![0].formats![0].formatter.name).toBe('segmented')
+
+      // [3,8) segmented + segmented2
+      expect(tree.children![1].startIndex).toBe(3)
+      expect(tree.children![1].endIndex).toBe(8)
+      expect(tree.children![1].formats).toBeDefined()
+      expect(tree.children![1].formats!.some(f => f.formatter.name === 'segmented')).toBe(true)
+      expect(tree.children![1].formats!.some(f => f.formatter.name === 'segmented2')).toBe(true)
+
+      // [8,10) segmented2 覆盖
+      expect(tree.children![2].startIndex).toBe(8)
+      expect(tree.children![2].endIndex).toBe(10)
+      expect(tree.children![2].formats).toBeDefined()
+      expect(tree.children![2].formats![0].formatter.name).toBe('segmented2')
+    })
+
+    test('stackSegmented 全覆盖 + bold 部分覆盖 → segmented 下沉到各子段', () => {
+      const slot = new TestSlot([ContentType.Text])
+      slot.insert('0123456789')
+      slot.applyFormat(stackSegmentedFmt, { startIndex: 0, endIndex: 10, value: true })
+      slot.applyFormat(bold, { startIndex: 3, endIndex: 7, value: true })
+
+      const tree = slot.getFormat().toTree(0, 10)
+      expectNoInvertedNodes(tree)
+      expectChildrenCoverParent(tree)
+
+      // split 在 [3,7) → before=[0,3), split=[3,7), after=[7,10)
+      expect(tree.formats).toBeUndefined()
+      expect(tree.children!.length).toBe(3)
+
+      // [0,3) 仅 stackSegmented
+      expect(tree.children![0].startIndex).toBe(0)
+      expect(tree.children![0].endIndex).toBe(3)
+      expect(tree.children![0].formats).toBeDefined()
+      expect(tree.children![0].formats![0].formatter.name).toBe('stackSegmented')
+
+      // [3,7) stackSegmented + bold
+      expect(tree.children![1].startIndex).toBe(3)
+      expect(tree.children![1].endIndex).toBe(7)
+      expect(tree.children![1].formats!.some(f => f.formatter.name === 'stackSegmented')).toBe(true)
+      expect(tree.children![1].formats!.some(f => f.formatter.name === 'bold')).toBe(true)
+
+      // [7,10) 仅 stackSegmented
+      expect(tree.children![2].startIndex).toBe(7)
+      expect(tree.children![2].endIndex).toBe(10)
+      expect(tree.children![2].formats).toBeDefined()
+      expect(tree.children![2].formats![0].formatter.name).toBe('stackSegmented')
     })
   })
 

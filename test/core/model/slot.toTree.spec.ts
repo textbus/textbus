@@ -3,7 +3,7 @@
  * - FormatTree 叶子上的 formats 按 priority 升序排列；createVDomByOverlapFormats 自数组末尾向前包裹，
  *   故 priority 数值更小者在最终 DOM 中更靠近外层。
  * - 「最少节点」：FormatHostBindingRender 在无宿主 VElement 时复用内层标签 attach；两个均返回 VElement 则必然嵌套两层。
- * - columned：整段与区间一致的格式可从 map 中保留以参与分段，从而更易产生并列子树而非单一合并节点。
+ * - segmented：整段与区间一致的格式可从 map 中保留以参与分段，从而更易产生并列子树而非单一合并节点。
  */
 import {
   Attribute,
@@ -208,35 +208,35 @@ describe('Slot.toTree 虚拟 DOM 与格式策略', () => {
     })
   })
 
-  describe('columned：在相同区间上强制拆列，产生更多格式树分段', () => {
+  describe('segmented：在相同区间上强制拆列，产生更多格式树分段', () => {
     const plain = new Formatter<boolean>('plain', {
-      columned: false,
+      segmented: false,
       render(children): VElement | FormatHostBindingRender {
         return createVNode('u', null, children)
       }
     })
-    const columnedFmt = new Formatter<boolean>('col', {
-      columned: true,
+    const segmentedFmt = new Formatter<boolean>('seg', {
+      segmented: true,
       render(children): VElement | FormatHostBindingRender {
         return createVNode('em', null, children)
       }
     })
 
-    test('非 columned 全宽合并为单个 em 节点', () => {
+    test('非 segmented 全宽合并为单个 em 节点', () => {
       const slot = new Slot([ContentType.Text])
       slot.insert('ab')
-      slot.applyFormat(columnedFmt, { startIndex: 0, endIndex: 2, value: true })
+      slot.applyFormat(segmentedFmt, { startIndex: 0, endIndex: 2, value: true })
 
       const tree = slot.toTree(doc)
       expect(collectTags(tree)).toEqual(['em'])
       expect(countFormatElements(tree)).toBe(1)
     })
 
-    test('columned + 与其它范围交错时子树分段增多', () => {
+    test('segmented + 与其它范围交错时子树分段增多', () => {
       const slot = new Slot([ContentType.Text])
       slot.insert('12345')
       slot.applyFormat(plain, { startIndex: 0, endIndex: 3, value: true })
-      slot.applyFormat(columnedFmt, { startIndex: 2, endIndex: 5, value: true })
+      slot.applyFormat(segmentedFmt, { startIndex: 2, endIndex: 5, value: true })
 
       const tree = slot.toTree(doc)
       const tags = collectTags(tree)
