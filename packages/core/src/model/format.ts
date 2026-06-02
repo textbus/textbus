@@ -304,95 +304,140 @@ export class Format {
   }
 
   toTree(startIndex: number, endIndex: number): FormatTree<any> {
-    const copyFormat = this.extract(startIndex, endIndex)
-    const tree: FormatTree<any> = {
-      startIndex,
-      endIndex,
-    }
+    const workingCopy = this.extract(startIndex, endIndex)
+    const {formats, columnedFormats} = Format.extractNodeFormats(workingCopy, startIndex, endIndex)
+    const split = Format.findFirstSplit(workingCopy, columnedFormats.length, startIndex, endIndex)
 
-    let nextStartIndex = endIndex
-    let nextEndIndex = startIndex
-    const formats: FormatItem<any>[] = []
-    const columnedFormats: FormatItem<any>[] = []
+    const tree: FormatTree<any> = {startIndex, endIndex}
 
-    const formatters = copyFormat.map.keys()
-    for (const formatter of formatters) {
-      const ranges = copyFormat.map.get(formatter)!
-      for (let j = 0; j < ranges.length; j++) {
-        const range = ranges[j]
-        if (range.startIndex === startIndex && range.endIndex === endIndex) {
-          if (formatter.columned) {
-            columnedFormats.push({
-              formatter,
-              ...range
-            })
-          } else {
-            formats.push({
-              formatter,
-              ...range
-            })
-            if (formatter instanceof StackableFormatter) {
-              if (ranges.length === 1) {
-                copyFormat.map.delete(formatter)
-              } else {
-                ranges.splice(j, 1)
-                j--
-              }
-            } else {
-              copyFormat.map.delete(formatter)
-            }
-          }
-        } else if (range.startIndex < nextStartIndex) {
-          nextStartIndex = range.startIndex
-          nextEndIndex = range.endIndex
-        } else if (range.startIndex === nextStartIndex) {
-          nextEndIndex = Math.max(nextEndIndex, range.endIndex)
-        }
-      }
-    }
-
-    const hasChildren = copyFormat.map.size > columnedFormats.length
-    if (hasChildren) {
-      tree.children = []
-      if (startIndex < nextStartIndex) {
-        if (columnedFormats.length) {
-          const childTree = copyFormat.extract(startIndex, nextStartIndex).toTree(startIndex, nextStartIndex)
-          tree.children.push(childTree)
-        } else {
-          tree.children.push({
-            startIndex,
-            endIndex: nextStartIndex
-          })
-        }
-      }
-
-      const push = function (tree: FormatTree<any>, childTree: FormatTree<any>) {
-        if (childTree.formats) {
-          tree.children!.push(childTree)
-        } else if (childTree.children) {
-          tree.children!.push(...childTree.children)
-        } else {
-          tree.children!.push(childTree)
-        }
-      }
-      const nextTree = copyFormat.toTree(nextStartIndex, nextEndIndex)
-      push(tree, nextTree)
-
-      if (nextEndIndex < endIndex) {
-        const afterFormat = copyFormat.extract(nextEndIndex, endIndex)
-        const afterTree = afterFormat.toTree(nextEndIndex, endIndex)
-        push(tree, afterTree)
-      }
-    } else {
+    if (!split) {
       formats.push(...columnedFormats)
+    } else {
+      tree.children = []
+      if (startIndex < split.start) {
+        if (columnedFormats.length) {
+          for (const child of Format.unwrapOrFlatten(
+            workingCopy.toTree(startIndex, split.start)
+          )) {
+            tree.children.push(child)
+          }
+        } else {
+          tree.children.push({startIndex, endIndex: split.start})
+        }
+      }
+      for (const child of Format.unwrapOrFlatten(
+        workingCopy.toTree(split.start, split.end)
+      )) {
+        tree.children.push(child)
+      }
+      if (split.end < endIndex) {
+        for (const child of Format.unwrapOrFlatten(
+          workingCopy.toTree(split.end, endIndex)
+        )) {
+          tree.children.push(child)
+        }
+      }
     }
 
     if (formats.length) {
-      tree.formats = formats.sort((a, b) => {
-        return a.formatter.priority - b.formatter.priority
-      })
+      tree.formats = formats.sort((a, b) => a.formatter.priority - b.formatter.priority)
     }
     return tree
+  }
+
+  /**
+   * 从 workingCopy 中提取完全覆盖 [L, R) 的格式。
+   * 非 columned 格式会从 map 中移除（stackable 只移除匹配的那一条，非 stackable 移除全部）。
+   * columned 格式保留在 map 中以参与子节点的分段。
+   */
+  private static extractNodeFormats(
+    workingCopy: Format,
+    L: number,
+    R: number,
+  ): { formats: FormatItem[]; columnedFormats: FormatItem[] } {
+    const formats: FormatItem[] = []
+    const columnedFormats: FormatItem[] = []
+
+    for (const [formatter, ranges] of workingCopy.map) {
+      const isFull = (r: FormatRange) => r.startIndex === L && r.endIndex === R
+
+      if (formatter.columned) {
+        for (const range of ranges) {
+          if (isFull(range)) {
+            columnedFormats.push({formatter, ...range})
+          }
+        }
+        continue
+      }
+
+      if (formatter instanceof StackableFormatter) {
+        const rest = ranges.filter(r => !isFull(r))
+        for (const range of ranges) {
+          if (isFull(range)) {
+            formats.push({formatter, ...range})
+          }
+        }
+        if (rest.length === 0) {
+          workingCopy.map.delete(formatter)
+        } else if (rest.length !== ranges.length) {
+          workingCopy.map.set(formatter, rest)
+        }
+      } else {
+        if (ranges.some(isFull)) {
+          formats.push({formatter, ...ranges.find(isFull)!})
+          workingCopy.map.delete(formatter)
+        }
+      }
+    }
+
+    return {formats, columnedFormats}
+  }
+
+  /**
+   * 在 workingCopy 中找到最靠左的非 ghost range 作为递归分割点。
+   * ghost 指 columned 格式中完全覆盖当前区间的 range，它们不参与 hasChildren 判断。
+   * 返回 null 表示无需继续分割。
+   */
+  private static findFirstSplit(
+    workingCopy: Format,
+    ghostCount: number,
+    L: number,
+    R: number,
+  ): { start: number; end: number } | null {
+    if (workingCopy.map.size <= ghostCount) {
+      return null
+    }
+    let splitStart = Infinity
+    let splitEnd = -1
+    for (const ranges of workingCopy.map.values()) {
+      for (const range of ranges) {
+        if (range.startIndex === L && range.endIndex === R) {
+          continue
+        }
+        if (range.startIndex < splitStart) {
+          splitStart = range.startIndex
+          splitEnd = range.endIndex
+        } else if (range.startIndex === splitStart) {
+          splitEnd = Math.max(splitEnd, range.endIndex)
+        }
+      }
+    }
+    return splitStart === Infinity ? null : {start: splitStart, end: splitEnd}
+  }
+
+  /**
+   * 如果子树有 formats 则原样返回（作为单个 child），
+   * 如果子树无 formats 但有 children 则展平返回其 children（消除空中间节点），
+   * 否则原样返回。
+   */
+  private static unwrapOrFlatten(tree: FormatTree): FormatTree[] {
+    if (tree.formats) {
+      return [tree]
+    }
+    if (tree.children) {
+      return tree.children
+    }
+    return [tree]
   }
 
   toArray() {
