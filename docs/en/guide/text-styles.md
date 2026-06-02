@@ -19,7 +19,7 @@ This differs from **Attributes** that affect **the whole slot** (alignment, inde
 
 ## `Formatter` configuration: `render`
 
-When you construct **`new Formatter<T>(name, config)`**, the second argument is **`FormatterConfig<T>`**; **`T`** is the value type (**`boolean`** for bold, **`string`** for font size, …). Below is the overall shape (confirm against **`@textbus/core`** after upgrades); **`render`** is required; **`priority`**, **`inheritable`**, **`columned`**, **`checkHost`** are optional—see **[Optional fields](#optional-formatter-fields)**. For **stackable** annotations (multiple values on the same span), use **`StackableFormatter`**—see that section below.
+When you construct **`new Formatter<T>(name, config)`**, the second argument is **`FormatterConfig<T>`**; **`T`** is the value type (**`boolean`** for bold, **`string`** for font size, …). Below is the overall shape (confirm against **`@textbus/core`** after upgrades); **`render`** is required; **`priority`**, **`inheritable`**, **`segmented`**, **`checkHost`** are optional—see **[Optional fields](#optional-formatter-fields)**. For **stackable** annotations (multiple values on the same span), use **`StackableFormatter`**—see that section below.
 
 ```ts
 import type { Component, Slot, VElement, VTextNode } from '@textbus/core'
@@ -34,7 +34,7 @@ interface FormatHostBindingRender {
 interface FormatterConfig<T> {
   priority?: number
   inheritable?: boolean
-  columned?: boolean
+  segmented?: boolean
   checkHost?(host: Slot, value: T): boolean
   render(
     children: Array<VElement | VTextNode | Component>,
@@ -159,9 +159,9 @@ You can add these four on the **`Formatter`** config when needed.
 
 **Default `true`.** When the caret **sits on the edge** of a formatted span, whether **new typing** **inherits** that format. **`false`** tends to stop the format from “growing” with the caret—good for one-shot marks. Behavior with **`applyFormat`** and collapsed carets ties to [Selection](./selection).
 
-### `columned`
+### `segmented`
 
-**Default `false`.** Textbus usually merges DOM with **minimal structure**: bold + large font might become **few tags** (e.g. outer **`strong`**, inner large **`span`**), not one wrapper per format boundary.
+**Default `false`.** Textbus usually merges DOM with **minimal structure**: bold + large font can be combined — the font size is attached directly onto the bold `strong` tag via `attach`, merging into a single node instead of wrapping a separate tag per formatter.
 
 **Minimal structure** (bold + larger size)—markup and result:
 
@@ -178,7 +178,7 @@ When a style must **line up per character** with strict visuals, minimal merging
 
 The blocks below use **inline styles** like **`background-color`** (typical Formatter output). Previews sit on a **fixed light canvas** so contrast stays clear even when the docs site uses dark theme.
 
-**Same content with an outer background** (still minimal merge, equivalent to **`columned: false`**):
+**Same content with an outer background** (still minimal merge, equivalent to **`segmented: false`**):
 
 ```html
 <p>I write with <strong style="background-color: #8ad9f5">Textbus <span style="font-size: 30px">rich text</span></strong>.</p>
@@ -189,18 +189,18 @@ The blocks below use **inline styles** like **`background-color`** (typical Form
 <p>I write with <strong style="background-color: #8ad9f5">Textbus <span style="font-size: 30px">rich text</span></strong>.</p>
 </div>
 
-Set **`columned: true`** on that **`Formatter`** (e.g. background): rendering **splits ranges** and **emits separate tags per segment** so backgrounds hug text. Roughly:
+Set **`segmented: true`** on that **`Formatter`** (e.g. background): rendering **splits ranges** and **emits separate tags per segment** so backgrounds hug text. Roughly:
 
 ```html
 <p>I write with <strong><span style="background-color: #8ad9f5">Textbus </span><span style="font-size: 30px; background-color: #8ad9f5">rich text</span></strong>.</p>
 ```
 
 <div class="tb-doc-html-demo">
-<div class="tb-doc-html-demo__label">Preview (split background, columned)</div>
+<div class="tb-doc-html-demo__label">Preview (split background, segmented)</div>
 <p>I write with <strong><span style="background-color: #8ad9f5">Textbus </span><span style="font-size: 30px; background-color: #8ad9f5">rich text</span></strong>.</p>
 </div>
 
-For everyday **bold / font size**, keep **`columned: false`**; turn **`columned`** on for “column-aligned” visuals (often background, underline, …).
+For everyday **bold / font size**, keep **`segmented: false`**; turn **`segmented`** on for per-segment alignment (often background, underline, …).
 
 ### `StackableFormatter`
 
@@ -245,7 +245,7 @@ If **`checkHost`** lives **inside** the **`Formatter`** config, import **`Conten
 
 - **Button does nothing**: confirm **`formatters`** are registered and **`name`** matches stored/pasted ids; check the selection is in an **editable text slot**, not a whole-block selection.
 - **Paste drops styles**: mapping external styles to your **`Formatter`** names depends on **`platform-browser`** and **`Parser`**—unmapped formats are dropped. See [Document parsing & compatibility](./document-parse-compat).
-- **Odd overlap nesting**: tune **`Formatter.priority`** (**smaller → wraps outer first**); use **`columned: true`** for per-glyph alignment (backgrounds, …).
+- **Odd overlap nesting**: tune **`Formatter.priority`** (**smaller → wraps outer first**); use **`segmented: true`** for per-segment alignment (backgrounds, …).
 - **Multiple annotations on the same text**: define that format with **`StackableFormatter`** and give each mark a **distinct value** (e.g. different **`id`** fields).
 - **Typing after caret doesn’t inherit bold**: check **`inheritable`** is not **`false`**; collapsed-caret rules in [Selection](./selection).
 

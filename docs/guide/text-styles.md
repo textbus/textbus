@@ -14,7 +14,7 @@
 
 ## `Formatter` 配置：`render`
 
-构造 **`new Formatter<T>(name, config)`** 时，第二个参数的类型是 **`FormatterConfig<T>`**，**`T`** 为格式值的类型（加粗用 **`boolean`**，字号用 **`string`** 等）。下面先给出类型整体形状（升级依赖后以编辑器中的类型为准），并说明必填的 **`render`**；**`priority`、`inheritable`、`columned`、`checkHost`** 四项可选含义见后文 **[可选字段详解](#optional-formatter-fields)**。需要 **可堆叠**（同段多取值）时改用 **`StackableFormatter`**，见后文 **`StackableFormatter`** 小节。
+构造 **`new Formatter<T>(name, config)`** 时，第二个参数的类型是 **`FormatterConfig<T>`**，**`T`** 为格式值的类型（加粗用 **`boolean`**，字号用 **`string`** 等）。下面先给出类型整体形状（升级依赖后以编辑器中的类型为准），并说明必填的 **`render`**；**`priority`、`inheritable`、`segmented`、`checkHost`** 四项可选含义见后文 **[可选字段详解](#optional-formatter-fields)**。需要 **可堆叠**（同段多取值）时改用 **`StackableFormatter`**，见后文 **`StackableFormatter`** 小节。
 
 ```ts
 import type { Component, Slot, VElement, VTextNode } from '@textbus/core'
@@ -29,7 +29,7 @@ interface FormatHostBindingRender {
 interface FormatterConfig<T> {
   priority?: number
   inheritable?: boolean
-  columned?: boolean
+  segmented?: boolean
   checkHost?(host: Slot, value: T): boolean
   render(
     children: Array<VElement | VTextNode | Component>,
@@ -154,9 +154,9 @@ commander.unApplyFormat(boldFormatter)
 
 **默认 `true`。** 表示光标 **贴在某一格式的边缘继续输入** 时，这一段格式是否 **倾向于延伸到新输入的字上**。若为 **`false`**，这类格式一般不会跟着光标「往外长」，更适合只做一次性标记、不希望后续键入自动带上同一格式的场景。是否与 **`applyFormat`**、折叠光标的组合行为有关，边界见 [选区](./selection)。
 
-### `columned`
+### `segmented`
 
-**默认 `false`，即不启用「列对齐」渲染。** Textbus 在渲染格式时默认按 **最少结构** 原则合并 DOM：例如同一段里既有 **加粗** 又有 **更大的字号**，往往会收成较少的标签层次（外层 **`strong`**、内层一个大字号 **`span`** 等），而不是为每种格式的边界都单独包一层。
+**默认 `false`，即不启用「分段」渲染。** Textbus 在渲染格式时默认按 **最少结构** 原则合并 DOM：例如同一段里既有 **加粗** 又有 **更大的字号**，字号会通过 `attach` 直接附加到加粗的 `strong` 标签上，合并为一个节点，而不是为每种格式各包一层标签。
 
 **最少结构**（加粗 + 较大字号）——源码与页面效果：
 
@@ -173,7 +173,7 @@ commander.unApplyFormat(boldFormatter)
 
 下面的 **代码块与预览中的 DOM** 一致，均为 **`background-color` 等内联样式**（与 Formatter 常见输出形式一致）。效果预览放在 **固定的浅色画布** 里展示，对应常见亮色编辑区；站点切换为深色主题时画布仍为浅色，便于看清高亮与字号的对比。
 
-**同一内容再给外层加背景色**（仍是最少结构合并，等价于 **`columned: false`**）——源码与页面效果：
+**同一内容再给外层加背景色**（仍是最少结构合并，等价于 **`segmented: false`**）——源码与页面效果：
 
 ```html
 <p>我是 <strong style="background-color: #8ad9f5">Textbus <span style="font-size: 30px">富文本编辑器</span></strong></p>
@@ -184,18 +184,18 @@ commander.unApplyFormat(boldFormatter)
 <p>我是 <strong style="background-color: #8ad9f5">Textbus <span style="font-size: 30px">富文本编辑器</span></strong></p>
 </div>
 
-这时可把对应 **`Formatter`**（例如背景色）的 **`columned`** 设为 **`true`**：渲染时会 **按内容把该格式拆成多段，并为各段生成单独的标签**，让背景等与文字一一贴合。拆分后源码与页面效果大致如下：
+这时可把对应 **`Formatter`**（例如背景色）的 **`segmented`** 设为 **`true`**：渲染时会 **按内容把该格式拆成多段，并为各段生成单独的标签**，让背景等与文字一一贴合。拆分后源码与页面效果大致如下：
 
 ```html
 <p>我是 <strong><span style="background-color: #8ad9f5">Textbus </span><span style="font-size: 30px; background-color: #8ad9f5">富文本编辑器</span></strong></p>
 ```
 
 <div class="tb-doc-html-demo">
-<div class="tb-doc-html-demo__label">效果预览（分段背景，columned）</div>
+<div class="tb-doc-html-demo__label">效果预览（分段背景，segmented）</div>
 <p>我是 <strong><span style="background-color: #8ad9f5">Textbus </span><span style="font-size: 30px; background-color: #8ad9f5">富文本编辑器</span></strong></p>
 </div>
 
-日常 **加粗、字号** 等一般仍可保持 **`columned: false`**，只在需要「按列贴齐」的样式（常见是背景、下划线等）上开启。
+日常 **加粗、字号** 等一般仍可保持 **`segmented: false`**，只在需要「分段贴齐」的样式（常见是背景、下划线等）上开启。
 
 ### `StackableFormatter`
 
@@ -240,7 +240,7 @@ checkHost(host, value) {
 
 - **点了按钮没反应**：确认 **`formatters`** 已注册、**`name`** 与保存/粘贴场景下的标识一致；再看选区是否落在 **可编辑文本插槽**（而不是整块组件选区）。
 - **粘贴丢样式**：粘贴管线是否把外部样式映射到你注册的 **`Formatter`** 名称上，取决于 **`platform-browser`** 与 **`Parser`** 配置；未配置的格式会被丢弃。详见 [文档解析与兼容处理](./document-parse-compat)。
-- **重叠格式顺序异常**：调整 **`Formatter`** 的 **`priority`**（数字 **越小越先包外层**）；需要「按字对齐」的背景等再考虑 **`columned: true`**。
+- **重叠格式顺序异常**：调整 **`Formatter`** 的 **`priority`**（数字 **越小越先包外层**）；需要「分段对齐」的背景等再考虑 **`segmented: true`**。
 - **同一段字需要多条批注**：使用 **`StackableFormatter`** 定义该格式，并为每条批注使用 **互不相同的格式值**（例如不同的 **`id`**）。
 - **光标后的字没有继承加粗**：检查 **`inheritable`** 是否为 **`false`**；或折叠光标下的输入继承规则是否符合预期（见 [选区](./selection)）。
 
