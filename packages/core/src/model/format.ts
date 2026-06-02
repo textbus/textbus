@@ -336,6 +336,7 @@ export class Format {
                 copyFormat.map.delete(formatter)
               } else {
                 ranges.splice(j, 1)
+                j--
               }
             } else {
               copyFormat.map.delete(formatter)
