@@ -1,5 +1,16 @@
 # @textbus/playground
 
+## 5.4.1
+
+### Patch Changes
+
+- fix: 修复格式树生成不正确的 bug
+- Updated dependencies
+  - @textbus/platform-browser@5.5.2
+  - @textbus/adapter-viewfly@5.5.2
+  - @textbus/collaborate@5.5.2
+  - @textbus/core@5.5.2
+
 ## 5.4.0
 
 ### Minor Changes

@@ -1,5 +1,14 @@
 # @textbus/adapter-vue
 
+## 5.5.2
+
+### Patch Changes
+
+- fix: 修复格式树生成不正确的 bug
+- Updated dependencies
+  - @textbus/platform-browser@5.5.2
+  - @textbus/core@5.5.2
+
 ## 5.5.1
 
 ### Patch Changes

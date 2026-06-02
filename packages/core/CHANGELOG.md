@@ -1,5 +1,11 @@
 # @textbus/core
 
+## 5.5.2
+
+### Patch Changes
+
+- fix: 修复格式树生成不正确的 bug
+
 ## 5.5.1
 
 ### Patch Changes
