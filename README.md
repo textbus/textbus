@@ -20,6 +20,12 @@ XNote 是 Textbus 官方基于最新 4.0 版本开发的一个无头的、高性
 
 你也可以直接查看在线演示：[在线演示](https://textbus.io/playground.html)
 
+> 我最近开了新坑,分别是：
+> 1. 多维表格：https://github.com/textbus/smartdb
+> 2. PPT 编辑器：https://github.com/textbus/presen
+> 
+> 欢迎大家支持。
+
 介绍
 -------------------------------------------------------------
 
